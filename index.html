@@ -8,7 +8,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* 顶部版本切换栏 */
         .top-bar {
             background: #1a1a2e;
             padding: 0 24px;
@@ -23,12 +22,9 @@
             font-size: 16px;
             font-weight: 700;
             margin-right: 32px;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
         }
         .top-bar .logo span { color: #3b82f6; }
 
-        /* 版本Tab */
         .version-tabs {
             display: flex;
             gap: 4px;
@@ -44,40 +40,20 @@
             border-radius: 8px 8px 0 0;
             transition: all 0.2s;
             white-space: nowrap;
-            border: 1px solid transparent;
-            border-bottom: none;
-            position: relative;
         }
         .version-tab:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.06); }
         .version-tab.active {
             color: #fff;
             background: rgba(59,130,246,0.15);
-            border-color: rgba(59,130,246,0.3);
-        }
-        .version-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #3b82f6;
         }
 
-        /* 主体区域 */
-        .main-area {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        .main-area { display: flex; flex: 1; overflow: hidden; }
 
-        /* 左侧导航 */
         .sidebar {
             width: 240px;
             background: #16213e;
             overflow-y: auto;
             flex-shrink: 0;
-            border-right: 1px solid rgba(255,255,255,0.06);
         }
         .sidebar::-webkit-scrollbar { width: 4px; }
         .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
@@ -86,7 +62,6 @@
         .nav-group-title {
             padding: 0 20px;
             font-size: 11px;
-            text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255,255,255,0.3);
             margin-bottom: 8px;
@@ -111,47 +86,23 @@
         }
         .nav-item .icon { font-size: 15px; }
 
-        /* 文档分组特殊样式 */
         .nav-group.docs-group {
             border-bottom: 1px solid rgba(255,255,255,0.08);
             margin-bottom: 8px;
             padding-bottom: 12px;
         }
-        .nav-group.docs-group .nav-group-title {
-            color: rgba(255,180,100,0.5);
-        }
+        .nav-group.docs-group .nav-group-title { color: rgba(255,180,100,0.5); }
 
-        /* 版本描述 */
         .version-info {
             padding: 16px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .version-info .title {
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .version-info .desc {
-            color: rgba(255,255,255,0.4);
-            font-size: 12px;
-            line-height: 1.5;
-        }
+        .version-info .title { color: #fff; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .version-info .desc { color: rgba(255,255,255,0.4); font-size: 12px; line-height: 1.5; }
 
-        /* 右侧iframe */
-        .content {
-            flex: 1;
-            background: #e5e5e5;
-            position: relative;
-        }
-        .content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #fff;
-        }
+        .content { flex: 1; background: #e5e5e5; position: relative; }
+        .content iframe { width: 100%; height: 100%; border: none; background: #fff; }
 
-        /* 欢迎页 */
         .welcome {
             display: flex;
             flex-direction: column;
@@ -164,7 +115,6 @@
         .welcome .text { font-size: 16px; }
         .welcome .hint { font-size: 13px; color: #bbb; margin-top: 8px; }
 
-        /* 顶部右侧操作区 */
         .top-actions {
             display: flex;
             gap: 8px;
@@ -183,104 +133,287 @@
             white-space: nowrap;
         }
         .btn-action:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-action.config-btn { border-color: rgba(100,255,150,0.4); color: rgba(100,255,150,0.8); }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #1e1e2e;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h3 { color: #fff; font-size: 16px; }
+        .modal-close { color: rgba(255,255,255,0.5); cursor: pointer; font-size: 24px; }
+        .modal-close:hover { color: #fff; }
+        .modal-body {
+            flex: 1;
+            padding: 20px 24px;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .modal-footer button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+        .btn-save { background: #3b82f6; color: #fff; }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* 表单样式 */
+        .form-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .form-section-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            flex: 1;
+        }
+        .form-group label {
+            display: block;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0d0d1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+        .form-group input:focus { outline: none; border-color: #3b82f6; }
+
+        .item-list {
+            margin-top: 12px;
+        }
+        .item-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .item-card .item-info {
+            flex: 1;
+        }
+        .item-card .item-name {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .item-card .item-detail {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        .item-card .item-delete {
+            color: rgba(255,100,100,0.6);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+        }
+        .item-card .item-delete:hover { color: #ff6464; }
+
+        .btn-add {
+            padding: 8px 16px;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #3b82f6;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-add:hover { background: rgba(59,130,246,0.25); }
+
+        .version-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .version-selector select {
+            flex: 1;
+            padding: 10px 12px;
+            background: #0d0d1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+        .btn-new-version {
+            padding: 10px 16px;
+            background: #10b981;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-new-version:hover { background: #059669; }
     </style>
 </head>
 <body>
-    <!-- 顶部栏 -->
     <div class="top-bar">
         <div class="logo"><span>POKO</span> 原型中心</div>
         <div class="version-tabs" id="versionTabs"></div>
         <div class="top-actions">
-            <button class="btn-action" onclick="copyLink()" title="复制当前页面链接">📋 复制链接</button>
-            <button class="btn-action" onclick="openInNewTab()" title="在新窗口打开">↗ 新窗口</button>
+            <button class="btn-action" onclick="copyLink()">📋 复制链接</button>
+            <button class="btn-action" onclick="openInNewTab()">↗ 新窗口</button>
+            <button class="btn-action config-btn" onclick="openConfigEditor()">✏️ 编辑</button>
         </div>
     </div>
 
-    <!-- 主体 -->
     <div class="main-area">
-        <!-- 左侧导航 -->
         <div class="sidebar" id="sidebar"></div>
-
-        <!-- 右侧内容 -->
         <div class="content" id="content">
             <div class="welcome">
                 <div class="icon">👈</div>
                 <div class="text">从左侧导航选择原型查看</div>
-                <div class="hint">顶部可切换不同需求版本</div>
+                <div class="hint">点击右上角「编辑」管理版本配置</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配置编辑器 -->
+    <div class="modal-overlay" id="configModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>✏️ 版本配置管理</h3>
+                <span class="modal-close" onclick="closeConfigEditor()">&times;</span>
+            </div>
+            <div class="modal-body" id="configBody">
+                <!-- 动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeConfigEditor()">关闭</button>
+                <button class="btn-save" id="saveBtn" onclick="saveConfig()">💾 保存到 GitHub</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑项目弹窗 -->
+    <div class="modal-overlay" id="itemModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="itemModalTitle">添加</h3>
+                <span class="modal-close" onclick="closeItemModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>名称 *</label>
+                        <input type="text" id="itemName" placeholder="如：PRD文档">
+                    </div>
+                    <div class="form-group" style="max-width: 80px;">
+                        <label>图标</label>
+                        <input type="text" id="itemIcon" placeholder="📄" value="📄">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>文件路径 *</label>
+                        <input type="text" id="itemFile" placeholder="如：docs/prd.html">
+                    </div>
+                </div>
+                <div class="form-row" id="anchorRow">
+                    <div class="form-group">
+                        <label>锚点（可选）</label>
+                        <input type="text" id="itemAnchor" placeholder="如：page-1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeItemModal()">取消</button>
+                <button class="btn-save" onclick="confirmItem()">确定</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== 数据配置 ==========
-        // 按需求版本分组，每个版本有独立的导航
-        // docs: 固定文档导航（PRD、修订日志、流程图等）
-        // groups: 原型页面分组
-        const versions = [
-            {
-                id: 'saas-subscription',
-                name: 'SaaS 订阅系统',
-                desc: '代购集运SaaS订阅模式，含运营侧+租户侧完整后台',
-                docs: [
-                    // { name: 'PRD 文档', file: 'docs/saas-prd.html', icon: '📄' },
-                    // { name: '修订日志', file: 'docs/saas-changelog.html', icon: '📝' },
-                    // { name: '业务流程图', file: 'docs/saas-flow.html', icon: '🔀' },
-                ],
-                groups: [
-                    {
-                        title: '运营侧',
-                        pages: [
-                            { name: '运营后台首页', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '📋', anchor: 'page-1' },
-                            { name: '租户管理', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '👥', anchor: 'page-2' },
-                            { name: '订阅套餐配置', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '💰', anchor: 'page-3' },
-                            { name: '物流供应商管理', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '🚚', anchor: 'page-4' },
-                            { name: '线路报价管理', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '📍', anchor: 'page-5' },
-                            { name: '充值与支付配置', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '💳', anchor: 'page-6' },
-                            { name: '增值服务配置', file: 'POKO%20SaaS%20运营后台%20-%20原型分享版.html', icon: '🔧', anchor: 'page-7' },
-                        ]
-                    },
-                    {
-                        title: '租户侧',
-                        pages: [
-                            { name: '租户后台首页', file: 'POKO%20SaaS%20租户后台%20-%20原型分享版.html', icon: '🏠', anchor: 'page-1' },
-                            { name: '线路管理', file: 'POKO%20SaaS%20租户后台%20-%20原型分享版.html', icon: '🗺️', anchor: 'page-2' },
-                            { name: '财务管理', file: 'POKO%20SaaS%20租户后台%20-%20原型分享版.html', icon: '💵', anchor: 'page-3' },
-                        ]
-                    }
-                ]
-            },
-            // ===== 新增需求版本只需在这里添加 =====
-            // {
-            //     id: 'parcel-optimization',
-            //     name: '提包单优化',
-            //     desc: '提包单交互优化与流程改进',
-            //     docs: [
-            //         { name: 'PRD 文档', file: 'docs/parcel-prd.html', icon: '📄' },
-            //         { name: '修订日志', file: 'docs/parcel-changelog.html', icon: '📝' },
-            //     ],
-            //     groups: [
-            //         {
-            //             title: '提包单',
-            //             pages: [
-            //                 { name: '提包单列表', file: 'parcel-optimize.html', icon: '📦', anchor: 'page-1' },
-            //             ]
-            //         }
-            //     ]
-            // },
-        ];
+        const GITHUB_REPO = 'karlwork511/karlwork';
+        const CONFIG_FILE = 'config.json';
+        
+        let versions = [];
+        let currentVersion = '';
+        let currentPage = null;
+        let editVersionId = '';
+        let itemType = ''; // 'doc' or 'page'
+        let editGroupIdx = -1;
+        let editPageIdx = -1;
 
-        // ========== 状态 ==========
-        let currentVersion = versions[0]?.id || '';
-        let currentPage = null; // { versionId, file, anchor }
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const resp = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${CONFIG_FILE}?t=${Date.now()}`);
+                if (resp.ok) {
+                    versions = await resp.json();
+                    if (versions.length > 0) currentVersion = versions[0].id;
+                    renderTabs();
+                    renderSidebar();
+                }
+            } catch (e) {
+                console.error('加载配置失败:', e);
+            }
+        }
 
-        // ========== 渲染 ==========
+        // 渲染
         function renderTabs() {
-            const container = document.getElementById('versionTabs');
-            container.innerHTML = versions.map(v => `
-                <div class="version-tab ${v.id === currentVersion ? 'active' : ''}" 
-                     onclick="switchVersion('${v.id}')">
-                    ${v.name}
-                </div>
+            document.getElementById('versionTabs').innerHTML = versions.map(v => `
+                <div class="version-tab ${v.id === currentVersion ? 'active' : ''}" onclick="switchVersion('${v.id}')">${v.name}</div>
             `).join('');
         }
 
@@ -289,112 +422,283 @@
             const version = versions.find(v => v.id === currentVersion);
             if (!version) { container.innerHTML = ''; return; }
 
-            let html = `
-                <div class="version-info">
-                    <div class="title">${version.name}</div>
-                    <div class="desc">${version.desc}</div>
-                </div>
-            `;
+            let html = `<div class="version-info"><div class="title">${version.name}</div><div class="desc">${version.desc}</div></div>`;
 
-            // 渲染固定文档导航（如果有）
             if (version.docs && version.docs.length > 0) {
                 html += `<div class="nav-group docs-group"><div class="nav-group-title">📚 文档</div>`;
                 version.docs.forEach((doc, idx) => {
                     const pageId = `${currentVersion}::${doc.file}::doc-${idx}`;
                     const isActive = currentPage && currentPage.pageId === pageId;
-                    html += `
-                        <div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${doc.file}', '', '${doc.name}', '${pageId}')">
-                            <span class="icon">${doc.icon}</span>
-                            <span>${doc.name}</span>
-                        </div>
-                    `;
+                    html += `<div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${doc.file}', '', '${doc.name}', '${pageId}')"><span class="icon">${doc.icon || '📄'}</span><span>${doc.name}</span></div>`;
                 });
                 html += `</div>`;
             }
 
-            // 渲染原型分组
-            version.groups.forEach(group => {
-                html += `<div class="nav-group"><div class="nav-group-title">${group.title}</div>`;
-                group.pages.forEach((page, idx) => {
-                    const pageId = `${currentVersion}::${page.file}::${page.anchor || idx}`;
-                    const isActive = currentPage && currentPage.pageId === pageId;
-                    html += `
-                        <div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${page.file}', '${page.anchor || ''}', '${page.name}', '${pageId}')">
-                            <span class="icon">${page.icon}</span>
-                            <span>${page.name}</span>
-                        </div>
-                    `;
+            if (version.groups) {
+                version.groups.forEach(group => {
+                    html += `<div class="nav-group"><div class="nav-group-title">${group.title}</div>`;
+                    group.pages.forEach((page, idx) => {
+                        const pageId = `${currentVersion}::${page.file}::${page.anchor || idx}`;
+                        const isActive = currentPage && currentPage.pageId === pageId;
+                        html += `<div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${page.file}', '${page.anchor || ''}', '${page.name}', '${pageId}')"><span class="icon">${page.icon}</span><span>${page.name}</span></div>`;
+                    });
+                    html += `</div>`;
                 });
-                html += `</div>`;
-            });
-
+            }
             container.innerHTML = html;
         }
 
-        function switchVersion(versionId) {
-            currentVersion = versionId;
+        function switchVersion(id) {
+            currentVersion = id;
             currentPage = null;
             renderTabs();
             renderSidebar();
-            document.getElementById('content').innerHTML = `
-                <div class="welcome">
-                    <div class="icon">👈</div>
-                    <div class="text">从左侧导航选择原型查看</div>
-                    <div class="hint">${versions.find(v=>v.id===versionId)?.name || ''}</div>
-                </div>
-            `;
+            document.getElementById('content').innerHTML = `<div class="welcome"><div class="icon">👈</div><div class="text">从左侧导航选择原型查看</div></div>`;
         }
 
         function loadPage(file, anchor, name, pageId) {
             currentPage = { file, anchor, name, pageId };
             renderSidebar();
-
             const url = anchor ? `${file}#${anchor}` : file;
-            document.getElementById('content').innerHTML = `
-                <iframe src="${url}" frameborder="0"></iframe>
-            `;
+            document.getElementById('content').innerHTML = `<iframe src="${url}" frameborder="0"></iframe>`;
         }
 
-        // ========== 操作 ==========
         function copyLink() {
             if (!currentPage) {
-                const v = versions.find(v=>v.id===currentVersion);
-                const text = `${window.location.origin}/#version=${currentVersion}`;
-                navigator.clipboard.writeText(text).then(() => showToast(`已复制「${v?.name}」版本链接`));
+                navigator.clipboard.writeText(`${window.location.origin}/#version=${currentVersion}`);
             } else {
-                const text = `${window.location.origin}/${currentPage.file}${currentPage.anchor ? '#' + currentPage.anchor : ''}`;
-                navigator.clipboard.writeText(text).then(() => showToast(`已复制「${currentPage.name}」链接`));
+                navigator.clipboard.writeText(`${window.location.origin}/${currentPage.file}${currentPage.anchor ? '#' + currentPage.anchor : ''}`);
             }
+            showToast('链接已复制');
         }
 
         function openInNewTab() {
             if (!currentPage) return;
-            const url = currentPage.anchor ? `${currentPage.file}#${currentPage.anchor}` : currentPage.file;
-            window.open(url, '_blank');
+            window.open(currentPage.anchor ? `${currentPage.file}#${currentPage.anchor}` : currentPage.file, '_blank');
         }
 
         function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.textContent = msg;
-            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            const t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2000);
         }
 
-        // ========== URL参数支持 ==========
-        function loadFromUrl() {
-            const hash = window.location.hash.slice(1);
-            const params = new URLSearchParams(hash);
-            const v = params.get('version');
-            if (v && versions.find(ver => ver.id === v)) {
-                currentVersion = v;
+        // ========== 配置编辑器 ==========
+        function openConfigEditor() {
+            editVersionId = currentVersion;
+            renderConfigEditor();
+            document.getElementById('configModal').classList.add('show');
+        }
+
+        function closeConfigEditor() {
+            document.getElementById('configModal').classList.remove('show');
+        }
+
+        function renderConfigEditor() {
+            const v = versions.find(x => x.id === editVersionId);
+            let html = `
+                <div class="version-selector">
+                    <select onchange="editVersionId = this.value; renderConfigEditor()">
+                        ${versions.map(x => `<option value="${x.id}" ${x.id === editVersionId ? 'selected' : ''}>${x.name}</option>`).join('')}
+                    </select>
+                    <button class="btn-new-version" onclick="addNewVersion()">+ 新版本</button>
+                </div>
+            `;
+
+            if (v) {
+                html += `
+                    <div class="form-section">
+                        <div class="form-section-title">📋 版本信息</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>版本名称</label>
+                                <input type="text" value="${v.name}" onchange="updateVersionName(this.value)">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>版本描述</label>
+                                <input type="text" value="${v.desc}" onchange="updateVersionDesc(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 文档区
+                html += `<div class="form-section">
+                    <div class="form-section-title">📚 文档 <button class="btn-add" onclick="addItem('doc')">+ 添加文档</button></div>
+                    <div class="item-list">`;
+                if (v.docs && v.docs.length > 0) {
+                    v.docs.forEach((doc, idx) => {
+                        html += `<div class="item-card">
+                            <span style="font-size:20px">${doc.icon || '📄'}</span>
+                            <div class="item-info">
+                                <div class="item-name">${doc.name}</div>
+                                <div class="item-detail">${doc.file}</div>
+                            </div>
+                            <span class="item-delete" onclick="deleteItem('doc', ${idx})">×</span>
+                        </div>`;
+                    });
+                } else {
+                    html += `<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0">暂无文档</div>`;
+                }
+                html += `</div></div>`;
+
+                // 原型分组
+                if (v.groups) {
+                    v.groups.forEach((group, gIdx) => {
+                        html += `<div class="form-section">
+                            <div class="form-section-title">📐 ${group.title} <button class="btn-add" onclick="addItem('page', ${gIdx})">+ 添加页面</button></div>
+                            <div class="item-list">`;
+                        group.pages.forEach((page, pIdx) => {
+                            html += `<div class="item-card">
+                                <span style="font-size:20px">${page.icon}</span>
+                                <div class="item-info">
+                                    <div class="item-name">${page.name}</div>
+                                    <div class="item-detail">${page.file}${page.anchor ? '#' + page.anchor : ''}</div>
+                                </div>
+                                <span class="item-delete" onclick="deleteItem('page', ${gIdx}, ${pIdx})">×</span>
+                            </div>`;
+                        });
+                        html += `</div></div>`;
+                    });
+                }
+            }
+
+            document.getElementById('configBody').innerHTML = html;
+        }
+
+        function updateVersionName(val) {
+            const v = versions.find(x => x.id === editVersionId);
+            if (v) { v.name = val; renderTabs(); }
+        }
+
+        function updateVersionDesc(val) {
+            const v = versions.find(x => x.id === editVersionId);
+            if (v) v.desc = val;
+        }
+
+        function addNewVersion() {
+            const name = prompt('输入新版本名称：');
+            if (!name) return;
+            const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+            versions.push({
+                id: id,
+                name: name,
+                desc: '',
+                docs: [],
+                groups: []
+            });
+            editVersionId = id;
+            renderConfigEditor();
+            renderTabs();
+        }
+
+        // ========== 添加/删除项目 ==========
+        function addItem(type, groupIdx) {
+            itemType = type;
+            editGroupIdx = groupIdx || 0;
+            document.getElementById('itemModalTitle').textContent = type === 'doc' ? '添加文档' : '添加页面';
+            document.getElementById('anchorRow').style.display = type === 'page' ? 'flex' : 'none';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemFile').value = '';
+            document.getElementById('itemAnchor').value = '';
+            document.getElementById('itemIcon').value = type === 'doc' ? '📄' : '📋';
+            document.getElementById('itemModal').classList.add('show');
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.remove('show');
+        }
+
+        function confirmItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const file = document.getElementById('itemFile').value.trim();
+            const icon = document.getElementById('itemIcon').value.trim() || '📄';
+            const anchor = document.getElementById('itemAnchor').value.trim();
+
+            if (!name || !file) { alert('请填写名称和文件路径'); return; }
+
+            const v = versions.find(x => x.id === editVersionId);
+            if (!v) return;
+
+            const item = { name, file, icon };
+            if (anchor) item.anchor = anchor;
+
+            if (itemType === 'doc') {
+                if (!v.docs) v.docs = [];
+                v.docs.push(item);
+            } else {
+                if (!v.groups[editGroupIdx]) {
+                    v.groups[editGroupIdx] = { title: '原型', pages: [] };
+                }
+                v.groups[editGroupIdx].pages.push(item);
+            }
+
+            closeItemModal();
+            renderConfigEditor();
+        }
+
+        function deleteItem(type, groupIdx, pageIdx) {
+            if (!confirm('确定删除？')) return;
+            const v = versions.find(x => x.id === editVersionId);
+            if (!v) return;
+
+            if (type === 'doc') {
+                v.docs.splice(groupIdx, 1);
+            } else {
+                v.groups[groupIdx].pages.splice(pageIdx, 1);
+            }
+            renderConfigEditor();
+        }
+
+        // ========== 保存到GitHub ==========
+        async function saveConfig() {
+            let token = localStorage.getItem('github_token');
+            if (!token) {
+                token = prompt('请输入 GitHub Token（只会保存在你的浏览器）：');
+                if (!token) return;
+                localStorage.setItem('github_token', token);
+            }
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 保存中...';
+
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${CONFIG_FILE}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                const data = await resp.json();
+                const sha = data.sha;
+
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(versions, null, 2))));
+                const uploadResp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${CONFIG_FILE}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: '更新版本配置', content, sha })
+                });
+
+                if (!uploadResp.ok) throw new Error('保存失败');
+
+                showToast('✅ 已保存！1-2分钟后生效');
+                closeConfigEditor();
+                renderTabs();
+                renderSidebar();
+                
+            } catch (e) {
+                if (e.message.includes('401')) localStorage.removeItem('github_token');
+                alert('保存失败：' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 保存到 GitHub';
             }
         }
 
-        // ========== 初始化 ==========
-        loadFromUrl();
-        renderTabs();
-        renderSidebar();
+        // 初始化
+        loadConfig();
     </script>
 </body>
 </html>
