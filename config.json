@@ -13,6 +13,11 @@
         "name": "doc.3",
         "file": "docs/doc-3-202608130739.html",
         "icon": "📄"
+      },
+      {
+        "name": "DOC3",
+        "file": "docs/DOC3-202608130749.html",
+        "icon": "📄"
       }
     ],
     "groups": [
