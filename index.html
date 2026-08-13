@@ -6,223 +6,359 @@
     <title>POKO 原型中心</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; }
-        .layout { display: flex; height: 100%; }
-        
-        /* 左侧导航 */
-        .sidebar { 
-            width: 220px; 
-            min-width: 220px;
-            background: #1e293b; 
-            color: #fff; 
-            display: flex; 
-            flex-direction: column;
-            border-right: 1px solid #334155;
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* 顶部版本切换栏 */
+        .top-bar {
+            background: #1a1a2e;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 56px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
         }
-        .sidebar-header {
-            padding: 20px 16px;
-            border-bottom: 1px solid #334155;
-        }
-        .sidebar-header h1 {
+        .top-bar .logo {
+            color: #fff;
             font-size: 16px;
-            font-weight: 600;
-            color: #f8fafc;
-        }
-        .sidebar-header p {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-        .nav-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 0;
-        }
-        .nav-group {
-            margin-bottom: 4px;
-        }
-        .nav-group-title {
-            padding: 8px 16px 4px;
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
+            font-weight: 700;
+            margin-right: 32px;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .top-bar .logo span { color: #3b82f6; }
+
+        /* 版本Tab */
+        .version-tabs {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+        }
+        .version-tabs::-webkit-scrollbar { display: none; }
+        .version-tab {
+            padding: 8px 20px;
+            color: rgba(255,255,255,0.55);
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            border-bottom: none;
+            position: relative;
+        }
+        .version-tab:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.06); }
+        .version-tab.active {
+            color: #fff;
+            background: rgba(59,130,246,0.15);
+            border-color: rgba(59,130,246,0.3);
+        }
+        .version-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3b82f6;
+        }
+
+        /* 主体区域 */
+        .main-area {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧导航 */
+        .sidebar {
+            width: 240px;
+            background: #16213e;
+            overflow-y: auto;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+        .nav-group { padding: 16px 0 8px; }
+        .nav-group-title {
+            padding: 0 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 8px;
             font-weight: 600;
         }
         .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 16px;
+            padding: 10px 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 13.5px;
             cursor: pointer;
             transition: all 0.15s;
-            font-size: 14px;
-            color: #cbd5e1;
-            border-left: 3px solid transparent;
-        }
-        .nav-item:hover {
-            background: #334155;
-            color: #f8fafc;
-        }
-        .nav-item.active {
-            background: #3b82f6;
-            color: #fff;
-            border-left-color: #60a5fa;
-        }
-        .nav-item .icon {
-            margin-right: 10px;
-            font-size: 16px;
-        }
-        
-        /* 右侧内容 */
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #f1f5f9;
-        }
-        .content-header {
-            padding: 10px 16px;
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            min-height: 44px;
+            gap: 10px;
+            border-left: 3px solid transparent;
         }
-        .content-title {
-            font-size: 14px;
-            color: #475569;
-            font-weight: 500;
-        }
-        .content-actions a {
-            font-size: 12px;
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-item.active {
+            background: rgba(59,130,246,0.12);
             color: #3b82f6;
-            text-decoration: none;
-            margin-left: 12px;
+            border-left-color: #3b82f6;
         }
-        .content-actions a:hover {
-            text-decoration: underline;
+        .nav-item .icon { font-size: 15px; }
+
+        /* 版本描述 */
+        .version-info {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .iframe-container {
+        .version-info .title {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .version-info .desc {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* 右侧iframe */
+        .content {
             flex: 1;
+            background: #e5e5e5;
             position: relative;
         }
-        .iframe-container iframe {
+        .content iframe {
             width: 100%;
             height: 100%;
             border: none;
             background: #fff;
         }
+
+        /* 欢迎页 */
         .welcome {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #94a3b8;
-            font-size: 16px;
-            flex-direction: column;
-            gap: 12px;
+            color: #999;
         }
-        .welcome .icon { font-size: 48px; }
+        .welcome .icon { font-size: 48px; margin-bottom: 16px; }
+        .welcome .text { font-size: 16px; }
+        .welcome .hint { font-size: 13px; color: #bbb; margin-top: 8px; }
+
+        /* 顶部右侧操作区 */
+        .top-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            padding-left: 16px;
+        }
+        .btn-action {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.7);
+            background: transparent;
+            white-space: nowrap;
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.1); color: #fff; }
     </style>
 </head>
 <body>
-    <div class="layout">
-        <!-- 左侧导航 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h1>POKO 原型中心</h1>
-                <p>产品原型在线预览</p>
-            </div>
-            <div class="nav-list" id="navList">
-                <!-- 导航项由JS动态生成 -->
-            </div>
+    <!-- 顶部栏 -->
+    <div class="top-bar">
+        <div class="logo"><span>POKO</span> 原型中心</div>
+        <div class="version-tabs" id="versionTabs"></div>
+        <div class="top-actions">
+            <button class="btn-action" onclick="copyLink()" title="复制当前页面链接">📋 复制链接</button>
+            <button class="btn-action" onclick="openInNewTab()" title="在新窗口打开">↗ 新窗口</button>
         </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="main-area">
+        <!-- 左侧导航 -->
+        <div class="sidebar" id="sidebar"></div>
 
         <!-- 右侧内容 -->
-        <div class="content">
-            <div class="content-header">
-                <span class="content-title" id="contentTitle">请选择一个原型</span>
-                <div class="content-actions" id="contentActions" style="display:none">
-                    <a href="#" id="shareLink" target="_blank">📋 独立链接</a>
-                    <a href="#" id="fullScreen" target="_blank">🔗 新窗口打开</a>
-                </div>
-            </div>
-            <div class="iframe-container" id="iframeContainer">
-                <div class="welcome" id="welcomeScreen">
-                    <div class="icon">📐</div>
-                    <div>从左侧选择一个原型开始查看</div>
-                </div>
+        <div class="content" id="content">
+            <div class="welcome">
+                <div class="icon">👈</div>
+                <div class="text">从左侧导航选择原型查看</div>
+                <div class="hint">顶部可切换不同需求版本</div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== 原型配置 ==========
-        // 新增原型只需要在这里添加一行
-        const prototypes = [
-            { name: 'SaaS 运营后台', file: 'POKO SaaS 运营后台 - 原型分享版.html', icon: '📋', group: 'SaaS 订阅系统' },
-            { name: 'SaaS 租户后台', file: 'POKO SaaS 租户后台 - 原型分享版.html', icon: '🏠', group: 'SaaS 订阅系统' },
+        // ========== 数据配置 ==========
+        // 按需求版本分组，每个版本有独立的导航
+        const versions = [
+            {
+                id: 'saas-subscription',
+                name: 'SaaS 订阅系统',
+                desc: '代购集运SaaS订阅模式，含运营侧+租户侧完整后台',
+                groups: [
+                    {
+                        title: '运营侧',
+                        pages: [
+                            { name: '运营后台首页', file: 'saas-operation.html', icon: '📋', anchor: 'page-1' },
+                            { name: '租户管理', file: 'saas-operation.html', icon: '👥', anchor: 'page-2' },
+                            { name: '订阅套餐配置', file: 'saas-operation.html', icon: '💰', anchor: 'page-3' },
+                            { name: '物流供应商管理', file: 'saas-operation.html', icon: '🚚', anchor: 'page-4' },
+                            { name: '线路报价管理', file: 'saas-operation.html', icon: '📍', anchor: 'page-5' },
+                            { name: '充值与支付配置', file: 'saas-operation.html', icon: '💳', anchor: 'page-6' },
+                            { name: '增值服务配置', file: 'saas-operation.html', icon: '🔧', anchor: 'page-7' },
+                        ]
+                    },
+                    {
+                        title: '租户侧',
+                        pages: [
+                            { name: '租户后台首页', file: 'saas-tenant.html', icon: '🏠', anchor: 'page-1' },
+                            { name: '线路管理', file: 'saas-tenant.html', icon: '🗺️', anchor: 'page-2' },
+                            { name: '财务管理', file: 'saas-tenant.html', icon: '💵', anchor: 'page-3' },
+                        ]
+                    }
+                ]
+            },
+            // ===== 新增需求版本只需在这里添加 =====
+            // {
+            //     id: 'parcel-optimization',
+            //     name: '提包单优化',
+            //     desc: '提包单交互优化与流程改进',
+            //     groups: [
+            //         {
+            //             title: '提包单',
+            //             pages: [
+            //                 { name: '提包单列表', file: 'parcel-optimize.html', icon: '📦', anchor: 'page-1' },
+            //             ]
+            //         }
+            //     ]
+            // },
         ];
 
-        // ========== 渲染导航 ==========
-        function renderNav() {
-            const navList = document.getElementById('navList');
-            const groups = {};
-            
-            prototypes.forEach((p, i) => {
-                if (!groups[p.group]) groups[p.group] = [];
-                groups[p.group].push({ ...p, index: i });
-            });
+        // ========== 状态 ==========
+        let currentVersion = versions[0]?.id || '';
+        let currentPage = null; // { versionId, file, anchor }
 
-            let html = '';
-            for (const [group, items] of Object.entries(groups)) {
-                html += `<div class="nav-group">`;
-                html += `<div class="nav-group-title">${group}</div>`;
-                items.forEach(item => {
+        // ========== 渲染 ==========
+        function renderTabs() {
+            const container = document.getElementById('versionTabs');
+            container.innerHTML = versions.map(v => `
+                <div class="version-tab ${v.id === currentVersion ? 'active' : ''}" 
+                     onclick="switchVersion('${v.id}')">
+                    ${v.name}
+                </div>
+            `).join('');
+        }
+
+        function renderSidebar() {
+            const container = document.getElementById('sidebar');
+            const version = versions.find(v => v.id === currentVersion);
+            if (!version) { container.innerHTML = ''; return; }
+
+            let html = `
+                <div class="version-info">
+                    <div class="title">${version.name}</div>
+                    <div class="desc">${version.desc}</div>
+                </div>
+            `;
+
+            version.groups.forEach(group => {
+                html += `<div class="nav-group"><div class="nav-group-title">${group.title}</div>`;
+                group.pages.forEach((page, idx) => {
+                    const pageId = `${currentVersion}::${page.file}::${page.anchor || idx}`;
+                    const isActive = currentPage && currentPage.pageId === pageId;
                     html += `
-                        <div class="nav-item" data-index="${item.index}" onclick="loadPrototype(${item.index})">
-                            <span class="icon">${item.icon}</span>
-                            ${item.name}
+                        <div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${page.file}', '${page.anchor || ''}', '${page.name}', '${pageId}')">
+                            <span class="icon">${page.icon}</span>
+                            <span>${page.name}</span>
                         </div>
                     `;
                 });
                 html += `</div>`;
-            }
-            navList.innerHTML = html;
+            });
+
+            container.innerHTML = html;
         }
 
-        // ========== 加载原型 ==========
-        function loadPrototype(index) {
-            const proto = prototypes[index];
-            const fileUrl = encodeURIComponent(proto.file).replace(/%2F/g, '/');
-            const shareUrl = `${location.origin}/${fileUrl}`;
-
-            // 更新导航高亮
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.querySelector(`.nav-item[data-index="${index}"]`).classList.add('active');
-
-            // 更新标题和操作
-            document.getElementById('contentTitle').textContent = proto.name;
-            document.getElementById('contentActions').style.display = 'block';
-            document.getElementById('shareLink').href = shareUrl;
-            document.getElementById('fullScreen').href = shareUrl;
-
-            // 隐藏欢迎页，加载iframe
-            document.getElementById('welcomeScreen').style.display = 'none';
-            const container = document.getElementById('iframeContainer');
-            
-            // 如果已有iframe则更新src
-            let iframe = container.querySelector('iframe');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                container.appendChild(iframe);
-            }
-            iframe.src = shareUrl;
+        function switchVersion(versionId) {
+            currentVersion = versionId;
+            currentPage = null;
+            renderTabs();
+            renderSidebar();
+            document.getElementById('content').innerHTML = `
+                <div class="welcome">
+                    <div class="icon">👈</div>
+                    <div class="text">从左侧导航选择原型查看</div>
+                    <div class="hint">${versions.find(v=>v.id===versionId)?.name || ''}</div>
+                </div>
+            `;
         }
 
-        // 初始化
-        renderNav();
+        function loadPage(file, anchor, name, pageId) {
+            currentPage = { file, anchor, name, pageId };
+            renderSidebar();
+
+            const url = anchor ? `${file}#${anchor}` : file;
+            document.getElementById('content').innerHTML = `
+                <iframe src="${url}" frameborder="0"></iframe>
+            `;
+        }
+
+        // ========== 操作 ==========
+        function copyLink() {
+            if (!currentPage) {
+                // 没选中页面，复制版本链接
+                const v = versions.find(v=>v.id===currentVersion);
+                const text = `${window.location.origin}/#version=${currentVersion}`;
+                navigator.clipboard.writeText(text).then(() => showToast(`已复制「${v?.name}」版本链接`));
+            } else {
+                const text = `${window.location.origin}/${currentPage.file}${currentPage.anchor ? '#' + currentPage.anchor : ''}`;
+                navigator.clipboard.writeText(text).then(() => showToast(`已复制「${currentPage.name}」链接`));
+            }
+        }
+
+        function openInNewTab() {
+            if (!currentPage) return;
+            const url = currentPage.anchor ? `${currentPage.file}#${currentPage.anchor}` : currentPage.file;
+            window.open(url, '_blank');
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.textContent = msg;
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // ========== URL参数支持 ==========
+        // 支持通过 URL 直接打开某个版本/页面
+        function loadFromUrl() {
+            const hash = window.location.hash.slice(1);
+            const params = new URLSearchParams(hash);
+            const v = params.get('version');
+            if (v && versions.find(ver => ver.id === v)) {
+                currentVersion = v;
+            }
+        }
+
+        // ========== 初始化 ==========
+        loadFromUrl();
+        renderTabs();
+        renderSidebar();
     </script>
 </body>
 </html>
