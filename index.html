@@ -111,6 +111,16 @@
         }
         .nav-item .icon { font-size: 15px; }
 
+        /* 文档分组特殊样式 */
+        .nav-group.docs-group {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+        }
+        .nav-group.docs-group .nav-group-title {
+            color: rgba(255,180,100,0.5);
+        }
+
         /* 版本描述 */
         .version-info {
             padding: 16px 20px;
@@ -204,11 +214,18 @@
     <script>
         // ========== 数据配置 ==========
         // 按需求版本分组，每个版本有独立的导航
+        // docs: 固定文档导航（PRD、修订日志、流程图等）
+        // groups: 原型页面分组
         const versions = [
             {
                 id: 'saas-subscription',
                 name: 'SaaS 订阅系统',
                 desc: '代购集运SaaS订阅模式，含运营侧+租户侧完整后台',
+                docs: [
+                    // { name: 'PRD 文档', file: 'docs/saas-prd.html', icon: '📄' },
+                    // { name: '修订日志', file: 'docs/saas-changelog.html', icon: '📝' },
+                    // { name: '业务流程图', file: 'docs/saas-flow.html', icon: '🔀' },
+                ],
                 groups: [
                     {
                         title: '运营侧',
@@ -237,6 +254,10 @@
             //     id: 'parcel-optimization',
             //     name: '提包单优化',
             //     desc: '提包单交互优化与流程改进',
+            //     docs: [
+            //         { name: 'PRD 文档', file: 'docs/parcel-prd.html', icon: '📄' },
+            //         { name: '修订日志', file: 'docs/parcel-changelog.html', icon: '📝' },
+            //     ],
             //     groups: [
             //         {
             //             title: '提包单',
@@ -275,6 +296,23 @@
                 </div>
             `;
 
+            // 渲染固定文档导航（如果有）
+            if (version.docs && version.docs.length > 0) {
+                html += `<div class="nav-group docs-group"><div class="nav-group-title">📚 文档</div>`;
+                version.docs.forEach((doc, idx) => {
+                    const pageId = `${currentVersion}::${doc.file}::doc-${idx}`;
+                    const isActive = currentPage && currentPage.pageId === pageId;
+                    html += `
+                        <div class="nav-item ${isActive ? 'active' : ''}" onclick="loadPage('${doc.file}', '', '${doc.name}', '${pageId}')">
+                            <span class="icon">${doc.icon}</span>
+                            <span>${doc.name}</span>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            // 渲染原型分组
             version.groups.forEach(group => {
                 html += `<div class="nav-group"><div class="nav-group-title">${group.title}</div>`;
                 group.pages.forEach((page, idx) => {
@@ -320,7 +358,6 @@
         // ========== 操作 ==========
         function copyLink() {
             if (!currentPage) {
-                // 没选中页面，复制版本链接
                 const v = versions.find(v=>v.id===currentVersion);
                 const text = `${window.location.origin}/#version=${currentVersion}`;
                 navigator.clipboard.writeText(text).then(() => showToast(`已复制「${v?.name}」版本链接`));
@@ -345,7 +382,6 @@
         }
 
         // ========== URL参数支持 ==========
-        // 支持通过 URL 直接打开某个版本/页面
         function loadFromUrl() {
             const hash = window.location.hash.slice(1);
             const params = new URLSearchParams(hash);
