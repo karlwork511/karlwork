@@ -3,7 +3,18 @@
     "id": "saas-subscription",
     "name": "SaaS 订阅系统",
     "desc": "代购集运SaaS订阅模式，含运营侧+租户侧完整后台",
-    "docs": [],
+    "docs": [
+      {
+        "name": "订阅系统文档",
+        "file": "docs/subscription-system-docs.html",
+        "icon": "📄"
+      },
+      {
+        "name": "系统文档2",
+        "file": "docs/2-202608130653.html",
+        "icon": "📄"
+      }
+    ],
     "groups": [
       {
         "title": "运营侧",
