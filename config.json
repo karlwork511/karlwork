@@ -13,6 +13,11 @@
         "name": "系统文档2",
         "file": "docs/2-202608130653.html",
         "icon": "📄"
+      },
+      {
+        "name": "DOC2",
+        "file": "docs/DOC2-202608130654.html",
+        "icon": "📄"
       }
     ],
     "groups": [
