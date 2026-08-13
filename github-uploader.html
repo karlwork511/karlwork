@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub 原型上传工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 24px; color: #333; font-size: 22px; }
+        .card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 16px; color: #666; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card h2 span { font-size: 20px; }
+        label { display: block; font-size: 13px; color: #888; margin-bottom: 4px; margin-top: 12px; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #3B82F6; }
+        .file-input { position: relative; border: 2px dashed #ccc; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
+        .file-input:hover { border-color: #3B82F6; background: #f0f7ff; }
+        .file-input.dragover { border-color: #3B82F6; background: #e8f2ff; }
+        .file-input p { color: #999; font-size: 14px; }
+        .file-input .icon { font-size: 36px; margin-bottom: 8px; }
+        .file-input input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .file-list { margin-top: 12px; }
+        .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+        .file-item .name { color: #333; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-item .size { color: #999; margin-left: 8px; white-space: nowrap; }
+        .file-item .remove { color: #ef4444; cursor: pointer; margin-left: 8px; font-size: 16px; }
+        .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 16px; }
+        .btn-primary { background: #24292e; color: #fff; }
+        .btn-primary:hover { background: #1a1e22; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-save { background: #3B82F6; color: #fff; padding: 10px; font-size: 14px; }
+        .btn-save:hover { background: #2563eb; }
+        .msg { padding: 12px 16px; border-radius: 8px; margin-top: 12px; font-size: 14px; display: none; }
+        .msg.success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; display: block; }
+        .msg.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; display: block; }
+        .msg.info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; display: block; }
+        .log { margin-top: 12px; max-height: 300px; overflow-y: auto; font-size: 13px; font-family: monospace; }
+        .log-item { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 8px; }
+        .log-item .status { flex-shrink: 0; }
+        .log-item .detail { color: #555; word-break: break-all; }
+        .log-item .success-icon { color: #10b981; }
+        .log-item .fail-icon { color: #ef4444; }
+        .log-item .pending-icon { color: #f59e0b; }
+        .config-saved { display: inline-block; padding: 2px 8px; background: #ecfdf5; color: #059669; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+        .path-hint { font-size: 12px; color: #999; margin-top: 4px; }
+        .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+        .checkbox-row input { width: auto; }
+        .checkbox-row label { margin: 0; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📤 GitHub 原型上传工具</h1>
+
+        <!-- GitHub配置 -->
+        <div class="card">
+            <h2><span>⚙️</span> GitHub 配置 <span id="savedBadge" class="config-saved" style="display:none">✓ 已保存</span></h2>
+            <label>Personal Access Token</label>
+            <input id="cfgToken" type="password" placeholder="ghp_xxxx" />
+            <label>仓库所有者</label>
+            <input id="cfgOwner" type="text" value="karlwork511" />
+            <label>仓库名称</label>
+            <input id="cfgRepo" type="text" value="karlwork" />
+            <div class="checkbox-row">
+                <input id="cfgRename" type="checkbox" checked />
+                <label for="cfgRename">文件名转拼音（避免中文URL）</label>
+            </div>
+            <button class="btn btn-save" onclick="saveConfig()">💾 保存配置</button>
+            <div id="configMsg" class="msg"></div>
+        </div>
+
+        <!-- 文件上传 -->
+        <div class="card">
+            <h2><span>📁</span> 选择文件</h2>
+            <div class="file-input" id="dropZone">
+                <div class="icon">📎</div>
+                <p>点击选择或拖拽文件到这里</p>
+                <input type="file" id="fileInput" multiple accept=".html,.htm,.css,.js,.json,.md,.txt,.png,.jpg,.jpeg,.gif,.svg,.pdf" />
+            </div>
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <!-- 上传按钮 -->
+        <button class="btn btn-primary" id="uploadBtn" onclick="startUpload()" disabled>
+            开始上传
+        </button>
+
+        <!-- 上传日志 -->
+        <div class="card" id="logCard" style="display:none">
+            <h2><span>📋</span> 上传结果</h2>
+            <div class="log" id="uploadLog"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let config = {};
+
+        // 加载配置
+        function loadConfig() {
+            const saved = localStorage.getItem('gh_upload_cfg');
+            if (saved) {
+                config = JSON.parse(saved);
+                $('cfgToken').value = config.token || '';
+                $('cfgOwner').value = config.owner || 'karlwork511';
+                $('cfgRepo').value = config.repo || 'karlwork';
+                $('cfgRename').checked = config.rename !== false;
+                $('savedBadge').style.display = 'inline-block';
+            }
+        }
+
+        function saveConfig() {
+            config = {
+                token: $('cfgToken').value.trim(),
+                owner: $('cfgOwner').value.trim(),
+                repo: $('cfgRepo').value.trim(),
+                rename: $('cfgRename').checked
+            };
+            if (!config.token) {
+                showConfigMsg('请填写 Token', 'error');
+                return;
+            }
+            localStorage.setItem('gh_upload_cfg', JSON.stringify(config));
+            $('savedBadge').style.display = 'inline-block';
+            showConfigMsg('✓ 配置已保存', 'success');
+        }
+
+        function showConfigMsg(text, type) {
+            const el = $('configMsg');
+            el.textContent = text;
+            el.className = 'msg ' + type;
+            setTimeout(() => { el.className = 'msg'; }, 3000);
+        }
+
+        // 文件名转拼音映射
+        const pinyinMap = {
+            '运营': 'operation', '租户': 'tenant', '后台': 'backend',
+            '原型': 'prototype', '分享版': 'share', '采购': 'purchase',
+            '订单': 'order', '入库': 'warehouse', '包裹': 'package',
+            '商品': 'product', '物流': 'logistics', '系统': 'system',
+            '设置': 'settings', '管理': 'manage', '列表': 'list',
+            '详情': 'detail', '首页': 'home', '首页导航': 'nav',
+            '充值': 'recharge', '支付': 'payment', '配置': 'config',
+            '审核': 'audit', '账户': 'account', '流水': 'statement',
+            '退款': 'refund', '售后': 'aftersale', '供应商': 'supplier',
+            '代购': 'agent-buy', '平台': 'platform', '线路': 'route',
+            '货类': 'cargo', '订阅': 'subscription', 'SaaS': 'saas',
+            'POKO': 'poko', '-': '-', ' ': '-'
+        };
+
+        function toPinyin(name) {
+            // 先尝试匹配中文词组
+            let result = name;
+            // 按词组长度从长到短替换
+            const sortedKeys = Object.keys(pinyinMap).sort((a, b) => b.length - a.length);
+            for (const key of sortedKeys) {
+                result = result.replace(new RegExp(key, 'g'), pinyinMap[key]);
+            }
+            // 清理特殊字符
+            result = result.replace(/[^\w\-\.]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            return result;
+        }
+
+        // 文件选择
+        $('fileInput').addEventListener('change', handleFiles);
+        const dropZone = $('dropZone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(f => {
+                if (!selectedFiles.find(sf => sf.name === f.name)) {
+                    selectedFiles.push(f);
+                }
+            });
+            renderFileList();
+            e.target.value = '';
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        function renderFileList() {
+            const list = $('fileList');
+            list.innerHTML = selectedFiles.map((f, i) => `
+                <div class="file-item">
+                    <span class="name">${f.name}</span>
+                    <span class="size">${formatSize(f.size)}</span>
+                    <span class="remove" onclick="removeFile(${i})">✕</span>
+                </div>
+            `).join('');
+            $('uploadBtn').disabled = selectedFiles.length === 0;
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // 上传
+        async function startUpload() {
+            if (!config.token) {
+                alert('请先保存 GitHub 配置');
+                return;
+            }
+
+            const btn = $('uploadBtn');
+            btn.disabled = true;
+            btn.textContent = '上传中...';
+
+            $('logCard').style.display = 'block';
+            const log = $('uploadLog');
+            log.innerHTML = '';
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                let fileName = file.name;
+
+                if ($('cfgRename').checked) {
+                    const ext = file.name.split('.').pop();
+                    const base = file.name.substring(0, file.name.lastIndexOf('.'));
+                    fileName = toPinyin(base) + '.' + ext;
+                }
+
+                addLogItem(fileName, 'pending', '上传中...');
+                try {
+                    await uploadFile(file, fileName, i);
+                    updateLogItem(i, 'success', `✓ ${fileName}`);
+                } catch (err) {
+                    updateLogItem(i, 'fail', `✕ ${fileName}: ${err.message}`);
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = '开始上传';
+            selectedFiles = [];
+            renderFileList();
+        }
+
+        async function uploadFile(file, fileName, logIndex) {
+            // 检查文件是否已存在（需要获取sha）
+            const owner = config.owner;
+            const repo = config.repo;
+            let sha = undefined;
+
+            try {
+                const checkRes = await fetch(
+                    `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(fileName)}`,
+                    { headers: { 'Authorization': `token ${config.token}` } }
+                );
+                if (checkRes.ok) {
+                    const data = await checkRes.json();
+                    sha = data.sha;
+                }
+            } catch (e) { /* 文件不存在，正常继续 */ }
+
+            // 读取文件内容为 base64
+            const content = await readFileAsBase64(file);
+
+            // 上传
+            const body = {
+                message: `${sha ? 'Update' : 'Add'} ${fileName}`,
+                content: content
+            };
+            if (sha) body.sha = sha;
+
+            const res = await fetch(
+                `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(fileName)}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${config.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }
+            );
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || '上传失败');
+            }
+
+            const result = await res.json();
+            return result.content.html_url;
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addLogItem(fileName, status, detail) {
+            const log = $('uploadLog');
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.id = `log-${Date.now()}-${Math.random()}`;
+            div.innerHTML = `
+                <span class="status pending-icon">⏳</span>
+                <span class="detail">${detail}</span>
+            `;
+            log.appendChild(div);
+        }
+
+        function updateLogItem(index, status, detail) {
+            const items = $('uploadLog').children;
+            if (items[index]) {
+                const icon = status === 'success' ? '✅' : '❌';
+                const cls = status === 'success' ? 'success-icon' : 'fail-icon';
+                items[index].innerHTML = `
+                    <span class="status ${cls}">${icon}</span>
+                    <span class="detail">${detail}</span>
+                `;
+            }
+        }
+
+        function $(id) { return document.getElementById(id); }
+
+        // 初始化
+        loadConfig();
+    </script>
+</body>
+</html>
