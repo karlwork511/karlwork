@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>doc.3 - POKO文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
+        .doc-header { background: #1a1a2e; padding: 10px 24px; color: #fff; display: flex; align-items: center; gap: 12px; }
+        .doc-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+        .doc-header .meta { font-size: 11px; color: rgba(255,255,255,0.4); }
+        .doc-header .actions { display: flex; gap: 6px; margin-left: auto; }
+        .btn { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; }
+        .btn:hover { background: rgba(255,255,255,0.15); }
+        .btn.primary { background: #3b82f6; border-color: #3b82f6; }
+        .btn.green { background: #10b941; border-color: #10b941; }
+        .btn.green:hover { background: #059669; }
+        .doc-body { max-width: 900px; margin: 16px auto; padding: 0 24px; }
+        .doc-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 50vh; }
+        .doc-content[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+        .doc-content h2 { font-size: 18px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .doc-content h3 { font-size: 15px; margin: 20px 0 8px 0; }
+        .doc-content p { margin: 8px 0; color: #444; }
+        .doc-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+        .doc-content th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e5e5e5; font-weight: 600; }
+        .doc-content td { padding: 10px 12px; border: 1px solid #e5e5e5; }
+        .doc-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+        .doc-content .placeholder { color: #aaa; text-align: center; padding: 60px 20px; }
+        .doc-content .placeholder .icon { font-size: 40px; margin-bottom: 12px; }
+        .doc-content .placeholder .title { font-size: 16px; color: #888; }
+        .doc-content .placeholder .hint { font-size: 13px; margin-top: 8px; }
+        .doc-footer { text-align: center; padding: 24px; color: #aaa; font-size: 12px; }
+        #toast { position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>doc.3</h1>
+        <span class="meta">POKO SaaS · 创建于 2026/8/13</span>
+        <div class="actions">
+            <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">
+            <button class="btn green" id="imgBtn" onclick="document.getElementById('imgInput').click()" style="display:none">🖼️ 插入图片</button>
+            <button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button>
+        </div>
+    </div>
+    <div class="doc-body">
+        <div class="doc-content" id="docContent">
+            <div class="placeholder" id="placeholder">
+                <div class="icon">📄</div>
+                <div class="title">点击右上角「编辑」后，可直接在此粘贴内容</div>
+                <div class="hint">支持从 Word / 飞书 / 网页复制表格、文字、图片，也可点击「插入图片」上传</div>
+            </div>
+        </div>
+    </div>
+    <div class="doc-footer">POKO 文档 · Powered by GitHub Pages</div>
+    <script>
+    var REPO = 'karlwork511/karlwork';
+    var FILE = 'docs/doc-3-202608130739.html';
+    var editing = false;
+
+    function toggleEdit() {
+        var c = document.getElementById('docContent');
+        var ph = document.getElementById('placeholder');
+        var eb = document.getElementById('editBtn');
+        var sb = document.getElementById('saveBtn');
+        var ib = document.getElementById('imgBtn');
+        if (!editing) {
+            if (ph) ph.remove();
+            c.contentEditable = 'true';
+            c.focus();
+            eb.textContent = '退出编辑';
+            sb.style.display = 'inline-block';
+            ib.style.display = 'inline-block';
+            editing = true;
+        } else {
+            c.contentEditable = 'false';
+            eb.textContent = '✏️ 编辑';
+            sb.style.display = 'none';
+            ib.style.display = 'none';
+            editing = false;
+        }
+    }
+
+    async function insertImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) === -1) ext = 'png';
+        var fn = 'img-' + Date.now() + '.' + ext;
+        showToast('正在上传图片...', '#3b82f6');
+        try {
+            var token = localStorage.getItem('github_token');
+            if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+            var base64 = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var path = 'images/' + fn;
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Upload ' + fn, content: base64 })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'Upload failed'); }
+            var data = await resp.json();
+            var imgUrl = data.content.download_url;
+            var docContent = document.getElementById('docContent');
+            var sel = window.getSelection();
+            if (sel.rangeCount > 0 && docContent.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                range.deleteContents();
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                docContent.appendChild(img);
+            }
+            showToast('✅ 图片已插入', '#10b941');
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('❌ ' + e.message, '#ef4444');
+        }
+        input.value = '';
+    }
+
+    async function savePage() {
+        var sb = document.getElementById('saveBtn');
+        var eb = document.getElementById('editBtn');
+        var ib = document.getElementById('imgBtn');
+        var token = localStorage.getItem('github_token');
+        if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+        document.getElementById('docContent').contentEditable = 'false';
+        eb.textContent = '✏️ 编辑';
+        sb.style.display = 'none';
+        ib.style.display = 'none';
+        sb.textContent = '⏳ 保存中...';
+        editing = false;
+        var userHTML = document.getElementById('docContent').innerHTML;
+        var page = buildPage(userHTML);
+        try {
+            var info = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, { headers: { 'Authorization': 'token ' + token } });
+            var sha = (await info.json()).sha;
+            var encoded = btoa(unescape(encodeURIComponent(page)));
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'update doc', content: encoded, sha: sha })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'failed'); }
+            showToast('✅ 已保存，1-2分钟生效', '#10b941');
+            sb.textContent = '📁 保存';
+        } catch(e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('❌ ' + e.message, '#ef4444');
+            sb.textContent = '📁 保存';
+        }
+    }
+
+    function buildPage(content) {
+        var title = document.querySelector('.doc-header h1').textContent;
+        var css = '*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#fafafa;color:#1a1a2e;line-height:1.7}'
+        + '.doc-header{background:#1a1a2e;padding:10px 24px;color:#fff;display:flex;align-items:center;gap:12px}.doc-header h1{font-size:16px;font-weight:600;flex:1}'
+        + '.doc-header .meta{font-size:11px;color:rgba(255,255,255,0.4)}.doc-header .actions{display:flex;gap:6px;margin-left:auto}'
+        + '.btn{padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff}'
+        + '.btn:hover{background:rgba(255,255,255,0.15)}.btn.primary{background:#3b82f6;border-color:#3b82f6}.btn.green{background:#10b941;border-color:#10b941}.btn.green:hover{background:#059669}'
+        + '.doc-body{max-width:900px;margin:16px auto;padding:0 24px}.doc-content{background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.08);min-height:50vh}'
+        + '.doc-content[contenteditable=true]{outline:2px solid #3b82f6;outline-offset:-2px}'
+        + '.doc-content h2{font-size:18px;margin:24px 0 12px 0;padding-bottom:8px;border-bottom:1px solid #eee}.doc-content h3{font-size:15px;margin:20px 0 8px 0}.doc-content p{margin:8px 0;color:#444}'
+        + '.doc-content table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}.doc-content th{background:#f5f5f5;padding:10px 12px;text-align:left;border:1px solid #e5e5e5;font-weight:600}'
+        + '.doc-content td{padding:10px 12px;border:1px solid #e5e5e5}.doc-content img{max-width:100%;border-radius:8px;margin:12px 0}'
+        + '.doc-footer{text-align:center;padding:24px;color:#aaa;font-size:12px}#toast{position:fixed;top:20px;right:20px;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;color:#fff}';
+        var js = 'var REPO="'+REPO+'",FILE="'+FILE+'",editing=false;'
+        + 'function toggleEdit(){var c=document.getElementById("docContent"),e=document.getElementById("editBtn"),s=document.getElementById("saveBtn"),ib=document.getElementById("imgBtn");if(!editing){c.contentEditable="true";c.focus();e.textContent="退出编辑";s.style.display="inline-block";ib.style.display="inline-block";editing=true}else{c.contentEditable="false";e.textContent="✏️ 编辑";s.style.display="none";ib.style.display="none";editing=false}}'
+        + 'async function insertImage(ip){var f=ip.files[0];if(!f)return;var x=f.name.split(".").pop().toLowerCase();if(["jpg","jpeg","png","gif","webp","svg"].indexOf(x)===-1)x="png";var n="img-"+Date.now()+"."+x;showToast("上传中...","#3b82f6");try{var t=localStorage.getItem("github_token");if(!t){t=prompt("GitHub Token：");if(!t)return;localStorage.setItem("github_token",t)}var b=await new Promise(function(r,j){var rd=new FileReader();rd.onload=function(){r(rd.result.split(",")[1])};rd.onerror=j;rd.readAsDataURL(f)};var p="images/"+n;var rp=await fetch("https://api.github.com/repos/"+REPO+"/contents/"+p,{method:"PUT",headers:{"Authorization":"token "+t,"Content-Type":"application/json"},body:JSON.stringify({message:"Upload "+n,content:b})});if(!rp.ok){var er=await rp.json();throw new Error(er.message||"failed")}var d=await rp.json();var u=d.content.download_url;var dc=document.getElementById("docContent");var sl=window.getSelection();if(sl.rangeCount>0&&dc.contains(sl.anchorNode)){var rg=sl.getRangeAt(0);var im=document.createElement("img");im.src=u;im.style.cssText="max-width:100%;border-radius:8px;margin:12px 0;display:block;";rg.deleteContents();rg.insertNode(im);rg.setStartAfter(im);rg.collapse(true);sl.removeAllRanges();sl.addRange(rg)}else{var im=document.createElement("img");im.src=u;im.style.cssText="max-width:100%;border-radius:8px;margin:12px 0;display:block;";dc.appendChild(im)}showToast("✅ 图片已插入","#10b941")}catch(e){if(e.message&&e.message.includes("401"))localStorage.removeItem("github_token");showToast("❌ "+e.message,"#ef4444")}ip.value=""}'
+        + 'async function savePage(){var s=document.getElementById("saveBtn"),t=localStorage.getItem("github_token");if(!t){t=prompt("GitHub Token：");if(!t)return;localStorage.setItem("github_token",t)}document.getElementById("docContent").contentEditable="false";document.getElementById("editBtn").textContent="✏️ 编辑";s.style.display="none";document.getElementById("imgBtn").style.display="none";s.textContent="⏳ 保存中...";editing=false;var h=document.getElementById("docContent").innerHTML,p=buildPage(h);try{var i=await fetch("https://api.github.com/repos/"+REPO+"/contents/"+FILE,{headers:{"Authorization":"token "+t}}),sh=(await i.json()).sha,en=btoa(unescape(encodeURIComponent(p))),r=await fetch("https://api.github.com/repos/"+REPO+"/contents/"+FILE,{method:"PUT",headers:{"Authorization":"token "+t,"Content-Type":"application/json"},body:JSON.stringify({message:"update",content:en,sha:sh})});if(!r.ok){var e2=await r.json();throw new Error(e2.message)}showToast("✅ 已保存","#10b981");s.textContent="📁 保存"}catch(e){if(e.message&&e.message.includes("401"))localStorage.removeItem("github_token");showToast("❌ "+e.message,"#ef4444");s.textContent="📁 保存"}}'
+        + 'function buildPage(c){return "<!DOCTYPE html><html><head><meta charset=UTF-8><title>doc</title></head><body>"+c+"</body></html>"}'
+        + 'function showToast(m,c2){var t=document.getElementById("toast");if(t)t.remove();var d=document.createElement("div");d.id="toast";d.textContent=m;d.style.background=c2;document.body.appendChild(d);setTimeout(function(){d.remove()},3000)}';
+        return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>'+title+' - POKO</title><style>'+css+'</style></head><body>'
+        + '<div class="doc-header"><h1>'+title+'</h1><span class="meta">POKO SaaS</span><div class="actions">'
+        + '<button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>'
+        + '<input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">'
+        + '<button class="btn green" id="imgBtn" onclick="document.getElementById(\'imgInput\').click()" style="display:none">🖼️ 插入图片</button>'
+        + '<button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button></div></div>'
+        + '<div class="doc-body"><div class="doc-content" id="docContent">'+content+'</div></div>'
+        + '<div class="doc-footer">POKO 文档</div>'
+        + '<'+'script>'+js+'<'+'/script></body></html>';
+    }
+
+    function showToast(msg, color) {
+        var t = document.getElementById('toast');
+        if (t) t.remove();
+        var d = document.createElement('div');
+        d.id = 'toast';
+        d.textContent = msg;
+        d.style.background = color;
+        document.body.appendChild(d);
+        setTimeout(function() { d.remove(); }, 3000);
+    }
+    </script>
+</body>
+</html>
