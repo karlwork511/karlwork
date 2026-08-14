@@ -406,6 +406,10 @@
                 if (resp.ok) {
                     versions = await resp.json();
                     if (versions.length > 0) currentVersion = versions[0].id;
+                    // URL hash 直达：支持 #parcel-module 或 #version=parcel-module
+                    var h = window.location.hash.replace('#', '');
+                    if (h.indexOf('version=') === 0) h = h.substring(8);
+                    if (h && versions.some(function(v){ return v.id === h; })) currentVersion = h;
                     renderTabs();
                     renderSidebar();
                 }
