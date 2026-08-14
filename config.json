@@ -97,5 +97,74 @@
         ]
       }
     ]
+  },
+  {
+    "id": "parcel-module",
+    "name": "提包模块",
+    "desc": "包裹提交模块，含后台管理+PC端+APP端完整原型及PRD文档",
+    "docs": [
+      {
+        "name": "提包模块需求文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/wiki/TYXUwxCQ4iTMH2koUWjcnSFgnSt?from=from_copylink",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "后台管理",
+        "pages": [
+          {
+            "name": "提包单列表",
+            "file": "docs/submit-order-list-tenant-v2.html",
+            "icon": "📋"
+          },
+          {
+            "name": "提包单详情",
+            "file": "docs/submit-order-detail-tenant-v1.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "PC用户端",
+        "pages": [
+          {
+            "name": "提交包裹",
+            "file": "docs/submit-parcel-web-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "我的包裹",
+            "file": "docs/my-parcels-web-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "包裹详情",
+            "file": "docs/parcel-detail-web-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "APP用户端",
+        "pages": [
+          {
+            "name": "提交包裹",
+            "file": "docs/submit-parcel-app-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "我的包裹",
+            "file": "docs/my-parcels-app-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "包裹详情",
+            "file": "docs/parcel-detail-app-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   }
 ]
