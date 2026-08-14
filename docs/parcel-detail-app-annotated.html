@@ -1,0 +1,2702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>包裹详情 - 预览v1 - 带标注版</title>
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F3F4F6; color: #111827; }
+
+.phone-frame {
+  width: 375px; margin: 20px auto; background: #F3F4F6;
+  min-height: 812px; position: relative; overflow-x: hidden;
+  border: 2px solid #E5E7EB; border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.status-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
+  font-size: 12px; font-weight: 600; color: #111827;
+}
+
+.nav-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  padding: 0 16px; border-bottom: 1px solid #F3F4F6;
+}
+.nav-bar .back { font-size: 20px; color: #111827; cursor: pointer; width: 30px; }
+.nav-bar .title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; }
+
+.page-content { padding-bottom: 100px; background: #F3F4F6; }
+
+.card {
+  background: #fff; margin: 8px 12px; border-radius: 12px;
+  padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.card-title { font-size: 14px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 6px; }
+
+/* ========== 订单信息区 ========== */
+.order-info-card {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: #fff; margin: 0; border-radius: 0 0 16px 16px;
+  padding: 16px 20px 20px;
+}
+.order-status {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.order-status-badge {
+  font-size: 18px; font-weight: 700;
+}
+.order-status-amount {
+  font-size: 15px; font-weight: 600;
+  padding: 3px 10px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+}
+.order-status-amount .yen { font-size: 11px; font-weight: 500; }
+.order-status-desc {
+  font-size: 12px; opacity: 0.85;
+}
+.order-meta {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.order-meta-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px;
+}
+.order-meta-label { opacity: 0.85; }
+.order-meta-val { font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.copy-icon {
+  font-size: 12px; cursor: pointer; padding: 2px 6px;
+  background: rgba(255,255,255,0.2); border-radius: 4px;
+}
+.copy-icon:active { background: rgba(255,255,255,0.35); }
+
+/* ========== 补款提示横幅 ========== */
+.supplement-banner {
+  margin: 8px 12px 0; border-radius: 12px;
+  background: #FFFBEB; border: 1px solid #FDE68A;
+  overflow: hidden;
+}
+.supplement-banner-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px 8px;
+}
+.supplement-banner-icon {
+  font-size: 18px;
+}
+.supplement-banner-title {
+  font-size: 14px; font-weight: 600; color: #92400E;
+}
+.supplement-banner-amount {
+  margin-left: auto; font-size: 18px; font-weight: 700; color: #DC2626;
+}
+.supplement-banner-amount .yen-sm { font-size: 12px; }
+.supplement-type-row {
+  padding: 0 14px 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.supplement-type-label {
+  font-size: 11px; color: #92400E;
+}
+.supplement-type-tag {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+}
+.supplement-type-tag.freight { background: #DBEAFE; color: #1D4ED8; }
+.supplement-type-tag.surcharge { background: #FEF3C7; color: #B45309; }
+
+/* 补附加费明细区 */
+.supplement-surcharges {
+  padding: 6px 14px 12px;
+}
+.supplement-surcharges-title {
+  font-size: 11px; color: #92400E; margin-bottom: 6px;
+}
+.surcharge-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px dashed #FDE68A;
+}
+.surcharge-item:last-child { border-bottom: none; }
+.surcharge-item-name {
+  font-size: 12px; color: #78350F;
+  display: flex; align-items: center; gap: 4px;
+}
+.surcharge-item-name::before {
+  content: ''; width: 4px; height: 4px; border-radius: 50%;
+  background: #F59E0B; flex-shrink: 0;
+}
+.surcharge-item-price {
+  font-size: 13px; font-weight: 600; color: #DC2626;
+}
+
+/* ========== 物流信息区 ========== */
+.logistics-card { margin-top: -8px; }
+.logistics-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+}
+.logistics-row:last-child { border-bottom: none; padding-bottom: 0; }
+.logistics-row:first-child { padding-top: 0; }
+.logistics-left {
+  display: flex; align-items: center; gap: 8px;
+}
+.logistics-icon { font-size: 16px; }
+.logistics-label { font-size: 13px; color: #6B7280; }
+.logistics-val {
+  font-size: 13px; font-weight: 600; color: #111827;
+  display: flex; align-items: center; gap: 6px;
+}
+.logistics-link {
+  font-size: 12px; color: #3B82F6; cursor: pointer;
+  display: flex; align-items: center; gap: 2px;
+}
+.tracking-num { font-family: monospace; }
+
+/* 收货地址卡 */
+.address-section {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6;
+}
+.address-row {
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.address-icon { font-size: 18px; margin-top: 2px; }
+.address-detail { flex: 1; }
+.address-name {
+  font-size: 14px; font-weight: 600; color: #111827;
+  display: flex; align-items: center; gap: 8px;
+}
+.address-phone { font-size: 13px; color: #6B7280; margin-top: 2px; }
+.address-text {
+  font-size: 13px; color: #6B7280; margin-top: 4px; line-height: 1.5;
+}
+.address-arrow { color: #D1D5DB; font-size: 16px; }
+
+/* ========== 商品明细区 ========== */
+.goods-header { cursor: pointer; }
+.goods-thumbs {
+  display: flex; gap: 6px; margin-bottom: 8px;
+}
+.goods-thumb {
+  width: 48px; height: 48px; border-radius: 8px; background: #F3F4F6;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  border: 1px solid #E5E7EB;
+}
+.goods-thumb.more {
+  background: #EFF6FF; color: #3B82F6; font-size: 11px; font-weight: 600;
+  border-color: #DBEAFE;
+}
+.goods-summary {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.goods-info-left { font-size: 13px; color: #374151; }
+.goods-info-left .count { font-weight: 600; color: #3B82F6; }
+.goods-info-left .weight { font-weight: 600; color: #3B82F6; margin-left: 8px; }
+.goods-toggle {
+  font-size: 12px; color: #3B82F6; font-weight: 500;
+  display: flex; align-items: center; gap: 2px;
+}
+.warehouse-row {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9CA3AF;
+}
+.warehouse-row span { color: #6B7280; font-weight: 500; }
+.packaging-row {
+  margin-top: 8px; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9CA3AF;
+}
+.packaging-row span { color: #6B7280; font-weight: 500; }
+.packed-weight-row {
+  margin-top: 8px; display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #9CA3AF;
+}
+.packed-weight-row span { color: #6B7280; font-weight: 500; }
+
+/* 快递分组 */
+.goods-count-tag {
+  font-size: 12px; color: #9CA3AF; font-weight: 500;
+}
+.express-group {
+  background: #F9FAFB; border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid #F3F4F6;
+}
+.express-group:last-of-type { margin-bottom: 0; }
+.express-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.express-left {
+  display: flex; align-items: center; gap: 6px;
+}
+.express-tag {
+  font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500;
+}
+.express-tag.normal { background: #DCFCE7; color: #16A34A; }
+.express-tag.sensitive { background: #FEF3C7; color: #D97706; }
+.express-tag.electric { background: #FEE2E2; color: #DC2626; }
+.express-number {
+  font-size: 12px; font-weight: 600; color: #374151;
+  font-family: monospace;
+}
+.copy-icon-sm {
+  font-size: 10px; color: #3B82F6; cursor: pointer;
+  padding: 2px 8px; background: #EFF6FF; border-radius: 4px;
+}
+.express-meta {
+  font-size: 11px; color: #9CA3AF; margin-bottom: 8px;
+}
+.express-goods-preview {
+  display: flex; gap: 6px;
+}
+.goods-thumb-sm {
+  width: 36px; height: 36px; border-radius: 6px; background: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  border: 1px solid #E5E7EB;
+}
+/* ========== 商品明细区 v2（极简卡片） ========== */
+.goods-card-v2 {
+  background: #F9FAFB;
+  border: 1px solid #F3F4F6;
+  border-radius: 12px;
+}
+.goods-v2-header {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 12px;
+}
+.goods-v2-icon { font-size: 16px; }
+.goods-v2-title {
+  font-size: 14px; font-weight: 600; color: #111827;
+}
+.goods-v2-thumbs {
+  display: flex; gap: 10px; margin-bottom: 12px;
+  cursor: pointer;
+}
+.goods-v2-thumb {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; border: 1px solid #F3F4F6;
+}
+.goods-v2-thumb.more {
+  background: #fff; color: #9CA3AF;
+  font-size: 12px; font-weight: 500;
+  border: 1px dashed #E5E7EB;
+}
+.goods-v2-footer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.goods-v2-summary {
+  font-size: 13px; color: #374151; font-weight: 500;
+}
+.goods-v2-link {
+  font-size: 13px; color: #3B82F6; font-weight: 500;
+  cursor: pointer;
+}
+
+.view-all-btn {
+  text-align: center; font-size: 12px; color: #3B82F6;
+  padding: 10px 0 2px; cursor: pointer; font-weight: 500;
+}
+
+/* ========== 包裹信息区 ========== */
+.info-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0;
+}
+.info-label { font-size: 13px; color: #6B7280; }
+.info-val { font-size: 13px; font-weight: 500; color: #111827; display: flex; align-items: center; gap: 4px; }
+.info-divider {
+  height: 1px; background: #F3F4F6; margin: 4px 0;
+}
+
+/* ========== 费用信息区 ========== */
+.fee-card { }
+.fee-total-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px; margin-bottom: 10px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.fee-total-label { font-size: 14px; font-weight: 600; color: #111827; }
+.fee-total-val {
+  font-size: 18px; font-weight: 700; color: #111827;
+}
+.fee-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0;
+}
+.fee-left {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280;
+}
+.fee-right {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: #111827; font-weight: 500;
+}
+.fee-sub {
+  margin-left: 24px; font-size: 11px; color: #9CA3AF;
+}
+.fee-discount { color: #10B981; }
+.fee-section-divider {
+  height: 1px; background: #F3F4F6; margin: 6px 0;
+}
+.fee-summary-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 10px; margin-top: 4px;
+  border-top: 1px solid #F3F4F6;
+}
+.fee-summary-label { font-size: 14px; font-weight: 600; color: #111827; }
+.fee-summary-val { font-size: 16px; font-weight: 700; color: #111827; }
+.fee-paid-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 10px; margin-top: 8px;
+  background: #FEF2F2; margin: 10px -16px -14px;
+  padding: 12px 16px; border-radius: 0 0 12px 12px;
+}
+.fee-paid-label { font-size: 13px; color: #6B7280; }
+.fee-paid-val { font-size: 20px; font-weight: 700; color: #EF4444; }
+.fee-paid-val .yen { font-size: 13px; }
+
+/* 支付方式标签 */
+.pay-method-tag {
+  display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: #EFF6FF; color: #3B82F6; font-weight: 500; margin-left: 6px;
+}
+
+/* 费用感叹号按钮 */
+.fee-info-icon {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #E5E7EB; color: #6B7280;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-style: italic;
+  cursor: pointer; margin-left: 4px;
+  font-family: Georgia, serif;
+}
+.fee-info-icon:active { background: #D1D5DB; }
+
+/* 运费提示标签 */
+.fee-info-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #FED7AA; color: #C2410C;
+  font-size: 11px; font-weight: 700; font-style: italic;
+  cursor: pointer; margin-left: 4px;
+  font-family: Georgia, serif;
+}
+.fee-info-tag:active { background: #FDBA74; }
+
+/* 计费详情行 */
+.billing-detail-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+}
+.billing-detail-label { font-size: 13px; color: #6B7280; }
+.billing-detail-val { font-size: 13px; font-weight: 600; color: #111827; }
+.billing-method-tag {
+  display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px;
+  background: #FEF3C7; color: #92400E; font-weight: 500; margin-left: 6px;
+}
+
+/* 应收合计 */
+.fee-receivable-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0 4px;
+}
+.fee-receivable-label { font-size: 14px; font-weight: 600; color: #111827; }
+.fee-receivable-val { font-size: 18px; font-weight: 700; color: #EF4444; }
+
+/* 状态切换按钮 */
+.status-switch {
+  display: flex; background: rgba(255,255,255,0.2);
+  border-radius: 8px; padding: 3px; gap: 3px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.status-switch-btn {
+  flex: 1; padding: 7px 0; text-align: center;
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8);
+  border-radius: 6px; cursor: pointer; transition: all 0.2s;
+  min-width: 0;
+}
+.status-switch-btn.active {
+  background: #fff; color: #3B82F6; font-weight: 600;
+}
+
+/* 处理中状态天蓝主题 */
+.order-info-card.processing {
+  background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
+}
+
+/* 已发货状态绿色主题 */
+.order-info-card.shipped {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+/* 已收货状态深绿主题 */
+.order-info-card.received {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* 已取消状态灰色主题 */
+.order-info-card.cancelled {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+/* 待付款状态橙色主题 */
+.order-info-card.pending-pay {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+/* 存在补款按钮视觉提示（待发货子场景） */
+.status-switch-btn.supplement-hint {
+  position: relative;
+}
+.status-switch-btn.supplement-hint::after {
+  content: '· 待发货场景';
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+/* ========== 底部操作栏 ========== */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 375px; box-sizing: border-box;
+  background: #fff; border-top: 1px solid #E5E7EB;
+  padding: 10px 16px; display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.bottom-btn.warning {
+  background: linear-gradient(135deg, #F97316, #EA580C);
+  color: #fff; box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+}
+.bottom-btn.warning:active { transform: scale(0.97); }
+.bottom-btn {
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 14px; font-weight: 600; border: none; cursor: pointer;
+}
+.bottom-btn.secondary {
+  background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB;
+}
+.bottom-btn.secondary:active { background: #E5E7EB; }
+.bottom-btn.primary {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.bottom-btn.primary:active { transform: scale(0.97); }
+.bottom-btn.danger {
+  background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA;
+}
+.bottom-btn.danger:active { background: #FEE2E2; }
+.bottom-btn.warning {
+  background: linear-gradient(135deg, #F97316, #EA580C);
+  color: #fff; box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+}
+.bottom-btn.warning:active { transform: scale(0.97); }
+
+/* ========== 申报信息区 ========== */
+.declare-summary-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0;
+}
+.declare-summary-left {
+  display: flex; align-items: center; gap: 8px; flex: 1;
+}
+.declare-summary-left .desc-filled {
+  font-size: 13px; color: #374151;
+}
+.declare-summary-right {
+  font-size: 12px; color: #3B82F6; font-weight: 500;
+  display: flex; align-items: center; gap: 2px;
+}
+.declare-type-tag {
+  display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: #F0FDF4; color: #16A34A; font-weight: 500; margin-left: 6px;
+}
+.declare-type-tag.commission { background: #FEF3C7; color: #D97706; }
+
+/* 申报明细弹窗 */
+.declare-detail-section { padding: 0 16px; margin-top: 12px; }
+.declare-detail-title {
+  font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 8px;
+}
+.declare-item {
+  background: #F9FAFB; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+}
+.declare-item:last-child { margin-bottom: 0; }
+.declare-item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.declare-item-row:last-child { margin-bottom: 0; }
+.declare-item-label { font-size: 11px; color: #9CA3AF; }
+.declare-item-val { font-size: 13px; color: #111827; font-weight: 500; }
+.declare-item-val.price { color: #EF4444; }
+.declare-contact-info {
+  background: #F9FAFB; border-radius: 8px; padding: 12px;
+}
+.declare-contact-row {
+  display: flex; justify-content: space-between; margin-bottom: 8px;
+}
+.declare-contact-row:last-child { margin-bottom: 0; }
+.declare-contact-label { font-size: 12px; color: #9CA3AF; }
+.declare-contact-val { font-size: 13px; color: #374151; font-weight: 500; text-align: right; max-width: 200px; }
+.declare-grand-total {
+  margin: 12px 16px 0; padding: 10px 16px; background: #F0F9FF; border-radius: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.declare-grand-total .label { font-size: 13px; color: #1E40AF; font-weight: 500; }
+.declare-grand-total .value { font-size: 16px; font-weight: 700; color: #1E40AF; }
+
+/* 申报商品卡片 */
+.declare-goods-card {
+  background: #F0F9FF; border-radius: 10px;
+  padding: 10px 12px 12px; margin-bottom: 10px;
+  border: 1px solid #DBEAFE;
+}
+.declare-goods-card:last-child { margin-bottom: 0; }
+.declare-goods-card-header {
+  font-size: 12px; font-weight: 600; color: #1E40AF;
+  margin-bottom: 8px;
+}
+.declare-field-row {
+  display: flex; gap: 10px; margin-bottom: 8px;
+}
+.declare-field-row:last-child { margin-bottom: 0; }
+.declare-field { flex: 1; }
+.declare-field-label {
+  font-size: 11px; color: #6B7280; margin-bottom: 3px;
+}
+.declare-field-text {
+  font-size: 13px; color: #111827; font-weight: 500;
+  padding: 6px 10px; background: #fff; border-radius: 6px;
+  border: 1px solid #DBEAFE;
+}
+.declare-field-text.price { color: #EF4444; }
+.declare-contact-val.placeholder { color: #D1D5DB; font-weight: 400; }
+
+/* 申报商品只读2行样式 */
+.declare-goods-card {
+  background: #F9FAFB; border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid #F3F4F6;
+}
+.declare-goods-card:last-child { margin-bottom: 0; }
+.declare-read-row1 {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.declare-read-name {
+  font-size: 14px; font-weight: 600; color: #111827;
+}
+.declare-read-price {
+  font-size: 14px; font-weight: 700; color: #3B82F6;
+}
+.declare-read-row2 {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.declare-read-en {
+  font-size: 11px; color: #9CA3AF;
+}
+.declare-read-meta {
+  font-size: 11px; color: #6B7280;
+}
+
+/* ========== 底部弹窗 ========== */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end;
+}
+.modal-overlay.show { display: flex; }
+.bottom-sheet {
+  background: #fff; border-radius: 16px 16px 0 0; width: 375px;
+  max-height: 75vh; overflow-y: auto; padding: 0 0 20px 0;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid #F3F4F6;
+  position: sticky; top: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 1;
+}
+.sheet-title { font-size: 16px; font-weight: 600; color: #111827; }
+.sheet-close { font-size: 20px; color: #9CA3AF; cursor: pointer; padding: 4px 8px; }
+
+/* 商品明细弹窗 */
+.goods-group { padding: 0 16px; margin-top: 12px; }
+.goods-group-title {
+  font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 8px;
+}
+.goods-item {
+  display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+}
+.goods-item:last-child { border-bottom: none; }
+.goods-img {
+  width: 60px; height: 60px; border-radius: 8px; background: #F3F4F6;
+  display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+.goods-info { flex: 1; min-width: 0; }
+.goods-name {
+  font-size: 13px; font-weight: 500; color: #111827;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.goods-spec { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.goods-meta {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+}
+.goods-tag {
+  font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  background: #F3F4F6; color: #6B7280;
+}
+.goods-tag.attr { background: #EFF6FF; color: #3B82F6; }
+.goods-tag.sensitive { background: #FEF3C7; color: #D97706; }
+.goods-tag.electric { background: #FEE2E2; color: #DC2626; }
+.goods-codes { font-size: 10px; color: #9CA3AF; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+.goods-codes span { white-space: nowrap; }
+.goods-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.goods-price { font-size: 13px; font-weight: 600; color: #EF4444; }
+.goods-subtotal { font-size: 11px; color: #6B7280; }
+.goods-subtotal strong { color: #EF4444; font-weight: 600; }
+
+/* 物流轨迹弹窗 */
+.tracking-list { padding: 0 16px; margin-top: 8px; }
+.tracking-item {
+  display: flex; gap: 12px; padding: 12px 0;
+  position: relative;
+}
+.tracking-item::before {
+  content: ''; position: absolute; left: 7px; top: 28px; bottom: 0;
+  width: 2px; background: #E5E7EB;
+}
+.tracking-item:last-child::before { display: none; }
+.tracking-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #E5E7EB; flex-shrink: 0; position: relative; z-index: 1;
+  margin-top: 2px;
+}
+.tracking-item:first-child .tracking-dot {
+  background: #3B82F6; box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+}
+.tracking-content { flex: 1; }
+.tracking-status { font-size: 14px; font-weight: 600; color: #111827; }
+.tracking-item:first-child .tracking-status { color: #3B82F6; }
+.tracking-desc { font-size: 12px; color: #6B7280; margin-top: 4px; line-height: 1.5; }
+.tracking-time { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+
+/* Toast */
+.toast {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 10px 24px; border-radius: 8px;
+  font-size: 14px; z-index: 999;
+}
+.toast.show { display: block; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* 确认弹窗 */
+.confirm-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 300; justify-content: center; align-items: center;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-dialog {
+  background: #fff; border-radius: 16px; width: 300px; padding: 24px 20px 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: fadeIn 0.2s;
+}
+.confirm-dialog .cd-title {
+  font-size: 16px; font-weight: 600; color: #111827;
+  text-align: center; margin-bottom: 8px;
+}
+.confirm-dialog .cd-msg {
+  font-size: 13px; color: #6B7280;
+  text-align: center; line-height: 1.6; margin-bottom: 20px;
+}
+.confirm-dialog .cd-btns { display: flex; gap: 10px; }
+.confirm-dialog .cd-btn {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  border: none; cursor: pointer; text-align: center;
+}
+.confirm-dialog .cd-btn.cancel { background: #F3F4F6; color: #6B7280; }
+.confirm-dialog .cd-btn.confirm { background: #EF4444; color: #fff; }
+
+
+
+/* ========== 标注系统样式（PC端） ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay-anno {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+.modal-overlay-anno.show { display: flex; }
+.modal-anno {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-anno-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-anno-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-anno-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-anno-close:hover { color: #333; }
+.modal-anno-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-anno-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn-anno {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-anno-primary { background: #165DFF; color: #fff; }
+.btn-anno-primary:hover { background: #0E42D2; }
+.btn-anno-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-anno-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-anno-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-anno-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+
+/* 调整原型在预览区的展示 */
+.preview-area .phone-frame {
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    
+    <div style="display:flex;flex:1;min-height:0;">
+        <div class="preview-area">
+            
+
+<div id="anno-1" style="position:relative;width:100%;">
+      <div class="phone-frame" id="mainPage">
+  <div class="page-main" id="pageMain">
+    <div class="status-bar"><span>15:30</span><span> </span></div>
+
+    <div class="nav-bar">
+      <div class="back" onclick="showToast('返回上一页')">‹</div>
+      <div class="title">包裹详情</div>
+      <div style="width:30px;"></div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- 1. 订单信息区（蓝色顶部卡片） -->
+      <div class="order-info-card" id="orderInfoCard" style="position:relative;" data-anno-id="2">
+        <div class="anno-marker" data-id="2">2</div>
+        <!-- 状态切换按钮 -->
+        <div class="status-switch">
+          <div class="status-switch-btn" id="btnPendingPay" onclick="switchStatus('pending_pay')">待付款</div>
+          <div class="status-switch-btn" id="btnPending" onclick="switchStatus('pending')">待审核</div>
+          <div class="status-switch-btn" id="btnProcessing" onclick="switchStatus('processing')">处理中</div>
+          <div class="status-switch-btn active" id="btnShipped" onclick="switchStatus('shipped')">待发货</div>
+          <div class="status-switch-btn supplement-hint" id="btnSupplement" onclick="switchStatus('supplement')">存在补款</div>
+          <div class="status-switch-btn" id="btnReceived" onclick="switchStatus('received')">已收货</div>
+          <div class="status-switch-btn" id="btnCancelled" onclick="switchStatus('cancelled')">已取消</div>
+        </div>
+
+        <div class="order-status">
+          <span class="order-status-badge" id="statusBadge">待发货</span>
+          <span class="order-status-amount" id="statusAmount" style="display:none;"><span class="yen">¥</span>909.88</span>
+        </div>
+        <div class="order-status-desc" id="statusDesc">包裹已完成称重计费，等待发货</div>
+        <div class="order-meta" style="margin-top:14px;">
+          <div class="order-meta-row">
+            <span class="order-meta-label">包裹编号</span>
+            <span class="order-meta-val">
+              <span id="packageCode">B26070384261</span>
+              <span class="copy-icon" onclick="copyText('B26070384261')">复制</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 补款提示横幅（存在补款时显示） -->
+      <div class="supplement-banner" id="supplementBanner" style="display:none;position:relative;" data-anno-id="3">
+        <div class="anno-marker" data-id="3">3</div>
+        <div class="supplement-banner-header">
+          <span class="supplement-banner-icon">⚠️</span>
+          <span class="supplement-banner-title">您的包裹需要补款</span>
+          <span class="supplement-banner-amount"><span class="yen-sm">¥</span>35.00</span>
+        </div>
+        <div class="supplement-type-row">
+          <span class="supplement-type-label">补款类型：</span>
+          <span class="supplement-type-tag surcharge" id="supplementTypeTag">补附加费</span>
+        </div>
+        <!-- 补附加费明细 -->
+        <div class="supplement-surcharges" id="surchargeDetail">
+          <div class="supplement-surcharges-title">附加费明细</div>
+          <div class="surcharge-item">
+            <span class="surcharge-item-name">转板费</span>
+            <span class="surcharge-item-price">¥15.00</span>
+          </div>
+          <div class="surcharge-item">
+            <span class="surcharge-item-name">偏远附加费</span>
+            <span class="surcharge-item-price">¥20.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 物流信息区 -->
+      <div class="card logistics-card" id="anno-4" style="position:relative;">
+        <div class="anno-marker" data-id="4">4</div>
+        <div class="card-header">
+          <div class="card-title">🚚 物流信息</div>
+        </div>
+        <div class="logistics-row">
+          <div class="logistics-left">
+            <span class="logistics-icon">🛫</span>
+            <span class="logistics-label">物流线路</span>
+          </div>
+          <div class="logistics-val">
+            <span>EMS特惠</span>
+          </div>
+        </div>
+        <div class="logistics-row">
+          <div class="logistics-left">
+            <span class="logistics-icon"></span>
+            <span class="logistics-label">物流单号</span>
+          </div>
+          <div class="logistics-val">
+            <span class="tracking-num">SF323123123</span>
+          </div>
+        </div>
+        <div class="logistics-row">
+          <div class="logistics-left">
+            <span class="logistics-icon">🗺️</span>
+            <span class="logistics-label">物流轨迹</span>
+          </div>
+          <div class="logistics-val">
+            <span class="logistics-link" style="font-size:13px;font-weight:600;color:#3B82F6;cursor:pointer;" onclick="showTrackingModal()">查看物流轨迹 ›</span>
+          </div>
+        </div>
+        <div class="logistics-row">
+          <div class="logistics-left">
+            <span class="logistics-icon">🏭</span>
+            <span class="logistics-label">发货仓</span>
+          </div>
+          <div class="logistics-val">中国义乌仓</div>
+        </div>
+
+        <!-- 收货地址 -->
+        <div class="address-section">
+          <div class="address-row">
+            <div class="address-icon">📍</div>
+            <div class="address-detail">
+              <div class="address-name">
+                John Smith
+              </div>
+              <div class="address-phone">+1 (213) 555-0198</div>
+              <div class="address-text">1234 Oak Avenue, Apt 5B, Los Angeles, CA 90001, United States</div>
+            </div>
+            <div class="address-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 商品明细区 -->
+      <div class="card goods-card-v2" id="anno-5" style="position:relative;">
+        <div class="anno-marker" data-id="5">5</div>
+        <div class="goods-v2-header">
+          <span class="goods-v2-icon">🛍️</span>
+          <span class="goods-v2-title">提包商品</span>
+        </div>
+        <div class="goods-v2-thumbs" onclick="showGoodsModal()">
+          <div class="goods-v2-thumb"></div>
+          <div class="goods-v2-thumb">📱</div>
+          <div class="goods-v2-thumb">👟</div>
+          <div class="goods-v2-thumb more">+2</div>
+        </div>
+        <div class="goods-v2-footer">
+          <span class="goods-v2-summary">5件 · 重2.4kg · 体积16,900cm³</span>
+          <span class="goods-v2-link">查看明细 ›</span>
+        </div>
+      </div>
+
+      <!-- 4. 申报信息区 -->
+      <div class="card" id="anno-6" style="position:relative;">
+        <div class="anno-marker" data-id="6">6</div>
+        
+        <div class="declare-summary-row" onclick="showDeclareModal()">
+          <div class="declare-summary-left">
+            <div class="desc-filled">已填写 3 件申报商品 · USD $125.00</div>
+          </div>
+          <div class="declare-summary-right">查看详情 ›</div>
+        </div>
+      </div>
+
+      <!-- 5. 包裹信息区 -->
+      <div class="card" id="packageInfoCard" style="position:relative;" data-anno-id="7">
+        <div class="anno-marker" data-id="7">7</div>
+        <div class="card-header">
+          <div class="card-title">📦 包裹信息</div>
+        </div>
+        <!-- 时间字段（所有状态可见） -->
+        <div class="info-row">
+          <span class="info-label">下单时间</span>
+          <span class="info-val">2026-07-03 14:58:54</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">支付时间</span>
+          <span class="info-val" id="payTimeVal">2026-07-03 15:12:30</span>
+        </div>
+        <div class="info-row" id="pkgShipTimeRow">
+          <span class="info-label">发货时间</span>
+          <span class="info-val" id="shipTimeVal">-</span>
+        </div>
+        <div class="info-row" id="pkgCancelTimeRow">
+          <span class="info-label">取消时间</span>
+          <span class="info-val" id="cancelTimeVal">-</span>
+        </div>
+        <!-- 重量与计费信息（所有状态可见） -->
+        <div class="info-divider"></div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">预估重量</span>
+          <span class="billing-detail-val" id="estWeightVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">预估体积</span>
+          <span class="billing-detail-val" id="estVolumeVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">预估运费</span>
+          <span class="billing-detail-val" id="estFreightVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">实际重量</span>
+          <span class="billing-detail-val" id="actWeightVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">实际体积</span>
+          <span class="billing-detail-val" id="actVolumeVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">计费重量</span>
+          <span class="billing-detail-val" id="billWeightVal">-</span>
+        </div>
+        <div class="billing-detail-row">
+          <span class="billing-detail-label">实际运费</span>
+          <span class="billing-detail-val" id="actFreightVal">-</span>
+          <span class="fee-info-icon" id="billingInfoBtn" style="display:none;" onclick="event.stopPropagation();showBillingModal()">i</span>
+        </div>
+        <!-- 增值服务字段 -->
+        <div class="info-divider"></div>
+        <div class="info-row">
+          <span class="info-label">代收货款</span>
+          <span class="info-val">是（¥200.00）</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">包税服务</span>
+          <span class="info-val" style="color:#16A34A;">是</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">保价服务</span>
+          <span class="info-val" style="color:#16A34A;">是（¥30.00）</span>
+        </div>
+        <!-- 备注 -->
+        <div class="info-divider"></div>
+        <div class="info-row" style="align-items:flex-start;">
+          <span class="info-label" style="flex-shrink:0;">备注</span>
+          <span class="info-val" id="remarkVal" style="color:#374151;font-weight:400;line-height:1.6;text-align:right;word-break:break-all;">请小心轻放，内有易碎品。如需更换包装请使用气泡膜加固。</span>
+        </div>
+      </div>
+
+      <!-- 6. 费用信息区 -->
+      <div class="card fee-card" id="anno-8" style="position:relative;">
+        <div class="anno-marker" data-id="8">8</div>
+        <div class="card-header">
+          <div class="card-title">💰 费用信息</div>
+        </div>
+
+        <div class="fee-item">
+          <div class="fee-left">费用总计</div>
+          <div class="fee-right">
+            ¥969.88
+            <span class="fee-info-icon" onclick="event.stopPropagation();showFeeDetailModal('total')">i</span>
+          </div>
+        </div>
+
+        <div class="fee-item">
+          <div class="fee-left">抵扣总计</div>
+          <div class="fee-right fee-discount">
+            -¥60.00
+            <span class="fee-info-icon" onclick="event.stopPropagation();showFeeDetailModal('discount')">i</span>
+          </div>
+        </div>
+
+        <div class="fee-section-divider"></div>
+
+        <div class="fee-receivable-row">
+          <div class="fee-receivable-label" id="receivableLabel">已支付</div>
+          <div class="fee-receivable-val" id="receivableVal">¥909.88</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-bar" id="bottomBar" style="position:relative;" data-anno-id="9">
+      <div class="anno-marker" data-id="9" style="top:50%;transform:translateY(-50%);left:8px;right:auto;">9</div>
+      <button class="bottom-btn danger" id="btnCancel" onclick="showCancelConfirm()">取消包裹</button>
+      <button class="bottom-btn primary" id="btnPrimary" onclick="showToast('发货')">确认发货</button>
+    </div>
+
+  </div>
+
+  <!-- 商品明细弹窗 -->
+  <div class="modal-overlay" id="goodsModal" onclick="closeGoodsModal(event)">
+    <div class="bottom-sheet" style="position:relative;">
+    <div class="anno-marker" data-id="5" style="top:12px;right:12px;z-index:10;">5</div>
+      <div class="sheet-header">
+        <div class="sheet-title">商品明细</div>
+        <div class="sheet-close" onclick="closeGoodsModal()">✕</div>
+      </div>
+
+      <!-- 快递1 -->
+      <div class="goods-group">
+        <div class="goods-group-title" style="display:flex;align-items:center;gap:8px;">
+          <span class="tracking-num" style="font-size:12px;color:#374151;">SF1234567890</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">共2件 · 0.95kg · 5,200cm³</span>
+        </div>
+
+        <div class="goods-item">
+          <div class="goods-img">🎧</div>
+          <div class="goods-info">
+            <div class="goods-name">蓝牙耳机 无线降噪头戴式</div>
+            <div class="goods-spec">黑色 / 标准版</div>
+            <div class="goods-price-row">
+              <span class="goods-tag">×2 · ¥159.00</span>
+              <span class="goods-subtotal">小计 <strong>¥318.00</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="goods-item">
+          <div class="goods-img">📱</div>
+          <div class="goods-info">
+            <div class="goods-name">手机壳 iPhone15 透明防摔</div>
+            <div class="goods-spec">透明 / iPhone15 Pro</div>
+            <div class="goods-price-row">
+              <span class="goods-tag">×1 · ¥29.00</span>
+              <span class="goods-subtotal">小计 <strong>¥29.00</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快递2 -->
+      <div class="goods-group">
+        <div class="goods-group-title" style="display:flex;align-items:center;gap:8px;">
+          <span class="tracking-num" style="font-size:12px;color:#374151;">YT9876543210</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">共2件 · 0.95kg · 8,500cm³</span>
+        </div>
+
+        <div class="goods-item">
+          <div class="goods-img">👟</div>
+          <div class="goods-info">
+            <div class="goods-name">运动鞋 Nike Air Max 90</div>
+            <div class="goods-spec">白色 / 42码</div>
+            <div class="goods-price-row">
+              <span class="goods-tag">×1 · ¥89.00</span>
+              <span class="goods-subtotal">小计 <strong>¥89.00</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="goods-item">
+          <div class="goods-img"></div>
+          <div class="goods-info">
+            <div class="goods-name">护肤精华液 30ml</div>
+            <div class="goods-spec">清爽型 / 30ml</div>
+            <div class="goods-price-row">
+              <span class="goods-tag">×1 · ¥220.00</span>
+              <span class="goods-subtotal">小计 <strong>¥220.00</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快递3 -->
+      <div class="goods-group">
+        <div class="goods-group-title" style="display:flex;align-items:center;gap:8px;">
+          <span class="tracking-num" style="font-size:12px;color:#374151;">JD2468135790</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">共1件 · 0.5kg · 3,200cm³</span>
+        </div>
+
+        <div class="goods-item">
+          <div class="goods-img">🔋</div>
+          <div class="goods-info">
+            <div class="goods-name">充电宝 20000mAh</div>
+            <div class="goods-spec">白色 / 20000mAh</div>
+            <div class="goods-price-row">
+              <span class="goods-tag">×1 · ¥129.00</span>
+              <span class="goods-subtotal">小计 <strong>¥129.00</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 物流轨迹弹窗 -->
+  <div class="modal-overlay" id="trackingModal" onclick="closeTrackingModal(event)">
+    <div class="bottom-sheet">
+      <div class="sheet-header">
+        <div class="sheet-title">物流轨迹</div>
+        <div class="sheet-close" onclick="closeTrackingModal()">✕</div>
+      </div>
+      <div class="tracking-list">
+        <div class="tracking-item">
+          <div class="tracking-dot"></div>
+          <div class="tracking-content">
+            <div class="tracking-status">运输中</div>
+            <div class="tracking-desc">包裹已到达【上海转运中心】，正在分拣中</div>
+            <div class="tracking-time">2026-07-03 16:30:00</div>
+          </div>
+        </div>
+        <div class="tracking-item">
+          <div class="tracking-dot"></div>
+          <div class="tracking-content">
+            <div class="tracking-status">已揽收</div>
+            <div class="tracking-desc">顺丰速运 已收取快件</div>
+            <div class="tracking-time">2026-07-03 10:15:00</div>
+          </div>
+        </div>
+        <div class="tracking-item">
+          <div class="tracking-dot"></div>
+          <div class="tracking-content">
+            <div class="tracking-status">待揽收</div>
+            <div class="tracking-desc">商家已发货，等待快递员揽收</div>
+            <div class="tracking-time">2026-07-03 09:00:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 申报明细弹窗 -->
+  <div class="modal-overlay" id="declareModal" onclick="closeDeclareModal(event)">
+    <div class="bottom-sheet" style="position:relative;">
+    <div class="anno-marker" data-id="6" style="top:12px;right:12px;z-index:10;">6</div>
+      <div class="sheet-header">
+        <div class="sheet-title">申报信息</div>
+        <div class="sheet-close" onclick="closeDeclareModal()"></div>
+      </div>
+
+      <!-- 申报商品 -->
+      <div class="declare-detail-section">
+        <div class="declare-detail-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>申报商品</span>
+        </div>
+
+        <div class="declare-goods-card">
+          <div class="declare-read-row1">
+            <span class="declare-read-name">头戴式耳机</span>
+            <span class="declare-read-price">USD $50.00</span>
+          </div>
+          <div class="declare-read-row2">
+            <span class="declare-read-en">Headphones</span>
+            <span class="declare-read-meta">×1 · USD $50.00/件</span>
+          </div>
+        </div>
+
+        <div class="declare-goods-card">
+          <div class="declare-read-row1">
+            <span class="declare-read-name">手机壳</span>
+            <span class="declare-read-price">USD $60.00</span>
+          </div>
+          <div class="declare-read-row2">
+            <span class="declare-read-en">Mobile Phone Case</span>
+            <span class="declare-read-meta">×1 · USD $60.00/件</span>
+          </div>
+        </div>
+
+        <div class="declare-goods-card">
+          <div class="declare-read-row1">
+            <span class="declare-read-name">运动鞋</span>
+            <span class="declare-read-price">USD $15.00</span>
+          </div>
+          <div class="declare-read-row2">
+            <span class="declare-read-en">Sports Shoes</span>
+            <span class="declare-read-meta">×1 · USD $15.00/件</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 申报总价 -->
+      <div class="declare-grand-total">
+        <span class="label">申报总价</span>
+        <span class="value">USD $125.00</span>
+      </div>
+      <div style="text-align:center;font-size:10px;color:#93C5FD;margin-top:4px;">限额 $5 ~ $800</div>
+
+      <!-- 申报人信息 -->
+      <div class="declare-detail-section">
+        <div class="declare-detail-title">申报人信息</div>
+        <div class="declare-contact-info">
+          <div class="declare-contact-row">
+            <span class="declare-contact-label">申报人电话</span>
+            <span class="declare-contact-val">13812346721</span>
+          </div>
+          <div class="declare-contact-row">
+            <span class="declare-contact-label">身份证号</span>
+            <span class="declare-contact-val">350102199501150031</span>
+          </div>
+          <div class="declare-contact-row">
+            <span class="declare-contact-label">身份证姓名</span>
+            <span class="declare-contact-val placeholder">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+
+  <!-- 取消包裹确认弹窗 -->
+  <div class="confirm-overlay" id="cancelConfirm">
+    <div class="confirm-dialog" style="position:relative;">
+    <div class="anno-marker" data-id="9" style="top:-11px;left:-11px;z-index:10;">9</div>
+      <div class="cd-title">确认取消包裹？</div>
+      <div class="cd-msg">取消后包裹商品将退回仓库，已支付费用将原路退回。</div>
+      <div class="cd-btns">
+        <div class="cd-btn cancel" onclick="closeCancelConfirm()">再想想</div>
+        <div class="cd-btn confirm" onclick="confirmCancel()">确认取消</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 费用明细弹窗 -->
+  <div class="modal-overlay" id="feeDetailModal" onclick="closeFeeDetailModal(event)">
+    <div class="bottom-sheet" style="max-height:60vh;">
+      <div class="sheet-header">
+        <div class="sheet-title" id="feeDetailTitle">费用明细</div>
+        <div class="anno-marker" data-id="8" style="top:12px;right:48px;z-index:10;">8</div>
+        <div class="sheet-close" onclick="closeFeeDetailModal()">✕</div>
+      </div>
+
+      <!-- 费用总计明细 -->
+      <div id="feeTotalDetail" style="padding:12px 16px 20px;">
+        <div class="fee-item">
+          <div class="fee-left">承运计费</div>
+          <div class="fee-right">¥360.00</div>
+        </div>
+        <div class="fee-sub">计费重：51kg</div>
+
+        <div class="fee-section-divider" style="margin:10px 0;"></div>
+
+        <div class="fee-item">
+          <div class="fee-left">超重费</div>
+          <div class="fee-right">¥153.00</div>
+        </div>
+        <div class="fee-item">
+          <div class="fee-left">超长费</div>
+          <div class="fee-right">¥450.00</div>
+        </div>
+        <div class="fee-item">
+          <div class="fee-left">包税费</div>
+          <div class="fee-right">¥50.00</div>
+        </div>
+        <div class="fee-item">
+          <div class="fee-left">保价费</div>
+          <div class="fee-right">¥30.00</div>
+        </div>
+
+        <div class="fee-section-divider" style="margin:10px 0;"></div>
+
+        <div class="fee-summary-row" style="padding-top:6px;margin-top:0;">
+          <div class="fee-summary-label">费用总计</div>
+          <div class="fee-summary-val">¥1,043.00</div>
+        </div>
+      </div>
+
+      <!-- 抵扣总计明细 -->
+      <div id="feeDiscountDetail" style="padding:12px 16px 20px;display:none;">
+        <div class="fee-item">
+          <div class="fee-left">优惠券抵扣</div>
+          <div class="fee-right fee-discount">-¥60.00</div>
+        </div>
+
+        <div class="fee-item" style="margin-top:8px;">
+          <div class="fee-left">积分抵扣</div>
+          <div class="fee-right fee-discount">-¥0.00</div>
+        </div>
+
+        <div class="fee-section-divider" style="margin:10px 0;"></div>
+
+        <div class="fee-summary-row" style="padding-top:6px;margin-top:0;">
+          <div class="fee-summary-label">抵扣总计</div>
+          <div class="fee-summary-val" style="color:#10B981;">-¥60.00</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 计费详情弹窗 -->
+  <div class="modal-overlay" id="billingModal" onclick="closeBillingModal(event)">
+    <div class="bottom-sheet" style="position:relative;">
+    <div class="anno-marker" data-id="7" style="top:12px;right:12px;z-index:10;">7</div>
+      <div class="sheet-header">
+        <div class="sheet-title">计费详情</div>
+        <div class="sheet-close" onclick="closeBillingModal()">✕</div>
+      </div>
+
+      <div style="padding:16px;">
+        <!-- 计费重量 -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#6B7280;margin-bottom:8px;">计费重量</div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-size:20px;font-weight:700;color:#111827;">2.85</span>
+            <span style="font-size:14px;color:#6B7280;">kg</span>
+          </div>
+        </div>
+
+        <!-- 计费方式 -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#6B7280;margin-bottom:8px;">计费方式</div>
+          <div style="background:#F9FAFB;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:15px;font-weight:600;color:#111827;margin-bottom:6px;">实重与抛重取大者</div>
+            <div style="font-size:12px;color:#9CA3AF;line-height:1.6;">实际重量 2.6 kg，体积重 2.85 kg，取较大值 2.85 kg 作为计费重量</div>
+          </div>
+        </div>
+
+        <!-- 计费标准（多段收费价格表） -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#6B7280;margin-bottom:8px;">计费标准</div>
+          <div style="background:#F0F9FF;border:1px solid #DBEAFE;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:13px;font-weight:600;color:#1E40AF;margin-bottom:10px;">EMS特惠</div>
+            <div style="font-size:12px;color:#374151;line-height:2;">
+              <div style="display:flex;justify-content:space-between;">
+                <span>首重 1kg</span>
+                <span style="font-weight:600;color:#EF4444;">¥120.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span>续重第1段（1.01-2kg）每0.5kg</span>
+                <span style="font-weight:600;color:#EF4444;">¥65.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span>续重第2段（2.01-3kg）每0.5kg</span>
+                <span style="font-weight:600;color:#EF4444;">¥52.50</span>
+              </div>
+              <div style="margin-top:6px;padding-top:8px;border-top:1px dashed #DBEAFE;font-size:11px;color:#6B7280;">
+                体积重计算：长×宽×高 ÷ 6000
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 费用计算 -->
+        <div>
+          <div style="font-size:13px;color:#6B7280;margin-bottom:8px;">费用计算</div>
+          <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:8px;padding:12px 14px;">
+            <div style="font-size:12px;color:#374151;line-height:2.2;">
+              <div style="display:flex;justify-content:space-between;">
+                <span>首重 1kg</span>
+                <span>¥120.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span>续重第1段（2段×¥65.00）</span>
+                <span>¥130.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span>续重第2段（2段×¥52.50）</span>
+                <span>¥105.00</span>
+              </div>
+              <div style="margin-top:6px;padding-top:8px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:baseline;">
+                <span style="font-size:13px;font-weight:600;color:#111827;">运费合计</span>
+                <span style="font-size:18px;font-weight:700;color:#EF4444;">¥355.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+  </div><!-- anno-1 闭合 -->
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('已复制：' + text);
+    });
+  } else {
+    showToast('已复制：' + text);
+  }
+}
+
+// 商品明细弹窗
+function showGoodsModal() {
+  document.getElementById('goodsModal').classList.add('show');
+}
+function closeGoodsModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('goodsModal').classList.remove('show');
+}
+
+// 物流轨迹弹窗
+function showTrackingModal() {
+  document.getElementById('trackingModal').classList.add('show');
+}
+function closeTrackingModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('trackingModal').classList.remove('show');
+}
+
+// 申报明细弹窗
+function showDeclareModal() {
+  document.getElementById('declareModal').classList.add('show');
+}
+function closeDeclareModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('declareModal').classList.remove('show');
+}
+
+// 取消包裹确认
+function showCancelConfirm() {
+  document.getElementById('cancelConfirm').classList.add('show');
+}
+function closeCancelConfirm() {
+  document.getElementById('cancelConfirm').classList.remove('show');
+}
+function confirmCancel() {
+  closeCancelConfirm();
+  showToast('已取消包裹');
+}
+
+// 计费详情弹窗
+function showBillingModal() {
+  document.getElementById('billingModal').classList.add('show');
+}
+function closeBillingModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('billingModal').classList.remove('show');
+}
+
+// 状态切换
+function switchStatus(status) {
+  const card = document.getElementById('orderInfoCard');
+  const btnPendingPay = document.getElementById('btnPendingPay');
+  const btnPending = document.getElementById('btnPending');
+  const btnProcessing = document.getElementById('btnProcessing');
+  const btnShipped = document.getElementById('btnShipped');
+  const btnSupplement = document.getElementById('btnSupplement');
+  const btnReceived = document.getElementById('btnReceived');
+  const btnCancelled = document.getElementById('btnCancelled');
+  const badge = document.getElementById('statusBadge');
+  const desc = document.getElementById('statusDesc');
+  const statusAmount = document.getElementById('statusAmount');
+  const recvLabel = document.getElementById('receivableLabel');
+  const recvVal = document.getElementById('receivableVal');
+  const btnCancel = document.getElementById('btnCancel');
+  const btnPrimary = document.getElementById('btnPrimary');
+  const bottomBar = document.getElementById('bottomBar');
+  const supplementBanner = document.getElementById('supplementBanner');
+  const pkgShipRow = document.getElementById('pkgShipTimeRow');
+  const pkgCancelRow = document.getElementById('pkgCancelTimeRow');
+  // 包裹信息字段
+  const payTimeVal = document.getElementById('payTimeVal');
+  const shipTimeVal = document.getElementById('shipTimeVal');
+  const cancelTimeVal = document.getElementById('cancelTimeVal');
+  const estWeightVal = document.getElementById('estWeightVal');
+  const estVolumeVal = document.getElementById('estVolumeVal');
+  const estFreightVal = document.getElementById('estFreightVal');
+  const actWeightVal = document.getElementById('actWeightVal');
+  const actVolumeVal = document.getElementById('actVolumeVal');
+  const billWeightVal = document.getElementById('billWeightVal');
+  const actFreightVal = document.getElementById('actFreightVal');
+
+  // 重置所有按钮状态
+  btnPendingPay.classList.remove('active');
+  btnPending.classList.remove('active');
+  btnProcessing.classList.remove('active');
+  btnShipped.classList.remove('active');
+  btnSupplement.classList.remove('active');
+  btnReceived.classList.remove('active');
+  btnCancelled.classList.remove('active');
+  card.classList.remove('cancelled', 'pending-pay', 'processing', 'shipped', 'received');
+  supplementBanner.style.display = 'none';
+
+  // 重置包裹信息为默认"-"
+  const resetAll = () => {
+    payTimeVal.textContent = '-';
+    shipTimeVal.textContent = '-';
+    cancelTimeVal.textContent = '-';
+    estWeightVal.textContent = '-';
+    estVolumeVal.textContent = '-';
+    estFreightVal.textContent = '-';
+    actWeightVal.textContent = '-';
+    actVolumeVal.textContent = '-';
+    billWeightVal.textContent = '-';
+    actFreightVal.textContent = '-';
+    actFreightVal.style.cssText = '';
+    document.getElementById('billingInfoBtn').style.display = 'none';
+    pkgShipRow.style.display = 'none';
+    pkgCancelRow.style.display = 'none';
+  };
+  resetAll();
+
+  // 填充重量计费实际值（仅待发货/存在补款）
+  const fillWeight = () => {
+    estWeightVal.textContent = '2.4 kg';
+    estVolumeVal.textContent = '16,900 cm³';
+    estFreightVal.textContent = '¥320.00';
+    actWeightVal.textContent = '2.6 kg';
+    actVolumeVal.textContent = '17,200 cm³';
+    billWeightVal.textContent = '2.6 kg';
+    actFreightVal.textContent = '¥355.00';
+    actFreightVal.style.cssText = 'font-size:15px;color:#EF4444;';
+    document.getElementById('billingInfoBtn').style.display = 'inline-flex';
+  };
+
+  if (status === 'pending_pay') {
+    card.classList.add('pending-pay');
+    btnPendingPay.classList.add('active');
+    badge.textContent = '待付款';
+    statusAmount.style.display = 'inline-block';
+    desc.textContent = '请及时完成支付，超时包裹将自动取消';
+    payTimeVal.textContent = '-';
+    recvLabel.textContent = '需支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#EF4444';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '去支付';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('跳转支付');
+  } else if (status === 'pending') {
+    btnPending.classList.add('active');
+    badge.textContent = '待审核';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹将在24小时内处理，请耐心等待';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '完成订单';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('完成订单');
+  } else if (status === 'processing') {
+    card.classList.add('processing');
+    btnProcessing.classList.add('active');
+    badge.textContent = '处理中';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹正在处理中，预计1-2个工作日发出';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'none';
+  } else if (status === 'shipped') {
+    card.classList.add('shipped');
+    btnShipped.classList.add('active');
+    badge.textContent = '待发货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已完成称重计费，等待发货';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    fillWeight();
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '确认发货';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('已确认发货');
+  } else if (status === 'supplement') {
+    card.classList.add('shipped');
+    btnShipped.classList.add('active');
+    btnSupplement.classList.add('active');
+    badge.textContent = '待发货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已完成称重计费，等待发货';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    fillWeight();
+    supplementBanner.style.display = 'block';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '去补款';
+    btnPrimary.className = 'bottom-btn warning';
+    btnPrimary.onclick = () => showToast('跳转补款');
+  } else if (status === 'received') {
+    card.classList.add('received');
+    btnReceived.classList.add('active');
+    badge.textContent = '已收货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '您已确认收货，感谢您的购买';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    shipTimeVal.textContent = '2026-07-03 18:00:00';
+    pkgShipRow.style.display = 'flex';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'none';
+  } else {
+    card.classList.add('cancelled');
+    btnCancelled.classList.add('active');
+    badge.textContent = '已取消';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已取消，商品已退回仓库';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    cancelTimeVal.textContent = '2026-07-03 16:30:00';
+    pkgCancelRow.style.display = 'flex';
+    recvLabel.textContent = '应支付';
+    recvLabel.style.color = '#9CA3AF';
+    recvVal.style.color = '#9CA3AF';
+    bottomBar.style.display = 'none';
+  }
+}
+
+// 费用明细弹窗
+function showFeeDetailModal(type) {
+  const modal = document.getElementById('feeDetailModal');
+  const title = document.getElementById('feeDetailTitle');
+  const totalDetail = document.getElementById('feeTotalDetail');
+  const discountDetail = document.getElementById('feeDiscountDetail');
+
+  if (type === 'total') {
+    title.textContent = '费用明细';
+    totalDetail.style.display = 'block';
+    discountDetail.style.display = 'none';
+  } else {
+    title.textContent = '抵扣明细';
+    totalDetail.style.display = 'none';
+    discountDetail.style.display = 'block';
+  }
+
+  modal.classList.add('show');
+}
+function closeFeeDetailModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('feeDetailModal').classList.remove('show');
+}
+</script>
+
+
+        </div>
+        
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    
+    </div>
+</div>
+
+
+    <!-- 标注详情弹窗 -->
+    <div class="modal-overlay-anno" id="detail-modal-anno">
+        <div class="modal-anno">
+            <div class="modal-anno-header">
+                <div class="modal-anno-title" id="modal-anno-title">标注详情</div>
+                <button class="modal-anno-close" onclick="closeAnnoModal()">×</button>
+            </div>
+            <div class="modal-anno-body">
+                <table class="detail-table" id="detail-table"></table>
+            </div>
+            <div class="modal-anno-footer">
+                <button class="btn-anno btn-anno-danger" id="anno-delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+                <button class="btn-anno btn-anno-default" id="anno-reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+                <button class="btn-anno btn-anno-default" id="anno-export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+                <button class="btn-anno btn-anno-default" id="anno-edit-btn" onclick="toggleEdit()">编辑</button>
+                <button class="btn-anno btn-anno-primary" id="anno-save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标注管理弹窗 -->
+    <div class="modal-overlay-anno" id="manage-modal-anno">
+        <div class="modal-anno">
+            <div class="modal-anno-header">
+                <div class="modal-anno-title">📌 标注管理</div>
+                <button class="modal-anno-close" onclick="closeManageModal()">×</button>
+            </div>
+            <div class="modal-anno-body" id="manage-modal-body"></div>
+            <div class="modal-anno-footer">
+                <button class="btn-anno btn-anno-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+            </div>
+        </div>
+    </div>
+    
+
+<script>
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('已复制：' + text);
+    });
+  } else {
+    showToast('已复制：' + text);
+  }
+}
+
+// 商品明细弹窗
+function showGoodsModal() {
+  document.getElementById('goodsModal').classList.add('show');
+}
+function closeGoodsModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('goodsModal').classList.remove('show');
+}
+
+// 物流轨迹弹窗
+function showTrackingModal() {
+  document.getElementById('trackingModal').classList.add('show');
+}
+function closeTrackingModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('trackingModal').classList.remove('show');
+}
+
+// 申报明细弹窗
+function showDeclareModal() {
+  document.getElementById('declareModal').classList.add('show');
+}
+function closeDeclareModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('declareModal').classList.remove('show');
+}
+
+// 取消包裹确认
+function showCancelConfirm() {
+  document.getElementById('cancelConfirm').classList.add('show');
+}
+function closeCancelConfirm() {
+  document.getElementById('cancelConfirm').classList.remove('show');
+}
+function confirmCancel() {
+  closeCancelConfirm();
+  showToast('已取消包裹');
+}
+
+// 计费详情弹窗
+function showBillingModal() {
+  document.getElementById('billingModal').classList.add('show');
+}
+function closeBillingModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('billingModal').classList.remove('show');
+}
+
+// 状态切换
+function switchStatus(status) {
+  const card = document.getElementById('orderInfoCard');
+  const btnPendingPay = document.getElementById('btnPendingPay');
+  const btnPending = document.getElementById('btnPending');
+  const btnProcessing = document.getElementById('btnProcessing');
+  const btnShipped = document.getElementById('btnShipped');
+  const btnSupplement = document.getElementById('btnSupplement');
+  const btnReceived = document.getElementById('btnReceived');
+  const btnCancelled = document.getElementById('btnCancelled');
+  const badge = document.getElementById('statusBadge');
+  const desc = document.getElementById('statusDesc');
+  const statusAmount = document.getElementById('statusAmount');
+  const recvLabel = document.getElementById('receivableLabel');
+  const recvVal = document.getElementById('receivableVal');
+  const btnCancel = document.getElementById('btnCancel');
+  const btnPrimary = document.getElementById('btnPrimary');
+  const bottomBar = document.getElementById('bottomBar');
+  const supplementBanner = document.getElementById('supplementBanner');
+  const pkgShipRow = document.getElementById('pkgShipTimeRow');
+  const pkgCancelRow = document.getElementById('pkgCancelTimeRow');
+  // 包裹信息字段
+  const payTimeVal = document.getElementById('payTimeVal');
+  const shipTimeVal = document.getElementById('shipTimeVal');
+  const cancelTimeVal = document.getElementById('cancelTimeVal');
+  const estWeightVal = document.getElementById('estWeightVal');
+  const estVolumeVal = document.getElementById('estVolumeVal');
+  const estFreightVal = document.getElementById('estFreightVal');
+  const actWeightVal = document.getElementById('actWeightVal');
+  const actVolumeVal = document.getElementById('actVolumeVal');
+  const billWeightVal = document.getElementById('billWeightVal');
+  const actFreightVal = document.getElementById('actFreightVal');
+
+  // 重置所有按钮状态
+  btnPendingPay.classList.remove('active');
+  btnPending.classList.remove('active');
+  btnProcessing.classList.remove('active');
+  btnShipped.classList.remove('active');
+  btnSupplement.classList.remove('active');
+  btnReceived.classList.remove('active');
+  btnCancelled.classList.remove('active');
+  card.classList.remove('cancelled', 'pending-pay', 'processing', 'shipped', 'received');
+  supplementBanner.style.display = 'none';
+
+  // 重置包裹信息为默认"-"
+  const resetAll = () => {
+    payTimeVal.textContent = '-';
+    shipTimeVal.textContent = '-';
+    cancelTimeVal.textContent = '-';
+    estWeightVal.textContent = '-';
+    estVolumeVal.textContent = '-';
+    estFreightVal.textContent = '-';
+    actWeightVal.textContent = '-';
+    actVolumeVal.textContent = '-';
+    billWeightVal.textContent = '-';
+    actFreightVal.textContent = '-';
+    actFreightVal.style.cssText = '';
+    document.getElementById('billingInfoBtn').style.display = 'none';
+    pkgShipRow.style.display = 'none';
+    pkgCancelRow.style.display = 'none';
+  };
+  resetAll();
+
+  // 填充重量计费实际值（仅待发货/存在补款）
+  const fillWeight = () => {
+    estWeightVal.textContent = '2.4 kg';
+    estVolumeVal.textContent = '16,900 cm³';
+    estFreightVal.textContent = '¥320.00';
+    actWeightVal.textContent = '2.6 kg';
+    actVolumeVal.textContent = '17,200 cm³';
+    billWeightVal.textContent = '2.6 kg';
+    actFreightVal.textContent = '¥355.00';
+    actFreightVal.style.cssText = 'font-size:15px;color:#EF4444;';
+    document.getElementById('billingInfoBtn').style.display = 'inline-flex';
+  };
+
+  if (status === 'pending_pay') {
+    card.classList.add('pending-pay');
+    btnPendingPay.classList.add('active');
+    badge.textContent = '待付款';
+    statusAmount.style.display = 'inline-block';
+    desc.textContent = '请及时完成支付，超时包裹将自动取消';
+    payTimeVal.textContent = '-';
+    recvLabel.textContent = '需支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#EF4444';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '去支付';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('跳转支付');
+  } else if (status === 'pending') {
+    btnPending.classList.add('active');
+    badge.textContent = '待审核';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹将在24小时内处理，请耐心等待';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '完成订单';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('完成订单');
+  } else if (status === 'processing') {
+    card.classList.add('processing');
+    btnProcessing.classList.add('active');
+    badge.textContent = '处理中';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹正在处理中，预计1-2个工作日发出';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'none';
+  } else if (status === 'shipped') {
+    card.classList.add('shipped');
+    btnShipped.classList.add('active');
+    badge.textContent = '待发货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已完成称重计费，等待发货';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    fillWeight();
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '确认发货';
+    btnPrimary.className = 'bottom-btn primary';
+    btnPrimary.onclick = () => showToast('已确认发货');
+  } else if (status === 'supplement') {
+    card.classList.add('shipped');
+    btnShipped.classList.add('active');
+    btnSupplement.classList.add('active');
+    badge.textContent = '待发货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已完成称重计费，等待发货';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    fillWeight();
+    supplementBanner.style.display = 'block';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'flex';
+    btnCancel.style.display = 'block';
+    btnCancel.textContent = '取消包裹';
+    btnPrimary.style.display = 'block';
+    btnPrimary.textContent = '去补款';
+    btnPrimary.className = 'bottom-btn warning';
+    btnPrimary.onclick = () => showToast('跳转补款');
+  } else if (status === 'received') {
+    card.classList.add('received');
+    btnReceived.classList.add('active');
+    badge.textContent = '已收货';
+    statusAmount.style.display = 'none';
+    desc.textContent = '您已确认收货，感谢您的购买';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    shipTimeVal.textContent = '2026-07-03 18:00:00';
+    pkgShipRow.style.display = 'flex';
+    recvLabel.textContent = '已支付';
+    recvLabel.style.color = '#111827';
+    recvVal.style.color = '#10B981';
+    bottomBar.style.display = 'none';
+  } else {
+    card.classList.add('cancelled');
+    btnCancelled.classList.add('active');
+    badge.textContent = '已取消';
+    statusAmount.style.display = 'none';
+    desc.textContent = '包裹已取消，商品已退回仓库';
+    payTimeVal.textContent = '2026-07-03 15:12:30';
+    cancelTimeVal.textContent = '2026-07-03 16:30:00';
+    pkgCancelRow.style.display = 'flex';
+    recvLabel.textContent = '应支付';
+    recvLabel.style.color = '#9CA3AF';
+    recvVal.style.color = '#9CA3AF';
+    bottomBar.style.display = 'none';
+  }
+}
+
+// 费用明细弹窗
+function showFeeDetailModal(type) {
+  const modal = document.getElementById('feeDetailModal');
+  const title = document.getElementById('feeDetailTitle');
+  const totalDetail = document.getElementById('feeTotalDetail');
+  const discountDetail = document.getElementById('feeDiscountDetail');
+
+  if (type === 'total') {
+    title.textContent = '费用明细';
+    totalDetail.style.display = 'block';
+    discountDetail.style.display = 'none';
+  } else {
+    title.textContent = '抵扣明细';
+    totalDetail.style.display = 'none';
+    discountDetail.style.display = 'block';
+  }
+
+  modal.classList.add('show');
+}
+function closeFeeDetailModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('feeDetailModal').classList.remove('show');
+}
+
+
+
+// ===== 标注系统 =====
+const STORAGE_KEY = 'annotated-prototype-package-detail';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+  {
+    id: 1,
+    title: '页面总览与状态流转',
+    summary: '展示单个包裹完整生命周期的详情页面，顶部设7个状态切换按钮，可演示各状态下页面元素的变化差异。',
+    target: '#anno-1',
+    showMarker: false,
+    type: 'overview',
+    detail: {
+      feature: '页面展示单个包裹的完整生命周期信息。顶部设有7个状态切换按钮（待付款/待审核/处理中/待发货/存在补款/已收货/已取消），用于演示不同状态下的页面变化。',
+      state: '各状态核心差异：\n• 待付款：显示需付金额，底部为「取消包裹」+「去支付」\n• 待审核：已支付，底部为「取消包裹」+「完成订单」\n• 处理中：已支付，底部仅「取消包裹」\n• 待发货：已支付，显示重量计费信息，底部为「取消包裹」+「确认发货」\n• 存在补款：在待发货基础上增加补款提示横幅，底部主按钮变为「去补款」\n• 已收货：显示发货时间，底部操作栏隐藏\n• 已取消：显示取消时间，应收金额变为应支付，底部操作栏隐藏'
+    }
+  },
+  {
+    id: 2,
+    title: '订单信息区（顶部状态卡片）',
+    summary: '展示包裹当前状态的核心信息，包含状态名称、金额标签、状态描述和包裹编号，卡片背景随状态变化。',
+    target: '#orderInfoCard',
+    showMarker: true,
+    type: 'area',
+    detail: {
+      feature: '展示包裹当前状态的核心信息，是用户进入页面后最先关注的区域。',
+      display: '• 状态名称：根据当前状态显示对应文字\n• 金额标签：仅待付款状态显示需付金额，其他状态隐藏\n• 状态描述：各状态对应不同提示文案\n• 包裹编号：显示包裹编号，右侧有复制按钮',
+      interaction: '点击包裹编号右侧的复制按钮，可将编号复制到剪贴板，点击后提示已复制。',
+      state: '顶部卡片背景样式随状态变化，不同状态使用不同主题色区分（待付款橙色、待审核蓝色、处理中天蓝、待发货绿色、已收货深绿、已取消灰色）。'
+    }
+  },
+  {
+    id: 3,
+    title: '补款提示横幅',
+    summary: '仅在存在补款状态下显示的提示横幅，提醒用户需要补款并展示补款金额和附加费明细。',
+    target: '#supplementBanner',
+    showMarker: true,
+    type: 'area',
+    detail: {
+      feature: '仅在存在补款状态下显示，提醒用户包裹需要补款，引导用户前往补款支付。',
+      display: '• 补款标题：「您的包裹需要补款」\n• 补款总金额：醒目展示需补款的总金额\n• 补款类型标签：如「补附加费」等类型标识\n• 附加费明细：逐行列出各项附加费名称及对应金额，如转板费、偏远附加费等，各项之间以虚线分隔',
+      business: '补款原因由后台发起补款时填写的备注信息决定，前端根据补款类型展示对应的明细内容。'
+    }
+  },
+  {
+    id: 4,
+    title: '物流信息卡片',
+    summary: '展示包裹的物流线路、物流单号、发货仓库和收货地址等物流相关信息。',
+    target: '#anno-4',
+    showMarker: true,
+    type: 'area',
+    detail: {
+      feature: '展示包裹的物流相关信息和收货地址，让用户了解包裹的运输路径和目的地。',
+      display: '• 物流线路：显示所选线路名称\n• 物流单号：显示运单号\n• 发货仓：显示发货仓库名称\n• 收货地址：展示收件人姓名、电话、详细地址',
+      interaction: '• 物流轨迹：点击「查看物流轨迹」打开物流轨迹弹窗，查看包裹的运输节点记录\n• 收货地址：整行可点击，点击后可进入地址编辑或选择页面'
+    }
+  },
+  {
+    id: 5,
+    title: '提包商品卡片与商品明细弹窗',
+    summary: '展示提包商品摘要和详细明细，卡片显示缩略图和概览，弹窗按快递单号分组展示完整商品列表。',
+    target: '#anno-5',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '展示提包商品的摘要信息和详细明细，让用户了解包裹内含哪些商品。',
+      display: '卡片摘要区：\n• 商品缩略图：最多展示3个，超出显示「+N」更多指示\n• 下方显示件数、总重量、总体积摘要\n• 右侧有「查看明细」链接\n\n弹窗内：\n• 按快递单号分组展示\n• 每组标题行显示快递单号、件数、重量、体积\n• 每件商品展示图标、名称、规格、数量×单价、小计金额',
+      interaction: '点击缩略图区域或「查看明细」链接，打开商品明细弹窗查看完整商品列表。'
+    }
+  },
+  {
+    id: 6,
+    title: '申报信息卡片与申报详情弹窗',
+    summary: '展示申报信息摘要和详情，包含申报商品列表、申报总价和申报人信息，支持校验和一键填入。',
+    target: '#anno-6',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '展示申报信息摘要和详情，支持校验和一键填入，用于跨境物流的海关申报。',
+      display: '卡片摘要区：\n• 显示已填写的申报商品件数和申报总价\n• 右侧有「查看详情」链接\n\n弹窗内：\n• 申报商品列表：每件商品以只读卡片展示，包含品名、英文品名、数量、单价、总价\n• 申报总价：汇总金额展示\n• 申报人信息：展示申报人电话、身份证号、身份证姓名等字段，未填写时显示占位符\n• 一键填入按钮',
+      interaction: '点击「一键填入」按钮，自动从当前提包商品中提取商品名称、件数、单价，从收货地址中提取收件人电话、身份证号、收件人姓名，自动回填到申报信息对应字段。',
+      business: '校验规则在保存申报信息时执行（非提交时校验）：\n• 申报品名校验：必填，检查是否填写\n• 英文品名校验：必填，检查是否填写\n• 申报总价值校验：检查是否超出上下限范围，具体上下限值由服务平台配置\n• 单价币种：由服务平台配置\n• 申报人信息校验：电话、身份证号、姓名必填，检查是否填写',
+      exception: '校验失败时在对应字段下方展示错误提示文案，如「请填写申报品名」「申报总价值超出限额范围」「请填写收件人电话」等，阻止保存操作，用户修改后可重新触发校验。'
+    }
+  },
+  {
+    id: 7,
+    title: '包裹信息区与计费详情弹窗',
+    summary: '展示包裹的时间信息、重量计费信息、增值服务、备注和计费详情，实际运费旁可查看计费明细。',
+    target: '#packageInfoCard',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '展示包裹的时间信息、重量计费信息、增值服务、备注和计费详情，是包裹核心信息的汇总展示区。',
+      display: '时间字段（所有状态可见）：\n• 下单时间、支付时间：始终显示\n• 发货时间：仅在已收货状态显示\n• 取消时间：仅在已取消状态显示\n• 未到时显示「-」\n\n重量与计费信息：\n• 待发货/存在补款状态填充具体值，其他状态显示「-」\n• 包含预估重量、预估体积、预估运费、实际重量、实际体积、计费重量、实际运费\n\n增值服务字段：\n• 代收货款：显示金额\n• 包税服务：是/否\n• 保价服务：是+金额/否\n\n备注：展示用户填写的备注文本',
+      interaction: '实际运费旁有「i」图标按钮，点击打开计费详情弹窗。',
+      business: '计费详情弹窗内容包含：\n• 计费重量数值\n• 计费方式说明：实重与抛重取大者，含计算逻辑描述\n• 计费标准：线路名称 + 多段续重价格表（首重价格、各段续重单价），底部标注体积重计算公式\n• 费用计算过程：逐段列出计算明细 + 运费合计'
+    }
+  },
+  {
+    id: 8,
+    title: '费用信息区与费用明细弹窗',
+    summary: '展示费用总计、抵扣总计和应收金额，点击金额旁的详情按钮可查看费用明细和抵扣明细。',
+    target: '#anno-8',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '展示费用总计、抵扣总计和应收金额，是用户最关心的费用结算区域。',
+      display: '• 费用总计行：显示费用总金额，右侧有「i」详情按钮\n• 抵扣总计行：显示抵扣总金额，右侧有「i」详情按钮\n• 应收金额行：根据状态显示不同标签和金额',
+      interaction: '• 点击费用总计右侧的「i」按钮，打开费用明细弹窗\n• 点击抵扣总计右侧的「i」按钮，打开抵扣明细弹窗',
+      business: '费用明细弹窗内容包含：\n• 承运计费（含计费重量说明）\n• 各项附加费：超重费、超长费、包税费、保价费等\n• 费用总计汇总\n\n抵扣明细弹窗内容包含：\n• 优惠券抵扣金额\n• 积分抵扣金额等逐项列出\n\n应收金额行状态差异：\n• 待付款：显示「需支付」+ 金额\n• 已付款/已发货/已收货：显示「已支付」+ 金额\n• 已取消：显示「应支付」+ 金额'
+    }
+  },
+  {
+    id: 9,
+    title: '底部操作栏与取消确认弹窗',
+    summary: '根据包裹状态展示不同的操作按钮，点击取消包裹弹出确认弹窗，防止误操作。',
+    target: '#bottomBar',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '根据包裹状态展示不同的操作按钮，是用户对包裹进行操作的主要入口。',
+      interaction: '点击「取消包裹」按钮，弹出取消确认弹窗，用户确认后执行取消操作。',
+      state: '各状态按钮配置：\n• 待付款：「取消包裹」+「去支付」（跳转支付）\n• 待审核：「取消包裹」+「完成订单」\n• 处理中：仅「取消包裹」\n• 待发货：「取消包裹」+「确认发货」\n• 存在补款：「取消包裹」+「去补款」（跳转补款支付）\n• 已收货/已取消：底部操作栏隐藏',
+      copywriting: '取消确认弹窗包含提示文案「取消后包裹商品将退回仓库，已支付费用将原路退回」，提供「再想想」和「确认取消」两个按钮。'
+    }
+  }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 标注系统逻辑 =====
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+
+function initMarkers() {
+    document.querySelectorAll('.anno-marker').forEach(marker => {
+        marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+        marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+        marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+    });
+}
+
+// 点击标注：先滚动定位，再弹详情
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+// 滚动定位到对应模块
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-anno-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('anno-edit-btn').style.display = 'inline-flex';
+    document.getElementById('anno-save-btn').style.display = 'none';
+    document.getElementById('anno-reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('anno-delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal-anno').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('anno-edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('anno-save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('anno-edit-btn').style.display = 'inline-flex';
+    document.getElementById('anno-save-btn').style.display = 'none';
+    document.getElementById('anno-reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('anno-save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('anno-edit-btn').style.display = 'inline-flex';
+    document.getElementById('anno-save-btn').style.display = 'none';
+    document.getElementById('anno-reset-btn').style.display = 'none';
+    document.getElementById('anno-delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeAnnoModal() {
+    document.getElementById('detail-modal-anno').classList.remove('show');
+}
+document.getElementById('detail-modal-anno').addEventListener('click', function(e) {
+    if (e.target === this) closeAnnoModal();
+});
+
+// ===== 面板折叠 =====
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+// ===== 标注管理 =====
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn-anno btn-anno-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn-anno btn-anno-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal-anno').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal-anno').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-anno-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('anno-edit-btn').style.display = 'none';
+    document.getElementById('anno-save-btn').style.display = 'inline-flex';
+    document.getElementById('anno-reset-btn').style.display = 'none';
+    document.getElementById('anno-delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal-anno').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeAnnoModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('anno-export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+// ESC关闭标注弹窗
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAnnoModal();
+        closeManageModal();
+    }
+});
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadCustomAnnotations();
+    renderAnnotationList();
+    initPanelState();
+    initMarkers();
+});
+
+</script>
+
+</body>
+</html>
