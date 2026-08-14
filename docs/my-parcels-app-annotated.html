@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的包裹 - APP用户端（带标注）</title>
+<style>
+/* ========== 全局重置 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F8FAFC; color: #111827; }
+
+/* ========== 页面标题区 ========== */
+.anno-page-header {
+  text-align: center;
+  padding: 24px 20px 16px;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+}
+.anno-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+.anno-page-subtitle {
+  font-size: 13px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+/* ========== 主体布局 ========== */
+.anno-page-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 20px 60px;
+  gap: 20px;
+  min-height: calc(100vh - 90px);
+}
+
+/* ========== 左侧预览区 ========== */
+.anno-preview-area {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ========== 手机原型样式（保持原始） ========== */
+.phone-frame {
+  width: 375px;
+  background: #F3F4F6;
+  min-height: 812px;
+  position: relative;
+  overflow-x: hidden;
+  border: 2px solid #E5E7EB;
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+.status-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
+  font-size: 12px; font-weight: 600; color: #111827;
+}
+.nav-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  padding: 0 16px;
+}
+.nav-bar .back { font-size: 20px; color: #111827; cursor: pointer; width: 30px; }
+.nav-bar .title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; }
+.page-content { padding-bottom: 40px; background: #F3F4F6; }
+
+/* 搜索框 */
+.search-section {
+  background: #fff; padding: 8px 12px 12px;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: #F3F4F6; border-radius: 20px; padding: 8px 14px;
+}
+.search-box .icon { font-size: 14px; color: #9CA3AF; }
+.search-box input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13px; color: #111827;
+}
+.search-box input::placeholder { color: #9CA3AF; }
+
+/* 状态标签栏 */
+.status-tabs {
+  display: flex; gap: 8px; padding: 0 12px 12px;
+  overflow-x: auto; background: #fff;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.status-tabs::-webkit-scrollbar { display: none; }
+.status-tab {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 16px;
+  font-size: 12px; font-weight: 500; color: #6B7280;
+  background: #F3F4F6; cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
+}
+.status-tab.active {
+  background: #8B5CF6; color: #fff; font-weight: 600;
+}
+.status-tab .count { font-size: 11px; opacity: 0.8; }
+.status-tab.active .count { opacity: 0.9; }
+
+/* 包裹卡片 */
+.package-list { padding: 12px; }
+.package-card {
+  background: #fff; border-radius: 12px; margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  overflow: hidden; cursor: pointer;
+}
+.package-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px 10px; border-bottom: 1px solid #F9FAFB;
+}
+.package-id {
+  font-size: 13px; font-weight: 600; color: #111827;
+  font-family: monospace;
+}
+.package-status {
+  font-size: 12px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+}
+.package-status.pending-pay { background: #FFF7ED; color: #F97316; }
+.package-status.pending-review { background: #EEF2FF; color: #6366F1; }
+.package-status.processing { background: #F0F9FF; color: #0284C7; }
+.package-status.pending-ship { background: #EFF6FF; color: #3B82F6; }
+.package-status.shipped { background: #ECFDF5; color: #10B981; }
+.package-status.delivered { background: #F3F4F6; color: #6B7280; }
+.package-status.cancelled { background: #F3F4F6; color: #9CA3AF; }
+.package-order-time {
+  padding: 0 14px 10px;
+  font-size: 11px; color: #9CA3AF;
+  border-bottom: 1px solid #F9FAFB;
+}
+.package-goods { padding: 12px 14px; }
+.goods-single { display: flex; gap: 12px; align-items: center; }
+.goods-single-img {
+  width: 64px; height: 64px; border-radius: 10px;
+  background: #F9FAFB; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+  border: 1px solid #F3F4F6;
+}
+.goods-single-info { flex: 1; min-width: 0; }
+.goods-single-name {
+  font-size: 13px; font-weight: 500; color: #111827;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.goods-single-spec { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+.goods-single-count { font-size: 12px; color: #6B7280; margin-top: 6px; }
+.goods-multi { display: flex; flex-direction: column; gap: 10px; }
+.goods-multi-thumbs { display: flex; gap: 8px; align-items: center; }
+.goods-multi-thumb {
+  width: 44px; height: 44px; border-radius: 8px;
+  background: #F9FAFB; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+  border: 1px solid #F3F4F6;
+}
+.goods-multi-thumb.more {
+  background: #fff; color: #9CA3AF;
+  font-size: 11px; font-weight: 500;
+  border: 1px dashed #E5E7EB;
+}
+.goods-multi-info {
+  flex: 1; display: flex; align-items: center; justify-content: space-between;
+}
+.goods-multi-summary { font-size: 12px; color: #374151; }
+.goods-multi-summary .num { font-weight: 600; color: #111827; }
+.package-logistics {
+  padding: 0 14px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: #6B7280;
+}
+.package-logistics-line { display: flex; align-items: center; gap: 4px; }
+.package-logistics-line .icon { font-size: 12px; }
+.package-logistics-weight { color: #9CA3AF; }
+.package-fee {
+  padding: 10px 14px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  border-top: 1px solid #F9FAFB;
+}
+.package-fee-label { font-size: 12px; color: #6B7280; }
+.package-fee-val { font-size: 16px; font-weight: 700; color: #EF4444; }
+.package-fee-val.green { color: #10B981; }
+.package-fee-val.gray { color: #9CA3AF; }
+.package-fee-val .yen { font-size: 11px; font-weight: 500; }
+.package-supplement-bar {
+  margin: 0 14px; padding: 8px 12px;
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border: 1px solid #FED7AA; border-radius: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.package-supplement-bar .supplement-text {
+  font-size: 12px; color: #9A3412; font-weight: 500;
+}
+.package-supplement-bar .supplement-amount {
+  font-size: 14px; color: #EA580C; font-weight: 700;
+}
+.package-actions {
+  padding: 10px 14px 14px;
+  display: flex; justify-content: flex-end; gap: 8px;
+  border-top: 1px solid #F9FAFB;
+}
+.action-btn {
+  padding: 6px 16px; border-radius: 16px;
+  font-size: 12px; font-weight: 500; border: none; cursor: pointer;
+}
+.action-btn.secondary {
+  background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB;
+}
+.action-btn.primary { background: #3B82F6; color: #fff; }
+.action-btn.danger {
+  background: #fff; color: #EF4444; border: 1px solid #FECACA;
+}
+.action-btn.orange { background: #F97316; color: #fff; }
+.empty-state {
+  padding: 60px 20px; text-align: center;
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+.empty-text { font-size: 13px; color: #9CA3AF; }
+
+/* Toast */
+.toast {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 10px 24px; border-radius: 8px;
+  font-size: 14px; z-index: 999;
+}
+.toast.show { display: block; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ========== 右侧标注面板 ========== */
+.anno-panel {
+  width: 400px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  overflow: hidden;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+.anno-panel-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  background: linear-gradient(135deg, #EEF2FF, #F0F9FF);
+}
+.anno-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E40AF;
+}
+.anno-panel-desc {
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+.anno-panel-body {
+  padding: 16px 20px 24px;
+}
+.anno-item {
+  border-left: 3px solid #3B82F6;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: #FAFBFC;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.anno-item:hover {
+  background: #EFF6FF;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+}
+.anno-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.anno-item-num {
+  width: 24px;
+  height: 24px;
+  background: #3B82F6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.anno-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E293B;
+}
+.anno-item-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.anno-item-tag.overview { background: #DBEAFE; color: #1D4ED8; }
+.anno-item-tag.interaction { background: #FEF3C7; color: #B45309; }
+.anno-item-tag.display { background: #D1FAE5; color: #047857; }
+.anno-item-body {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #E5E7EB;
+}
+.anno-item.expanded .anno-item-body {
+  display: block;
+}
+.anno-item-section {
+  margin-bottom: 10px;
+}
+.anno-item-section:last-child { margin-bottom: 0; }
+.anno-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.anno-item-text {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+.anno-item-list {
+  list-style: none;
+  padding: 0;
+}
+.anno-item-list li {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.7;
+  padding-left: 12px;
+  position: relative;
+}
+.anno-item-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #3B82F6;
+  font-weight: 700;
+}
+.anno-item-list li strong {
+  color: #1E40AF;
+}
+.anno-item-arrow {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-left: auto;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.anno-item.expanded .anno-item-arrow {
+  transform: rotate(90deg);
+}
+
+/* ========== 角标样式 ========== */
+.anno-marker {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: #3B82F6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 100;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+  transition: transform 0.2s;
+}
+.anno-marker:hover {
+  transform: scale(1.2);
+}
+.anno-marker.active {
+  background: #1D4ED8;
+  transform: scale(1.3);
+}
+
+/* ========== 补款弹窗 ========== */
+.anno-modal-overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 500;
+  justify-content: center;
+  align-items: center;
+}
+.anno-modal-overlay.show {
+  display: flex;
+}
+.anno-modal {
+  width: 320px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.anno-modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #F3F4F6;
+  text-align: center;
+}
+.anno-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+.anno-modal-body {
+  padding: 16px 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.anno-modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+}
+.anno-modal-row .label {
+  color: #6B7280;
+}
+.anno-modal-row .value {
+  color: #111827;
+  font-weight: 500;
+  font-family: monospace;
+}
+.anno-modal-divider {
+  height: 1px;
+  background: #F3F4F6;
+  margin: 8px 0;
+}
+.anno-modal-reason {
+  padding: 10px 12px;
+  background: #FFF7ED;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #9A3412;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.anno-modal-fee-detail {
+  margin: 8px 0;
+}
+.anno-modal-fee-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #374151;
+}
+.anno-modal-fee-row .amount {
+  color: #EA580C;
+  font-weight: 600;
+}
+.anno-modal-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0 4px;
+  border-top: 1px solid #F3F4F6;
+  font-size: 14px;
+  font-weight: 700;
+}
+.anno-modal-total .label { color: #111827; }
+.anno-modal-total .amount { color: #EF4444; }
+.anno-modal-footer {
+  padding: 14px 20px 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  border-top: 1px solid #F3F4F6;
+}
+.anno-modal-btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+.anno-modal-btn.cancel {
+  background: #F3F4F6;
+  color: #374151;
+  border: 1px solid #E5E7EB;
+}
+.anno-modal-btn.confirm {
+  background: #F97316;
+  color: #fff;
+}
+
+/* ========== 空状态标注区 ========== */
+.anno-empty-demo {
+  padding: 30px 20px;
+  text-align: center;
+  border: 2px dashed #E5E7EB;
+  border-radius: 12px;
+  margin: 12px;
+  background: #FAFBFC;
+}
+.anno-empty-demo .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+.anno-empty-demo .empty-title {
+  font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 4px;
+}
+.anno-empty-demo .empty-sub {
+  font-size: 12px; color: #9CA3AF;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 860px) {
+  .anno-page-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .anno-panel {
+    width: 375px;
+    position: static;
+    max-height: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- 页面标题 -->
+<div class="anno-page-header">
+  <div class="anno-page-title">我的包裹 - APP用户端（带标注）</div>
+  <div class="anno-page-subtitle">共 9 个标注点 · 点击角标或右侧条目查看详情</div>
+</div>
+
+<!-- 主体：水平排列 -->
+<div class="anno-page-wrapper">
+
+  <!-- ========== 左侧：手机原型 ========== -->
+  <div class="anno-preview-area">
+    <div class="phone-frame" id="phoneFrame">
+
+      <!-- 角标 1 - 页面总说明 -->
+      <div class="anno-marker" id="annoMarker1" style="top: 50px; right: -30px;" data-anno="1" title="页面总说明">1</div>
+
+      <div class="page-main">
+        <div class="status-bar"><span>15:30</span><span>📶 </span></div>
+
+        <div class="nav-bar">
+          <div class="back" onclick="showToast('返回')">‹</div>
+          <div class="title">我的包裹</div>
+          <div style="width:30px;"></div>
+        </div>
+
+        <div class="page-content">
+
+          <!-- 搜索框 -->
+          <div class="search-section" id="searchSection">
+            <div class="search-box">
+              <span class="icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="搜索包裹单号 / 商品名称 / 国内快递单号" oninput="handleSearch()">
+            </div>
+            <!-- 角标 2 - 搜索区 -->
+            <div class="anno-marker" id="annoMarker2" style="top: 8px; right: -8px;" data-anno="2" title="搜索区">2</div>
+          </div>
+
+          <!-- 状态标签栏 -->
+          <div class="status-tabs" id="statusTabs" style="position:relative;">
+            <div class="status-tab active" data-status="all" onclick="switchTab('all')">全部 <span class="count">6</span></div>
+            <div class="status-tab" data-status="pending_pay" onclick="switchTab('pending_pay')">待付款 <span class="count">1</span></div>
+            <div class="status-tab" data-status="pending_review" onclick="switchTab('pending_review')">待审核 <span class="count">1</span></div>
+            <div class="status-tab" data-status="processing" onclick="switchTab('processing')">处理中 <span class="count">1</span></div>
+            <div class="status-tab" data-status="pending_ship" onclick="switchTab('pending_ship')">待发货 <span class="count">2</span></div>
+            <div class="status-tab" data-status="shipped" onclick="switchTab('shipped')">已发货 <span class="count">1</span></div>
+            <div class="status-tab" data-status="delivered" onclick="switchTab('delivered')">已收货</div>
+            <div class="status-tab" data-status="cancelled" onclick="switchTab('cancelled')">已取消 <span class="count">1</span></div>
+            <!-- 角标 3 - 状态标签筛选 -->
+            <div class="anno-marker" id="annoMarker3" style="top: -10px; right: -8px;" data-anno="3" title="状态标签筛选">3</div>
+          </div>
+
+          <!-- 包裹列表 -->
+          <div class="package-list" id="packageList">
+
+            <!-- 角标 4 - 包裹卡片结构 -->
+            <div class="anno-marker" id="annoMarker4" style="top: 12px; right: -8px;" data-anno="4" title="包裹卡片结构">4</div>
+
+            <!-- 待付款 - 单商品 -->
+            <div class="package-card" data-status="pending_pay" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26070384261</span>
+                <span class="package-status pending-pay">待付款</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-07-03 14:58</div>
+              <div class="package-goods">
+                <div class="goods-single">
+                  <div class="goods-single-img">🎧</div>
+                  <div class="goods-single-info">
+                    <div class="goods-single-name">蓝牙耳机 无线降噪头戴式</div>
+                    <div class="goods-single-spec">黑色 / 标准版</div>
+                    <div class="goods-single-count">×1</div>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>EMS国际特快</div>
+                <div class="package-logistics-weight">1.2kg / 0.008m³</div>
+              </div>
+              <div class="package-fee" id="feeArea1">
+                <span class="package-fee-label">需付款</span>
+                <span class="package-fee-val"><span class="yen">¥</span>299.00</span>
+                <!-- 角标 5 - 费用展示规则 -->
+                <div class="anno-marker" id="annoMarker5" style="top: -10px; right: -8px;" data-anno="5" title="费用展示规则">5</div>
+              </div>
+              <div class="package-actions" id="actionsArea1">
+                <button class="action-btn danger" onclick="event.stopPropagation(); showToast('取消包裹')">取消包裹</button>
+                <button class="action-btn orange" onclick="event.stopPropagation(); showToast('去支付')">去支付</button>
+                <!-- 角标 6 - 操作按钮规则 -->
+                <div class="anno-marker" id="annoMarker6" style="bottom: -10px; right: -8px;" data-anno="6" title="操作按钮规则">6</div>
+              </div>
+            </div>
+
+            <!-- 待审核 - 多商品 -->
+            <div class="package-card" data-status="pending_review" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26070392157</span>
+                <span class="package-status pending-review">待审核</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-07-03 12:30</div>
+              <div class="package-goods">
+                <div class="goods-multi">
+                  <div class="goods-multi-thumbs">
+                    <div class="goods-multi-thumb">🎧</div>
+                    <div class="goods-multi-thumb">📱</div>
+                    <div class="goods-multi-thumb">👟</div>
+                    <div class="goods-multi-thumb more">+2</div>
+                  </div>
+                  <div class="goods-multi-info">
+                    <span class="goods-multi-summary">共 <span class="num">5</span> 件商品</span>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>顺丰空运专线</div>
+                <div class="package-logistics-weight">2.4kg / 0.015m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">实付款</span>
+                <span class="package-fee-val green"><span class="yen">¥</span>909.88</span>
+              </div>
+              <div class="package-actions">
+                <button class="action-btn danger" onclick="event.stopPropagation(); showToast('取消包裹')">取消包裹</button>
+              </div>
+            </div>
+
+            <!-- 处理中 - 多商品 -->
+            <div class="package-card" data-status="processing" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26070315873</span>
+                <span class="package-status processing">处理中</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-07-03 10:15</div>
+              <div class="package-goods">
+                <div class="goods-multi">
+                  <div class="goods-multi-thumbs">
+                    <div class="goods-multi-thumb">🎮</div>
+                    <div class="goods-multi-thumb">🎧</div>
+                    <div class="goods-multi-thumb more">+1</div>
+                  </div>
+                  <div class="goods-multi-info">
+                    <span class="goods-multi-summary">共 <span class="num">3</span> 件商品</span>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>顺丰空运专线</div>
+                <div class="package-logistics-weight">1.5kg / 0.010m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">实付款</span>
+                <span class="package-fee-val green"><span class="yen">¥</span>688.00</span>
+              </div>
+              <div class="package-actions">
+                <button class="action-btn danger" onclick="event.stopPropagation(); showToast('取消包裹')">取消包裹</button>
+              </div>
+            </div>
+
+            <!-- 待发货 - 多商品 -->
+            <div class="package-card" data-status="pending_ship" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26070274362</span>
+                <span class="package-status pending-ship">待发货</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-07-02 16:45</div>
+              <div class="package-goods">
+                <div class="goods-multi">
+                  <div class="goods-multi-thumbs">
+                    <div class="goods-multi-thumb">👟</div>
+                    <div class="goods-multi-thumb">🧴</div>
+                    <div class="goods-multi-thumb">👕</div>
+                  </div>
+                  <div class="goods-multi-info">
+                    <span class="goods-multi-summary">共 <span class="num">3</span> 件商品</span>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>海运经济线</div>
+                <div class="package-logistics-weight">1.8kg / 0.012m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">实付款</span>
+                <span class="package-fee-val green"><span class="yen">¥</span>520.00</span>
+              </div>
+            </div>
+
+            <!-- 待发货 - 存在补款 -->
+            <div class="package-card" data-status="pending_ship" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26080561247</span>
+                <span class="package-status pending-ship">待发货</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-08-05 09:30</div>
+              <div class="package-goods">
+                <div class="goods-multi">
+                  <div class="goods-multi-thumbs">
+                    <div class="goods-multi-thumb">💻</div>
+                    <div class="goods-multi-thumb">🎮</div>
+                    <div class="goods-multi-thumb more">+1</div>
+                  </div>
+                  <div class="goods-multi-info">
+                    <span class="goods-multi-summary">共 <span class="num">3</span> 件商品</span>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>EMS国际特快</div>
+                <div class="package-logistics-weight">3.2kg / 0.025m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">已付</span>
+                <span class="package-fee-val green"><span class="yen">¥</span>280.00</span>
+              </div>
+              <div class="package-supplement-bar">
+                <span class="supplement-text">⚠️ 需补款</span>
+                <span class="supplement-amount">¥85.00</span>
+              </div>
+              <div class="package-actions">
+                <button class="action-btn orange" onclick="event.stopPropagation(); showSupplementModal()">去补款</button>
+              </div>
+            </div>
+
+            <!-- 已发货 - 单商品 -->
+            <div class="package-card" data-status="shipped" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26062848519</span>
+                <span class="package-status shipped">已发货</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-06-28 10:20</div>
+              <div class="package-goods">
+                <div class="goods-single">
+                  <div class="goods-single-img">📱</div>
+                  <div class="goods-single-info">
+                    <div class="goods-single-name">手机壳 iPhone15 透明防摔</div>
+                    <div class="goods-single-spec">透明 / iPhone15 Pro</div>
+                    <div class="goods-single-count">×2</div>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>EMS国际特快</div>
+                <div class="package-logistics-weight">0.3kg / 0.002m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">实付款</span>
+                <span class="package-fee-val green"><span class="yen">¥</span>89.00</span>
+              </div>
+              <div class="package-actions">
+                <button class="action-btn primary" onclick="event.stopPropagation(); showToast('确认收货')">确认收货</button>
+              </div>
+            </div>
+
+            <!-- 已取消 - 多商品 -->
+            <div class="package-card" data-status="cancelled" onclick="handleCardClick(event)">
+              <div class="package-card-header">
+                <span class="package-id">B26062539074</span>
+                <span class="package-status cancelled">已取消</span>
+              </div>
+              <div class="package-order-time">下单时间：2026-06-25 16:12</div>
+              <div class="package-goods">
+                <div class="goods-multi">
+                  <div class="goods-multi-thumbs">
+                    <div class="goods-multi-thumb">👕</div>
+                    <div class="goods-multi-thumb">👖</div>
+                  </div>
+                  <div class="goods-multi-info">
+                    <span class="goods-multi-summary">共 <span class="num">2</span> 件商品</span>
+                  </div>
+                </div>
+              </div>
+              <div class="package-logistics">
+                <div class="package-logistics-line"><span class="icon">🚚</span>顺丰空运专线</div>
+                <div class="package-logistics-weight">0.6kg / 0.005m³</div>
+              </div>
+              <div class="package-fee">
+                <span class="package-fee-label">应付款</span>
+                <span class="package-fee-val gray"><span class="yen">¥</span>356.00</span>
+              </div>
+            </div>
+
+            <!-- 角标 9 - 空状态示例 -->
+            <div class="anno-empty-demo" id="emptyDemo" style="position:relative;">
+              <div class="empty-icon">📦</div>
+              <div class="empty-title">暂无已发货的包裹</div>
+              <div class="empty-sub">（空状态标注示例）</div>
+              <div class="anno-marker" id="annoMarker9" style="top: -12px; right: -12px;" data-anno="9" title="空数据与搜索无结果状态">9</div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+
+      <!-- 角标 7 - 包裹卡片点击交互 -->
+      <div class="anno-marker" id="annoMarker7" style="top: 200px; left: -30px;" data-anno="7" title="包裹卡片点击交互">7</div>
+
+      <!-- 补款弹窗 -->
+      <div class="anno-modal-overlay" id="supplementModal" onclick="closeSupplementModal(event)">
+        <div class="anno-modal" onclick="event.stopPropagation()" style="position:relative;">
+          <!-- 角标 8 - 补款确认弹窗 -->
+          <div class="anno-marker" id="annoMarker8" style="top: -12px; right: -12px;" data-anno="8" title="补款确认弹窗">8</div>
+          <div class="anno-modal-header">
+            <div class="anno-modal-title">补款确认</div>
+          </div>
+          <div class="anno-modal-body">
+            <div class="anno-modal-row">
+              <span class="label">包裹单号</span>
+              <span class="value">B26080561247</span>
+            </div>
+            <div class="anno-modal-row">
+              <span class="label">下单时间</span>
+              <span class="value">2026-08-05 09:30</span>
+            </div>
+            <div class="anno-modal-divider"></div>
+            <div class="anno-modal-reason">
+              💡 <strong>补款原因：</strong>包裹打包后计费重量超出预估，需补运费差额
+            </div>
+            <div class="anno-modal-fee-detail">
+              <div class="anno-modal-fee-row">
+                <span>运费差额（计费重量超出预估）</span>
+                <span class="amount">¥85.00</span>
+              </div>
+            </div>
+            <div class="anno-modal-total">
+              <span class="label">合计需补</span>
+              <span class="amount">¥85.00</span>
+            </div>
+          </div>
+          <div class="anno-modal-footer">
+            <button class="anno-modal-btn cancel" onclick="closeSupplementModal()">取消</button>
+            <button class="anno-modal-btn confirm" onclick="confirmSupplement()">确认补款</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== 右侧：标注面板 ========== -->
+  <div class="anno-panel" id="annoPanel">
+    <div class="anno-panel-header">
+      <div class="anno-panel-title">📋 标注说明</div>
+      <div class="anno-panel-desc">点击条目展开/收起详情，点击角标可联动高亮</div>
+    </div>
+    <div class="anno-panel-body">
+
+      <!-- 标注1 -->
+      <div class="anno-item" data-anno="1" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">1</div>
+          <div class="anno-item-title">页面总说明</div>
+          <span class="anno-item-tag overview">总览</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">APP端用户查看和管理所有包裹的列表页，支持按状态筛选和关键词搜索</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li>顶部导航栏（标题「我的包裹」+ 返回按钮）</li>
+              <li>搜索框（支持关键词搜索）</li>
+              <li>横向状态标签栏（含数量角标）</li>
+              <li>包裹卡片列表（按下单时间倒序）</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>搜索支持<strong>包裹单号 / 商品名称 / 国内快递单号</strong></li>
+              <li>状态标签切换实时筛选列表</li>
+              <li>卡片整行可点击进入详情页</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注2 -->
+      <div class="anno-item" data-anno="2" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">2</div>
+          <div class="anno-item-title">搜索区</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">搜索框区域 .search-section</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">关键词搜索包裹</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li>搜索框占位文案：<strong>「搜索包裹单号 / 商品名称 / 国内快递单号」</strong></li>
+              <li>右侧搜索图标 🔍</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>输入后<strong>实时筛选</strong>列表</li>
+              <li>清空搜索框恢复全部列表</li>
+              <li>搜索无结果时显示空状态：<strong>「未找到相关包裹」</strong> + 副标题<strong>「换个关键词试试」</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注3 -->
+      <div class="anno-item" data-anno="3" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">3</div>
+          <div class="anno-item-title">状态标签筛选</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">状态标签栏 .status-tabs</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">横向滑动标签栏，按包裹状态筛选</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li>标签列表：全部、待付款、待审核、处理中、待发货、已发货、已收货、已取消</li>
+              <li>每个标签右侧显示<strong>数量角标</strong>（该状态下包裹数量），角标始终存在</li>
+              <li><strong>已收货</strong>不显示角标</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>点击标签切换列表，标签高亮</li>
+              <li>某状态下无包裹时，列表区域显示：<strong>「暂无XX的包裹」</strong>（如"暂无已取消的包裹"）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注4 -->
+      <div class="anno-item" data-anno="4" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">4</div>
+          <div class="anno-item-title">包裹卡片结构</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">任意一个 package-card</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">每个包裹以卡片形式展示核心信息</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li><strong>卡片头：</strong>状态标签 + 包裹单号 + 下单时间</li>
+              <li><strong>商品信息：</strong>缩略图 + 商品名 + 规格 + 件数</li>
+              <li><strong>物流信息：</strong>线路名称 + 承运商 + 重量/体积</li>
+              <li><strong>费用信息：</strong>费用标签 + 金额</li>
+              <li><strong>操作按钮区：</strong>根据状态显示对应按钮</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <ul class="anno-item-list">
+              <li>卡片按<strong>下单时间倒序</strong>排列</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注5 -->
+      <div class="anno-item" data-anno="5" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">5</div>
+          <div class="anno-item-title">费用展示规则</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">package-fee 区域</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">不同状态下费用展示逻辑不同</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">状态说明</div>
+            <ul class="anno-item-list">
+              <li><strong>待付款</strong> → 展示「需付款 ¥XX」</li>
+              <li><strong>已付款（待审核/处理中/待发货）</strong> → 展示「实付款 ¥XX」</li>
+              <li><strong>已发货/已收货</strong> → 展示「实付款 ¥XX」</li>
+              <li><strong>已取消</strong> → 展示「应付款 ¥XX」</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">补款提示</div>
+            <ul class="anno-item-list">
+              <li>存在补款时，在费用行下方增加<strong>补款提示条</strong></li>
+              <li>内容：「⚠️ 需补款 ¥XX」+ 「去补款」按钮</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注6 -->
+      <div class="anno-item" data-anno="6" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">6</div>
+          <div class="anno-item-title">操作按钮规则</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">package-actions 区域</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">根据包裹状态展示对应操作按钮</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">状态说明</div>
+            <ul class="anno-item-list">
+              <li><strong>待付款</strong> → 「取消包裹」「去支付」</li>
+              <li><strong>待审核 / 处理中</strong> → 「取消包裹」</li>
+              <li><strong>待发货</strong> → 无操作按钮（仅有补款提示条时显示「去补款」）</li>
+              <li><strong>已发货</strong> → 「确认收货」（APP端没有"查看物流"按钮）</li>
+              <li><strong>已收货 / 已取消</strong> → 无操作按钮</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>取消包裹 → 确认弹窗</li>
+              <li>去支付 → 收银台</li>
+              <li>去补款 → 补款确认弹窗 → 收银台</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注7 -->
+      <div class="anno-item" data-anno="7" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">7</div>
+          <div class="anno-item-title">包裹卡片点击交互</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">包裹卡片整体</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">整行可点击跳转详情</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>点击卡片<strong>任意位置</strong>（操作按钮区域除外）→ 跳转包裹详情页</li>
+              <li>操作按钮和补款提示条上的按钮<strong>阻止事件冒泡</strong>，不触发跳转</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注8 -->
+      <div class="anno-item" data-anno="8" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">8</div>
+          <div class="anno-item-title">补款确认弹窗</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">补款确认弹窗本身</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">用户点击「去补款」后弹出，确认补款信息后跳转支付</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li>标题：<strong>「补款确认」</strong></li>
+              <li>原包裹信息：包裹单号、下单时间</li>
+              <li><strong>补款原因</strong> — 由后台发起补款时填写的备注信息决定，前端直接展示</li>
+              <li><strong>补款金额明细</strong> — 展示附加费类型及对应金额（如"运费差额 ¥85.00"），多种附加费时逐行列出</li>
+              <li>合计需补金额</li>
+              <li>底部「取消」和「确认补款」按钮</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>确认补款 → 关闭弹窗 → 跳转收银台</li>
+              <li>取消 / 点遮罩 → 关闭弹窗</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注9 -->
+      <div class="anno-item" data-anno="9" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">9</div>
+          <div class="anno-item-title">空数据与搜索无结果状态</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">标注位置</div>
+            <div class="anno-item-text">包裹列表区域的空状态示例</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">列表为空或搜索无结果时的占位提示</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">字段/展示规则</div>
+            <ul class="anno-item-list">
+              <li><strong>全局无包裹</strong>（所有标签下均无数据）：📦 +「还没有包裹」+「提交包裹后，这里会显示你的包裹信息」+「去提交包裹」按钮</li>
+              <li><strong>某状态标签下无包裹</strong>：📦 +「暂无XX的包裹」（如"暂无已发货的包裹"）</li>
+              <li><strong>搜索无结果</strong>：📦 +「未找到相关包裹」+「换个关键词试试」</li>
+            </ul>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">交互规则</div>
+            <ul class="anno-item-list">
+              <li>全局无包裹时「去提交包裹」按钮可点击跳转</li>
+              <li>其他空状态仅展示，无交互</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== 原始交互功能 ==========
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 1500);
+}
+
+// 状态标签切换
+var currentTab = 'all';
+function switchTab(status) {
+  currentTab = status;
+  // 更新标签状态
+  document.querySelectorAll('.status-tab').forEach(function(tab) {
+    tab.classList.remove('active');
+    if (tab.dataset.status === status) {
+      tab.classList.add('active');
+    }
+  });
+
+  // 过滤卡片
+  var visibleCount = 0;
+  document.querySelectorAll('.package-card').forEach(function(card) {
+    if (status === 'all') {
+      card.style.display = 'block';
+      visibleCount++;
+    } else {
+      if (card.dataset.status === status) {
+        card.style.display = 'block';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    }
+  });
+
+  // 空状态处理：移除已有空状态提示
+  var existingEmpty = document.getElementById('tabEmptyState');
+  if (existingEmpty) existingEmpty.remove();
+
+  // 隐藏标注用的空状态demo
+  var emptyDemo = document.getElementById('emptyDemo');
+  if (emptyDemo) emptyDemo.style.display = 'none';
+
+  if (visibleCount === 0 && status !== 'all') {
+    var statusNames = {
+      'pending_pay': '待付款',
+      'pending_review': '待审核',
+      'processing': '处理中',
+      'pending_ship': '待发货',
+      'shipped': '已发货',
+      'delivered': '已收货',
+      'cancelled': '已取消'
+    };
+    var emptyDiv = document.createElement('div');
+    emptyDiv.id = 'tabEmptyState';
+    emptyDiv.style.cssText = 'padding:50px 20px;text-align:center;';
+    emptyDiv.innerHTML = '<div style="font-size:48px;opacity:0.5;margin-bottom:12px;">📦</div>' +
+      '<div style="font-size:14px;font-weight:600;color:#6B7280;margin-bottom:4px;">暂无' + (statusNames[status] || '') + '的包裹</div>';
+    document.getElementById('packageList').appendChild(emptyDiv);
+  } else if (visibleCount === 0 && status === 'all') {
+    // 全部标签下也没有包裹（不会触发，因为示例数据有包裹）
+    var emptyDiv = document.createElement('div');
+    emptyDiv.id = 'tabEmptyState';
+    emptyDiv.style.cssText = 'padding:50px 20px;text-align:center;';
+    emptyDiv.innerHTML = '<div style="font-size:48px;opacity:0.5;margin-bottom:12px;">📦</div>' +
+      '<div style="font-size:14px;font-weight:600;color:#6B7280;margin-bottom:4px;">还没有包裹</div>' +
+      '<div style="font-size:12px;color:#9CA3AF;margin-bottom:16px;">提交包裹后，这里会显示你的包裹信息</div>' +
+      '<div style="display:inline-block;padding:8px 20px;background:#3B82F6;color:#fff;border-radius:20px;font-size:13px;cursor:pointer;">去提交包裹</div>';
+    document.getElementById('packageList').appendChild(emptyDiv);
+  }
+
+  // 搜索关键词存在时重新搜索
+  var searchInput = document.getElementById('searchInput');
+  if (searchInput && searchInput.value.trim()) {
+    handleSearch();
+  }
+}
+
+// 搜索功能
+function handleSearch() {
+  var keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+  var cards = document.querySelectorAll('.package-card');
+  var visibleCount = 0;
+
+  // 移除搜索无结果提示
+  var existingSearchEmpty = document.getElementById('searchEmptyState');
+  if (existingSearchEmpty) existingSearchEmpty.remove();
+
+  cards.forEach(function(card) {
+    if (!keyword) {
+      // 无搜索词，恢复到当前tab筛选状态
+      if (currentTab === 'all') {
+        card.style.display = 'block';
+        visibleCount++;
+      } else {
+        if (card.dataset.status === currentTab) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      }
+    } else {
+      // 有搜索词，在可见卡片中搜索
+      var cardText = card.textContent.toLowerCase();
+      var matchKeyword = cardText.indexOf(keyword) !== -1;
+      var tabMatch = (currentTab === 'all') || (card.dataset.status === currentTab);
+
+      if (matchKeyword && tabMatch) {
+        card.style.display = 'block';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    }
+  });
+
+  // 搜索无结果提示
+  if (keyword && visibleCount === 0) {
+    var emptyDiv = document.createElement('div');
+    emptyDiv.id = 'searchEmptyState';
+    emptyDiv.style.cssText = 'padding:50px 20px;text-align:center;';
+    emptyDiv.innerHTML = '<div style="font-size:48px;opacity:0.5;margin-bottom:12px;">📦</div>' +
+      '<div style="font-size:14px;font-weight:600;color:#6B7280;margin-bottom:4px;">未找到相关包裹</div>' +
+      '<div style="font-size:12px;color:#9CA3AF;">换个关键词试试</div>';
+    document.getElementById('packageList').appendChild(emptyDiv);
+  }
+}
+
+// 卡片点击跳转详情
+function handleCardClick(event) {
+  // 阻止操作按钮区域触发
+  if (event.target.closest('.package-actions') || event.target.closest('.package-supplement-bar')) {
+    return;
+  }
+  showToast('跳转包裹详情页');
+}
+
+// 补款弹窗
+function showSupplementModal() {
+  document.getElementById('supplementModal').classList.add('show');
+}
+
+function closeSupplementModal(event) {
+  if (event && event.target !== document.getElementById('supplementModal')) return;
+  document.getElementById('supplementModal').classList.remove('show');
+}
+
+// 点击遮罩关闭
+document.getElementById('supplementModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    this.classList.remove('show');
+  }
+});
+
+function confirmSupplement() {
+  document.getElementById('supplementModal').classList.remove('show');
+  showToast('跳转收银台');
+}
+
+// ========== 标注交互 ==========
+function toggleAnnoItem(el) {
+  var wasExpanded = el.classList.contains('expanded');
+  // 收起其他
+  document.querySelectorAll('.anno-item').forEach(function(item) {
+    item.classList.remove('expanded');
+  });
+  // 清除角标高亮
+  document.querySelectorAll('.anno-marker').forEach(function(m) {
+    m.classList.remove('active');
+  });
+
+  if (!wasExpanded) {
+    el.classList.add('expanded');
+    // 联动角标高亮
+    var annoNum = el.dataset.anno;
+    var marker = document.getElementById('annoMarker' + annoNum);
+    if (marker) {
+      marker.classList.add('active');
+    }
+  }
+}
+
+// 点击角标联动标注面板
+document.querySelectorAll('.anno-marker').forEach(function(marker) {
+  marker.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var annoNum = this.dataset.anno;
+    var panelItem = document.querySelector('.anno-item[data-anno="' + annoNum + '"]');
+    if (panelItem) {
+      // 滚动到对应条目
+      panelItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 展开
+      document.querySelectorAll('.anno-item').forEach(function(item) {
+        item.classList.remove('expanded');
+      });
+      document.querySelectorAll('.anno-marker').forEach(function(m) {
+        m.classList.remove('active');
+      });
+      panelItem.classList.add('expanded');
+      this.classList.add('active');
+    }
+  });
+});
+</script>
+
+</body>
+</html>
