@@ -1,0 +1,4000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提交包裹-WEB端-带标注原型</title>
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #F3F4F6;
+  color: #1F2937;
+  min-height: 100vh;
+}
+
+/* ===== 顶部栏 ===== */
+.top-bar {
+  height: 48px;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-bar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1F2937;
+  margin-right: 24px;
+  cursor: pointer;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: #3B82F6;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.breadcrumb {
+  font-size: 12px;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.breadcrumb .sep { color: #D1D5DB; }
+.breadcrumb .current { color: #1F2937; font-weight: 500; }
+.breadcrumb a { color: #6B7280; text-decoration: none; }
+.breadcrumb a:hover { color: #3B82F6; }
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #3B82F6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ===== 进度步骤条 ===== */
+.progress-step-bar {
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.progress-step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.progress-step-title .icon {
+  font-size: 16px;
+}
+.progress-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.progress-step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+.progress-step-dot.completed {
+  background: #10B981;
+  color: #fff;
+}
+.progress-step-dot.current {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+}
+.progress-step-dot.pending {
+  background: #E5E7EB;
+  color: #9CA3AF;
+}
+.progress-step-label {
+  font-size: 11px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.progress-step-label.completed {
+  color: #10B981;
+  font-weight: 500;
+}
+.progress-step-label.current {
+  color: #3B82F6;
+  font-weight: 600;
+}
+.progress-step-label.pending {
+  color: #9CA3AF;
+}
+.progress-connector {
+  width: 32px;
+  height: 2px;
+  margin: 0 4px;
+  background: #E5E7EB;
+}
+.progress-connector.completed {
+  background: #10B981;
+}
+
+/* ===== Demo控制条 ===== */
+.demo-control-bar {
+  position: fixed;
+  top: 112px;
+  right: 16px;
+  z-index: 200;
+  background: #FEF3C7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.demo-toggle-btn {
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #F59E0B;
+  background: #fff;
+  color: #92400E;
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.demo-toggle-btn:hover { background: #FEF9C3; }
+.demo-btns-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.demo-btn {
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #F59E0B;
+  background: #fff;
+  color: #92400E;
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.demo-btn:hover { background: #FEF9C3; }
+.demo-btn.active {
+  background: #F59E0B;
+  color: #fff;
+  border-color: #F59E0B;
+}
+
+/* ===== 主内容区 ===== */
+.page-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 72px;
+}
+
+/* 左侧主内容 */
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 右侧固定面板 */
+.side-panel {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 64px;
+  max-height: calc(100vh - 124px);
+  overflow-y: auto;
+}
+
+/* ===== 卡片样式 ===== */
+.card-web {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #F3F4F6;
+}
+.card-header-web {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.card-title-web {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.card-title-web .icon { font-size: 14px; }
+.card-action {
+  font-size: 12px;
+  color: #3B82F6;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.card-action:hover { color: #2563EB; }
+
+/* ===== 收货地址 ===== */
+.address-content-web {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.address-icon-web {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.address-info-web { flex: 1; }
+.address-name-web {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.default-tag-web {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #FEF3C7;
+  color: #D97706;
+  font-weight: 500;
+}
+.address-phone-web {
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+.address-text-web {
+  font-size: 12px;
+  color: #374151;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.address-empty-web {
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 0;
+  gap: 10px;
+}
+.address-empty-web .empty-icon { font-size: 20px; }
+.address-empty-web .empty-text {
+  font-size: 13px;
+  color: #9CA3AF;
+  flex: 1;
+}
+.address-empty-web .empty-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  background: #3B82F6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.address-empty-web .empty-btn:hover { background: #2563EB; }
+
+/* 未选地址-线路提示 */
+.route-empty-hint-web {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px 0;
+  gap: 10px;
+}
+.route-empty-hint-web .empty-icon { font-size: 20px; }
+.route-empty-hint-web .empty-text {
+  font-size: 13px;
+  color: #9CA3AF;
+}
+
+/* 无可用线路状态 */
+.route-no-available-web {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+}
+.route-no-available-web .empty-icon { font-size: 20px; }
+.route-no-available-web .empty-text {
+  font-size: 13px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+/* ===== 提包商品 ===== */
+.goods-summary-web {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.goods-left-web {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.goods-thumbs-web {
+  display: flex;
+  gap: 4px;
+}
+.goods-thumb-web {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border: 1px solid #E5E7EB;
+}
+.goods-info-web {
+  flex: 1;
+  min-width: 0;
+}
+.goods-info-item-web {
+  font-size: 12px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.goods-info-item-web .highlight {
+  font-weight: 600;
+  color: #3B82F6;
+}
+.goods-tags-web {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.goods-type-tag-web {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.goods-type-tag-web.buy {
+  background: #EFF6FF;
+  color: #3B82F6;
+}
+.goods-type-tag-web.transfer {
+  background: #F5F3FF;
+  color: #8B5CF6;
+}
+.goods-toggle-web {
+  font-size: 12px;
+  color: #3B82F6;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.goods-toggle-web:hover { color: #2563EB; }
+
+.warehouse-info-web {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #F3F4F6;
+  font-size: 11px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.warehouse-info-web span {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* ===== 物流线路 ===== */
+.route-list-web {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.route-card-web {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+.route-card-web:hover {
+  border-color: #3B82F6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+/* 不可选线路卡片 */
+.route-card-web.route-disabled {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+  opacity: 0.7;
+  pointer-events: auto;
+}
+.route-card-web.route-disabled:hover {
+  border-color: #E5E7EB;
+  box-shadow: none;
+}
+.route-disabled-tag-web {
+  display: inline-block;
+  background: #FEE2E2;
+  color: #DC2626;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.route-disabled-reason-web {
+  font-size: 11px;
+  color: #DC2626;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.route-disabled-btn-web {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid #D1D5DB;
+  background: #F3F4F6;
+  color: #9CA3AF;
+  font-size: 12px;
+  cursor: not-allowed;
+}
+.route-selected-web {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+  border: 1px solid #3B82F6;
+  border-radius: 8px;
+  padding: 12px;
+}
+.route-selected-web:hover {
+  background: #F9FAFB;
+}
+
+/* 线路头部行 */
+.route-header-row-web {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.route-name-area-web {
+  flex-shrink: 0;
+  min-width: 100px;
+}
+.route-name-main-web {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.3;
+}
+.route-name-sub-web {
+  font-size: 11px;
+  color: #9CA3AF;
+}
+.route-desc-web {
+  flex: 1;
+  min-width: 0;
+}
+.route-desc-label-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-bottom: 2px;
+}
+.route-desc-text-web {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.route-goods-tag-web {
+  font-size: 11px;
+  color: #374151;
+  background: #F3F4F6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.route-time-web {
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 90px;
+}
+.route-time-label-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.route-time-label-web .info-icon {
+  font-size: 12px;
+  cursor: pointer;
+}
+.route-time-value-web {
+  font-size: 12px;
+  color: #1F2937;
+  font-weight: 500;
+}
+.route-price-area-web {
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 70px;
+}
+.route-price-label-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-bottom: 2px;
+}
+.route-price-value-web {
+  font-size: 14px;
+  font-weight: 700;
+  color: #EF4444;
+}
+.route-price-value-web .yen {
+  font-size: 11px;
+}
+.route-actions-web {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.route-collapse-btn-web {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #6B7280;
+  transition: all 0.2s;
+}
+.route-collapse-btn-web:hover {
+  border-color: #3B82F6;
+  color: #3B82F6;
+}
+.route-collapse-btn-web.expanded {
+  transform: rotate(180deg);
+}
+.route-select-btn-web {
+  padding: 5px 14px;
+  border-radius: 4px;
+  background: #3B82F6;
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.route-select-btn-web:hover {
+  background: #2563EB;
+}
+.route-switch-btn-web {
+  padding: 5px 14px;
+  border-radius: 4px;
+  background: #fff;
+  color: #3B82F6;
+  border: 1px solid #3B82F6;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.route-switch-btn-web:hover {
+  background: #EFF6FF;
+}
+
+/* 线路展开详情 */
+.route-expanded-web {
+  display: none;
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+}
+.route-expanded-web.show {
+  display: block;
+}
+.route-expanded-top-web {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.route-expanded-item-web {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6B7280;
+}
+.route-expanded-item-web .label {
+  color: #9CA3AF;
+}
+.route-expanded-item-web .val {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* 线路详情区域（折叠） */
+.route-detail-area-web {
+  display: none;
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+}
+.route-detail-area-web.show {
+  display: block;
+}
+.route-detail-top-web {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.route-detail-item-web {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6B7280;
+}
+.route-detail-item-web .label {
+  color: #9CA3AF;
+}
+.route-detail-item-web .val {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* 计费元信息行 */
+.billing-meta-row-web {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.billing-meta-item-web {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6B7280;
+}
+.billing-meta-item-web .label {
+  color: #9CA3AF;
+}
+.billing-meta-item-web .val {
+  color: #374151;
+  font-weight: 500;
+}
+.billing-meta-item-web .info-icon {
+  cursor: pointer;
+  color: #3B82F6;
+  font-size: 14px;
+}
+
+/* 计费表格 */
+.billing-table-web {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 10px 0;
+}
+.billing-table-web th {
+  text-align: center;
+  padding: 6px 8px;
+  color: #6B7280;
+  font-weight: 500;
+  border: 1px solid #E5E7EB;
+  background: #F3F4F6;
+  font-size: 11px;
+}
+.billing-table-web th:first-child {
+  text-align: left;
+  background: #F3F4F6;
+  color: #9CA3AF;
+}
+.billing-table-web td {
+  text-align: center;
+  padding: 6px 8px;
+  color: #374151;
+  border: 1px solid #E5E7EB;
+}
+.billing-table-web td:first-child {
+  text-align: left;
+  color: #9CA3AF;
+}
+
+/* 禁寄品类标签 */
+.prohibit-tags-web {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.prohibit-tag-web {
+  font-size: 11px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: #EF4444;
+  color: #fff;
+  font-weight: 500;
+}
+
+.route-placeholder-web {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 8px;
+  color: #9CA3AF;
+  font-size: 12px;
+  border: 2px dashed #E5E7EB;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.route-placeholder-web:hover {
+  border-color: #3B82F6;
+  color: #3B82F6;
+  background: #EFF6FF;
+}
+.route-placeholder-web .icon { font-size: 24px; }
+
+/* ===== 申报信息 ===== */
+.declare-empty-web {
+  font-size: 12px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.declare-empty-web .icon { font-size: 16px; }
+
+.declare-filled-summary-web {
+  display: none;
+}
+.declare-summary-text-web {
+  font-size: 12px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.declare-field-label-web {
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.declare-field-label-web .req { color: #EF4444; }
+
+/* 表头字段说明tooltip */
+.declare-tip-icon-web {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  color: #EF4444;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.declare-tooltip-web {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1F2937;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.declare-tooltip-web::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1F2937;
+}
+.declare-tip-icon-web:hover + .declare-tooltip-web {
+  display: block;
+}
+
+/* 下单备注提示栏 */
+.declare-notice-bar-web {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #374151;
+}
+.declare-notice-icon-web {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: #F97316;
+  font-size: 16px;
+  line-height: 18px;
+  margin-top: 1px;
+}
+
+.declare-field-input-web {
+  width: 100%;
+  border: 1px solid #E5E7EB;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #374151;
+  outline: none;
+  background: #F9FAFB;
+  transition: all 0.2s;
+}
+.declare-field-input-web:focus {
+  border-color: #3B82F6;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+/* ===== 包裹服务 ===== */
+.service-item-web {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+.service-item-web:last-child { border-bottom: none; }
+.service-left-web {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.service-left-web .icon { font-size: 16px; }
+.service-info-web { flex: 1; }
+.service-name-web {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+.service-link-web {
+  font-size: 11px;
+  color: #3B82F6;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.service-link-web:hover { text-decoration: underline; }
+.tip-icon-web {
+  display: inline-block;
+  font-size: 12px;
+  color: #9CA3AF;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.tip-icon-web:hover { color: #6B7280; }
+
+.switch-web {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #E5E7EB;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.switch-web.active { background: #3B82F6; }
+.switch-web::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: left 0.2s;
+}
+.switch-web.active::after { left: 18px; }
+
+.service-sub-web {
+  margin-top: 8px;
+  padding: 8px;
+  background: #F9FAFB;
+  border-radius: 6px;
+  display: none;
+}
+.service-sub-web.show { display: block; }
+.service-sub-row-web {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.service-sub-label-web {
+  font-size: 12px;
+  color: #6B7280;
+  white-space: nowrap;
+}
+.service-sub-input-web {
+  flex: 1;
+  border: 1px solid #E5E7EB;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+  width: 80px;
+}
+.service-sub-input-web:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+.service-sub-unit-web {
+  font-size: 12px;
+  color: #6B7280;
+}
+.service-sub-hint-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+
+/* ===== 备注 ===== */
+.remark-tags-web {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.remark-tag-web {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #F3F4F6;
+  color: #6B7280;
+  cursor: pointer;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s;
+}
+.remark-tag-web:hover {
+  border-color: #3B82F6;
+  color: #3B82F6;
+}
+.remark-tag-web.active {
+  background: #EFF6FF;
+  color: #3B82F6;
+  border-color: #3B82F6;
+}
+.remark-input-web {
+  width: 100%;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #374151;
+  outline: none;
+  background: #F9FAFB;
+  min-height: 80px;
+  resize: vertical;
+  transition: all 0.2s;
+}
+.remark-input-web:focus {
+  border-color: #3B82F6;
+  background: #fff;
+}
+.remark-input-web::placeholder { color: #9CA3AF; }
+.remark-count-web {
+  text-align: right;
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 4px;
+}
+
+/* ===== 收费明细（右侧面板） ===== */
+.fee-card-web {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #F3F4F6;
+}
+.fee-header-web {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.fee-group-web {
+  margin-bottom: 12px;
+}
+.fee-group-title-web {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-bottom: 6px;
+}
+.fee-row-web {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 12px;
+}
+.fee-row-web .label {
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fee-row-web .value {
+  color: #1F2937;
+  font-weight: 500;
+}
+.fee-row-web .value.discount {
+  color: #10B981;
+}
+.fee-link-web {
+  font-size: 11px;
+  color: #3B82F6;
+  cursor: pointer;
+}
+.fee-link-web:hover { text-decoration: underline; }
+
+.fee-total-web {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 2px solid #F3F4F6;
+  margin-top: 6px;
+}
+.fee-total-web .label {
+  font-size: 14px;
+  color: #1F2937;
+  font-weight: 600;
+}
+.fee-total-web .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #EF4444;
+}
+.fee-total-web .value .yen {
+  font-size: 16px;
+}
+
+/* ===== 免责声明 ===== */
+.disclaimer-card-web {
+  margin-top: 12px;
+}
+.disclaimer-content-web {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.7;
+}
+.disclaimer-content-web p { margin-bottom: 6px; }
+.disclaimer-content-web p:last-child { margin-bottom: 0; }
+.disclaimer-check-web {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.disclaimer-check-web input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  cursor: pointer;
+}
+.disclaimer-check-web label {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.disclaimer-check-web label a {
+  color: #3B82F6;
+  text-decoration: none;
+}
+.disclaimer-check-web label a:hover { text-decoration: underline; }
+
+/* ===== 底部操作栏 ===== */
+.bottom-bar-web {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #fff;
+  border-top: 1px solid #E5E7EB;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 50;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+}
+.bottom-tip-web {
+  font-size: 11px;
+  color: #6B7280;
+  max-width: 500px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.4;
+}
+.bottom-tip-web .icon { color: #F97316; flex-shrink: 0; margin-top: 1px; }
+.bottom-tip-web .tip-trigger {
+  color: #3B82F6;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.submit-btn-web {
+  padding: 10px 32px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.submit-btn-web:hover {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  transform: translateY(-1px);
+}
+.submit-btn-web:active { transform: translateY(1px); }
+.submit-btn-web:disabled {
+  background: #D1D5DB;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== 弹窗 ===== */
+.modal-overlay-web {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay-web.show { display: flex; }
+.modal-dialog-web {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal-header-web {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #F3F4F6;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+.modal-title-web {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2937;
+}
+.modal-close-web {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #6B7280;
+}
+.modal-close-web:hover { background: #E5E7EB; }
+.modal-body-web {
+  padding: 14px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 商品明细弹窗内容 */
+.goods-group-web { margin-top: 12px; }
+.goods-group-title-web {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: #F9FAFB;
+  border-radius: 5px;
+}
+.goods-item-web {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+.goods-item-web:last-child { border-bottom: none; }
+.goods-img-web {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  border: 1px solid #E5E7EB;
+}
+.goods-detail-web { flex: 1; }
+.goods-name-web {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 2px;
+}
+.goods-spec-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-bottom: 4px;
+}
+.goods-meta-web {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.goods-tag-web {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.goods-tag-web.attr {
+  background: #EFF6FF;
+  color: #3B82F6;
+}
+.goods-tag-web.sensitive {
+  background: #FEF3C7;
+  color: #D97706;
+}
+.goods-tag-web.electric {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+.goods-price-web {
+  font-size: 14px;
+  font-weight: 600;
+  color: #EF4444;
+}
+
+/* 线路选择弹窗内容 */
+.route-option-web {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.route-option-web.selected {
+  border-color: #3B82F6;
+  background: #EFF6FF;
+}
+.route-option-web.route-disabled {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.route-option-web.route-disabled:hover { border-color: #E5E7EB; }
+.route-option-header-web {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.route-option-name-web {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.route-option-price-web {
+  font-size: 18px;
+  font-weight: 700;
+  color: #EF4444;
+}
+.route-option-meta-web {
+  font-size: 12px;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.route-option-time-web {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 4px;
+}
+.route-option-disabled-web {
+  font-size: 11px;
+  color: #EF4444;
+  margin-top: 4px;
+}
+.route-check-web {
+  display: none;
+  color: #3B82F6;
+  font-size: 18px;
+}
+.route-option-web.selected .route-check-web { display: block; }
+
+/* Toast */
+.toast-web {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 1000;
+}
+
+/* 隐藏类 */
+.hidden { display: none !important; }
+
+/* 温馨提示弹窗 */
+.tip-modal-content {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.8;
+}
+.tip-modal-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 12px 0 6px;
+}
+.tip-modal-content h4:first-child { margin-top: 0; }
+.tip-modal-content ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.tip-modal-content li {
+  margin-bottom: 4px;
+}
+
+
+/* ===== 标注系统样式 ===== */
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.main-content-area {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 0; position: relative; }
+
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <div class="main-content-area">
+        <!-- 左侧原型区 -->
+        <div class="preview-area">
+<!-- ===== 顶部栏 ===== -->
+<div class="top-bar">
+  <div class="top-bar-logo">
+    <div class="logo-icon">P</div>
+    POKO
+  </div>
+  <div class="breadcrumb">
+    <a href="#">仓储管理</a>
+    <span class="sep">›</span>
+    <a href="#">我的仓库</a>
+    <span class="sep">›</span>
+    <span class="current">提交包裹</span>
+  </div>
+  <div class="top-bar-right">
+    <div class="user-avatar">K</div>
+  </div>
+</div>
+
+<!-- 进度步骤条已移动到主内容区内 -->
+
+<!-- Demo控制条 -->
+<div class="demo-control-bar">
+  <button class="demo-toggle-btn" id="demoToggleBtn" onclick="toggleDemoBar()">Demo</button>
+  <div class="demo-btns-wrap" id="demoBtnsWrap" style="display:none;">
+    <button class="demo-btn active" id="demoBtnEmpty" onclick="toggleDemoState('empty')">初始化</button>
+    <button class="demo-btn" id="demoBtnFilled" onclick="toggleDemoState('filled')">已填写</button>
+    <button class="demo-btn" id="demoBtnNoAvailable" onclick="toggleDemoState('noAvailable')">无线路</button>
+  </div>
+</div>
+
+<!-- ===== 主内容区 ===== -->
+<div class="page-content">
+
+  <!-- 左侧主内容 -->
+  <div class="main-content">
+
+    <!-- 1. 收货地址 -->
+    <div class="card-web" id="anno-2" style="position:relative;">
+      <div class="anno-marker" data-id="2">2</div>
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">📦</span>
+          提交包裹，国际快递
+        </div>
+      </div>
+      <div class="progress-steps" style="margin-top: 4px;">
+        <div class="progress-step">
+          <div class="progress-step-dot completed" style="width:20px;height:20px;font-size:10px;">✓</div>
+          <span class="progress-step-label completed">选择提包商品</span>
+        </div>
+        <div class="progress-connector completed"></div>
+        <div class="progress-step">
+          <div class="progress-step-dot current" style="width:20px;height:20px;font-size:10px;">2</div>
+          <span class="progress-step-label current">支付提包费用</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step">
+          <div class="progress-step-dot pending" style="width:20px;height:20px;font-size:10px;">3</div>
+          <span class="progress-step-label pending">包裹发出</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step">
+          <div class="progress-step-dot pending" style="width:20px;height:20px;font-size:10px;">4</div>
+          <span class="progress-step-label pending">等待收货</span>
+        </div>
+        <div class="progress-connector"></div>
+        <div class="progress-step">
+          <div class="progress-step-dot pending" style="width:20px;height:20px;font-size:10px;">5</div>
+          <span class="progress-step-label pending">签收晒单</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-web">
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">📍</span>
+          收货地址
+        </div>
+        <div class="card-action" onclick="showToast('跳转地址管理页')">
+          切换地址 ›
+        </div>
+      </div>
+
+      <!-- 有地址状态 -->
+      <div class="address-content-web" id="addressFilledWeb" style="display:none;">
+        <div class="address-icon-web">📍</div>
+        <div class="address-info-web">
+          <div class="address-name-web">
+            John Smith
+            <span class="default-tag-web">默认</span>
+          </div>
+          <div class="address-phone-web">+1 (213) 555-0198</div>
+          <div class="address-text-web">
+            1234 Oak Avenue, Apt 5B, Los Angeles, CA 90001, United States
+          </div>
+        </div>
+      </div>
+
+      <!-- 无地址空状态 -->
+      <div class="address-empty-web" id="addressEmptyWeb" style="display:flex;">
+        <div class="empty-icon">📍</div>
+        <div class="empty-text">请添加收货地址</div>
+        <button class="empty-btn" onclick="showToast('跳转添加地址页')">去添加</button>
+      </div>
+    </div>
+
+    <!-- 2. 提包商品 -->
+    <div class="card-web" id="anno-3" style="position:relative;">
+      <div class="anno-marker" data-id="3">3</div>
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">📦</span>
+          提包商品
+        </div>
+        <div class="card-action" onclick="showGoodsModalWeb()">
+          查看明细 ›
+        </div>
+      </div>
+
+      <div class="goods-summary-web">
+        <div class="goods-left-web">
+          <div class="goods-thumbs-web">
+            <div class="goods-thumb-web">📱</div>
+            <div class="goods-thumb-web">👕</div>
+            <div class="goods-thumb-web">🧢</div>
+            <div class="goods-thumb-web">+2</div>
+          </div>
+          <div class="goods-info-web">
+            <div class="goods-info-item-web">
+              <span>共 <span class="highlight">5</span> 件商品</span>
+              <span>·</span>
+              <span>总重量 <span class="highlight">2.1kg</span></span>
+              <span>·</span>
+              <span>总体积 <span class="highlight">12,000cm³</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warehouse-info-web">
+        <span>🏭 深圳仓</span>
+      </div>
+    </div>
+
+    <!-- 3. 物流线路 -->
+    <div class="card-web" id="anno-4" style="position:relative;">
+      <div class="anno-marker" data-id="4">4</div>
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">🚚</span>
+          物流线路
+        </div>
+      </div>
+
+      <!-- 线路列表（初始状态：多条线路可选） -->
+      <div class="route-list-web" id="routeListWeb" style="display:none;">
+        <!-- 线路卡片1 -->
+        <div class="route-card-web" data-route="1">
+          <div class="route-header-row-web">
+            <div class="route-name-area-web">
+              <div class="route-name-main-web">空运标快</div>
+              <div class="route-name-sub-web">空运</div>
+            </div>
+            <div class="route-desc-web">
+              <div class="route-desc-label-web">线路介绍</div>
+              <div class="route-desc-text-web">
+                经济行快运快线，适合费急需包裹
+              </div>
+            </div>
+            <div class="route-time-web">
+              <div class="route-time-label-web">运输时效 <span class="info-icon" onclick="showTimeTooltip()">ⓘ</span></div>
+              <div class="route-time-value-web">2-3天</div>
+            </div>
+            <div class="route-price-area-web">
+              <div class="route-price-label-web">运费</div>
+              <div class="route-price-value-web">¥<span class="yen">200</span></div>
+            </div>
+            <div class="route-actions-web">
+              <button class="route-collapse-btn-web" onclick="toggleCardExpand(this, event)">∨</button>
+              <button class="route-select-btn-web" onclick="selectRoute('1', event)">选择</button>
+            </div>
+          </div>
+          <div class="route-detail-area-web">
+            <div class="billing-meta-row-web">
+              <div class="billing-meta-item-web">
+                <span class="label">计费重量：</span>
+                <span class="val">15kg</span>
+              </div>
+              <div class="billing-meta-item-web">
+                <span class="label">计费方式：</span>
+                <span class="val">实重与抛重二者取其大</span>
+                <span class="info-icon" onclick="showToast('计费方式说明')">ⓘ</span>
+              </div>
+            </div>
+            <table class="billing-table-web">
+              <thead>
+                <tr>
+                  <th>计费区间</th>
+                  <th>计费方式</th>
+                  <th>费用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>首重 0-3kg</td>
+                  <td>一口价</td>
+                  <td>¥36.00</td>
+                </tr>
+                <tr>
+                  <td>续重 3-6kg</td>
+                  <td>¥20.00/kg</td>
+                  <td>¥60.00</td>
+                </tr>
+                <tr>
+                  <td>续重 6-10kg</td>
+                  <td>¥18.00/kg</td>
+                  <td>¥72.00</td>
+                </tr>
+                <tr>
+                  <td>续重 10-15kg</td>
+                  <td>¥15.00/kg</td>
+                  <td>¥75.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="prohibit-tags-web">
+              <span class="prohibit-tag-web">🚫 肉类</span>
+              <span class="prohibit-tag-web">🚫 药品</span>
+              <span class="prohibit-tag-web">🚫 液体</span>
+              <span class="prohibit-tag-web">🚫 带电</span>
+            </div>
+          </div>
+        </div>
+        <!-- 线路卡片2 -->
+        <div class="route-card-web" data-route="2">
+          <div class="route-header-row-web">
+            <div class="route-name-area-web">
+              <div class="route-name-main-web">海运经济</div>
+              <div class="route-name-sub-web">海运</div>
+            </div>
+            <div class="route-desc-web">
+              <div class="route-desc-label-web">线路介绍</div>
+              <div class="route-desc-text-web">
+                经济实惠海运线路，适合大件包裹
+              </div>
+            </div>
+            <div class="route-time-web">
+              <div class="route-time-label-web">运输时效 <span class="info-icon" onclick="showTimeTooltip()">ⓘ</span></div>
+              <div class="route-time-value-web">15-20天</div>
+            </div>
+            <div class="route-price-area-web">
+              <div class="route-price-label-web">运费</div>
+              <div class="route-price-value-web">¥<span class="yen">80</span></div>
+            </div>
+            <div class="route-actions-web">
+              <button class="route-collapse-btn-web" onclick="toggleCardExpand(this, event)">∨</button>
+              <button class="route-select-btn-web" onclick="selectRoute('2', event)">选择</button>
+            </div>
+          </div>
+          <div class="route-detail-area-web">
+            <div class="billing-meta-row-web">
+              <div class="billing-meta-item-web">
+                <span class="label">计费重量：</span>
+                <span class="val">15kg</span>
+              </div>
+              <div class="billing-meta-item-web">
+                <span class="label">计费方式：</span>
+                <span class="val">实重与抛重二者取其大</span>
+                <span class="info-icon" onclick="showToast('计费方式说明')">ⓘ</span>
+              </div>
+            </div>
+            <table class="billing-table-web">
+              <thead>
+                <tr>
+                  <th>计费区间</th>
+                  <th>计费方式</th>
+                  <th>费用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>首重 0-3kg</td>
+                  <td>一口价</td>
+                  <td>¥30.00</td>
+                </tr>
+                <tr>
+                  <td>续重 3-6kg</td>
+                  <td>¥15.00/kg</td>
+                  <td>¥45.00</td>
+                </tr>
+                <tr>
+                  <td>续重 6-10kg</td>
+                  <td>¥12.00/kg</td>
+                  <td>¥48.00</td>
+                </tr>
+                <tr>
+                  <td>续重 10-15kg</td>
+                  <td>¥10.00/kg</td>
+                  <td>¥50.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="prohibit-tags-web">
+              <span class="prohibit-tag-web">🚫 肉类</span>
+              <span class="prohibit-tag-web">🚫 药品</span>
+              <span class="prohibit-tag-web">🚫 液体</span>
+              <span class="prohibit-tag-web">🚫 带电</span>
+            </div>
+          </div>
+        </div>
+        <!-- 线路卡片3 -->
+        <div class="route-card-web" data-route="3">
+          <div class="route-header-row-web">
+            <div class="route-name-area-web">
+              <div class="route-name-main-web">快递专线</div>
+              <div class="route-name-sub-web">快递</div>
+            </div>
+            <div class="route-desc-web">
+              <div class="route-desc-label-web">线路介绍</div>
+              <div class="route-desc-text-web">
+                快速送达，适合急件
+              </div>
+            </div>
+            <div class="route-time-web">
+              <div class="route-time-label-web">运输时效 <span class="info-icon" onclick="showTimeTooltip()">ⓘ</span></div>
+              <div class="route-time-value-web">1-2天</div>
+            </div>
+            <div class="route-price-area-web">
+              <div class="route-price-label-web">运费</div>
+              <div class="route-price-value-web">¥<span class="yen">350</span></div>
+            </div>
+            <div class="route-actions-web">
+              <button class="route-collapse-btn-web" onclick="toggleCardExpand(this, event)">∨</button>
+              <button class="route-select-btn-web" onclick="selectRoute('3', event)">选择</button>
+            </div>
+          </div>
+          <div class="route-detail-area-web">
+            <div class="billing-meta-row-web">
+              <div class="billing-meta-item-web">
+                <span class="label">计费重量：</span>
+                <span class="val">15kg</span>
+              </div>
+              <div class="billing-meta-item-web">
+                <span class="label">计费方式：</span>
+                <span class="val">实重与抛重二者取其大</span>
+                <span class="info-icon" onclick="showToast('计费方式说明')">ⓘ</span>
+              </div>
+            </div>
+            <table class="billing-table-web">
+              <thead>
+                <tr>
+                  <th>计费区间</th>
+                  <th>计费方式</th>
+                  <th>费用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>首重 0-3kg</td>
+                  <td>一口价</td>
+                  <td>¥45.00</td>
+                </tr>
+                <tr>
+                  <td>续重 3-6kg</td>
+                  <td>¥25.00/kg</td>
+                  <td>¥75.00</td>
+                </tr>
+                <tr>
+                  <td>续重 6-10kg</td>
+                  <td>¥22.00/kg</td>
+                  <td>¥88.00</td>
+                </tr>
+                <tr>
+                  <td>续重 10-15kg</td>
+                  <td>¥18.00/kg</td>
+                  <td>¥90.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="prohibit-tags-web">
+              <span class="prohibit-tag-web">🚫 肉类</span>
+              <span class="prohibit-tag-web">🚫 药品</span>
+              <span class="prohibit-tag-web">🚫 液体</span>
+              <span class="prohibit-tag-web">🚫 带电</span>
+            </div>
+          </div>
+        </div>
+        <!-- 线路卡片4（不可选） -->
+        <div class="route-card-web route-disabled" data-route="4">
+          <div class="route-header-row-web">
+            <div class="route-name-area-web">
+              <div class="route-name-main-web">敏货专线 <span class="route-disabled-tag-web">不可选</span></div>
+              <div class="route-name-sub-web">快递</div>
+            </div>
+            <div class="route-desc-web">
+              <div class="route-desc-label-web">线路介绍</div>
+              <div class="route-desc-text-web">
+                专接敏感货物，适合化妆品、食品等
+              </div>
+              <div class="route-disabled-reason-web"> 该线路不支持寄送敏感品（护肤精华液）</div>
+            </div>
+            <div class="route-time-web">
+              <div class="route-time-label-web">运输时效 <span class="info-icon" onclick="showTimeTooltip()">ⓘ</span></div>
+              <div class="route-time-value-web">5-7天</div>
+            </div>
+            <div class="route-price-area-web">
+              <div class="route-price-label-web">运费</div>
+              <div class="route-price-value-web">¥<span class="yen">260</span></div>
+            </div>
+            <div class="route-actions-web">
+              <button class="route-disabled-btn-web" disabled>不可选</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 未选地址提示（无地址时显示） -->
+      <div class="route-empty-hint-web" id="routeEmptyHintWeb" style="display:flex;">
+        <div class="empty-icon">🚚</div>
+        <div class="empty-text">请先选择收货地址</div>
+      </div>
+
+      <!-- 无可用线路状态 -->
+      <div class="route-no-available-web" id="routeNoAvailableWeb" style="display:none;">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text">暂无可用物流线路</div>
+        <div style="font-size: 12px; color: #9CA3AF; margin-top: 4px;">当前地址暂无支持的服务线路，请更换地址或联系客服</div>
+      </div>
+
+      <!-- 已选中线路（选择后显示） -->
+      <div class="route-selected-web" id="routeSelectedWeb" style="display:none;">
+        <div class="route-header-row-web">
+          <div class="route-name-area-web">
+            <div class="route-name-main-web" id="selectedRouteName">空运标快</div>
+            <div class="route-name-sub-web" id="selectedRouteType">空运</div>
+          </div>
+          <div class="route-desc-web">
+            <div class="route-desc-label-web">线路介绍</div>
+            <div class="route-desc-text-web">
+              <span id="selectedRouteDesc">经济行快运快线，适合费急需包裹</span>
+            </div>
+          </div>
+          <div class="route-time-web">
+            <div class="route-time-label-web">运输时效 <span class="info-icon" onclick="showTimeTooltip()">ⓘ</span></div>
+            <div class="route-time-value-web" id="selectedRouteTime">2-3天</div>
+          </div>
+          <div class="route-price-area-web">
+            <div class="route-price-label-web">运费</div>
+            <div class="route-price-value-web">¥<span class="yen" id="selectedRoutePrice">200</span></div>
+          </div>
+          <div class="route-actions-web">
+            <button class="route-switch-btn-web" onclick="switchRoute()">更换</button>
+            <button class="route-collapse-btn-web" id="routeCollapseBtnWeb" onclick="toggleRouteExpand(event)">∨</button>
+          </div>
+        </div>
+        <div class="route-detail-area-web" id="routeDetailAreaWeb">
+          <div class="billing-meta-row-web">
+            <div class="billing-meta-item-web">
+              <span class="label">计费重量：</span>
+              <span class="val">15kg</span>
+            </div>
+            <div class="billing-meta-item-web">
+              <span class="label">计费方式：</span>
+              <span class="val">实重与抛重二者取其大</span>
+              <span class="info-icon" onclick="showToast('计费方式说明')">ⓘ</span>
+            </div>
+          </div>
+          <table class="billing-table-web">
+            <thead>
+              <tr>
+                <th>计费区间</th>
+                <th>计费方式</th>
+                <th>费用</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>首重 0-3kg</td>
+                <td>一口价</td>
+                <td>¥36.00</td>
+              </tr>
+              <tr>
+                <td>续重 3-6kg</td>
+                <td>¥20.00/kg</td>
+                <td>¥60.00</td>
+              </tr>
+              <tr>
+                <td>续重 6-10kg</td>
+                <td>¥18.00/kg</td>
+                <td>¥72.00</td>
+              </tr>
+              <tr>
+                <td>续重 10-15kg</td>
+                <td>¥15.00/kg</td>
+                <td>¥75.00</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="prohibit-tags-web">
+            <span class="prohibit-tag-web">🚫 肉类</span>
+            <span class="prohibit-tag-web">🚫 药品</span>
+            <span class="prohibit-tag-web">🚫 液体</span>
+            <span class="prohibit-tag-web">🚫 带电</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 申报信息（选择线路后显示） -->
+    <div class="card-web" id="declareSectionWeb" style="display:none; position:relative;">
+      <div class="anno-marker" data-id="5">5</div>
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">📋</span>
+          申报信息
+        </div>
+      </div>
+
+      <!-- 自主申报 -->
+      <div id="declareSelfWeb">
+        <!-- 未填写状态 -->
+        <div class="declare-empty-web" id="declareEmptyWeb">
+          <span class="icon">📝</span>
+          <span>请填写申报信息</span>
+          <button class="declare-type-btn-web" style="background:#3B82F6;color:#fff;" onclick="showDeclareFormWeb()">开始填写</button>
+        </div>
+
+        <!-- 已填写摘要 -->
+        <div class="declare-filled-summary-web" id="declareFilledWeb">
+          <div class="declare-summary-text-web">
+            <span>📋</span>
+            <span>蓝牙耳机等3件商品 · USD $125.00</span>
+          </div>
+          <div class="card-action" onclick="showDeclareFormWeb()">修改</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 包裹服务（选择线路后显示） -->
+    <div class="card-web" id="serviceSectionWeb" style="display:none; position:relative;">
+      <div class="anno-marker" data-id="6">6</div>
+      <div class="card-header-web">
+        <div class="card-title-web">
+          <span class="icon">⭐</span>
+          包裹服务
+        </div>
+      </div>
+
+      <!-- 代收货款 -->
+      <div class="service-item-web">
+        <div class="service-left-web">
+          <div class="icon">💰</div>
+          <div class="service-info-web">
+            <div class="service-name-web">
+              代收货款
+              <span class="tip-icon-web" onclick="showCodTipModal()">ⓘ</span>
+            </div>
+          </div>
+        </div>
+        <div class="switch-web" id="switchCODWeb" onclick="toggleSwitchWeb('COD')"></div>
+      </div>
+      <div class="service-sub-web" id="subCODWeb">
+        <div class="service-sub-row-web">
+          <span class="service-sub-label-web">代收金额</span>
+          <input class="service-sub-input-web" type="number" id="codAmountWeb" value="1000" />
+          <span class="service-sub-unit-web">TWD</span>
+        </div>
+        <div class="service-sub-hint-web">100积分=1元，最低100积分</div>
+      </div>
+
+      <!-- 包税服务 -->
+      <div class="service-item-web">
+        <div class="service-left-web">
+          <div class="icon">📦</div>
+          <div class="service-info-web">
+            <div class="service-name-web">
+              包税服务
+              <span class="tip-icon-web" onclick="showTaxServiceModal()">ⓘ</span>
+            </div>
+          </div>
+        </div>
+        <div class="switch-web" id="switchTaxWeb" onclick="toggleSwitchWeb('Tax')"></div>
+      </div>
+      <div class="service-sub-web" id="subTaxWeb">
+        <div class="service-sub-hint-web" style="color:#6B7280;">包税服务由平台统一计算税费</div>
+      </div>
+
+      <!-- 保价服务 -->
+      <div class="service-item-web">
+        <div class="service-left-web">
+          <div class="icon">🛡️</div>
+          <div class="service-info-web">
+            <div class="service-name-web">
+              保价服务
+              <span class="tip-icon-web" onclick="showInsuranceModalWeb()">ⓘ</span>
+            </div>
+          </div>
+        </div>
+        <div class="switch-web" id="switchInsuranceWeb" onclick="toggleSwitchWeb('Insurance')"></div>
+      </div>
+      <div class="service-sub-web" id="subInsuranceWeb">
+        <div class="service-sub-row-web">
+          <span class="service-sub-label-web">保价金额</span>
+          <input class="service-sub-input-web" type="number" id="insuranceAmountWeb" value="500" oninput="calcInsuranceFeeWeb()" />
+          <span class="service-sub-unit-web">元</span>
+        </div>
+        <div class="service-sub-hint-web" id="insuranceHintWeb">保价范围：¥100 ~ ¥50,000</div>
+        <div class="service-sub-hint-web hidden" id="insuranceErrorWeb" style="color:#EF4444;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 右侧固定面板 -->
+  <div class="side-panel" id="anno-7">
+    <div class="anno-marker" data-id="7">7</div>
+    <div class="fee-card-web">
+      <div class="fee-header-web">收费明细</div>
+
+      <!-- 基础费用 -->
+      <div class="fee-group-web">
+        <div class="fee-group-title-web">基础费用</div>
+        <div class="fee-row-web">
+          <span class="label">📦 承运运费</span>
+          <span class="value">¥186.00 <span class="tip-icon-web" onclick="showShippingDetailModal()" style="cursor:pointer;">ⓘ</span></span>
+        </div>
+        <div class="fee-row-web">
+          <span class="label">⚖️ 超重费</span>
+          <span class="value">¥0.00 <span class="tip-icon-web" onclick="showToast('查看超重费明细')" style="cursor:pointer;">ⓘ</span></span>
+        </div>
+      </div>
+
+      <!-- 包裹服务费用 -->
+      <div class="fee-group-web" id="otherFeesWeb" style="display:none;">
+
+        <div class="fee-row-web" id="feeTaxWeb" style="display:none;">
+          <span class="label">📦 包税手续费</span>
+          <span class="value">¥30.00</span>
+        </div>
+        <div class="fee-row-web" id="feeInsuranceWeb" style="display:none;">
+          <span class="label">🛡️ 保价手续费</span>
+          <span class="value" id="feeInsuranceValue">¥15.00</span>
+        </div>
+      </div>
+
+      <!-- 优惠抵扣 -->
+      <div class="fee-group-web">
+        <div class="fee-group-title-web">优惠抵扣</div>
+        <div class="fee-row-web">
+          <span class="label">🎫 优惠券 <span class="fee-link-web" onclick="showToast('打开优惠券选择')">2张可用 ›</span></span>
+          <span class="value discount" id="couponDiscountWeb">-¥0.00</span>
+        </div>
+        <div class="fee-row-web">
+          <span class="label">⭐ 积分抵扣 <span style="font-size:10px;color:#9CA3AF;">(可用1250)</span></span>
+          <span class="value" style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="pointInputWeb" value="0" min="0" max="1250" style="width:70px;padding:4px 6px;border:1px solid #D1D5DB;border-radius:4px;font-size:12px;text-align:center;" oninput="calcPointDeductWeb()" />
+            <span style="font-size:11px;color:#6B7280;">积分</span>
+            <span class="discount" id="pointDeductWeb" style="margin-left:4px;">-¥0.00</span>
+          </span>
+        </div>
+        <!-- 积分使用说明 -->
+        <div style="padding: 0 0 8px 0; display: flex; align-items: center; justify-content: flex-start;">
+          <img src="https://www.coze.cn/s/0-rKSgRgj6w/" alt="积分使用说明" style="height: 28px;" />
+        </div>
+      </div>
+
+      <!-- 合计 -->
+      <div class="fee-total-web">
+        <span class="label">合计</span>
+        <span class="value"><span class="yen">¥</span><span id="totalAmountWeb">0.00</span></span>
+      </div>
+
+      <!-- 备注 -->
+      <div class="remark-section-web" style="margin-top: 12px;">
+        <div class="remark-title-web" style="font-size: 13px; font-weight: 600; color: #1F2937; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+          <span>💬</span>备注
+        </div>
+        <textarea class="remark-input-web" id="remarkInputWeb" placeholder="如果您对包裹还有其他特殊要求，请在这里备注" oninput="updateRemarkCountWeb()" maxlength="300"></textarea>
+        <div class="remark-count-web" id="remarkCountWeb">0/300</div>
+      </div>
+
+      <!-- 免责声明 -->
+      <div class="disclaimer-card-web">
+        <div class="disclaimer-content-web">
+          <p>• 因海关查验扣押导致的损失平台不承担责任</p>
+          <p>• 因申报信息不实导致的损失由用户自行承担</p>
+        </div>
+        <div class="disclaimer-check-web">
+          <input type="checkbox" id="disclaimerCheckboxWeb" onchange="updateSubmitButtonStateWeb()" />
+          <label for="disclaimerCheckboxWeb">我已阅读并同意 <a href="#">《服务协议》</a> 和 <a href="#">《免责声明》</a></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 底部操作栏 ===== -->
+<div class="bottom-bar-web" id="anno-8" style="position:relative;">
+  <div class="anno-marker" data-id="8">8</div>
+  <div class="bottom-tip-web">
+    <span class="icon">⚠️</span>
+    <span>POKO会根据包裹预估重量收取预估运费，包裹最终运费以承运方核定的重量为准。如产生差额，我们会在打包后7天内退还多余部分；如超重则需您补款。<span class="tip-trigger" onclick="showTipModal()">查看详情</span></span>
+  </div>
+  <button class="submit-btn-web" id="submitBtnWeb" onclick="showToast('跳转支付页面')">提交包裹 ¥191.00</button>
+</div>
+
+<!-- ===== 商品明细弹窗 ===== -->
+<div class="modal-overlay-web" id="goodsModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">提包商品明细</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+
+      <!-- 快递单号信息行 -->
+      <div class="goods-express-info-web" style="background: #F0F9FF; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 600; color: #1E40AF;">快递单号：SF2000000001</span>
+          </div>
+          <div style="font-size: 12px; color: #6B7280;">
+            <span>重量：1.2kg</span>
+            <span style="margin-left: 12px;">体积：0.5kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 商品列表 -->
+      <div class="goods-item-web">
+        <div class="goods-img-web">📱</div>
+        <div class="goods-detail-web">
+          <div class="goods-name-web">iPhone 15 Pro Max 硅胶保护壳</div>
+          <div class="goods-spec-web">颜色：深空黑</div>
+          <div class="goods-price-web" style="display:flex;align-items:center;gap:8px;">¥149.00 <span style="font-size:12px;color:#6B7280;">×1</span></div>
+        </div>
+      </div>
+      <div class="goods-item-web">
+        <div class="goods-img-web">🎧</div>
+        <div class="goods-detail-web">
+          <div class="goods-name-web">AirPods Pro 2代 无线耳机</div>
+          <div class="goods-spec-web">USB-C充电盒</div>
+          <div class="goods-price-web" style="display:flex;align-items:center;gap:8px;">¥1,899.00 <span style="font-size:12px;color:#6B7280;">×1</span></div>
+        </div>
+      </div>
+      <div class="goods-item-web">
+        <div class="goods-img-web">⌚</div>
+        <div class="goods-detail-web">
+          <div class="goods-name-web">Apple Watch Ultra 2 表带</div>
+          <div class="goods-spec-web">钛金属链式 · 49mm</div>
+          <div class="goods-price-web" style="display:flex;align-items:center;gap:8px;">¥2,999.00 <span style="font-size:12px;color:#6B7280;">×1</span></div>
+        </div>
+      </div>
+
+      <!-- 快递单号信息行 -->
+      <div class="goods-express-info-web" style="background: #F5F3FF; padding: 10px 12px; border-radius: 6px; margin-top: 16px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 600; color: #7C3AED;">快递单号：SF2000000002</span>
+          </div>
+          <div style="font-size: 12px; color: #6B7280;">
+            <span>重量：0.9kg</span>
+            <span style="margin-left: 12px;">体积：0.3kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 商品列表 -->
+      <div class="goods-item-web">
+        <div class="goods-img-web">👕</div>
+        <div class="goods-detail-web">
+          <div class="goods-name-web">优衣库纯棉T恤 白色</div>
+          <div class="goods-spec-web">L码</div>
+          <div class="goods-price-web" style="display:flex;align-items:center;gap:8px;">¥79.00 <span style="font-size:12px;color:#6B7280;">×1</span></div>
+        </div>
+      </div>
+      <div class="goods-item-web">
+        <div class="goods-img-web">🧦</div>
+        <div class="goods-detail-web">
+          <div class="goods-name-web">Tabio 棉袜三件套</div>
+          <div class="goods-spec-web">均码</div>
+          <div class="goods-price-web" style="display:flex;align-items:center;gap:8px;">¥39.00 <span style="font-size:12px;color:#6B7280;">×1</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== 线路选择弹窗 ===== -->
+<div class="modal-overlay-web" id="routeModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">选择物流线路</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+
+      <div class="route-option-web selected" onclick="selectRouteWeb(this)">
+        <div class="route-option-header-web">
+          <div class="route-option-name-web">
+            EMS特惠
+            <div class="route-check-web">✓</div>
+          </div>
+          <div class="route-option-price-web">¥186<span style="font-size:12px;">.00</span></div>
+        </div>
+        <div class="route-option-meta-web">
+          <span class="route-tag-web value">[海快]</span>
+          <span>7-15个工作日</span>
+        </div>
+        <div class="route-option-time-web">承运商：EMS + USPS</div>
+      </div>
+
+      <div class="route-option-web" onclick="selectRouteWeb(this)">
+        <div class="route-option-header-web">
+          <div class="route-option-name-web">
+            空运标快
+          </div>
+          <div class="route-option-price-web">¥245<span style="font-size:12px;">.00</span></div>
+        </div>
+        <div class="route-option-meta-web">
+          <span class="route-tag-web value">[空运]</span>
+          <span>5-10个工作日</span>
+        </div>
+        <div class="route-option-time-web">承运商：空运代理</div>
+      </div>
+
+      <div class="route-option-web route-disabled">
+        <div class="route-option-header-web">
+          <div class="route-option-name-web">
+            海运经济
+          </div>
+          <div class="route-option-price-web">¥98<span style="font-size:12px;">.00</span></div>
+        </div>
+        <div class="route-option-meta-web">
+          <span class="route-tag-web value">[海运]</span>
+          <span class="route-option-disabled-web">❌ 不可寄</span>
+        </div>
+        <div class="route-option-disabled-web">敏感品限制</div>
+      </div>
+
+      <div class="route-option-web route-disabled">
+        <div class="route-option-header-web">
+          <div class="route-option-name-web">
+            DHL快递
+          </div>
+          <div class="route-option-price-web">¥320<span style="font-size:12px;">.00</span></div>
+        </div>
+        <div class="route-option-meta-web">
+          <span class="route-tag-web value">[空运]</span>
+          <span class="route-option-disabled-web">❌ 不可寄</span>
+        </div>
+        <div class="route-option-disabled-web">带电品限制</div>
+      </div>
+
+      <div class="route-option-web" onclick="selectRouteWeb(this)">
+        <div class="route-option-header-web">
+          <div class="route-option-name-web">
+            UPS红单
+          </div>
+          <div class="route-option-price-web">¥288<span style="font-size:12px;">.00</span></div>
+        </div>
+        <div class="route-option-meta-web">
+          <span class="route-tag-web value">[空运]</span>
+          <span>5-8个工作日</span>
+        </div>
+        <div class="route-option-time-web">承运商：UPS</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== 包税服务说明弹窗 ===== -->
+<div class="modal-overlay-web" id="taxServiceModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">包税服务说明</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div class="tip-modal-content">
+        <h4>什么是包税服务？</h4>
+        <p>包税服务（DDP）是指在提交包裹时预先支付关税费用，由POKO统一处理清关和缴税事宜。您无需在收货时再向海关或物流商支付任何税费。</p>
+        
+        <h4>包税 vs 不包税</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
+          <tr style="background:#F3F4F6;">
+            <th style="padding:8px 10px;text-align:left;font-weight:500;color:#6B7280;border-bottom:1px solid #E5E7EB;width:60px;">对比项</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:600;color:#3B82F6;border-bottom:1px solid #E5E7EB;">包税</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:500;color:#6B7280;border-bottom:1px solid #E5E7EB;">不包税</th>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">费用</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">运费已含关税，总价固定</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">运费 + 收货时可能产生的关税</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">清关</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">POKO全权处理，无需您操作</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">可能需要您配合提供资料、自行缴税</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">成本</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">可控，支付时即锁定总费用</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">不可控，关税金额由海关决定</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;">适合场景</td>
+            <td style="padding:8px 10px;">高价值商品、敏感品类、希望省心</td>
+            <td style="padding:8px 10px;">低价值商品、公司商业报关</td>
+          </tr>
+        </table>
+        
+        <h4>如何计费？</h4>
+        <ul>
+          <li>包税费用 = 包裹申报价值 × 当前线路包税率</li>
+          <li>包税率因目的国和物流线路不同而有所差异</li>
+          <li>提交订单时系统自动计算，费用在收费明细中单独展示</li>
+        </ul>
+        
+        <h4>建议开启包税的场景</h4>
+        <ul>
+          <li>🎯 高价值商品：电子产品、奢侈品等，关税可能较高</li>
+          <li>🎯 敏感品类：带电品、液体等，被查验概率更高</li>
+          <li>🎯 不熟悉目的国关税政策：省心省力，避免意外支出</li>
+        </ul>
+        
+        <h4>温馨提示</h4>
+        <ul>
+          <li>包税服务覆盖正常清关产生的关税和增值税</li>
+          <li>如因申报信息不实或商品违反目的国法规导致的额外费用，不在包税范围内</li>
+          <li>部分国家/地区有免税额度，低价值包裹可不选包税</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 代收货款说明弹窗 ===== -->
+<div class="modal-overlay-web" id="codTipModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">代收货款说明</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div class="tip-modal-content">
+        <h4>📌 手续费说明</h4>
+        <ul>
+          <li>代收货款会产生相应手续费</li>
+          <li>具体费用根据您收取的货款及承运商决定</li>
+          <li>详情可以联系客服咨询</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 保价服务说明弹窗 ===== -->
+<div class="modal-overlay-web" id="insuranceModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">保价服务说明</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div class="tip-modal-content">
+        <h4>保价费率</h4>
+        <ul>
+          <li>保价金额 ≤ ¥1000：保价费 = 保价金额 × 3%</li>
+          <li>保价金额 > ¥1000：保价费 = 保价金额 × 5%</li>
+          <li>最低保价费 ¥5</li>
+        </ul>
+        <h4>理赔规则</h4>
+        <ul>
+          <li>货物在运输途中丢失：按保价金额全额赔付</li>
+          <li>货物在运输途中破损：不在赔付范围内</li>
+          <li>理赔周期：提交理赔申请后 7-15 个工作日内完成审核</li>
+        </ul>
+        <h4>免责条款</h4>
+        <ul>
+          <li>因不可抗力（自然灾害、战争等）导致的损失不赔付</li>
+          <li>因海关查验扣押导致的损失不赔付</li>
+          <li>因申报信息不实导致的损失不赔付</li>
+          <li>违禁品、易碎品（未特殊包装）不在保价范围内</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 运费明细弹窗 ===== -->
+<div class="modal-overlay-web" id="shippingDetailModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">运费明细</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div class="tip-modal-content">
+        <h4>计费重量</h4>
+        <ul>
+          <li>实重：15kg</li>
+          <li>体积：125,000 cm³（50cm × 40cm × 50cm）</li>
+          <li>体积重：12.5kg（体积 ÷ 6000）</li>
+          <li>计费方式：实重与抛重二者取其大 → <strong>15kg</strong></li>
+        </ul>
+        <h4>运费计算</h4>
+        <ul>
+          <li>首重 0-3kg：¥36.00</li>
+          <li>续重 3-6kg：3kg × ¥20.00/kg = ¥60.00</li>
+          <li>续重 6-10kg：4kg × ¥18.00/kg = ¥72.00</li>
+          <li>续重 10-15kg：5kg × ¥15.00/kg = ¥75.00</li>
+          <li><strong>承运运费总计：¥243.00</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 申报信息弹窗 ===== -->
+<div class="modal-overlay-web" id="declareModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web" style="max-width: 700px;">
+    <div class="modal-header-web">
+      <span class="modal-title-web">申报信息</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web" style="padding: 16px 20px;">
+      
+      <!-- 快捷操作区 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; gap: 8px;">
+          <button style="padding: 6px 12px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 5px; font-size: 12px; color: #374151; cursor: pointer;" onclick="showToast('一键填入成功')">📋 一键填入</button>
+          <button style="padding: 6px 12px; background: #EFF6FF; border: 1px solid #3B82F6; border-radius: 5px; font-size: 12px; color: #3B82F6; cursor: pointer;" onclick="showHistoryDeclareModal()">📜 历史申报</button>
+        </div>
+      </div>
+
+      <!-- 下单备注提示栏（后台配置了备注说明时展示） -->
+      <div class="declare-notice-bar-web">
+        <span class="declare-notice-icon-web">🔔</span>
+        <span>如需按您的申报金额申报，请务必在下单备注的位置备注清晰"按我的申报金额申报"，若未备注，会按照我司清关要求修改申报金额喔（合单后1件不低于800台币，合单后两件不低于2001台币，以此类推）</span>
+      </div>
+
+      <!-- 申报商品表格 -->
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 13px; font-weight: 600; color: #1F2937; margin-bottom: 10px;">申报商品</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: #F3F4F6;">
+              <th style="padding: 8px 10px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB;">
+                <span style="display: inline-flex; align-items: center; gap: 3px;">
+                  申报品名
+                  <span class="declare-tip-icon-web" title="">ⓘ</span>
+                  <span class="declare-tooltip-web">请填写商品中文名称，如：蓝牙耳机</span>
+                </span>
+              </th>
+              <th style="padding: 8px 10px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB;">
+                <span style="display: inline-flex; align-items: center; gap: 3px;">
+                  英文品名
+                  <span class="declare-tip-icon-web" title="">ⓘ</span>
+                  <span class="declare-tooltip-web">需使用英文填写，如：Bluetooth Headphone</span>
+                </span>
+              </th>
+              <th style="padding: 8px 10px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB; width: 80px;">
+                <span style="display: inline-flex; align-items: center; gap: 3px;">
+                  件数
+                  <span class="declare-tip-icon-web" title="">ⓘ</span>
+                  <span class="declare-tooltip-web">单商品件数范围：1~500</span>
+                </span>
+              </th>
+              <th style="padding: 8px 10px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB; width: 120px;">
+                <span style="display: inline-flex; align-items: center; gap: 3px;">
+                  单价(USD)
+                  <span class="declare-tip-icon-web" title="">ⓘ</span>
+                  <span class="declare-tooltip-web">单商品申报单价范围：1~1,000 USD</span>
+                </span>
+              </th>
+              <th style="padding: 8px 10px; text-align: center; font-weight: 600; color: #374151; border-bottom: 1px solid #E5E7EB; width: 48px;">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="蓝牙耳机" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="Bluetooth Headphone" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="1" min="1" style="width: 100%; text-align: center;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="25.00" step="0.01" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; text-align: center;">
+                <button style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #EF4444; background: #FEE2E2; color: #EF4444; cursor: pointer; font-size: 12px;">✕</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="手机壳" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="Phone Case" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="1" min="1" style="width: 100%; text-align: center;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="15.00" step="0.01" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #F3F4F6; text-align: center;">
+                <button style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #EF4444; background: #FEE2E2; color: #EF4444; cursor: pointer; font-size: 12px;">✕</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 8px; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="T恤" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" value="T-Shirt" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="1" min="1" style="width: 100%; text-align: center;" />
+              </td>
+              <td style="padding: 6px 8px; border-right: 1px solid #F3F4F6;">
+                <input class="declare-field-input-web" type="number" value="10.00" step="0.01" style="width: 100%;" />
+              </td>
+              <td style="padding: 6px 8px; text-align: center;">
+                <button style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #EF4444; background: #FEE2E2; color: #EF4444; cursor: pointer; font-size: 12px;">✕</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button style="margin-top: 8px; padding: 6px 16px; background: #fff; border: 1px dashed #3B82F6; border-radius: 5px; font-size: 12px; color: #3B82F6; cursor: pointer;" onclick="showToast('添加商品')">➕ 添加商品</button>
+      </div>
+
+      <!-- 申报总价汇总（超限时显示红色警告） -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; margin-bottom: 4px;">
+        <div>
+          <span style="font-size: 13px; font-weight: 600; color: #DC2626;">申报总价</span>
+          <span style="font-size: 11px; color: #6B7280; margin-left: 8px;">（限额：1~3.5 USD）</span>
+        </div>
+        <span style="font-size: 18px; font-weight: 700; color: #DC2626;">USD $50.00</span>
+      </div>
+      <div style="font-size: 11px; color: #EF4444; margin-bottom: 12px; padding-left: 2px;">⚠ 申报总价超出限额范围（1~3.5 USD），请修改商品单价或件数</div>
+
+      <!-- 申报人信息（实名认证时展示） -->
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 13px; font-weight: 600; color: #1F2937; margin-bottom: 10px;">申报人信息</div>
+        <div style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: #6B7280; margin-bottom: 4px;">申报人电话</div>
+            <input class="declare-field-input-web" value="+1 (213) 555-0198" style="width: 100%;" />
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: #6B7280; margin-bottom: 4px;">身份证号</div>
+            <input class="declare-field-input-web" value="A123456789" style="width: 100%;" />
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 11px; color: #6B7280; margin-bottom: 4px;">身份证姓名</div>
+            <input class="declare-field-input-web" value="John Smith" style="width: 100%;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 完成按钮 -->
+      <div style="text-align: center; margin-top: 16px;">
+        <button style="padding: 10px 40px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(59,130,246,0.3);" onclick="saveDeclareFromModalWeb()">完成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 温馨提示弹窗 ===== -->
+<div class="modal-overlay-web" id="tipModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web">
+    <div class="modal-header-web">
+      <span class="modal-title-web">温馨提示</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div class="tip-modal-content">
+        <p>POKO会根据包裹预估重量收取预估运费，包裹最终运费以承运方核定的重量为准。</p>
+        <h4>关于运费差额</h4>
+        <ul>
+          <li><strong>预付大于实际：</strong>如若产生差额，我们会在打包后的7天内退还多余部分金额</li>
+          <li><strong>预付小于实际：</strong>如若承运方核定的重量超过预估重量，则需要您进行补款</li>
+        </ul>
+        <h4>为什么会有差额？</h4>
+        <ul>
+          <li>商品实际重量与预估可能有轻微差异</li>
+          <li>打包后可能添加防护材料导致重量增加</li>
+          <li>不同线路对重量计算方式可能不同</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 历史申报弹窗 ===== -->
+<div class="modal-overlay-web" id="historyDeclareModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web" style="width:720px;max-width:90vw;" onclick="event.stopPropagation()">
+    <div class="modal-header-web">
+      <span class="modal-title-web">📜 历史申报记录</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web" style="padding:16px 20px;max-height:60vh;overflow-y:auto;">
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:14px;padding:10px 14px;background:#F9FAFB;border-radius:8px;border:1px solid #F3F4F6;">💡 点击记录可快速复制申报信息到当前订单</div>
+      
+      <!-- 历史记录1 -->
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;" onclick="useWebHistoryDeclare(0)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;padding:3px 10px;border-radius:4px;background:#DBEAFE;color:#1E40AF;font-weight:500;">已签收</span>
+            <span style="font-size:12px;color:#6B7280;font-family:monospace;">P20240115001</span>
+          </div>
+          <span style="font-size:12px;color:#9CA3AF;">2024-01-15</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:6px;">🇺🇸 美国 · EMS特惠</div>
+            <div style="font-size:13px;color:#6B7280;line-height:1.6;">蓝牙耳机 ×2、手机壳 ×1、运动鞋 ×1</div>
+          </div>
+          <div style="text-align:right;margin-left:20px;">
+            <div style="font-size:16px;font-weight:600;color:#3B82F6;">$125.00</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">共4件</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;padding-top:10px;border-top:1px solid #F3F4F6;">
+          <span style="font-size:12px;color:#9CA3AF;">📦 实重 2.8kg</span>
+          <span style="font-size:12px;color:#9CA3AF;">📐 体积 5200cm³</span>
+          <span style="font-size:12px;color:#9CA3AF;">💰 运费 ¥186</span>
+        </div>
+      </div>
+      
+      <!-- 历史记录2 -->
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;" onclick="useWebHistoryDeclare(1)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;padding:3px 10px;border-radius:4px;background:#D1FAE5;color:#065F46;font-weight:500;">已入库</span>
+            <span style="font-size:12px;color:#6B7280;font-family:monospace;">P20240108002</span>
+          </div>
+          <span style="font-size:12px;color:#9CA3AF;">2024-01-08</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:6px;">🇺🇸 美国 · 空运标快</div>
+            <div style="font-size:13px;color:#6B7280;line-height:1.6;">USB数据线 ×3、充电器 ×1</div>
+          </div>
+          <div style="text-align:right;margin-left:20px;">
+            <div style="font-size:16px;font-weight:600;color:#3B82F6;">$45.00</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">共4件</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;padding-top:10px;border-top:1px solid #F3F4F6;">
+          <span style="font-size:12px;color:#9CA3AF;">📦 实重 1.2kg</span>
+          <span style="font-size:12px;color:#9CA3AF;">📐 体积 3100cm³</span>
+          <span style="font-size:12px;color:#9CA3AF;">💰 运费 ¥98</span>
+        </div>
+      </div>
+      
+      <!-- 历史记录3 -->
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;" onclick="useWebHistoryDeclare(2)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;padding:3px 10px;border-radius:4px;background:#FEF3C7;color:#92400E;font-weight:500;">待出库</span>
+            <span style="font-size:12px;color:#6B7280;font-family:monospace;">P20231220003</span>
+          </div>
+          <span style="font-size:12px;color:#9CA3AF;">2023-12-20</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:6px;">🇨🇳 中国台湾 · 海快专线</div>
+            <div style="font-size:13px;color:#6B7280;line-height:1.6;">机械键盘 ×1</div>
+          </div>
+          <div style="text-align:right;margin-left:20px;">
+            <div style="font-size:16px;font-weight:600;color:#3B82F6;">$89.00</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">共1件</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;padding-top:10px;border-top:1px solid #F3F4F6;">
+          <span style="font-size:12px;color:#9CA3AF;">📦 实重 1.5kg</span>
+          <span style="font-size:12px;color:#9CA3AF;">📐 体积 8500cm³</span>
+          <span style="font-size:12px;color:#9CA3AF;">💰 运费 ¥135</span>
+        </div>
+      </div>
+
+      <!-- 底部提示 -->
+      <div style="text-align:center;padding:12px;color:#9CA3AF;font-size:12px;">
+        仅展示近6个月申报记录
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 运输时效说明弹窗 -->
+<div class="modal-overlay-web" id="timeTipModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web" onclick="event.stopPropagation()">
+    <div class="modal-header-web">
+      <span class="modal-title-web">运输时效说明</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <p style="font-size:13px;color:#374151;line-height:1.6;">该时效为物流商预估，仅供参考，非承诺时效。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 计费重量说明弹窗 -->
+<div class="modal-overlay-web" id="billingWeightModalWeb" onclick="closeModalWeb(event)">
+  <div class="modal-dialog-web" onclick="event.stopPropagation()">
+    <div class="modal-header-web">
+      <span class="modal-title-web">计费重量说明</span>
+      <button class="modal-close-web" onclick="closeModalWeb(null)">✕</button>
+    </div>
+    <div class="modal-body-web">
+      <div style="font-size:13px;color:#374151;line-height:1.8;">
+        <div style="margin-bottom:12px;">
+          <strong>线路是否计算体积重：</strong><span style="color:#3B82F6;">是</span>
+        </div>
+        <ul style="margin:0;padding-left:20px;color:#6B7280;">
+          <li>该线路需取物理重与体积重中<b>较大值</b>计算运费</li>
+          <li>包裹尺寸乘积为该包裹体积</li>
+          <li>体积重计算公式：长*宽*高*1000/8000</li>
+        </ul>
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #E5E7EB;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="color:#6B7280;">计费重量</span>
+            <span>实重 11g > 体积重 3g</span>
+          </div>
+          <div style="background:#F3F4F6;padding:8px 12px;border-radius:6px;">
+            <strong>实重 11g</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-web" id="toastWeb"></div>
+
+<script>
+// ===== Demo控制条折叠 =====
+let demoBarExpanded = false;
+let declareDemoState = 0; // 0=未显示, 1=未填写, 2=已填写
+function toggleDemoBar() {
+  demoBarExpanded = !demoBarExpanded;
+  const wrap = document.getElementById('demoBtnsWrap');
+  const btn = document.getElementById('demoToggleBtn');
+  if (demoBarExpanded) {
+    wrap.style.display = 'flex';
+    btn.textContent = 'Demo ▲';
+  } else {
+    wrap.style.display = 'none';
+    btn.textContent = 'Demo';
+  }
+}
+
+// ===== Demo状态切换 =====
+function toggleDemoState(state) {
+  const btns = document.querySelectorAll('.demo-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  
+  const addrFilled = document.getElementById('addressFilledWeb');
+  const addrEmpty = document.getElementById('addressEmptyWeb');
+  const routeList = document.getElementById('routeListWeb');
+  const routeSelected = document.getElementById('routeSelectedWeb');
+  const routeEmptyHint = document.getElementById('routeEmptyHintWeb');
+  const declareFilled = document.getElementById('declareFilledWeb');
+  const declareEmpty = document.getElementById('declareEmptyWeb');
+  const submitBtn = document.getElementById('submitBtnWeb');
+  const totalAmount = document.getElementById('totalAmountWeb');
+  const otherFees = document.getElementById('otherFeesWeb');
+
+  if (state === 'empty') {
+    btns[0].classList.add('active');
+    // 地址：无
+    addrFilled.style.display = 'none';
+    addrEmpty.style.display = 'flex';
+    // 线路：隐藏（未选地址不展示线路）
+    routeList.style.display = 'none';
+    routeSelected.style.display = 'none';
+    routeEmptyHint.style.display = 'flex';
+    document.getElementById('routeNoAvailableWeb').style.display = 'none';
+    // 隐藏包裹服务
+    document.getElementById('serviceSectionWeb').style.display = 'none';
+    // 隐藏申报信息
+    document.getElementById('declareSectionWeb').style.display = 'none';
+    declareDemoState = 0; // 重置申报demo状态
+    // 重置所有卡片折叠状态
+    document.querySelectorAll('.route-card-web').forEach(card => {
+      card.querySelector('.route-detail-area-web').classList.remove('show');
+      card.querySelector('.route-collapse-btn-web').textContent = '∨';
+    });
+    // 申报：未填写
+    declareFilled.style.display = 'none';
+    declareEmpty.style.display = 'block';
+    // 包裹服务：关闭所有
+    ['COD','Tax','Insurance'].forEach(t => {
+      document.getElementById('switch' + t + 'Web').classList.remove('active');
+      document.getElementById('sub' + t + 'Web').classList.remove('show');
+    });
+    // 隐藏其他费用
+    otherFees.style.display = 'none';
+    document.getElementById('feeTaxWeb').style.display = 'none';
+    document.getElementById('feeInsuranceWeb').style.display = 'none';
+    // 免责声明：未勾选
+    document.getElementById('disclaimerCheckboxWeb').checked = false;
+    // 底部：禁用
+    submitBtn.disabled = true;
+    totalAmount.textContent = '0.00';
+    submitBtn.textContent = '提交包裹 ¥0.00';
+  } else if (state === 'filled') {
+    btns[1].classList.add('active');
+    // 地址：有
+    addrFilled.style.display = 'flex';
+    addrEmpty.style.display = 'none';
+    // 线路：已选择
+    routeList.style.display = 'none';
+    routeSelected.style.display = 'flex';
+    routeEmptyHint.style.display = 'none';
+    document.getElementById('routeNoAvailableWeb').style.display = 'none';
+    // 显示包裹服务
+    document.getElementById('serviceSectionWeb').style.display = 'block';
+    // 显示申报信息
+    document.getElementById('declareSectionWeb').style.display = 'block';
+    // 申报状态循环：0→未填写(1) → 已填写(2) → 未填写(1)...
+    declareDemoState = declareDemoState === 2 ? 1 : 2;
+    if (declareDemoState === 1) {
+      declareFilled.style.display = 'none';
+      declareEmpty.style.display = 'block';
+    } else {
+      declareFilled.style.display = 'block';
+      declareEmpty.style.display = 'none';
+    }
+    // 包裹服务：包税+保价开启
+    document.getElementById('switchTaxWeb').classList.add('active');
+    document.getElementById('subTaxWeb').classList.add('show');
+    document.getElementById('switchInsuranceWeb').classList.add('active');
+    document.getElementById('subInsuranceWeb').classList.add('show');
+    document.getElementById('switchCODWeb').classList.remove('active');
+    document.getElementById('subCODWeb') && document.getElementById('subCODWeb').classList.remove('show');
+    // 显示其他费用
+    otherFees.style.display = 'block';
+    document.getElementById('feeTaxWeb').style.display = 'flex';
+    document.getElementById('feeInsuranceWeb').style.display = 'flex';
+    // 免责声明：未勾选
+    document.getElementById('disclaimerCheckboxWeb').checked = false;
+    // 底部：禁用
+    submitBtn.disabled = true;
+    totalAmount.textContent = '209.60';
+    submitBtn.textContent = '提交包裹 ¥209.60';
+  } else if (state === 'noAvailable') {
+    btns[2].classList.add('active');
+    // 地址：有（已选地址但无可用线路）
+    addrFilled.style.display = 'flex';
+    addrEmpty.style.display = 'none';
+    // 线路：显示无可用线路状态
+    routeList.style.display = 'none';
+    routeSelected.style.display = 'none';
+    routeEmptyHint.style.display = 'none';
+    document.getElementById('routeNoAvailableWeb').style.display = 'flex';
+    // 隐藏包裹服务
+    document.getElementById('serviceSectionWeb').style.display = 'none';
+    // 隐藏申报信息
+    document.getElementById('declareSectionWeb').style.display = 'none';
+    declareDemoState = 0;
+    declareFilled.style.display = 'none';
+    declareEmpty.style.display = 'block';
+    // 隐藏其他费用
+    otherFees.style.display = 'none';
+    document.getElementById('feeTaxWeb').style.display = 'none';
+    document.getElementById('feeInsuranceWeb').style.display = 'none';
+    // 免责声明：未勾选
+    document.getElementById('disclaimerCheckboxWeb').checked = false;
+    // 底部：禁用
+    submitBtn.disabled = true;
+    totalAmount.textContent = '0.00';
+    submitBtn.textContent = '提交包裹 ¥0.00';
+  }
+}
+
+// ===== 弹窗控制 =====
+function showGoodsModalWeb() {
+  document.getElementById('goodsModalWeb').classList.add('show');
+}
+function showRouteModalWeb() {
+  document.getElementById('routeModalWeb').classList.add('show');
+}
+function showDeclareModalWeb() {
+  document.getElementById('declareModalWeb').classList.add('show');
+}
+function showTaxServiceModal() {
+  document.getElementById('taxServiceModalWeb').classList.add('show');
+}
+function showCodTipModal() {
+  document.getElementById('codTipModalWeb').classList.add('show');
+}
+function showInsuranceModalWeb() {
+  document.getElementById('insuranceModalWeb').classList.add('show');
+}
+function showShippingDetailModal() {
+  document.getElementById('shippingDetailModalWeb').classList.add('show');
+}
+function showTipModal() {
+  document.getElementById('tipModalWeb').classList.add('show');
+}
+function showHistoryDeclareModal() {
+  document.getElementById('historyDeclareModalWeb').classList.add('show');
+}
+// WEB端使用历史申报
+function useWebHistoryDeclare(index) {
+  closeModalWeb(null);
+  showToast('已复制历史申报信息到当前订单');
+}
+function closeModalWeb(e) {
+  if (!e || e.target.classList.contains('modal-overlay-web')) {
+    document.querySelectorAll('.modal-overlay-web').forEach(m => m.classList.remove('show'));
+  }
+}
+
+// ===== 线路展开/折叠 =====
+// ===== 线路卡片折叠/展开（未选择状态） =====
+function toggleCardExpand(btn, e) {
+  e.stopPropagation();
+  const card = btn.closest('.route-card-web');
+  const detailArea = card.querySelector('.route-detail-area-web');
+  const isShow = detailArea.classList.toggle('show');
+  btn.textContent = isShow ? '∧' : '∨';
+}
+
+function toggleRouteExpand(e) {
+  e.stopPropagation();
+  const btn = document.getElementById('routeCollapseBtnWeb');
+  const detailArea = document.getElementById('routeDetailAreaWeb');
+  const isShow = detailArea.classList.toggle('show');
+  btn.textContent = isShow ? '∧' : '∨';
+}
+
+// ===== 线路选择交互 =====
+function selectRoute(routeId, event) {
+  event.stopPropagation();
+  const card = document.querySelector(`.route-card-web[data-route="${routeId}"]`);
+  const routeList = document.getElementById('routeListWeb');
+  const routeSelected = document.getElementById('routeSelectedWeb');
+  
+  // 获取线路信息
+  const name = card.querySelector('.route-name-main-web').textContent;
+  const type = card.querySelector('.route-name-sub-web').textContent;
+  const desc = card.querySelector('.route-desc-text-web').childNodes[0].textContent.trim();
+  const time = card.querySelector('.route-time-value-web').textContent;
+  const price = card.querySelector('.route-price-value-web .yen').textContent;
+  
+  // 更新选中线路显示
+  document.getElementById('selectedRouteName').textContent = name;
+  document.getElementById('selectedRouteType').textContent = type;
+  document.getElementById('selectedRouteDesc').textContent = desc;
+  document.getElementById('selectedRouteTime').textContent = time;
+  document.getElementById('selectedRoutePrice').textContent = price;
+  
+  // 隐藏线路列表，显示选中线路
+  routeList.style.display = 'none';
+  routeSelected.style.display = 'flex';
+  
+  // 显示包裹服务
+  document.getElementById('serviceSectionWeb').style.display = 'block';
+  // 显示申报信息
+  document.getElementById('declareSectionWeb').style.display = 'block';
+  
+  showToast(`已选择：${name}`);
+}
+
+function switchRoute() {
+  const routeList = document.getElementById('routeListWeb');
+  const routeSelected = document.getElementById('routeSelectedWeb');
+  
+  // 隐藏选中线路，显示线路列表
+  routeList.style.display = 'flex';
+  routeSelected.style.display = 'none';
+  
+  // 隐藏包裹服务
+  document.getElementById('serviceSectionWeb').style.display = 'none';
+  // 隐藏申报信息
+  document.getElementById('declareSectionWeb').style.display = 'none';
+  
+  // 重置选中线路折叠状态
+  const btn = document.getElementById('routeCollapseBtnWeb');
+  const detailArea = document.getElementById('routeDetailAreaWeb');
+  btn.textContent = '∨';
+  detailArea.classList.remove('show');
+  
+  // 重置所有卡片折叠状态
+  document.querySelectorAll('.route-card-web').forEach(card => {
+    card.querySelector('.route-detail-area-web').classList.remove('show');
+    card.querySelector('.route-collapse-btn-web').textContent = '∨';
+  });
+}
+
+// ===== 线路选择 =====
+function selectRouteWeb(el) {
+  if (el.classList.contains('route-disabled')) return;
+  document.querySelectorAll('#routeModalWeb .route-option-web').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  closeModalWeb(null);
+  showToast('线路已更新');
+}
+
+// ===== 申报表单控制 =====
+function showDeclareFormWeb() {
+  document.getElementById('declareModalWeb').classList.add('show');
+}
+
+function saveDeclareFromModalWeb() {
+  document.getElementById('declareModalWeb').classList.remove('show');
+  document.getElementById('declareFilledWeb').style.display = 'flex';
+  document.getElementById('declareEmptyWeb').style.display = 'none';
+  showToast('申报信息已保存');
+}
+
+// ===== 包裹服务开关 =====
+function toggleSwitchWeb(type) {
+  const sw = document.getElementById('switch' + type + 'Web');
+  const sub = document.getElementById('sub' + type + 'Web');
+  sw.classList.toggle('active');
+  
+  if (sw.classList.contains('active')) {
+    sub.classList.add('show');
+  } else {
+    sub.classList.remove('show');
+  }
+  
+  // 更新收费明细
+  if (type === 'Tax') {
+    document.getElementById('otherFeesWeb').style.display = 'block';
+    document.getElementById('feeTaxWeb').style.display = sw.classList.contains('active') ? 'flex' : 'none';
+  }
+  if (type === 'Insurance') {
+    document.getElementById('otherFeesWeb').style.display = 'block';
+    document.getElementById('feeInsuranceWeb').style.display = sw.classList.contains('active') ? 'flex' : 'none';
+  }
+  
+  updateTotalWeb();
+}
+
+// ===== 保价手续费计算 =====
+function calcInsuranceFeeWeb() {
+  const input = document.getElementById('insuranceAmountWeb');
+  const hint = document.getElementById('insuranceHintWeb');
+  const error = document.getElementById('insuranceErrorWeb');
+  const amount = parseFloat(input.value) || 0;
+
+  if (!input.value || input.value === '') {
+    error.style.display = 'none';
+    hint.style.display = 'block';
+    hint.textContent = '保价范围：¥100 ~ ¥50,000';
+    hint.style.color = '#9CA3AF';
+    document.getElementById('feeInsuranceValue').textContent = '¥15.00';
+    updateTotalWeb();
+    return;
+  }
+
+  if (amount < 100) {
+    error.style.display = 'block';
+    error.textContent = '保价金额不能低于 ¥100';
+    hint.style.display = 'none';
+    updateTotalWeb();
+    return;
+  }
+
+  if (amount > 50000) {
+    error.style.display = 'block';
+    error.textContent = '保价金额不能超过 ¥50,000';
+    hint.style.display = 'none';
+    updateTotalWeb();
+    return;
+  }
+
+  error.style.display = 'none';
+  hint.style.display = 'block';
+  hint.textContent = '保价范围：¥100 ~ ¥50,000';
+  hint.style.color = '#9CA3AF';
+
+  let rate = 0.03;
+  if (amount > 10000) rate = 0.05;
+  else if (amount > 1000) rate = 0.04;
+
+  let fee = amount * rate;
+  if (fee < 5) fee = 5;
+
+  document.getElementById('feeInsuranceValue').textContent = '¥' + fee.toFixed(2);
+  updateTotalWeb();
+}
+
+// ===== 合计计算 =====
+function updateTotalWeb() {
+  let total = 186 + 5; // 基础运费 + 服务费
+
+  // 包税
+  const taxSwitch = document.getElementById('switchTaxWeb');
+  if (taxSwitch.classList.contains('active')) {
+    total += 18.6;
+  }
+
+  // 保价
+  const insSwitch = document.getElementById('switchInsuranceWeb');
+  if (insSwitch.classList.contains('active')) {
+    const insAmount = parseFloat(document.getElementById('insuranceAmountWeb').value) || 0;
+    if (insAmount >= 100 && insAmount <= 50000) {
+      let rate = 0.03;
+      if (insAmount > 10000) rate = 0.05;
+      else if (insAmount > 1000) rate = 0.04;
+      let fee = insAmount * rate;
+      if (fee < 5) fee = 5;
+      total += fee;
+    }
+  }
+
+  // 积分抵扣
+  const pointInput = document.getElementById('pointInputWeb');
+  if (pointInput) {
+    const points = parseInt(pointInput.value) || 0;
+    total -= points / 100;
+  }
+
+  // 不允许负数
+  if (total < 0) total = 0;
+
+  document.getElementById('totalAmountWeb').textContent = total.toFixed(2);
+  
+  const submitBtn = document.getElementById('submitBtnWeb');
+  submitBtn.textContent = '提交包裹 ¥' + total.toFixed(2);
+}
+
+// ===== 备注标签 =====
+function toggleRemarkTagWeb(el) {
+  el.classList.toggle('active');
+}
+
+// ===== 备注字数统计 =====
+function updateRemarkCountWeb() {
+  const input = document.getElementById('remarkInputWeb');
+  const count = document.getElementById('remarkCountWeb');
+  count.textContent = input.value.length + '/300';
+}
+
+// ===== 提交按钮状态 =====
+function updateSubmitButtonStateWeb() {
+  const checkbox = document.getElementById('disclaimerCheckboxWeb');
+  const submitBtn = document.getElementById('submitBtnWeb');
+  submitBtn.disabled = !checkbox.checked;
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toastWeb');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 1500);
+}
+
+function showTimeTooltip() {
+  document.getElementById('timeTipModalWeb').classList.add('show');
+}
+
+function showBillingWeightTooltip() {
+  document.getElementById('billingWeightModalWeb').classList.add('show');
+}
+
+// ===== 积分抵扣计算 =====
+function calcPointDeductWeb() {
+  const input = document.getElementById('pointInputWeb');
+  const maxPoints = 1250; // 可用积分
+  let points = parseInt(input.value) || 0;
+  
+  // 校验范围
+  if (points < 0) points = 0;
+  if (points > maxPoints) points = maxPoints;
+  input.value = points;
+  
+  // 100积分=1元
+  const deductAmount = points / 100;
+  document.getElementById('pointDeductWeb').textContent = '-¥' + deductAmount.toFixed(2);
+  
+  updateTotalWeb();
+}
+</script>
+        </div><!-- end preview-area -->
+
+        <!-- 右侧标注面板 -->
+        <div class="annotation-panel" id="annotation-panel">
+            <div class="panel-header">
+                <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+                <span>📌 标注说明</span>
+            </div>
+            <div id="annotation-list"></div>
+        </div>
+    </div><!-- end main-content-area -->
+
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div><!-- end app-container -->
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-submit-package-web';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '提交包裹页面，左侧为操作表单（收货地址→提包商品→物流线路→申报信息→包裹服务），右侧固定收费明细面板，底部操作栏含运费差额提示和提交按钮',
+        target: '.preview-area',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '提交包裹页是用户选择仓库商品后，完成物流线路选择、申报信息填写、增值服务配置，并支付运费的核心页面。页面采用左右双栏布局，左侧为可滚动的操作表单区域，右侧为固定的收费明细面板。选择物流线路后，申报信息和增值服务区块才会显示。'
+        }
+    },
+    {
+        id: 2,
+        title: '收货地址区',
+        summary: '展示或引导设置收货地址，提交时校验地址有效性',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示当前选中的收货地址信息（收货人+默认标签+电话+详细地址），或无地址时展示引导空状态（图标+提示+「去添加」按钮）。点击「切换地址」跳转地址管理页。',
+            interaction: '有地址时展示紧凑横向布局；无地址时展示引导状态，点击「去添加」跳转添加地址页；点击「切换地址 ›」跳转地址管理页。',
+            business: '提交时校验：收货地址是否仍存在（防止提交时地址被删除）。校验不通过时提示「收货地址已变更，请重新选择」。'
+        }
+    },
+    {
+        id: 3,
+        title: '提包商品区',
+        summary: '展示已选商品缩略图和汇总信息，提交时校验商品状态',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示用户从仓库选择的商品汇总：缩略图（最多3个，超出显示+N）、总件数、总重量、总体积，以及发货仓库名称。点击「查看明细 ›」弹出商品明细弹窗，按快递单号分组展示完整商品信息。',
+            interaction: '「查看明细 ›」弹出商品明细弹窗，按快递单号分组展示商品图片+名称+规格+价格×数量。',
+            business: '提交时校验：当前提交的商品是否处于可提包状态（如已入库、未被其他包裹占用、未被退货等）。校验不通过时提示具体商品不可提包的原因，如「部分商品已出库，无法提交」或「部分商品已被其他包裹占用」，引导用户返回我的仓库页处理。'
+        }
+    },
+    {
+        id: 4,
+        title: '物流线路区',
+        summary: '可选线路列表或已选线路展示，提交时校验线路有效性',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '未选地址时显示「请先选择收货地址」提示；已选地址后展示可选物流线路卡片列表（线路名称+运输类型+介绍+可寄品类+时效+运费+计费详情+禁寄品类）。选择后切换为单条线路展示，带「更换」按钮。支持折叠/展开计费详情（计费重量、计费方式、分段计费表格、禁寄品类）。不可选线路灰色展示并标注不可选原因。',
+            interaction: '未选地址时不展示线路；选择线路后展示申报信息和增值服务区块；点击「更换」回到线路列表；折叠/展开可查看计费详情。选择线路后，申报信息和增值服务区块联动显示。更换线路时，隐藏申报信息和增值服务并重置。',
+            business: '提交时校验：当前线路是否仍存在、是否支持该收货地区。校验不通过时提示「该线路暂不支持当前收货地区，请更换线路」。'
+        }
+    },
+    {
+        id: 5,
+        title: '申报信息区',
+        summary: '填写申报商品信息及申报人信息，保存时校验',
+        target: '#declareSectionWeb',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '选择物流线路后显示。未填写时展示引导状态+「开始填写」按钮；已填写时展示摘要（品名+件数+总价）+「修改」按钮。点击后弹出申报信息弹窗。',
+            interaction: "弹窗交互：\n1. Tab切换：「一键填入」（自动填充）+「历史申报」（查询当前用户历史包裹的申报信息，直接选择引用）\n2. 下单备注提示栏：关于申报金额申报的备注说明\n3. 申报商品列表：申报品名+英文品名+件数+单价+删除按钮\n4. 添加商品：底部「➕ 添加商品」按钮\n5. 申报总价汇总：自动计算所有商品总价，展示申报总价值上下限（由服务平台配置），超出时显示错误提示\n6. 申报人信息：申报人电话+身份证号（条件显示：寄台湾地区时需要）+身份证姓名\n7. 完成按钮：点击关闭弹窗，更新摘要状态",
+            business: "校验规则（在保存申报信息时执行，非提交时校验）：\n- 申报品名：由服务平台配置\n- 英文品名：由服务平台配置\n- 申报总价值上下限：由服务平台配置，保存时校验\n- 单价币种：由服务平台配置"
+        }
+    },
+    {
+        id: 6,
+        title: '增值服务区',
+        summary: '代收货款、包税服务、保价服务的开关与配置',
+        target: '#serviceSectionWeb',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '选择物流线路后显示。包含三项增值服务：代收货款（开关+金额输入+币种）、包税服务（开关+说明弹窗）、保价服务（开关+金额输入+范围校验+手续费实时计算）。每项服务均有 ⓘ 说明弹窗。开启/关闭后右侧收费明细联动更新。',
+            interaction: '各服务独立开关控制；代收货款开启后展示金额输入和币种（币种由服务平台配置）；包税服务开启后展示说明；保价服务开启后展示金额输入，实时计算手续费（≤1000收3%、1000-10000收4%、>10000收5%，最低¥5）。',
+            business: '保价金额范围 ¥100~¥50,000，低于100或超过50000时显示红色错误提示。各服务开启后右侧收费明细面板动态显示对应费用行并实时更新合计金额。'
+        }
+    },
+    {
+        id: 7,
+        title: '右侧收费明细面板',
+        summary: '展示费用构成、优惠抵扣、合计金额、备注和免责声明',
+        target: '#anno-7',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '固定在页面右侧，展示完整收费明细。基础费用：承运运费+超重费+系统服务费；增值服务费用：包税手续费+保价手续费（按开关状态动态显示）；优惠抵扣：优惠券（展示可用数量）+积分抵扣（输入积分数实时换算抵扣金额）；合计金额实时更新；备注输入（最多300字+字数统计）；免责声明勾选激活提交按钮。',
+            interaction: '优惠券可点击选择；积分输入实时计算抵扣金额；勾选免责声明后提交按钮从禁用变为可用；点击 ⓘ 查看各项费用明细弹窗。',
+            business: '提交时校验：优惠券是否有效（是否已使用、是否过期、是否仍满足条件）。校验不通过时提示「优惠券已失效，已自动移除，请确认费用后重新提交」。合计金额随线路选择、增值服务开关、优惠券和积分变化实时更新。'
+        }
+    },
+    {
+        id: 8,
+        title: '提交包裹校验',
+        summary: '点击提交按钮时的前置条件校验和业务规则校验',
+        target: '#anno-8',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '点击「提交包裹」按钮时触发完整校验流程。校验分为前置条件校验和业务规则校验两类，确保所有必要信息完整且有效后才允许提交。',
+            interaction: "前置条件校验（未满足时提交按钮禁用，点击后提示引导）：\n- 未选择收货地址 → 提示「请先设置收货地址」+ 高亮地址区引导\n- 未选择物流线路 → 提示「请先选择物流线路」+ 高亮线路区引导\n- 未填写申报信息 → 提示「请先填写申报信息」+ 高亮申报区引导\n- 未勾选免责声明 → 勾选框抖动/高亮 + 提示「请先阅读并勾选免责声明」",
+            business: "业务规则校验（点击提交时实时校验，不通过提示）：\n- 收货地址已失效 → 提示「收货地址已变更，请重新选择」\n- 商品不可提包 → 提示具体原因，如「部分商品已出库，无法提交」或「部分商品已被其他包裹占用」\n- 线路不可用或不支持该地区 → 提示「该线路暂不支持当前收货地区，请更换线路」\n- 优惠券已失效 → 提示「优惠券已失效，已自动移除，请确认费用后重新提交」"
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+
+</body>
+</html>
