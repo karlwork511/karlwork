@@ -1,0 +1,2843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提交包裹 - APP端（带标注）</title>
+<style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>提交包裹 - 预览v11</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F3F4F6; color: #111827; }
+
+.phone-frame {
+  width: 375px; margin: 20px auto; background: #F3F4F6;
+  min-height: 812px; position: relative; overflow-x: visible;
+  border: 2px solid #E5E7EB; border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.status-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
+  font-size: 12px; font-weight: 600; color: #111827;
+}
+
+/* Demo控制条 */
+.demo-control {
+  background: #FEF3C7; padding: 6px 12px; display: flex; align-items: center;
+  justify-content: center; gap: 8px; font-size: 11px; color: #92400E;
+  border-bottom: 1px solid #FDE68A;
+}
+.demo-control .demo-btn {
+  padding: 3px 10px; border-radius: 12px; border: 1px solid #F59E0B;
+  background: #fff; color: #92400E; font-size: 11px; cursor: pointer; font-weight: 500;
+}
+.demo-control .demo-btn.active { background: #F59E0B; color: #fff; }
+
+.nav-bar {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  padding: 0 16px; border-bottom: 1px solid #F3F4F6;
+}
+.nav-bar .back { font-size: 20px; color: #111827; cursor: pointer; width: 30px; }
+.nav-bar .title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; }
+
+.page-content { padding-bottom: 80px; background: #F3F4F6; }
+
+.card {
+  background: #fff; margin: 8px 12px; border-radius: 12px;
+  padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.card-title { font-size: 14px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 6px; }
+.card-toggle { font-size: 12px; color: #9CA3AF; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.card-toggle .arrow { transition: transform 0.2s; }
+.card-toggle.collapsed .arrow { transform: rotate(-90deg); }
+
+/* 收货地址 */
+.address-card { cursor: pointer; }
+.address-info { display: flex; align-items: flex-start; gap: 10px; }
+.address-icon { font-size: 20px; margin-top: 2px; }
+.address-detail { flex: 1; }
+.address-name { font-size: 14px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 6px; }
+.address-phone { font-size: 13px; color: #6B7280; margin-top: 2px; }
+.address-text { font-size: 13px; color: #6B7280; margin-top: 4px; line-height: 1.5; }
+.default-tag {
+  display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: #FEF3C7; color: #D97706; font-weight: 500;
+}
+.address-arrow { color: #D1D5DB; font-size: 16px; }
+
+/* 无地址空状态 */
+.address-empty {
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; padding: 24px 16px; gap: 8px;
+}
+.address-empty .empty-icon { font-size: 32px; }
+.address-empty .empty-text { font-size: 14px; color: #9CA3AF; }
+.address-empty .empty-btn {
+  padding: 8px 20px; border-radius: 20px; background: #3B82F6;
+  color: #fff; font-size: 13px; font-weight: 500; border: none; cursor: pointer;
+  margin-top: 4px;
+}
+.address-empty .empty-btn:active { background: #2563EB; }
+
+/* 提包商品 */
+.goods-header { cursor: pointer; }
+.goods-thumbs { display: flex; gap: 6px; margin-bottom: 8px; }
+.goods-thumb {
+  width: 44px; height: 44px; border-radius: 8px; background: #F3F4F6;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  border: 1px solid #E5E7EB;
+}
+.goods-summary { display: flex; align-items: center; justify-content: space-between; }
+.goods-info-left { font-size: 13px; color: #374151; }
+.goods-info-left .count { font-weight: 600; color: #3B82F6; }
+.goods-info-left .weight { font-weight: 600; color: #3B82F6; margin-left: 8px; }
+.goods-type-tags { margin-top: 6px; display: flex; gap: 6px; }
+.goods-type-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.goods-type-tag.buy { background: #EFF6FF; color: #3B82F6; }
+.goods-type-tag.transfer { background: #F5F3FF; color: #8B5CF6; }
+.goods-toggle { font-size: 12px; color: #3B82F6; font-weight: 500; }
+.warehouse-row { margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9CA3AF; }
+.warehouse-row span { color: #6B7280; font-weight: 500; }
+
+/* 物流线路 */
+.route-selected { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.route-selected .detail { flex: 1; }
+.route-selected .name { font-size: 14px; font-weight: 600; color: #111827; }
+.route-selected .sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.route-selected .price-area { text-align: right; }
+.route-selected .price { font-size: 16px; font-weight: 700; color: #EF4444; }
+.route-selected .time { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.route-detail-link { font-size: 11px; color: #3B82F6; cursor: pointer; }
+.route-placeholder { display: flex; align-items: center; justify-content: space-between; color: #9CA3AF; font-size: 14px; cursor: pointer; }
+
+/* 备注 */
+.remark-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.remark-tag {
+  font-size: 12px; padding: 4px 10px; border-radius: 16px;
+  background: #F3F4F6; color: #6B7280; cursor: pointer; border: 1px solid #E5E7EB;
+}
+.remark-tag.active { background: #EFF6FF; color: #3B82F6; border-color: #3B82F6; }
+.remark-input {
+  width: 100%; border: 1px solid #E5E7EB; border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; color: #374151; outline: none;
+  background: #F9FAFB; height: 44px;
+}
+.remark-input:focus { border-color: #3B82F6; background: #fff; }
+.remark-input::placeholder { color: #9CA3AF; }
+
+/* 申报信息摘要卡片（主页面） */
+.declare-summary-card { cursor: pointer; }
+.declare-summary-row { display: flex; align-items: center; justify-content: space-between; }
+.declare-summary-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+.declare-summary-left .desc { font-size: 13px; color: #9CA3AF; }
+.declare-summary-left .desc-filled { font-size: 13px; color: #374151; }
+.declare-summary-right { font-size: 12px; color: #3B82F6; font-weight: 500; display: flex; align-items: center; gap: 2px; }
+.declare-fill-btn {
+  font-size: 12px; padding: 4px 10px; border-radius: 6px;
+  background: #EFF6FF; color: #3B82F6; cursor: pointer; border: none; font-weight: 500;
+  margin-left: 8px;
+}
+.declare-fill-btn:active { background: #DBEAFE; }
+
+/* 增值服务 */
+.service-toggle-area { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.service-summary { font-size: 12px; color: #9CA3AF; }
+.service-summary.has-selection { color: #3B82F6; }
+.service-list { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; }
+.service-list.show { display: block; }
+.service-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
+.service-item:last-child { border-bottom: none; }
+.service-left { display: flex; align-items: center; gap: 8px; }
+.service-left .icon { font-size: 18px; }
+.service-left .name { font-size: 14px; color: #374151; }
+.service-right { display: flex; align-items: center; gap: 8px; }
+.switch { width: 44px; height: 24px; border-radius: 12px; background: #E5E7EB; position: relative; cursor: pointer; transition: background 0.2s; }
+.switch.active { background: #3B82F6; }
+.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: left 0.2s;
+}
+.switch.active::after { left: 22px; }
+.service-link { font-size: 11px; color: #3B82F6; cursor: pointer; }
+.service-sub { padding: 8px 10px; background: #F9FAFB; border-radius: 8px; margin-top: 6px; display: none; }
+.service-sub.show { display: block; }
+.service-sub-input { display: flex; align-items: center; gap: 8px; }
+.service-sub-input label { font-size: 12px; color: #6B7280; white-space: nowrap; }
+.service-sub-input input {
+  flex: 1; border: 1px solid #E5E7EB; border-radius: 6px;
+  padding: 6px 8px; font-size: 13px; outline: none; background: #fff;
+}
+.service-sub-input input:focus { border-color: #3B82F6; }
+.service-sub-input .unit { font-size: 12px; color: #6B7280; }
+
+/* 收费明细 */
+.fee-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+.fee-item:last-child { border-bottom: none; }
+.fee-left { display: flex; align-items: center; gap: 6px; }
+.fee-left .icon { font-size: 18px; }
+.fee-left .label { font-size: 14px; color: #374151; }
+.fee-right { display: flex; align-items: center; gap: 6px; }
+.fee-value { font-size: 14px; font-weight: 600; color: #111827; }
+.fee-value.discount { color: #10B981; }
+.fee-arrow { color: #D1D5DB; font-size: 12px; cursor: pointer; }
+.fee-link { font-size: 12px; color: #3B82F6; cursor: pointer; }
+.fee-placeholder { text-align: center; color: #9CA3AF; font-size: 13px; padding: 12px 0; }
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #E5E7EB;
+  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 100;
+}
+.bottom-total .label { font-size: 12px; color: #6B7280; }
+.bottom-total .amount { font-size: 22px; font-weight: 700; color: #EF4444; }
+.bottom-total .amount .yen { font-size: 14px; }
+.bottom-total .breakdown { font-size: 11px; color: #6B7280; margin-top: 2px; }
+.bottom-total .discount-text { font-size: 11px; color: #10B981; }
+.submit-btn {
+  padding: 12px 28px; background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff; font-size: 15px; font-weight: 600; border: none; border-radius: 24px;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.submit-btn:active { transform: scale(0.97); }
+.submit-btn:disabled { background: #D1D5DB; box-shadow: none; }
+.submit-btn.postpay-mode { background: #3B82F6; }
+.submit-btn.postpay-mode:active { background: #2563EB; transform: scale(0.97); }
+
+/* 后付费提示 */
+.bottom-postpay-hint { flex: 1; display: flex; align-items: center; }
+.postpay-text { font-size: 12px; color: #6B7280; line-height: 1.4; }
+
+/* 底部弹窗 */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end;
+}
+.modal-overlay.show { display: flex; }
+.bottom-sheet {
+  background: #fff; border-radius: 16px 16px 0 0; width: 375px;
+  max-height: 70vh; overflow-y: auto; padding: 0 0 20px 0;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid #F3F4F6;
+  position: sticky; top: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 1;
+}
+.sheet-title { font-size: 16px; font-weight: 600; color: #111827; }
+.sheet-close { font-size: 20px; color: #9CA3AF; cursor: pointer; padding: 4px 8px; }
+
+/* 商品明细弹窗 */
+.goods-group { padding: 0 16px; margin-top: 12px; }
+.goods-group-title { font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 8px; }
+.goods-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+.goods-item:last-child { border-bottom: none; }
+.goods-img {
+  width: 60px; height: 60px; border-radius: 8px; background: #F3F4F6;
+  display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+.goods-info { flex: 1; min-width: 0; }
+.goods-name { font-size: 13px; font-weight: 500; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goods-spec { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.goods-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.goods-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #F3F4F6; color: #6B7280; }
+.goods-tag.attr { background: #EFF6FF; color: #3B82F6; }
+.goods-tag.sensitive { background: #FEF3C7; color: #D97706; }
+.goods-tag.electric { background: #FEE2E2; color: #DC2626; }
+.goods-price { font-size: 13px; font-weight: 600; color: #EF4444; margin-top: 4px; }
+
+/* 转运快递分组 */
+.tracking-group { padding: 0 16px; margin-top: 12px; }
+.tracking-header {
+  font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px; background: #F9FAFB; border-radius: 8px;
+}
+.tracking-header .track-number { color: #374151; font-family: monospace; font-size: 12px; }
+.tracking-summary { font-size: 11px; color: #9CA3AF; margin-bottom: 8px; padding-left: 4px; }
+
+/* 线路选择弹窗 */
+.route-option {
+  background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px;
+  border: 2px solid transparent; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: border-color 0.2s;
+}
+.route-option.selected { border-color: #3B82F6; background: #EFF6FF; }
+.route-option.route-disabled { background: #F9FAFB; border-color: #E5E7EB; opacity: 0.7; cursor: not-allowed; }
+.route-option.route-disabled:hover { border-color: #E5E7EB; }
+.route-option-header { display: flex; align-items: center; justify-content: space-between; }
+.route-option-name { font-size: 15px; font-weight: 600; color: #111827; display: flex; align-items: center; gap: 6px; }
+.route-option-price { font-size: 18px; font-weight: 700; color: #EF4444; }
+.route-option-price .yen { font-size: 12px; }
+.route-option-tags { display: flex; gap: 6px; margin-top: 6px; }
+.route-type-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.tag-recommend { background: #FEF3C7; color: #D97706; }
+.tag-fast { background: #DBEAFE; color: #2563EB; }
+.tag-cheap { background: #D1FAE5; color: #059669; }
+.tag-value { background: #EDE9FE; color: #7C3AED; }
+.route-option-time { font-size: 12px; color: #6B7280; margin-top: 6px; }
+.route-check { display: none; color: #3B82F6; font-size: 18px; }
+.route-option.selected .route-check { display: block; }
+.route-option-detail { font-size: 11px; color: #3B82F6; cursor: pointer; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+/* 线路详情弹窗 */
+.route-detail-sheet { max-height: 80vh; padding-bottom: 16px; }
+
+/* 线路概要区 */
+.rd-summary { padding: 0 16px 12px; border-bottom: 1px solid #F3F4F6; }
+.rd-summary-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.rd-route-name { font-size: 16px; font-weight: 700; color: #111827; }
+.rd-route-type { font-size: 11px; color: #3B82F6; background: #EFF6FF; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+.rd-goods-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #F0FDF4; color: #16A34A; font-weight: 500; }
+/* 无可用线路状态 */
+.route-no-available { display: flex; flex-direction: column; align-items: center; padding: 20px 16px; gap: 4px; }
+.route-no-available-icon { font-size: 28px; margin-bottom: 4px; }
+.route-no-available-text { font-size: 14px; font-weight: 600; color: #6B7280; }
+.route-no-available-tip { font-size: 12px; color: #9CA3AF; text-align: center; }
+.rd-meta-row { display: flex; align-items: center; gap: 16px; }
+.rd-meta-item { display: flex; align-items: center; gap: 6px; }
+.rd-meta-label { font-size: 12px; color: #6B7280; }
+.rd-meta-val { font-size: 13px; font-weight: 600; color: #111827; }
+.rd-meta-price { font-size: 20px; font-weight: 800; color: #F97316; background: #FFF7ED; padding: 4px 12px; border-radius: 8px; border: 1px solid #FDBA74; }
+.rd-price-val { font-size: 22px; }
+.rd-info-icon { font-size: 12px; color: #9CA3AF; cursor: pointer; margin-left: 2px; }
+
+/* 线路介绍区 */
+.rd-intro-section { padding: 10px 16px; border-bottom: 1px solid #F3F4F6; }
+.rd-intro-text { font-size: 13px; color: #6B7280; line-height: 1.5; margin-bottom: 8px; }
+.rd-intro-tags { display: flex; gap: 6px; }
+.rd-goods-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #F0FDF4; color: #16A34A; font-weight: 500; }
+
+/* 计费信息区 */
+.rd-billing-section { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; }
+.rd-billing-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+.rd-billing-meta-item { display: flex; align-items: center; gap: 2px; font-size: 13px; }
+.rd-bm-label { color: #6B7280; white-space: nowrap; }
+.rd-bm-val { color: #111827; font-weight: 500; }
+
+.rd-table-scroll { overflow-x: visible; }
+.rd-billing-table { width: 100%; border-collapse: collapse; }
+.rd-billing-table th, .rd-billing-table td { padding: 10px 12px; text-align: center; font-size: 13px; border-bottom: 1px solid #F3F4F6; }
+.rd-billing-table th { background: #F9FAFB; color: #6B7280; font-weight: 500; }
+.rd-billing-table td { color: #111827; }
+.rd-billing-table td:first-child { text-align: center; font-weight: 500; color: #374151; background: transparent; }
+
+/* 邮寄限制区 */
+.rd-restrict-section { padding: 12px 16px; }
+.rd-section-title { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+.rd-restrict-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.rd-restrict-tag { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: #FEF2F2; color: #EF4444; font-weight: 500; border: 1px solid #FEE2E2; }
+
+/* 计费明细弹窗 */
+.billing-detail { padding: 0 16px; }
+.billing-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+.billing-row:last-child { border-bottom: none; }
+.billing-row .label { font-size: 13px; color: #6B7280; }
+.billing-row .value { font-size: 13px; font-weight: 600; color: #111827; }
+.billing-row.total { background: #F0F9FF; margin: 8px -16px 0; padding: 12px 16px; border-radius: 0 0 8px 8px; }
+.billing-row.total .label { font-size: 14px; font-weight: 600; color: #1E40AF; }
+.billing-row.total .value { font-size: 16px; font-weight: 700; color: #1E40AF; }
+
+/* 保价说明弹窗 */
+.insurance-info { padding: 0 16px; font-size: 13px; color: #374151; line-height: 1.8; }
+.insurance-info h4 { font-size: 14px; font-weight: 600; color: #111827; margin: 12px 0 4px; }
+.insurance-info ul { padding-left: 16px; }
+.insurance-info li { margin-bottom: 4px; }
+
+/* 保价输入框错误状态 */
+.service-sub-input input.input-error {
+  border: 1.5px solid #EF4444 !important;
+  background: #FEF2F2;
+}
+
+/* 提示图标样式 */
+.tip-icon {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 14px;
+  color: #9CA3AF;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.tip-icon:hover {
+  color: #6B7280;
+}
+
+/* 确认弹窗 */
+.confirm-section { padding: 0 16px; margin-top: 10px; }
+.confirm-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6; }
+.confirm-row .label { font-size: 13px; color: #6B7280; }
+.confirm-row .value { font-size: 13px; color: #111827; font-weight: 500; max-width: 220px; text-align: right; }
+.confirm-check { margin: 12px 16px; display: flex; align-items: center; gap: 8px; }
+.confirm-check input { width: 18px; height: 18px; }
+.confirm-check label { font-size: 12px; color: #6B7280; }
+.confirm-submit { margin: 0 16px; }
+.confirm-submit .submit-btn { width: 100%; text-align: center; }
+
+/* Toast */
+.toast {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 10px 24px; border-radius: 8px;
+  font-size: 14px; z-index: 999;
+}
+
+/* ===== 申报信息独立页面 ===== */
+.page-declare {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: #F3F4F6; z-index: 150;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+.page-declare.show {
+  transform: translateX(0);
+}
+.page-declare .declare-nav {
+  height: 44px; background: #fff; display: flex; align-items: center;
+  padding: 0 16px; border-bottom: 1px solid #F3F4F6;
+  position: sticky; top: 0; z-index: 10;
+}
+.page-declare .declare-nav .back-btn { font-size: 20px; color: #111827; cursor: pointer; width: 30px; }
+.page-declare .declare-nav .nav-title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; }
+.page-declare .declare-nav .nav-right { width: 60px; text-align: right; }
+
+.declare-content { padding: 8px 0 100px; }
+
+.declare-goods-section { padding: 0 12px; }
+.declare-goods-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.declare-goods-title { font-size: 14px; font-weight: 600; color: #111827; }
+.declare-add-btn {
+  font-size: 12px; color: #3B82F6; cursor: pointer; display: flex; align-items: center; gap: 4px;
+  background: none; border: none; font-weight: 500;
+}
+.declare-add-btn:active { color: #2563EB; }
+
+.declare-goods-item {
+  background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative;
+}
+.declare-goods-item-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.declare-goods-item-title { font-size: 13px; font-weight: 600; color: #374151; }
+.declare-goods-item-del {
+  font-size: 12px; color: #EF4444; cursor: pointer; background: none; border: none;
+  padding: 2px 6px;
+}
+.declare-goods-item-del:disabled { color: #D1D5DB; cursor: default; }
+.declare-field-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.declare-field-row:last-child { margin-bottom: 0; }
+.declare-field { flex: 1; }
+.declare-field-label { font-size: 11px; font-weight: 500; color: #374151; margin-bottom: 3px; display: flex; align-items: center; gap: 3px; }
+.declare-field-label .req { color: #EF4444; }
+.declare-field-label .tip { color: #D1D5DB; font-size: 11px; cursor: pointer; }
+.declare-field-input {
+  width: 100%; border: 1px solid #E5E7EB; border-radius: 8px;
+  padding: 7px 10px; font-size: 13px; color: #374151; outline: none; background: #F9FAFB;
+}
+.declare-field-input:focus { border-color: #3B82F6; background: #fff; }
+.declare-field-hint { font-size: 10px; color: #9CA3AF; margin-top: 2px; }
+.declare-field-hint.error { color: #EF4444; }
+.declare-field-hint.success { color: #10B981; }
+.declare-field-total {
+  padding: 7px 10px; background: #F0F9FF; border-radius: 8px;
+  font-size: 13px; color: #1E40AF; font-weight: 600; text-align: center;
+}
+.declare-grand-total {
+  margin: 8px 12px 0; padding: 10px 16px; background: #F0F9FF; border-radius: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.declare-grand-total .label { font-size: 13px; color: #1E40AF; font-weight: 500; }
+.declare-grand-total .value { font-size: 16px; font-weight: 700; color: #1E40AF; }
+.declare-grand-total .hint { font-size: 10px; color: #93C5FD; margin-left: 6px; }
+
+.declare-contact-section {
+  margin-top: 12px; padding: 0 12px;
+}
+.declare-contact-card {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.declare-contact-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 10px; }
+
+.declare-id-section {
+  margin-top: 12px; padding: 0 12px;
+}
+.declare-id-card {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.declare-id-notice {
+  font-size: 11px; color: #F59E0B; background: #FFFBEB; padding: 6px 10px;
+  border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;
+}
+
+.declare-submit-bar {
+  position: sticky; bottom: 0; background: #fff; border-top: 1px solid #E5E7EB;
+  padding: 12px 16px; text-align: center;
+}
+.declare-submit-btn {
+  width: 100%; padding: 12px; background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff; font-size: 15px; font-weight: 600; border: none; border-radius: 24px;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.declare-submit-btn:active { transform: scale(0.97); }
+
+/* 一键填入按钮 */
+.declare-auto-fill-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 8px 12px; padding: 10px 16px; background: #EFF6FF; border-radius: 10px;
+  border: 1px dashed #93C5FD; cursor: pointer;
+  font-size: 13px; color: #3B82F6; font-weight: 500;
+}
+.declare-auto-fill-btn:active { background: #DBEAFE; }
+
+/* 确认弹窗 */
+.confirm-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 300; justify-content: center; align-items: center;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-dialog {
+  background: #fff; border-radius: 16px; width: 300px; padding: 24px 20px 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.confirm-dialog .cd-title { font-size: 16px; font-weight: 600; color: #111827; text-align: center; margin-bottom: 8px; }
+.confirm-dialog .cd-msg { font-size: 13px; color: #6B7280; text-align: center; line-height: 1.6; margin-bottom: 20px; }
+.confirm-dialog .cd-btns { display: flex; gap: 10px; }
+.confirm-dialog .cd-btn {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  border: none; cursor: pointer; text-align: center;
+}
+.confirm-dialog .cd-btn.cancel { background: #F3F4F6; color: #6B7280; }
+.confirm-dialog .cd-btn.confirm { background: #3B82F6; color: #fff; }
+
+
+/* ========== 标注页面布局 ========== */
+.anno-page-header {
+  text-align: center;
+  padding: 24px 20px 16px;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+}
+.anno-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+.anno-page-subtitle {
+  font-size: 13px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+.anno-page-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 20px 60px;
+  gap: 20px;
+  min-height: calc(100vh - 90px);
+}
+.anno-preview-area {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.anno-preview-area .phone-frame {
+  margin: 0;
+}
+
+/* ========== 右侧标注面板 ========== */
+.anno-panel {
+  width: 400px;
+  flex: 0 0 400px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  overflow: hidden;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+.anno-panel-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  background: linear-gradient(135deg, #EEF2FF, #F0F9FF);
+}
+.anno-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E40AF;
+}
+.anno-panel-desc {
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+.anno-panel-body {
+  padding: 16px 20px 24px;
+}
+.anno-item {
+  border-left: 3px solid #3B82F6;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: #FAFBFC;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.anno-item:hover {
+  background: #EFF6FF;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+}
+.anno-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.anno-item-num {
+  width: 24px;
+  height: 24px;
+  background: #3B82F6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.anno-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E293B;
+}
+.anno-item-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.anno-item-tag.overview { background: #DBEAFE; color: #1D4ED8; }
+.anno-item-tag.interaction { background: #FEF3C7; color: #B45309; }
+.anno-item-tag.display { background: #D1FAE5; color: #047857; }
+.anno-item-body {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #E5E7EB;
+}
+.anno-item.expanded .anno-item-body {
+  display: block;
+}
+.anno-item-section { margin-bottom: 10px; }
+.anno-item-section:last-child { margin-bottom: 0; }
+.anno-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.anno-item-text {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+.anno-item-list {
+  list-style: none;
+  padding: 0;
+}
+.anno-item-list li {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.7;
+  padding-left: 12px;
+  position: relative;
+}
+.anno-item-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #3B82F6;
+  font-weight: 700;
+}
+.anno-item-list li strong { color: #1E40AF; }
+.anno-item-arrow {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-left: auto;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.anno-item.expanded .anno-item-arrow {
+  transform: rotate(90deg);
+}
+
+/* ========== 角标样式 ========== */
+.anno-marker {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: #3B82F6;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 100;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(59,130,246,0.4);
+  transition: transform 0.2s;
+}
+.anno-marker:hover {
+  transform: scale(1.2);
+}
+.anno-marker.active {
+  background: #1D4ED8;
+  transform: scale(1.3);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 860px) {
+  .anno-page-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .anno-panel {
+    width: 375px;
+    flex: 0 0 auto;
+    position: static;
+    max-height: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- 页面标题 -->
+<div class="anno-page-header">
+  <div class="anno-page-title">提交包裹 - APP端（带标注）</div>
+  <div class="anno-page-subtitle">共 14 个标注点 · 点击角标或右侧条目查看详情</div>
+</div>
+
+<!-- 主体：水平排列 -->
+<div class="anno-page-wrapper">
+
+  <!-- ========== 左侧：手机原型预览 ========== -->
+  <div class="anno-preview-area">
+    <div class="phone-frame" id="mainPage">
+
+
+<div class="phone-frame" id="mainPage">
+
+  <!-- ========== 主页面 ========== -->
+  <div class="page-main" id="pageMain">
+      <!-- 角标 2 - 收货地址卡片 -->
+      <div class="anno-marker" id="annoMarker2" style="top: 135px; left: -4px;" data-anno="2" title="收货地址卡片">2</div>
+      <!-- 角标 3 - 提包商品卡片 -->
+      <div class="anno-marker" id="annoMarker3" style="top: 290px; left: -4px;" data-anno="3" title="提包商品卡片">3</div>
+      <!-- 角标 4 - 物流线路卡片 -->
+      <div class="anno-marker" id="annoMarker4" style="top: 470px; left: -4px;" data-anno="4" title="物流线路卡片">4</div>
+      <!-- 角标 7 - 申报信息摘要卡片 -->
+      <div class="anno-marker" id="annoMarker7" style="top: 580px; left: -4px;" data-anno="7" title="申报信息摘要卡片">7</div>
+      <!-- 角标 9 - 增值服务项目 -->
+      <div class="anno-marker" id="annoMarker9" style="top: 680px; left: -4px;" data-anno="9" title="增值服务项目">9</div>
+      <!-- 角标 10 - 备注 -->
+      <div class="anno-marker" id="annoMarker10" style="top: 900px; left: -4px;" data-anno="10" title="备注">10</div>
+      <!-- 角标 11 - 收费明细卡片 -->
+      <div class="anno-marker" id="annoMarker11" style="top: 1060px; left: -4px;" data-anno="11" title="收费明细卡片">11</div>
+      <!-- 角标 14 - 底部操作栏 -->
+      <div class="anno-marker" id="annoMarker14" style="top: 1590px; left: -4px;" data-anno="14" title="底部操作栏与免责声明">14</div>
+
+    <div class="status-bar"><span>12:10</span><span>📶 </span></div>
+
+    <!-- Demo控制条 -->
+    <div class="demo-control" id="demoControl">
+      <span>Demo:</span>
+      <button class="demo-btn active" id="btnEmpty" onclick="toggleDemoState('empty')">初始化状态</button>
+      <button class="demo-btn" id="btnFilled" onclick="toggleDemoState('filled')">已填写状态</button>
+      <button class="demo-btn" id="btnNoRoute" onclick="toggleDemoState('noroute')">无线路状态</button>
+      <button class="demo-btn" id="btnPostpay" onclick="toggleDemoState('postpay')">后付费状态</button>
+    </div>
+
+    <div class="nav-bar">
+      <div class="back">‹</div>
+      <div class="title">提交包裹</div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- 1. 收货地址 -->
+      <div class="card address-card" id="addressCard">
+        <!-- 有地址状态 -->
+        <div class="address-info" id="addressFilled" style="display:none;" onclick="showToast('跳转地址列表页')">
+          <div class="address-icon">📍</div>
+          <div class="address-detail">
+            <div class="address-name">John Smith <span class="default-tag">默认</span></div>
+            <div class="address-phone">+1 (213) 555-0198</div>
+            <div class="address-text">1234 Oak Avenue, Apt 5B, Los Angeles, CA 90001, United States</div>
+          </div>
+          <div class="address-arrow">›</div>
+        </div>
+        <!-- 无地址空状态 -->
+        <div class="address-empty" id="addressEmpty" style="display:flex;">
+          <div class="empty-icon">📍</div>
+          <div class="empty-text">请添加收货地址</div>
+          <button class="empty-btn" onclick="simulateAddressFilled()">去添加</button>
+        </div>
+      </div>
+
+      <!-- 2. 提包商品 + 仓库 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📦 提包商品</div>
+        </div>
+        <div class="goods-header" onclick="showGoodsModal()">
+          <div class="goods-thumbs">
+            <div class="goods-thumb">🎧</div>
+            <div class="goods-thumb">📱</div>
+            <div class="goods-thumb">👟</div>
+            <div class="goods-thumb" style="background:#EFF6FF;font-size:12px;color:#3B82F6;font-weight:600;">+2</div>
+          </div>
+          <div class="goods-summary">
+            <div class="goods-info-left">
+              <span class="count">5</span>件 · 重<span class="weight">2.8kg</span> · 体积 12,000cm³
+            </div>
+            <div class="goods-toggle">查看明细 ›</div>
+          </div>
+        </div>
+        <div class="warehouse-row">
+          🏭 发货仓：<span>中国义乌仓</span>
+        </div>
+      </div>
+
+      <!-- 3. 物流线路 -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="card-title">🚚 物流线路</div>
+          <div id="switchRouteBtn" style="font-size:12px;color:#3B82F6;font-weight:500;cursor:pointer;display:none;" onclick="showRouteModal()">切换线路 ›</div>
+        </div>
+        <!-- 未填写收货地址状态 -->
+        <div id="routeAddressEmpty" class="route-placeholder" style="margin-top:8px;display:none;">
+          <span style="color:#9CA3AF;">请先填写收货地址</span>
+        </div>
+        <!-- 无可用线路状态 -->
+        <div id="routeNoAvailable" class="route-no-available" style="margin-top:8px;display:none;">
+          <div class="route-no-available-icon">📭</div>
+          <div class="route-no-available-text">暂无可用物流线路</div>
+          <div class="route-no-available-tip">当前地址暂无支持的服务线路，请更换地址或联系客服</div>
+        </div>
+        <!-- 未选择状态 -->
+        <div id="routePlaceholder" class="route-placeholder" style="margin-top:8px;display:none;" onclick="showRouteModal()">
+          <span>请选择物流线路</span>
+          <span>›</span>
+        </div>
+        <!-- 已选择状态 -->
+        <div id="routeSelected" class="route-selected" style="margin-top:8px;display:none;">
+          <div class="detail" onclick="showRouteDetailModal('EMS特惠','中国台湾','空运,海快','预估7-15个工作日','新竹-台湾,盛鼎-台湾,海快新竹1,宅配通,国内转寄,烟台EMS')">
+            <div class="name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;">EMS特惠</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:2px;">预估时效：7-15个工作日</div>
+          </div>
+          <div class="price-area">
+            <div class="price">¥186.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. 申报信息（摘要卡片） -->
+      <div class="card declare-summary-card" id="declareCard" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">📋 申报信息</div>
+        </div>
+        <!-- 未填写状态 -->
+        <div id="declareEmpty">
+          <div class="declare-summary-row" onclick="openDeclarePage(false)">
+            <div class="declare-summary-left">
+              <div class="desc">请填写申报信息</div>
+            </div>
+            <div class="declare-summary-right">去填写 ›</div>
+          </div>
+        </div>
+        <!-- 已填写摘要 -->
+        <div id="declareFilledSummary" style="display:none;">
+          <div class="declare-summary-row" onclick="openDeclarePage(false)">
+            <div class="declare-summary-left">
+              <div class="desc-filled" id="declareSummaryText">已填写 3 件申报商品 · USD $125.00</div>
+            </div>
+            <div class="declare-summary-right">去修改 ›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 增值服务项目（直接展示） -->
+      <div class="card" id="serviceList" style="display:none;">
+          <div class="service-item">
+            <div class="service-left">
+              <div class="icon">💰</div>
+              <div class="name">代收货款<span class="tip-icon" onclick="showCodTipModal()">ⓘ</span></div>
+            </div>
+            <div class="service-right">
+              <div class="switch" id="switchCOD" onclick="toggleSwitch('COD')"></div>
+            </div>
+          </div>
+          <div class="service-sub" id="subCOD">
+            <div class="service-sub-input">
+              <label>代收金额</label>
+              <input type="number" placeholder="请输入代收金额" />
+              <span class="unit">TWD</span>
+            </div>
+          </div>
+
+          <div class="service-item">
+            <div class="service-left">
+              <div class="icon">📦</div>
+              <div class="name">包税服务</div>
+            </div>
+            <div class="service-right">
+              <span class="service-link" onclick="showTaxServiceModal()">说明</span>
+              <div class="switch" id="switchTax" onclick="toggleSwitch('Tax')"></div>
+            </div>
+          </div>
+
+          <div class="service-item">
+            <div class="service-left">
+              <div class="icon">🔒</div>
+              <div class="name">保价服务</div>
+            </div>
+            <div class="service-right">
+              <span class="service-link" onclick="showInsuranceModal()">说明</span>
+              <div class="switch" id="switchInsurance" onclick="toggleSwitch('Insurance')"></div>
+            </div>
+          </div>
+          <div class="service-sub" id="subInsurance">
+            <div class="service-sub-input">
+              <label>保价金额</label>
+              <input type="number" id="insuranceAmountInput" placeholder="请输入保价金额" oninput="calcInsuranceFee()" />
+              <span class="unit">¥</span>
+            </div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:6px;" id="insuranceHint">保价范围：¥100 ~ ¥50,000</div>
+            <div style="font-size:11px;color:#EF4444;margin-top:4px;display:none;" id="insuranceError"></div>
+          </div>
+      </div>
+
+      <!-- 7. 备注 -->
+      <div class="card">
+        <div class="card-title">备注</div>
+        <div style="position:relative;margin-top:10px;">
+          <textarea class="remark-input" id="remarkInput" placeholder="如果您对包裹还有其他特殊要求，请在这里备注" maxlength="300" oninput="updateRemarkCount()" style="height:80px;padding-bottom:24px;"></textarea>
+          <div style="position:absolute;right:10px;bottom:8px;font-size:11px;color:#9CA3AF;" id="remarkCount">0/300</div>
+        </div>
+      </div>
+
+      <!-- 8. 收费明细 -->
+      <div class="card">
+        <div class="card-title">💳 收费明细</div>
+
+        <div class="fee-item" onclick="showBillingModal()">
+          <div class="fee-left">
+            <div class="icon">🚛</div>
+            <div class="label">承运计费</div>
+          </div>
+          <div class="fee-right">
+            <div class="fee-value">¥186.00</div>
+            <div class="fee-arrow">明细 ›</div>
+          </div>
+        </div>
+
+        <div class="fee-item">
+          <div class="fee-left"><div class="icon">⚙️</div><div class="label">系统服务费</div></div>
+          <div class="fee-right"><div class="fee-value">¥5.00</div></div>
+        </div>
+
+        <div id="otherFees" style="display:none;">
+          <div class="fee-item" id="feeTax" style="display:none;">
+            <div class="fee-left"><div class="icon">📋</div><div class="label">包税手续费</div></div>
+            <div class="fee-right"><div class="fee-value">¥18.60</div></div>
+          </div>
+          <div class="fee-item" id="feeInsurance" style="display:none;">
+            <div class="fee-left"><div class="icon">🔒</div><div class="label">保价手续费</div></div>
+            <div class="fee-right"><div class="fee-value">¥5.00</div></div>
+          </div>
+          <div class="fee-item" id="feeAddress" style="display:none;">
+            <div class="fee-left"><div class="icon">📍</div><div class="label">地址附加费</div></div>
+            <div class="fee-right"><div class="fee-value">¥10.00</div></div>
+          </div>
+          <div class="fee-item" id="feePackage" style="display:none;">
+            <div class="fee-left"><div class="icon">📦</div><div class="label">包裹费用</div></div>
+            <div class="fee-right"><div class="fee-value">¥8.00</div></div>
+          </div>
+          <div class="fee-item" id="feeOrder" style="display:none;">
+            <div class="fee-left"><div class="icon">📄</div><div class="label">订单附加费</div></div>
+            <div class="fee-right"><div class="fee-value">¥3.00</div></div>
+          </div>
+          <div class="fee-item" id="feeDelivery" style="display:none;">
+            <div class="fee-left"><div class="icon">🏠</div><div class="label">落地派送费</div></div>
+            <div class="fee-right"><div class="fee-value">¥25.00</div></div>
+          </div>
+        </div>
+
+        <div class="fee-item" onclick="showCouponModal()">
+          <div class="fee-left"><div class="icon">🎫</div><div class="label">优惠券</div></div>
+          <div class="fee-right">
+            <div class="fee-value discount" id="couponDiscount">-¥10.00</div>
+            <div class="fee-link" id="couponLink">2张可用 ›</div>
+          </div>
+        </div>
+
+        <div style="padding:10px 0;border-bottom:1px solid #F3F4F6;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="icon" style="font-size:18px;"></div>
+              <div class="label" style="font-size:14px;color:#374151;">积分抵扣</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-left:4px;">当前积分：<span style="color:#3B82F6;font-weight:500;">1,250</span></div>
+            </div>
+            <div class="fee-value discount" id="pointDeductAmount">-¥0.00</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" id="pointInput" placeholder="输入使用积分" min="0" max="1250" oninput="calcPointDeduct()" style="flex:1;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#F9FAFB;" />
+            <div style="font-size:12px;color:#6B7280;white-space:nowrap;">积分</div>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:6px;">💡 100积分 = 1元，最低使用100积分</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 温馨提示弹窗 -->
+    <div class="modal-overlay" id="tipModal" onclick="closeModal(event,'tipModal')">
+      <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:50vh;">
+              <div class="anno-marker" id="annoMarker12" style="top: -4px; left: -4px; z-index: 10;" data-anno="12" title="温馨提示弹窗">12</div>
+<div class="sheet-header">
+          <div class="sheet-title">温馨提示</div>
+          <div class="sheet-close" onclick="closeModal(null,'tipModal')">✕</div>
+        </div>
+        <div style="padding:16px;font-size:14px;color:#374151;line-height:1.8;">
+          POKO会根据包裹预估重量收取预估运费，包裹最终运费以承运方核定的重量为准。如若产生差额，我们会在打包后的7天内退还多余部分金额。如若承运方核定的重量超过预估重量，则需要您进行补款。
+        </div>
+      </div>
+    </div>
+
+    <!-- 免责声明 -->
+    <div style="padding:12px 16px 8px;background:#F9FAFB;border-top:1px solid #E5E7EB;">
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#6B7280;cursor:pointer;">
+        <input type="checkbox" id="disclaimerCheckbox" style="margin-top:2px;cursor:pointer;" onchange="updateSubmitButtonState()" />
+        <span>我已阅读并同意<a href="javascript:void(0)" onclick="showDisclaimerModal();event.stopPropagation();" style="color:#3B82F6;text-decoration:none;">《POKO集运免责声明》</a></span>
+      </label>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-bar">
+      <div class="bottom-total" id="bottomTotal">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="label">合计</div>
+          <div style="font-size:14px;color:#D1D5DB;cursor:pointer;" onclick="showTipModal()">ⓘ</div>
+        </div>
+        <div class="amount"><span class="yen">¥</span><span id="totalAmount">0.00</span></div>
+      </div>
+      <div class="bottom-postpay-hint" id="bottomPostpayHint" style="display:none;">
+        <div class="postpay-text">请等待仓库打包核重后通知支付金额</div>
+      </div>
+      <button class="submit-btn" id="submitBtnMain" onclick="showConfirmModal()" disabled>提交包裹</button>
+    </div>
+  </div>
+
+  <!-- ========== 申报信息独立页面 ========== -->
+  <div class="page-declare" id="pageDeclare">
+    <div class="anno-marker" id="annoMarker8" style="top: 56px; left: 8px;" data-anno="8" title="申报信息页面">8</div>
+    <div class="declare-nav">
+      <div class="back-btn" onclick="closeDeclarePage()">‹</div>
+      <div class="nav-title">申报信息</div>
+      <div class="nav-right"></div>
+    </div>
+
+    <div class="declare-content">
+      <!-- 快捷操作区 -->
+      <div style="display:flex;gap:8px;margin:8px 12px;">
+        <div class="declare-auto-fill-btn" onclick="autoFillDeclareWithCheck()" style="flex:1;margin:0;">
+          🤖 一键填入
+        </div>
+        <div class="declare-auto-fill-btn" onclick="showHistoryDeclareWithCheck()" style="flex:1;margin:0;background:#F0FDF4;border-color:#86EFAC;color:#16A34A;">
+          📋 历史申报
+        </div>
+      </div>
+
+      <!-- 申报商品列表 -->
+      <div class="declare-goods-section">
+        <div class="declare-goods-header">
+          <div class="declare-goods-title">📝 申报商品</div>
+          <button class="declare-add-btn" onclick="addDeclareItem()">+ 添加申报商品</button>
+        </div>
+        <div id="declareItemsContainer">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <!-- 申报总价汇总 -->
+      <div class="declare-grand-total" style="flex-direction:column;align-items:stretch;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="label">申报总价</span>
+            <span class="hint">💡 限额 $5 ~ $800</span>
+          </div>
+          <div class="value" id="declareGrandTotal">USD $0.00</div>
+        </div>
+        <div id="declareTotalError" style="display:none;font-size:11px;margin-top:6px;padding:6px 10px;border-radius:6px;"></div>
+      </div>
+
+      <!-- 申报人信息 -->
+      <div class="declare-contact-section">
+        <div class="declare-contact-card">
+          <div class="declare-contact-title">📋 申报人信息</div>
+          <div class="declare-field-row">
+            <div class="declare-field">
+              <div class="declare-field-label"><span class="req">*</span> 申报人电话</div>
+              <input class="declare-field-input" id="dcPhone" value="138****6789" placeholder="请输入手机号" />
+            </div>
+          </div>
+          <div class="declare-field-row">
+            <div class="declare-field">
+              <div class="declare-field-label">身份证号</div>
+              <input class="declare-field-input" id="dcIdNumber" placeholder="请输入身份证号码" />
+            </div>
+          </div>
+          <div class="declare-field-row">
+            <div class="declare-field">
+              <div class="declare-field-label">身份证姓名</div>
+              <input class="declare-field-input" id="dcIdName" placeholder="请输入身份证上的姓名" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 完成按钮 -->
+    <div class="declare-submit-bar">
+      <button class="declare-submit-btn" onclick="saveDeclareAndBack()">完成</button>
+    </div>
+  </div>
+
+  <!-- ==================== 优惠券选择弹窗 ==================== -->
+  <div class="modal-overlay" id="couponModal" onclick="closeModal(event,'couponModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:60vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">选择优惠券</div>
+        <div class="sheet-close" onclick="closeModal(null,'couponModal')">✕</div>
+      </div>
+      <div style="padding:12px;">
+        <!-- 优惠券1 -->
+        <div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid #F59E0B;" onclick="selectCoupon(0, 10)">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#92400E;">新人优惠券</div>
+            <div style="font-size:11px;color:#B45309;margin-top:2px;">有效期至 2024-03-31</div>
+            <div style="font-size:11px;color:#B45309;margin-top:2px;">满¥100可用</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:700;color:#DC2626;">-¥10</div>
+            <div style="font-size:10px;color:#F59E0B;margin-top:2px;">✓ 已选</div>
+          </div>
+        </div>
+        
+        <!-- 优惠券2 -->
+        <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:2px solid transparent;" onclick="selectCoupon(1, 20)">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#1E40AF;">会员专属券</div>
+            <div style="font-size:11px;color:#3B82F6;margin-top:2px;">有效期至 2024-06-30</div>
+            <div style="font-size:11px;color:#3B82F6;margin-top:2px;">满¥200可用</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:700;color:#DC2626;">-¥20</div>
+          </div>
+        </div>
+        
+        <!-- 不使用优惠券 -->
+        <div style="background:#F9FAFB;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;" onclick="selectCoupon(-1, 0)">
+          <div style="font-size:14px;color:#6B7280;">不使用优惠券</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 历史申报弹窗 ==================== -->
+  <div class="modal-overlay" id="historyDeclareModal" onclick="closeModal(event,'historyDeclareModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:70vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">历史申报记录</div>
+        <div class="sheet-close" onclick="closeModal(null,'historyDeclareModal')">✕</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="font-size:12px;color:#9CA3AF;margin-bottom:12px;padding:8px 12px;background:#F9FAFB;border-radius:8px;">💡 点击记录可快速复制申报信息到当前订单</div>
+        
+        <!-- 历史记录1 -->
+        <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onclick="useHistoryDeclare(0)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#DBEAFE;color:#1E40AF;font-weight:500;">已签收</span>
+              <span style="font-size:11px;color:#9CA3AF;">P20240115001</span>
+            </div>
+            <span style="font-size:11px;color:#9CA3AF;">2024-01-15</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">🇺🇸 美国 · EMS特惠</div>
+              <div style="font-size:12px;color:#6B7280;line-height:1.5;">蓝牙耳机 ×2、手机壳 ×1、运动鞋 ×1</div>
+            </div>
+            <div style="text-align:right;margin-left:12px;">
+              <div style="font-size:14px;font-weight:600;color:#3B82F6;">$125.00</div>
+              <div style="font-size:11px;color:#9CA3AF;">共4件</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding-top:8px;border-top:1px solid #F3F4F6;">
+            <span style="font-size:11px;color:#9CA3AF;">📦 实重 2.8kg</span>
+            <span style="font-size:11px;color:#9CA3AF;">📐 体积 5200cm³</span>
+            <span style="font-size:11px;color:#9CA3AF;">💰 运费 ¥186</span>
+          </div>
+        </div>
+        
+        <!-- 历史记录2 -->
+        <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onclick="useHistoryDeclare(1)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#D1FAE5;color:#065F46;font-weight:500;">已入库</span>
+              <span style="font-size:11px;color:#9CA3AF;">P20240108002</span>
+            </div>
+            <span style="font-size:11px;color:#9CA3AF;">2024-01-08</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">🇺🇸 美国 · 空运标快</div>
+              <div style="font-size:12px;color:#6B7280;line-height:1.5;">USB数据线 ×3、充电器 ×1</div>
+            </div>
+            <div style="text-align:right;margin-left:12px;">
+              <div style="font-size:14px;font-weight:600;color:#3B82F6;">$45.00</div>
+              <div style="font-size:11px;color:#9CA3AF;">共4件</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding-top:8px;border-top:1px solid #F3F4F6;">
+            <span style="font-size:11px;color:#9CA3AF;">📦 实重 1.2kg</span>
+            <span style="font-size:11px;color:#9CA3AF;">📐 体积 3100cm³</span>
+            <span style="font-size:11px;color:#9CA3AF;">💰 运费 ¥98</span>
+          </div>
+        </div>
+        
+        <!-- 历史记录3 -->
+        <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onclick="useHistoryDeclare(2)" onmouseover="this.style.borderColor='#3B82F6';this.style.boxShadow='0 2px 8px rgba(59,130,246,0.1)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#FEF3C7;color:#92400E;font-weight:500;">待出库</span>
+              <span style="font-size:11px;color:#9CA3AF;">P20231220003</span>
+            </div>
+            <span style="font-size:11px;color:#9CA3AF;">2023-12-20</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">🇨🇳 中国台湾 · 海快专线</div>
+              <div style="font-size:12px;color:#6B7280;line-height:1.5;">机械键盘 ×1</div>
+            </div>
+            <div style="text-align:right;margin-left:12px;">
+              <div style="font-size:14px;font-weight:600;color:#3B82F6;">$89.00</div>
+              <div style="font-size:11px;color:#9CA3AF;">共1件</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding-top:8px;border-top:1px solid #F3F4F6;">
+            <span style="font-size:11px;color:#9CA3AF;">📦 实重 1.5kg</span>
+            <span style="font-size:11px;color:#9CA3AF;">📐 体积 8500cm³</span>
+            <span style="font-size:11px;color:#9CA3AF;">💰 运费 ¥135</span>
+          </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div style="text-align:center;padding:16px;color:#9CA3AF;font-size:12px;">
+          仅展示近6个月申报记录
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 商品明细弹窗 ==================== -->
+  <div class="modal-overlay" id="goodsModal" onclick="closeModal(event,'goodsModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:75vh;">
+            <div class="anno-marker" id="annoMarker3b" style="top: -4px; left: -4px; z-index: 10;" data-anno="3" title="提包商品卡片">3</div>
+<div class="sheet-header">
+        <div class="sheet-title">商品明细</div>
+        <div class="sheet-close" onclick="closeModal(null,'goodsModal')">✕</div>
+      </div>
+      <div class="goods-group">
+        <div class="goods-group-title">共5件商品</div>
+
+        <!-- 快递单号1 -->
+        <div class="tracking-group" style="padding:0;margin-bottom:8px;">
+          <div class="tracking-header">
+            📦 快递单号：<span class="track-number">SF1234567890</span>
+          </div>
+          <div class="tracking-summary">共2件 · 重量 0.95kg · 体积 5,200cm³</div>
+          <div class="goods-item" style="padding:8px 4px;">
+            <div class="goods-img" style="width:50px;height:50px;font-size:18px;">🎧</div>
+            <div class="goods-info">
+              <div class="goods-name">蓝牙耳机 无线降噪头戴式</div>
+              <div class="goods-spec">黑色 / 标准版</div>
+              <div class="goods-meta">
+                <span class="goods-tag">×2</span>
+              </div>
+              <div class="goods-price">¥159.00</div>
+            </div>
+          </div>
+          <div class="goods-item" style="padding:8px 4px;">
+            <div class="goods-img" style="width:50px;height:50px;font-size:18px;">📱</div>
+            <div class="goods-info">
+              <div class="goods-name">手机壳 iPhone15 透明防摔</div>
+              <div class="goods-spec">透明 / iPhone15 Pro</div>
+              <div class="goods-meta">
+                <span class="goods-tag">×1</span>
+              </div>
+              <div class="goods-price">¥29.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快递单号2 -->
+        <div class="tracking-group" style="padding:0;margin-bottom:8px;">
+          <div class="tracking-header">
+            📦 快递单号：<span class="track-number">YT9876543210</span>
+          </div>
+          <div class="tracking-summary">共2件 · 重量 0.95kg · 体积 8,500cm³</div>
+          <div class="goods-item" style="padding:8px 4px;">
+            <div class="goods-img" style="width:50px;height:50px;font-size:18px;">👟</div>
+            <div class="goods-info">
+              <div class="goods-name">运动鞋 Nike Air Max 90</div>
+              <div class="goods-meta">
+                <span class="goods-tag">×1</span>
+              </div>
+              <div class="goods-price">¥89.00</div>
+            </div>
+          </div>
+          <div class="goods-item" style="padding:8px 4px;">
+            <div class="goods-img" style="width:50px;height:50px;font-size:18px;">🧴</div>
+            <div class="goods-info">
+              <div class="goods-name">护肤精华液 30ml</div>
+              <div class="goods-meta">
+                <span class="goods-tag">×1</span>
+              </div>
+              <div class="goods-price">¥220.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快递单号3 -->
+        <div class="tracking-group" style="padding:0;margin-bottom:0;">
+          <div class="tracking-header">
+            📦 快递单号：<span class="track-number">JD2468135790</span>
+          </div>
+          <div class="tracking-summary">共1件 · 重量 0.5kg · 体积 3,200cm³</div>
+          <div class="goods-item" style="padding:8px 4px;">
+            <div class="goods-img" style="width:50px;height:50px;font-size:18px;">📱</div>
+            <div class="goods-info">
+              <div class="goods-name">充电宝 20000mAh</div>
+              <div class="goods-meta">
+                <span class="goods-tag">×1</span>
+              </div>
+              <div class="goods-price">¥129.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 代收货款提示弹窗 ==================== -->
+  <div class="modal-overlay" id="codTipModal" onclick="closeModal(event,'codTipModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:70vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">代收货款说明</div>
+        <div class="sheet-close" onclick="closeModal(null,'codTipModal')">✕</div>
+      </div>
+      <div class="insurance-info">
+        <h4>📌 什么是代收货款？</h4>
+        <p style="margin:0 0 16px;color:#6B7280;">代收货款是指POKO在派送包裹时，代您向收件人收取货款，并在扣除手续费后将款项转账给您。</p>
+
+        <h4>📌 手续费规则</h4>
+        <ul>
+          <li>代收货款会产生相应手续费</li>
+          <li>具体费用根据您收取的货款金额及承运商标准而定</li>
+          <li>手续费在转账时自动扣除，您收到的为扣除手续费后的净额</li>
+        </ul>
+
+        <h4>📌 到账时间</h4>
+        <ul>
+          <li>收件人签收并支付货款后，款项将在 3-7 个工作日内转入您的账户</li>
+          <li>如遇节假日或特殊情况，到账时间可能顺延</li>
+        </ul>
+
+        <h4>📌 注意事项</h4>
+        <ul>
+          <li>请确保填写准确的收款账户信息</li>
+          <li>如收件人拒付货款，包裹将按退货流程处理</li>
+          <li>如有疑问，请联系客服咨询详情</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 免责声明弹窗 ==================== -->
+  <div class="modal-overlay" id="disclaimerModal" onclick="closeModal(event,'disclaimerModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:70vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">POKO集运免责声明</div>
+        <div class="sheet-close" onclick="closeModal(null,'disclaimerModal')">✕</div>
+      </div>
+      <div class="insurance-info" style="padding-bottom:20px;">
+        <h4>一、服务说明</h4>
+        <ul>
+          <li>POKO集运作为第三方物流服务平台，仅提供信息撮合及物流协助服务</li>
+          <li>实际运输服务由合作承运商提供，POKO不直接参与货物运输</li>
+        </ul>
+        <h4>二、责任界定</h4>
+        <ul>
+          <li>因不可抗力（自然灾害、战争、疫情管控等）导致的延误或损失，平台不承担责任</li>
+          <li>因海关查验、扣关、征税等导致的延误或损失，由用户自行承担</li>
+          <li>因申报信息不实、违禁品、敏感品导致的损失，由用户自行承担</li>
+        </ul>
+        <h4>三、保价与理赔</h4>
+        <ul>
+          <li>用户可自愿选择保价服务，未保价商品按承运商标准赔付</li>
+          <li>保价商品按保价金额及实际损失比例赔付</li>
+          <li>易碎品、贵重物品需特殊包装，否则不予理赔</li>
+        </ul>
+        <h4>四、用户义务</h4>
+        <ul>
+          <li>如实申报商品信息，不得瞒报、虚报</li>
+          <li>不得寄送违禁品、危险品</li>
+          <li>配合提供必要的清关文件和信息</li>
+        </ul>
+        <h4>五、争议解决</h4>
+        <ul>
+          <li>发生争议时，双方应友好协商解决</li>
+          <li>协商不成的，提交平台所在地人民法院诉讼解决</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- 选择物流线路页面（全屏） -->
+  <div id="routeModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:2000;overflow-y:auto;">
+    <div class="anno-marker" id="annoMarker5" style="top: 8px; left: 50%; transform: translateX(-50%); z-index: 10;" data-anno="5" title="线路选择页面">5</div>
+    <!-- 顶部导航栏 -->
+    <div style="background:linear-gradient(135deg,#3B82F6,#2563EB);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:1;">
+      <div onclick="closeModal2(null,'routeModal')" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:#fff;">←</div>
+      <div style="flex:1;font-size:17px;font-weight:600;color:#fff;">选择物流线路</div>
+    </div>
+    <!-- 提示横幅 -->
+    <div style="padding:10px 16px;font-size:12px;color:#F59E0B;background:#FFFBEB;border-bottom:1px solid #FEF3C7;display:flex;gap:6px;align-items:flex-start;">
+      <span>⚠️</span><span>您的包裹含敏感品（护肤精华液）和带电品（充电宝），部分线路不支持此类商品</span>
+    </div>
+    <!-- 包裹概要信息 -->
+    <div style="padding:12px 16px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;display:flex;gap:16px;font-size:12px;color:#6B7280;">
+      <span>预估重量：<b style="color:#111827;">5.4 kg</b></span>
+      <span>预估体积：<b style="color:#111827;">29,160 cm³</b></span>
+      <span>可用线路：<b style="color:#3B82F6;">5 条</b></span>
+    </div>
+    <!-- 线路列表 -->
+    <div style="padding:12px 16px;">
+        <div class="route-option selected" onclick="selectRoute(this,'EMS特惠','预估7-15个工作日','¥186.00')">
+          <div class="route-option-header">
+            <div class="route-option-name">EMS特惠 <span class="route-check">✓</span></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="route-option-price"><span class="yen">¥</span>186.00</div>
+              <div onclick="event.stopPropagation();selectRoute(this,'EMS特惠','预估7-15个工作日','¥186.00')" style="padding:6px 14px;border-radius:16px;background:#3B82F6;color:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;">选择线路</div>
+            </div>
+          </div>
+          <div class="route-option-tags"><span class="route-type-tag tag-fast">海快</span></div>
+          <div class="route-option-time">预估时效：7-15个工作日</div>
+          <div class="route-option-detail" onclick="event.stopPropagation();showRouteDetailModal({name:'EMS特惠',type:'空运,海快',desc:'经济实惠海运快线，适合不急的包裹',time:'7-15个工作日',price:'186',tags:['普货','大件'],billingWeight:'15kg',billingMethod:'实重与抛重二者取其大',carriers:'新竹-台湾,盛鼎-台湾,海快新竹1,宅配通,国内转寄,烟台EMS',restricts:['肉类','药品','液体']})">📋 查看线路详情</div>
+        </div>
+
+        <div class="route-option" onclick="selectRoute(this,'空运标快','预估5-10个工作日','¥245.00')">
+          <div class="route-option-header">
+            <div class="route-option-name">空运标快 <span class="route-check">✓</span></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="route-option-price"><span class="yen">¥</span>245.00</div>
+              <div onclick="event.stopPropagation();selectRoute(this,'空运标快','预估5-10个工作日','¥245.00')" style="padding:6px 14px;border-radius:16px;background:#3B82F6;color:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;">选择线路</div>
+            </div>
+          </div>
+          <div class="route-option-tags"><span class="route-type-tag tag-fast">空运</span></div>
+          <div class="route-option-time">预估时效：5-10个工作日</div>
+          <div class="route-option-detail" onclick="event.stopPropagation();showRouteDetailModal({name:'空运标快',type:'空运',desc:'经济行快运快线，适合急需包裹',time:'5-10天',price:'245',tags:['普货','特A'],billingWeight:'15kg',billingMethod:'实重与抛重二者取其大',carriers:'顺丰国际,台湾邮政',restricts:['肉类','药品','液体','带电']})">📋 查看线路详情</div>
+        </div>
+
+        <div class="route-option route-disabled" onclick="event.stopPropagation();showToast('该线路不支持寄送敏感品')">
+          <div class="route-option-header">
+            <div class="route-option-name" style="color:#9CA3AF;">海运经济 <span style="font-size:10px;color:#EF4444;margin-left:6px;">不可寄</span></div>
+            <div class="route-option-price" style="color:#9CA3AF;"><span class="yen">¥</span>98.00</div>
+          </div>
+          <div class="route-option-tags"><span class="route-type-tag tag-cheap">海运</span></div>
+          <div class="route-option-time" style="color:#EF4444;font-size:11px;">❌ 该线路不支持寄送敏感品（护肤精华液）</div>
+        </div>
+
+        <div class="route-option route-disabled" onclick="event.stopPropagation();showToast('该线路不支持寄送带电品')">
+          <div class="route-option-header">
+            <div class="route-option-name" style="color:#9CA3AF;">DHL快递 <span style="font-size:10px;color:#EF4444;margin-left:6px;">不可寄</span></div>
+            <div class="route-option-price" style="color:#9CA3AF;"><span class="yen">¥</span>320.00</div>
+          </div>
+          <div class="route-option-tags"><span class="route-type-tag tag-fast">空运</span></div>
+          <div class="route-option-time" style="color:#EF4444;font-size:11px;">❌ 该线路不支持寄送带电品（充电宝）</div>
+        </div>
+
+        <div class="route-option" onclick="selectRoute(this,'UPS红单','预估5-8个工作日','¥288.00')">
+          <div class="route-option-header">
+            <div class="route-option-name">UPS红单 <span class="route-check">✓</span></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="route-option-price"><span class="yen">¥</span>288.00</div>
+              <div onclick="event.stopPropagation();selectRoute(this,'UPS红单','预估5-8个工作日','¥288.00')" style="padding:6px 14px;border-radius:16px;background:#3B82F6;color:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;">选择线路</div>
+            </div>
+          </div>
+          <div class="route-option-tags"><span class="route-type-tag tag-fast">空运</span></div>
+          <div class="route-option-time">预估时效：5-8个工作日</div>
+          <div class="route-option-detail" onclick="event.stopPropagation();showRouteDetailModal({name:'UPS红单',type:'空运',desc:'国际快递，时效稳定',time:'5-8天',price:'288',tags:['普货'],billingWeight:'15kg',billingMethod:'实重与抛重二者取其大',carriers:'UPS',restricts:['肉类','液体','带电']})">📋 查看线路详情</div>
+        </div>
+    </div>
+  </div>
+
+  <!-- ==================== 线路详情弹窗 ==================== -->
+  <div class="modal-overlay" id="routeDetailModal" onclick="closeModal(event,'routeDetailModal')">
+    <div class="bottom-sheet route-detail-sheet" onclick="event.stopPropagation()">
+            <div class="anno-marker" id="annoMarker6" style="top: -4px; left: -4px; z-index: 10;" data-anno="6" title="线路详情弹窗">6</div>
+<div class="sheet-header">
+        <div class="sheet-title">线路详情</div>
+        <div class="sheet-close" onclick="closeModal(null,'routeDetailModal')">✕</div>
+      </div>
+
+      <!-- 线路概要 -->
+      <div class="rd-summary">
+        <div class="rd-summary-row">
+          <div class="rd-route-name" id="rdName">空运标快</div>
+          <div class="rd-route-type" id="rdType">空运</div>
+        </div>
+        <div class="rd-meta-row">
+          <div class="rd-meta-item">
+            <span class="rd-meta-label">运输时效 <span class="rd-info-icon" onclick="showToast('时效说明')">ⓘ</span></span>
+            <span class="rd-meta-val" id="rdTime">2-3天</span>
+          </div>
+          <div class="rd-meta-item">
+            <span class="rd-meta-label">运费</span>
+            <span class="rd-meta-price">¥<span class="rd-price-val" id="rdPrice">200</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 线路介绍 -->
+      <div class="rd-intro-section">
+        <div class="rd-intro-text" id="rdDesc">经济行快运快线，适合急需包裹</div>
+        <div class="rd-intro-tags">
+          <span class="rd-goods-tag" id="rdTag1">普货</span>
+          <span class="rd-goods-tag" id="rdTag2" style="display:none;">特A</span>
+        </div>
+      </div>
+
+      <!-- 计费信息 -->
+      <div class="rd-billing-section">
+        <div class="rd-billing-meta">
+          <div class="rd-billing-meta-item">
+            <span class="rd-bm-label">计费重量：</span>
+            <span class="rd-bm-val" id="rdBillingWeight">15kg</span>
+          </div>
+          <div class="rd-billing-meta-item">
+            <span class="rd-bm-label">计费方式：</span>
+            <span class="rd-bm-val" id="rdBillingMethod">实重与抛重二者取其大</span>
+            <span class="rd-info-icon" onclick="showToast('计费方式：取实重与体积重较大值作为计费重量')">ⓘ</span>
+          </div>
+        </div>
+        <div class="rd-table-scroll">
+          <table class="rd-billing-table">
+            <thead>
+              <tr><th>计费区间</th><th>价格</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>[0-1kg)</td><td>一口价 ¥10</td></tr>
+              <tr><td>[1-10kg)</td><td>每KG ¥3</td></tr>
+              <tr><td colspan="2" style="text-align:center;color:#9CA3AF;font-size:11px;height:20px;">↓</td></tr>
+              <tr><td>[0-10kg)</td><td>一口价 ¥36</td></tr>
+              <tr><td>[10-39kg)</td><td>每KG ¥2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 邮寄限制 -->
+      <div class="rd-restrict-section">
+        <div class="rd-section-title">邮寄限制</div>
+        <div class="rd-restrict-tags" id="rdRestricts">
+          <span class="rd-restrict-tag">🚫 肉类</span>
+          <span class="rd-restrict-tag">🚫 药品</span>
+          <span class="rd-restrict-tag">🚫 液体</span>
+          <span class="rd-restrict-tag">🚫 带电</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 计费明细弹窗 ==================== -->
+  <div class="modal-overlay" id="billingModal" onclick="closeModal(event,'billingModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="anno-marker" id="annoMarker13" style="top: -4px; left: -4px; z-index: 10;" data-anno="13" title="计费明细弹窗">13</div>
+<div class="sheet-header">
+        <div class="sheet-title">计费明细</div>
+        <div class="sheet-close" onclick="closeModal(null,'billingModal')">✕</div>
+      </div>
+      <div class="billing-detail">
+        <div class="billing-row"><div class="label">实际重量</div><div class="value">2.80 kg</div></div>
+        <div class="billing-row"><div class="label">体积重量</div><div class="value">2.35 kg</div></div>
+        <div class="billing-row"><div class="label">计费重量（取较大值）</div><div class="value">2.80 kg</div></div>
+        <div class="billing-row"><div class="label">首重（1kg）</div><div class="value">¥68.00</div></div>
+        <div class="billing-row"><div class="label">续重（1.8kg × ¥60/kg）</div><div class="value">¥118.00</div></div>
+        <div class="billing-row total"><div class="label">合计运费</div><div class="value">¥186.00</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 保价说明弹窗 ==================== -->
+  <div class="modal-overlay" id="insuranceModal" onclick="closeModal(event,'insuranceModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:60vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">保价说明</div>
+        <div class="sheet-close" onclick="closeModal(null,'insuranceModal')">✕</div>
+      </div>
+      <div class="insurance-info">
+        <h4>📌 保价费率</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
+          <tr style="background:#F3F4F6;">
+            <th style="padding:10px;text-align:left;font-weight:600;color:#374151;border-bottom:1px solid #E5E7EB;">保价金额</th>
+            <th style="padding:10px;text-align:left;font-weight:600;color:#374151;border-bottom:1px solid #E5E7EB;">保价费</th>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">0-1000</td>
+            <td style="padding:10px;color:#374151;border-bottom:1px solid #F3F4F6;">¥10</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">1000-2000</td>
+            <td style="padding:10px;color:#374151;border-bottom:1px solid #F3F4F6;">¥20</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">2000-5000</td>
+            <td style="padding:10px;color:#374151;border-bottom:1px solid #F3F4F6;">¥50</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;color:#6B7280;">5000-10000</td>
+            <td style="padding:10px;color:#374151;">¥100</td>
+          </tr>
+        </table>
+        <h4>📌 计费说明</h4>
+        <ul>
+          <li>保价费按区间一口价收取，根据您填写的保价金额自动匹配对应档位</li>
+          <li>提交订单时系统自动计算，费用在收费明细中单独展示</li>
+        </ul>
+        <h4>📌 理赔规则</h4>
+        <ul>
+          <li>货物在运输途中丢失：按保价金额全额赔付</li>
+          <li>货物在运输途中破损：不在赔付范围内</li>
+          <li>理赔周期：提交理赔申请后 7-15 个工作日内完成审核</li>
+        </ul>
+        <h4>📌 免责条款</h4>
+        <ul>
+          <li>因不可抗力（自然灾害、战争等）导致的损失不赔付</li>
+          <li>因海关查验扣押导致的损失不赔付</li>
+          <li>因申报信息不实导致的损失不赔付</li>
+          <li>违禁品、易碎品（未特殊包装）不在保价范围内</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 包税服务说明弹窗 ==================== -->
+  <div class="modal-overlay" id="taxServiceModal" onclick="closeModal(event,'taxServiceModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:75vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">包税服务说明</div>
+        <div class="sheet-close" onclick="closeModal(null,'taxServiceModal')">✕</div>
+      </div>
+      <div style="padding:16px;font-size:13px;color:#374151;line-height:1.7;">
+        <h4 style="font-size:14px;font-weight:600;margin:0 0 8px;">什么是包税服务？</h4>
+        <p style="margin:0 0 16px;color:#6B7280;">包税服务（DDP）是指在提交包裹时预先支付关税费用，由POKO统一处理清关和缴税事宜。您无需在收货时再向海关或物流商支付任何税费。</p>
+
+        <h4 style="font-size:14px;font-weight:600;margin:0 0 10px;">包税 vs 不包税</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
+          <tr style="background:#F3F4F6;">
+            <th style="padding:8px 10px;text-align:left;font-weight:500;color:#6B7280;border-bottom:1px solid #E5E7EB;width:60px;">对比项</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:600;color:#3B82F6;border-bottom:1px solid #E5E7EB;">包税</th>
+            <th style="padding:8px 10px;text-align:left;font-weight:500;color:#6B7280;border-bottom:1px solid #E5E7EB;">不包税</th>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">费用</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">运费已含关税，总价固定</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">运费 + 收货时可能产生的关税</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">清关</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">POKO全权处理，无需您操作</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">可能需要您配合提供资料、自行缴税</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;border-bottom:1px solid #F3F4F6;">成本</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">可控，支付时即锁定总费用</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">不可控，关税金额由海关决定</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;color:#6B7280;">适合场景</td>
+            <td style="padding:8px 10px;">高价值商品、敏感品类、希望省心</td>
+            <td style="padding:8px 10px;">低价值商品、公司商业报关</td>
+          </tr>
+        </table>
+
+        <h4 style="font-size:14px;font-weight:600;margin:0 0 8px;">如何计费？</h4>
+        <ul style="margin:0 0 16px;padding-left:18px;color:#6B7280;">
+          <li>包税费用 = 包裹重量 × 线路单价（X元/kg）</li>
+          <li>纺织品等品类超出一定重量将加收税费</li>
+          <li>提交订单时系统自动计算，费用在收费明细中单独展示</li>
+        </ul>
+
+        <h4 style="font-size:14px;font-weight:600;margin:0 0 8px;">建议开启包税的场景</h4>
+        <ul style="margin:0 0 16px;padding-left:18px;color:#6B7280;">
+          <li>🎯 高价值商品：电子产品、奢侈品等，关税可能较高</li>
+          <li>🎯 敏感品类：带电品、液体等，被查验概率更高</li>
+          <li>🎯 不熟悉目的国关税政策：省心省力，避免意外支出</li>
+        </ul>
+
+        <h4 style="font-size:14px;font-weight:600;margin:0 0 8px;">温馨提示</h4>
+        <ul style="margin:0;padding-left:18px;color:#6B7280;">
+          <li>包税服务覆盖正常清关产生的关税和增值税</li>
+          <li>如因申报信息不实或商品违反目的国法规导致的额外费用，不在包税范围内</li>
+          <li>部分国家/地区有免税额度，低价值包裹可不选包税</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 提交确认弹窗 ==================== -->
+  <div class="modal-overlay" id="confirmModal" onclick="closeModal(event,'confirmModal')">
+    <div class="bottom-sheet" onclick="event.stopPropagation()" style="max-height:75vh;">
+      <div class="sheet-header">
+        <div class="sheet-title">确认提交</div>
+        <div class="sheet-close" onclick="closeModal(null,'confirmModal')">✕</div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-row"><div class="label">收件人</div><div class="value">John Smith, +1 (213) 555-0198</div></div>
+        <div class="confirm-row"><div class="label">收货地址</div><div class="value">1234 Oak Avenue, Apt 5B, Los Angeles, CA 90001</div></div>
+        <div class="confirm-row"><div class="label">物流线路</div><div class="value">EMS特惠（7-15个工作日）</div></div>
+        <div class="confirm-row"><div class="label">提包商品</div><div class="value">5件（代购3件+转运2件）</div></div>
+        <div class="confirm-row"><div class="label">申报品名</div><div class="value" id="confirmDeclareName">电子设备配件 / Electronic device accessories</div></div>
+        <div class="confirm-row"><div class="label">申报总价</div><div class="value" id="confirmDeclareTotal">USD $125.00</div></div>
+        <div class="confirm-row"><div class="label">承运运费</div><div class="value">¥186.00</div></div>
+        <div class="confirm-row"><div class="label">系统服务费</div><div class="value">¥5.00</div></div>
+        <div class="confirm-row"><div class="label">优惠抵扣</div><div class="value" style="color:#10B981;">-¥0.00</div></div>
+      </div>
+      <div class="confirm-check">
+        <input type="checkbox" id="confirmCheck" />
+        <label for="confirmCheck">我确认申报信息真实准确，因申报不实导致的损失由本人承担</label>
+      </div>
+      <div class="confirm-submit">
+        <button class="submit-btn" onclick="showToast('跳转支付页面');closeModal(null,'confirmModal')">确认提交 ¥191.00</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 通用确认弹窗 ==================== -->
+  <div class="confirm-overlay" id="confirmDialog">
+    <div class="confirm-dialog">
+      <div class="cd-title" id="cdTitle"></div>
+      <div class="cd-msg" id="cdMsg"></div>
+      <div class="cd-btns">
+        <button class="cd-btn cancel" onclick="closeConfirmDialog()">取消</button>
+        <button class="cd-btn confirm" id="cdConfirmBtn">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ===== Demo控制：初始化/已填写状态切换 =====
+function toggleDemoState(state) {
+  const btnEmpty = document.getElementById('btnEmpty');
+  const btnFilled = document.getElementById('btnFilled');
+  const btnNoRoute = document.getElementById('btnNoRoute');
+  const btnPostpay = document.getElementById('btnPostpay');
+  const addrFilled = document.getElementById('addressFilled');
+  const addrEmpty = document.getElementById('addressEmpty');
+  const routeSelected = document.getElementById('routeSelected');
+  const routePlaceholder = document.getElementById('routePlaceholder');
+  const routeNoAvailable = document.getElementById('routeNoAvailable');
+  const declareEmpty = document.getElementById('declareEmpty');
+  const declareFilled = document.getElementById('declareFilledSummary');
+  const serviceList = document.getElementById('serviceList');
+  const submitBtn = document.getElementById('submitBtnMain');
+  const totalAmount = document.getElementById('totalAmount');
+  const totalBreakdown = document.getElementById('totalBreakdown');
+  const bottomTotal = document.getElementById('bottomTotal');
+  const bottomPostpayHint = document.getElementById('bottomPostpayHint');
+
+  // 重置所有按钮状态
+  btnEmpty.classList.remove('active');
+  btnFilled.classList.remove('active');
+  btnNoRoute.classList.remove('active');
+  btnPostpay.classList.remove('active');
+  // 重置所有线路子状态
+  routeSelected.style.display = 'none';
+  routePlaceholder.style.display = 'none';
+  routeNoAvailable.style.display = 'none';
+  document.getElementById('routeAddressEmpty').style.display = 'none';
+  document.getElementById('switchRouteBtn').style.display = 'none';
+  // 重置底部栏为默认模式
+  bottomTotal.style.display = 'flex';
+  bottomPostpayHint.style.display = 'none';
+  submitBtn.classList.remove('postpay-mode');
+  submitBtn.textContent = '提交包裹';
+  submitBtn.onclick = function() { showConfirmModal(); };
+
+  if (state === 'empty') {
+    btnEmpty.classList.add('active');
+    // 地址：无地址
+    addrFilled.style.display = 'none';
+    addrEmpty.style.display = 'flex';
+    // 线路：未填地址提示
+    document.getElementById('routeAddressEmpty').style.display = 'flex';
+    // 申报：未填写
+    declareEmpty.style.display = 'block';
+    declareFilled.style.display = 'none';
+    // 申报卡片和服务列表隐藏
+    document.getElementById('declareCard').style.display = 'none';
+    serviceList.style.display = 'none';
+    // 增值服务：始终展示，开关重置
+    ['COD','Tax','Insurance'].forEach(t => {
+      document.getElementById('switch' + t).classList.remove('active');
+      document.getElementById('sub' + t).classList.remove('show');
+    });
+    // 隐藏其他费用
+    document.getElementById('otherFees').style.display = 'none';
+    ['feeTax','feeInsurance','feeAddress','feePackage','feeOrder','feeDelivery'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    // 免责声明重置
+    document.getElementById('disclaimerCheckbox').checked = false;
+    // 底部：提交按钮禁用，金额为0
+    submitBtn.disabled = true;
+    totalAmount.textContent = '0.00';
+    totalBreakdown.textContent = '请完成以上信息';
+  } else if (state === 'noroute') {
+    btnNoRoute.classList.add('active');
+    // 地址：有地址
+    addrFilled.style.display = 'flex';
+    addrEmpty.style.display = 'none';
+    // 线路：无可用线路
+    routeNoAvailable.style.display = 'flex';
+    // 申报卡片和服务列表隐藏
+    document.getElementById('declareCard').style.display = 'none';
+    serviceList.style.display = 'none';
+    // 申报：未填写
+    declareEmpty.style.display = 'block';
+    declareFilled.style.display = 'none';
+    // 底部：提交按钮禁用
+    submitBtn.disabled = true;
+    totalAmount.textContent = '0.00';
+    totalBreakdown.textContent = '请选择物流线路';
+  } else if (state === 'postpay') {
+    btnPostpay.classList.add('active');
+    // 地址：有地址
+    addrFilled.style.display = 'flex';
+    addrEmpty.style.display = 'none';
+    // 线路：已选择
+    routeSelected.style.display = 'flex';
+    document.getElementById('switchRouteBtn').style.display = 'block';
+    // 申报信息和增值服务：显示
+    document.getElementById('declareCard').style.display = 'block';
+    serviceList.style.display = 'block';
+    // 申报：未填写
+    declareEmpty.style.display = 'block';
+    declareFilled.style.display = 'none';
+    // 底部栏：后付费模式
+    bottomTotal.style.display = 'none';
+    bottomPostpayHint.style.display = 'flex';
+    submitBtn.disabled = false;
+    submitBtn.classList.add('postpay-mode');
+    submitBtn.textContent = '下一步';
+    submitBtn.onclick = function() { showToast('进入下一步（后付费模式）'); };
+  } else {
+    btnFilled.classList.add('active');
+    btnEmpty.classList.remove('active');
+    // 地址：有地址
+    addrFilled.style.display = 'flex';
+    addrEmpty.style.display = 'none';
+    // 线路：已选择
+    routeSelected.style.display = 'flex';
+    routePlaceholder.style.display = 'none';
+    document.getElementById('routeAddressEmpty').style.display = 'none';
+    document.getElementById('switchRouteBtn').style.display = 'block';
+    // 申报信息和增值服务：显示
+    document.getElementById('declareCard').style.display = 'block';
+    document.getElementById('serviceList').style.display = 'block';
+    // 申报：已填写
+    declareEmpty.style.display = 'none';
+    declareFilled.style.display = 'block';
+    document.getElementById('declareSummaryText').textContent = '蓝牙耳机等3件商品 · USD $125.00';
+    // 增值服务：始终展示，包税+保价开启
+    // 开启包税和保价
+    ['Tax','Insurance'].forEach(t => {
+      document.getElementById('switch' + t).classList.add('active');
+      document.getElementById('sub' + t).classList.add('show');
+    });
+    document.getElementById('switchCOD').classList.remove('active');
+    document.getElementById('subCOD').classList.remove('show');
+    // 显示其他费用
+    document.getElementById('otherFees').style.display = 'block';
+    document.getElementById('feeTax').style.display = 'flex';
+    document.getElementById('feeInsurance').style.display = 'flex';
+    // 保价金额填入示例值
+    document.getElementById('insuranceAmountInput').value = 500;
+    calcInsuranceFee();
+    // 免责声明：未勾选，需要手动勾选才能提交
+    document.getElementById('disclaimerCheckbox').checked = false;
+    // 底部：提交按钮需要勾选免责声明才能启用
+    submitBtn.disabled = true;
+    totalAmount.textContent = '209.60';
+    totalBreakdown.textContent = '运费¥186 + 服务费¥5 + 包税¥18.60 + 保价¥15 - 优惠¥10';
+  }
+}
+
+// ===== 弹窗通用 =====
+function showGoodsModal() { document.getElementById('goodsModal').classList.add('show'); }
+function showRouteModal() { 
+  document.getElementById('routeModal').style.display='block';
+  window.scrollTo(0,0);
+}
+function showRouteDetailModal(d) {
+  document.getElementById('rdName').textContent = d.name;
+  document.getElementById('rdType').textContent = d.type;
+  document.getElementById('rdDesc').textContent = d.desc;
+  document.getElementById('rdTime').textContent = d.time;
+  document.getElementById('rdPrice').textContent = d.price;
+  document.getElementById('rdBillingWeight').textContent = d.billingWeight;
+  document.getElementById('rdBillingMethod').textContent = d.billingMethod;
+  // 商品类型标签
+  const t1 = document.getElementById('rdTag1');
+  const t2 = document.getElementById('rdTag2');
+  if (d.tags && d.tags.length > 0) { t1.textContent = d.tags[0]; t1.style.display = 'inline-block'; } else { t1.style.display = 'none'; }
+  if (d.tags && d.tags.length > 1) { t2.textContent = d.tags[1]; t2.style.display = 'inline-block'; } else { t2.style.display = 'none'; }
+  // 邮寄限制标签
+  const rEl = document.getElementById('rdRestricts');
+  rEl.innerHTML = (d.restricts || d.prohibits || []).map(p => '<span class="rd-restrict-tag">🚫 ' + p + '</span>').join('');
+  document.getElementById('routeDetailModal').classList.add('show');
+}
+function showBillingModal() { document.getElementById('billingModal').classList.add('show'); }
+function showInsuranceModal() { document.getElementById('insuranceModal').classList.add('show'); }
+function showTaxServiceModal() { document.getElementById('taxServiceModal').classList.add('show'); }
+function showCodTipModal() { document.getElementById('codTipModal').classList.add('show'); }
+function showCouponModal() { document.getElementById('couponModal').classList.add('show'); }
+
+// 优惠券选择
+let selectedCouponIndex = 0;
+let selectedCouponAmount = 10;
+
+function selectCoupon(index, amount) {
+  selectedCouponIndex = index;
+  selectedCouponAmount = amount;
+  
+  const discountEl = document.getElementById('couponDiscount');
+  const linkEl = document.getElementById('couponLink');
+  
+  if (index === -1) {
+    // 不使用优惠券
+    discountEl.textContent = '-¥0.00';
+    linkEl.textContent = '2张可用 ›';
+  } else {
+    discountEl.textContent = '-¥' + amount.toFixed(2);
+    linkEl.textContent = '已选1张 ›';
+  }
+  
+  closeModal(null, 'couponModal');
+  updateTotal();
+  showToast(index === -1 ? '已取消使用优惠券' : '已选择优惠券 -¥' + amount);
+}
+function showDisclaimerModal() { document.getElementById('disclaimerModal').classList.add('show'); }
+
+// ===== 提交按钮状态控制 =====
+function updateSubmitButtonState() {
+  const checkbox = document.getElementById('disclaimerCheckbox');
+  const submitBtn = document.getElementById('submitBtnMain');
+  // 只有勾选免责声明后才允许提交
+  submitBtn.disabled = !checkbox.checked;
+}
+function showConfirmModal() {
+  // 更新确认弹窗中的申报信息
+  updateConfirmDeclare();
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeModal(e, id) {
+  if (!e || e.target === document.getElementById(id)) {
+    document.getElementById(id).classList.remove('show');
+  }
+}
+function closeModal2(e, id) {
+  document.getElementById(id).style.display='none';
+}
+
+// ===== 线路选择 =====
+function selectRoute(el, name, time, price) {
+  // 找到父级route-option
+  const option = el.closest ? el.closest('.route-option') : el.closest('.route-option');
+  if (!option || option.classList.contains('route-disabled')) {
+    return;
+  }
+  
+  document.querySelectorAll('#routeModal .route-option').forEach(o => o.classList.remove('selected'));
+  option.classList.add('selected');
+  document.querySelector('#routeSelected .name').textContent = name;
+  document.querySelector('#routeSelected .sub').textContent = time;
+  document.querySelector('#routeSelected .price').textContent = price;
+  
+  // 自动关闭线路选择页，回到提交包裹页
+  closeModal2(null, 'routeModal');
+  
+  // 选择线路后，显示申报信息和增值服务
+  showRouteSelectedSections();
+}
+
+// 选择线路后显示申报信息和增值服务
+function showRouteSelectedSections() {
+  document.getElementById('routePlaceholder').style.display = 'none';
+  document.getElementById('routeAddressEmpty').style.display = 'none';
+  document.getElementById('routeSelected').style.display = 'flex';
+  document.getElementById('switchRouteBtn').style.display = 'block';
+  document.getElementById('declareCard').style.display = 'block';
+  document.getElementById('serviceList').style.display = 'block';
+}
+
+// 模拟：未填写收货地址状态（默认展示）
+function showAddressEmptyState() {
+  document.getElementById('routeAddressEmpty').style.display = 'flex';
+  document.getElementById('routePlaceholder').style.display = 'none';
+  document.getElementById('routeSelected').style.display = 'none';
+  document.getElementById('switchRouteBtn').style.display = 'none';
+  document.getElementById('declareCard').style.display = 'none';
+  document.getElementById('serviceList').style.display = 'none';
+}
+
+// 模拟：已填写地址但未选择线路
+function showAddressFilledNoRoute() {
+  document.getElementById('routeAddressEmpty').style.display = 'none';
+  document.getElementById('routePlaceholder').style.display = 'flex';
+  document.getElementById('routeSelected').style.display = 'none';
+  document.getElementById('switchRouteBtn').style.display = 'none';
+  document.getElementById('declareCard').style.display = 'none';
+  document.getElementById('serviceList').style.display = 'none';
+}
+
+// 模拟地址已填写（点击"去添加"按钮后）
+function simulateAddressFilled() {
+  // 显示已填写的地址
+  document.getElementById('addressFilled').style.display = 'flex';
+  document.getElementById('addressEmpty').style.display = 'none';
+  // 显示线路占位符"请选择物流线路"
+  showAddressFilledNoRoute();
+  showToast('已添加收货地址');
+}
+
+// ===== 增值服务 =====
+function toggleSwitch(type) {
+  const sw = document.getElementById('switch' + type);
+  const sub = document.getElementById('sub' + type);
+  sw.classList.toggle('active');
+  if (sw.classList.contains('active')) {
+    sub.classList.add('show');
+  } else {
+    sub.classList.remove('show');
+  }
+  if (type === 'Tax') {
+    document.getElementById('otherFees').style.display = 'block';
+    document.getElementById('feeTax').style.display = sw.classList.contains('active') ? 'flex' : 'none';
+  }
+  if (type === 'Insurance') {
+    document.getElementById('otherFees').style.display = 'block';
+    document.getElementById('feeInsurance').style.display = sw.classList.contains('active') ? 'flex' : 'none';
+  }
+}
+
+// ===== 增值服务折叠已移除，服务项始终展示 =====
+
+// ===== 备注（已移除折叠逻辑） =====
+
+// ===== 保价手续费实时计算 =====
+function calcInsuranceFee() {
+  const input = document.getElementById('insuranceAmountInput');
+  const feeValue = document.getElementById('feeInsurance');
+  const hint = document.getElementById('insuranceHint');
+  const error = document.getElementById('insuranceError');
+  const amount = parseFloat(input.value) || 0;
+  
+  // 空值或未开启时，恢复默认状态
+  if (!input.value || input.value === '') {
+    input.classList.remove('input-error');
+    error.style.display = 'none';
+    hint.style.display = 'block';
+    hint.textContent = '保价范围：¥100 ~ ¥50,000';
+    hint.style.color = '#9CA3AF';
+    feeValue.style.display = 'none';
+    updateTotal();
+    return;
+  }
+  
+  // 超出范围校验
+  if (amount < 100) {
+    input.classList.add('input-error');
+    hint.style.display = 'none';
+    error.style.display = 'block';
+    error.textContent = '保价金额不能低于 ¥100';
+    feeValue.style.display = 'none';
+    updateTotal();
+    return;
+  }
+  
+  if (amount > 50000) {
+    input.classList.add('input-error');
+    hint.style.display = 'none';
+    error.style.display = 'block';
+    error.textContent = '保价金额不能超过 ¥50,000';
+    feeValue.style.display = 'none';
+    updateTotal();
+    return;
+  }
+  
+  // 正常范围，计算手续费
+  input.classList.remove('input-error');
+  error.style.display = 'none';
+  hint.style.display = 'block';
+  hint.textContent = '保价范围：¥100 ~ ¥50,000';
+  hint.style.color = '#9CA3AF';
+  
+  let rate = 0.03;
+  if (amount > 10000) rate = 0.05;
+  else if (amount > 1000) rate = 0.04;
+  
+  let fee = amount * rate;
+  if (fee < 5) fee = 5;
+  
+  feeValue.querySelector('.fee-value').textContent = '¥' + fee.toFixed(2);
+  feeValue.style.display = 'flex';
+  updateTotal();
+}
+
+// ===== 底部费用明细折叠 =====
+function toggleBreakdown() {
+  const breakdown = document.getElementById('totalBreakdown');
+  if (breakdown.style.display === 'none') {
+    breakdown.style.display = 'block';
+  } else {
+    breakdown.style.display = 'none';
+  }
+}
+
+// ===== 底部合计联动 =====
+function updateTotal() {
+  let total = 186 + 5; // 基础运费 + 系统服务费
+  let parts = ['运费¥186', '服务费¥5'];
+  
+  // 包税
+  const taxSwitch = document.getElementById('switchTax');
+  if (taxSwitch.classList.contains('active')) {
+    total += 18.6;
+    parts.push('包税¥18.60');
+  }
+  
+  // 保价
+  const insSwitch = document.getElementById('switchInsurance');
+  if (insSwitch.classList.contains('active')) {
+    const insAmount = parseFloat(document.getElementById('insuranceAmountInput').value) || 0;
+    if (insAmount >= 100 && insAmount <= 50000) {
+      let rate = 0.03;
+      if (insAmount > 10000) rate = 0.05;
+      else if (insAmount > 1000) rate = 0.04;
+      let fee = insAmount * rate;
+      if (fee < 5) fee = 5;
+      total += fee;
+      parts.push('保价¥' + fee.toFixed(2));
+    }
+  }
+  
+  // 优惠券
+  total -= selectedCouponAmount;
+  if (selectedCouponAmount > 0) {
+    parts.push('优惠-¥' + selectedCouponAmount.toFixed(2));
+  }
+  
+  // 积分
+  const points = parseInt(document.getElementById('pointInput').value) || 0;
+  if (points >= 100) {
+    const deduct = Math.min(points, 1250) / 100;
+    total -= deduct;
+    parts.push('积分-¥' + deduct.toFixed(2));
+  }
+  
+  const totalEl = document.getElementById('totalAmount');
+  const breakdownEl = document.getElementById('totalBreakdown');
+  if (totalEl) totalEl.textContent = total.toFixed(2);
+  if (breakdownEl) breakdownEl.textContent = parts.join(' + ');
+}
+
+// ===== 积分抵扣计算 =====
+function calcPointDeduct() {
+  const input = document.getElementById('pointInput');
+  const amountEl = document.getElementById('pointDeductAmount');
+  let points = parseInt(input.value) || 0;
+  
+  if (points < 100 && points > 0) {
+    amountEl.textContent = '-¥0.00';
+    updateTotal();
+    return;
+  }
+  
+  if (points > 1250) {
+    points = 1250;
+    input.value = 1250;
+  }
+  
+  const deduct = points / 100;
+  amountEl.textContent = '-¥' + deduct.toFixed(2);
+  updateTotal();
+}
+
+// ===== 申报信息独立页面 =====
+let declareItems = [];
+let declareAutoFill = false;
+
+// 申报商品数据模板（用于一键填入）
+const declareTemplates = [
+  { nameCn: '蓝牙耳机', nameEn: 'Bluetooth Headphone', qty: 2, price: 25.00 },
+  { nameCn: '手机壳', nameEn: 'Phone Case', qty: 1, price: 8.00 },
+  { nameCn: '运动鞋', nameEn: 'Sneakers', qty: 1, price: 35.00 },
+];
+
+function renderDeclareItems() {
+  const container = document.getElementById('declareItemsContainer');
+  container.innerHTML = '';
+  declareItems.forEach((item, index) => {
+    const total = (item.qty * item.price).toFixed(2);
+    const div = document.createElement('div');
+    div.className = 'declare-goods-item';
+    div.innerHTML = `
+      <div class="declare-goods-item-header">
+        <div class="declare-goods-item-title">申报商品 ${index + 1}</div>
+        <button class="declare-goods-item-del" onclick="removeDeclareItem(${index})" ${declareItems.length <= 1 ? 'disabled' : ''}>${declareItems.length <= 1 ? '' : '删除'}</button>
+      </div>
+      <div class="declare-field-row">
+        <div class="declare-field">
+          <div class="declare-field-label"><span class="req">*</span> 申报品名(中文) <span class="tip" onclick="showToast('请填写商品中文名称，需与实际商品一致')">ⓘ</span></div>
+          <input class="declare-field-input" value="${item.nameCn}" placeholder="商品中文名称" onchange="updateDeclareField(${index},'nameCn',this.value)" />
+        </div>
+        <div class="declare-field">
+          <div class="declare-field-label"><span class="req">*</span> 英文品名</div>
+          <input class="declare-field-input" value="${item.nameEn}" placeholder="商品英文名称" onchange="updateDeclareField(${index},'nameEn',this.value)" />
+        </div>
+      </div>
+      <div class="declare-field-row">
+        <div class="declare-field" style="flex:0.5;">
+          <div class="declare-field-label"><span class="req">*</span> 申报件数</div>
+          <input class="declare-field-input" type="number" value="${item.qty}" min="1" onchange="updateDeclareField(${index},'qty',parseInt(this.value)||1)" oninput="updateDeclareField(${index},'qty',parseInt(this.value)||1)" />
+        </div>
+        <div class="declare-field" style="flex:0.7;">
+          <div class="declare-field-label"><span class="req">*</span> 申报单价(USD)</div>
+          <input class="declare-field-input" type="number" value="${item.price.toFixed(2)}" step="0.01" min="0" onchange="updateDeclareField(${index},'price',parseFloat(this.value)||0)" oninput="updateDeclareField(${index},'price',parseFloat(this.value)||0)" />
+        </div>
+        <div class="declare-field" style="flex:0.8;">
+          <div class="declare-field-label">申报总价</div>
+          <div class="declare-field-total" id="declareItemTotal${index}">USD $${total}</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  updateGrandTotal();
+}
+
+function updateDeclareField(index, field, value) {
+  declareItems[index][field] = value;
+  // 更新该行的总价
+  const item = declareItems[index];
+  const total = (item.qty * item.price).toFixed(2);
+  const totalEl = document.getElementById('declareItemTotal' + index);
+  if (totalEl) totalEl.textContent = 'USD $' + total;
+  updateGrandTotal();
+}
+
+function updateGrandTotal() {
+  let grand = 0;
+  declareItems.forEach(item => { grand += item.qty * item.price; });
+  
+  const totalEl = document.getElementById('declareGrandTotal');
+  const errorEl = document.getElementById('declareTotalError');
+  
+  totalEl.textContent = 'USD $' + grand.toFixed(2);
+  
+  // 区间校验：仅在超出范围时提示
+  if (grand === 0 || (grand >= 5 && grand <= 800)) {
+    totalEl.style.color = '#1E40AF';
+    errorEl.style.display = 'none';
+  } else if (grand > 0 && grand < 5) {
+    totalEl.style.color = '#EF4444';
+    errorEl.style.display = 'block';
+    errorEl.style.background = '#FEF2F2';
+    errorEl.style.color = '#DC2626';
+    errorEl.textContent = '⚠️ 申报总价不能低于 $5，还需填写 $' + (5 - grand).toFixed(2);
+  } else if (grand > 800) {
+    totalEl.style.color = '#EF4444';
+    errorEl.style.display = 'block';
+    errorEl.style.background = '#FEF2F2';
+    errorEl.style.color = '#DC2626';
+    errorEl.textContent = '⚠️ 申报总价不能超过 $800，已超出 $' + (grand - 800).toFixed(2);
+  }
+}
+
+function addDeclareItem() {
+  declareItems.push({ nameCn: '', nameEn: '', qty: 1, price: 0 });
+  renderDeclareItems();
+}
+
+function removeDeclareItem(index) {
+  if (declareItems.length <= 1) return;
+  declareItems.splice(index, 1);
+  renderDeclareItems();
+}
+
+function autoFillDeclareItems() {
+  declareItems = declareTemplates.map(t => ({...t}));
+  declareAutoFill = true;
+  renderDeclareItems();
+  showToast('已根据提包商品信息自动填充');
+}
+
+// 判断申报信息是否已填写（有实际内容）
+function isDeclareFilled() {
+  return declareItems.length > 0 && declareItems.some(item => item.nameCn && item.nameCn.trim() !== '');
+}
+
+// 一键填入（带二次确认）
+function autoFillDeclareWithCheck() {
+  if (isDeclareFilled()) {
+    showConfirmAction('覆盖确认', '当前已填写申报信息，一键填入将覆盖现有内容，是否继续？', function() {
+      autoFillDeclareItems();
+    });
+  } else {
+    autoFillDeclareItems();
+  }
+}
+
+// 历史申报（带二次确认）
+function showHistoryDeclareWithCheck() {
+  if (isDeclareFilled()) {
+    showConfirmAction('追加确认', '当前已填写申报信息，历史申报将追加到当前列表，是否继续？', function() {
+      showHistoryDeclareModal();
+    });
+  } else {
+    showHistoryDeclareModal();
+  }
+}
+
+// 通用确认弹窗
+let confirmActionCallback = null;
+function showConfirmAction(title, msg, callback) {
+  document.getElementById('cdTitle').textContent = title;
+  document.getElementById('cdMsg').textContent = msg;
+  confirmActionCallback = callback;
+  document.getElementById('cdConfirmBtn').onclick = function() {
+    closeConfirmDialog();
+    if (confirmActionCallback) confirmActionCallback();
+  };
+  document.getElementById('confirmDialog').classList.add('show');
+}
+function closeConfirmDialog() {
+  document.getElementById('confirmDialog').classList.remove('show');
+  confirmActionCallback = null;
+}
+
+// 历史申报商品数据
+const historyDeclareData = [
+  [
+    { nameCn: '蓝牙耳机', nameEn: 'Bluetooth Headphone', qty: 2, price: 25.00 },
+    { nameCn: '手机壳', nameEn: 'Phone Case', qty: 1, price: 8.00 },
+    { nameCn: '运动鞋', nameEn: 'Sneakers', qty: 1, price: 35.00 },
+  ],
+  [
+    { nameCn: 'USB数据线', nameEn: 'USB Cable', qty: 3, price: 5.00 },
+    { nameCn: '充电器', nameEn: 'Charger', qty: 1, price: 15.00 },
+  ],
+  [
+    { nameCn: '机械键盘', nameEn: 'Mechanical Keyboard', qty: 1, price: 89.00 },
+  ]
+];
+
+function showHistoryDeclareModal() {
+  document.getElementById('historyDeclareModal').classList.add('show');
+}
+
+function useHistoryDeclare(index) {
+  const history = historyDeclareData[index];
+  // 追加到现有列表
+  history.forEach(item => {
+    declareItems.push({...item});
+  });
+  renderDeclareItems();
+  closeModal(null, 'historyDeclareModal');
+  showToast('已添加 ' + history.length + ' 件历史商品');
+}
+
+function openDeclarePage(autoFill) {
+  if (autoFill && declareItems.length === 0) {
+    autoFillDeclareItems();
+  } else if (declareItems.length === 0) {
+    // 初始化一个空项
+    declareItems = [{ nameCn: '电子设备配件', nameEn: 'Electronic device accessories', qty: 5, price: 25.00 }];
+  }
+  renderDeclareItems();
+  document.getElementById('pageDeclare').classList.add('show');
+}
+
+function closeDeclarePage() {
+  document.getElementById('pageDeclare').classList.remove('show');
+}
+
+function saveDeclareAndBack() {
+  if (declareItems.length > 0) {
+    let grand = 0;
+    let names = [];
+    declareItems.forEach(item => {
+      grand += item.qty * item.price;
+      if (item.nameCn) names.push(item.nameCn);
+    });
+    const totalQty = declareItems.reduce((s, i) => s + i.qty, 0);
+    // 多个商品时：第一个商品名等X件商品 + 币种简写 + 申报金额
+    let summaryText;
+    if (names.length === 1) {
+      summaryText = names[0] + ' · ' + totalQty + '件 · USD $' + grand.toFixed(2);
+    } else {
+      summaryText = names[0] + '等' + names.length + '件商品 · USD $' + grand.toFixed(2);
+    }
+    document.getElementById('declareSummaryText').textContent = summaryText;
+    document.getElementById('declareEmpty').style.display = 'none';
+    document.getElementById('declareFilledSummary').style.display = 'block';
+  }
+  closeDeclarePage();
+  showToast('申报信息已保存');
+}
+
+function updateConfirmDeclare() {
+  if (declareItems.length > 0) {
+    let grand = 0;
+    let namesCn = [], namesEn = [];
+    declareItems.forEach(item => {
+      grand += item.qty * item.price;
+      if (item.nameCn) namesCn.push(item.nameCn);
+      if (item.nameEn) namesEn.push(item.nameEn);
+    });
+    document.getElementById('confirmDeclareName').textContent = namesCn.join('、') + ' / ' + namesEn.join('、');
+    document.getElementById('confirmDeclareTotal').textContent = 'USD $' + grand.toFixed(2);
+  }
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 1500);
+}
+
+// ===== 备注字数统计 =====
+function updateRemarkCount() {
+  var input = document.getElementById('remarkInput');
+  var count = document.getElementById('remarkCount');
+  if (input && count) {
+    count.textContent = input.value.length + '/300';
+  }
+}
+
+// ===== 温馨提示弹窗 =====
+function showTipModal() {
+  document.getElementById('tipModal').classList.add('show');
+}
+
+// ===== 初始状态设置 =====
+// 默认以"未填写收货地址"状态展示
+showAddressEmptyState();
+
+</script>
+
+
+    </div>
+  </div>
+
+
+  <!-- ========== 右侧：标注面板 ========== -->
+  <div class="anno-panel" id="annoPanel">
+    <div class="anno-panel-header">
+      <div class="anno-panel-title">📋 标注说明</div>
+      <div class="anno-panel-desc">点击条目展开/收起详情，点击角标可联动高亮</div>
+    </div>
+    <div class="anno-panel-body">
+
+      <!-- 标注1 - 页面总说明 (无角标) -->
+      <div class="anno-item" data-anno="1" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">1</div>
+          <div class="anno-item-title">页面总说明</div>
+          <span class="anno-item-tag overview">总览</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">APP端提交包裹页面——用户从仓库选择商品后进入此页面填写包裹信息，包含收货地址、商品信息、物流线路、申报信息、增值服务、收费明细等模块，以及多个弹窗交互。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">无</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注2 - 收货地址卡片 -->
+      <div class="anno-item" data-anno="2" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">2</div>
+          <div class="anno-item-title">收货地址卡片</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">收货地址卡片——展示境外收货地址（姓名、电话、国家/地区、详细地址）；有地址时显示完整信息，点击可编辑跳转地址管理；无地址时显示空状态「请添加收货地址」+ 添加按钮。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">收货地址是提交包裹的前提条件，未填写地址时物流线路卡片显示「请先填写收货地址」占位提示。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注3 - 提包商品卡片 -->
+      <div class="anno-item" data-anno="3" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">3</div>
+          <div class="anno-item-title">提包商品卡片</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">提包商品卡片——展示商品缩略图（最多3张，超出显示+N）+ 汇总信息（件数、总重量、总体积）+ 发货仓信息；点击「查看明细」弹出商品明细弹窗，按快递单号分组列出所有提包商品的缩略图、名称、规格、数量、重量、体积、仓库来源。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">提包商品由前置页面（我的仓库）选择后自动带入，此页面仅展示汇总信息和明细查看，不可在此编辑商品。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注4 - 物流线路卡片 -->
+      <div class="anno-item" data-anno="4" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">4</div>
+          <div class="anno-item-title">物流线路卡片</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">物流线路卡片——4种状态：①未填地址时显示「请先填写收货地址」②已填地址未选择时显示「请选择物流线路」③已选择时显示线路名称、预估时效、运费，右侧显示「切换线路」④无可用线路时显示「暂无可用物流线路」+ 提示更换地址或联系客服。点击可选择/切换线路，进入全屏线路选择页面。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">线路可用性取决于收货地址、包裹重量体积和商品类型（含敏感品/带电品时部分线路不可用）。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注5 - 线路选择页面 -->
+      <div class="anno-item" data-anno="5" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">5</div>
+          <div class="anno-item-title">线路选择页面</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">全屏线路选择页面——顶部导航栏+提示横幅（含敏感品/带电品提醒）+ 包裹概要信息（预估重量、体积、可用线路数）+ 线路列表。每条线路卡片展示线路名称、运输方式标签、预估时效、运费、「选择线路」按钮；不可寄线路置灰并标注原因。点击「查看线路详情」打开线路详情弹窗。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">线路列表根据包裹属性和收货地址动态筛选，不可寄线路仍然展示但置灰，方便用户了解原因。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注6 - 线路详情弹窗 -->
+      <div class="anno-item" data-anno="6" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">6</div>
+          <div class="anno-item-title">线路详情弹窗</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">线路详情弹窗——底部弹出式（bottom-sheet），展示选中线路的完整信息：线路名称、运输方式标签、运输时效、运费价格、线路描述、支持货类标签、计费信息（计费重量、计费方式、续重价格表）、邮寄限制标签（禁运品类）。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">计费信息展示首重续重规则和价格表，帮助用户理解运费计算方式。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注7 - 申报信息摘要卡片 -->
+      <div class="anno-item" data-anno="7" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">7</div>
+          <div class="anno-item-title">申报信息摘要卡片</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">申报信息摘要卡片——两种状态：①未填写时显示「请填写申报信息」+「去填写」按钮；②已填写时显示摘要（如「蓝牙耳机等3件商品 · USD $125.00」）+「去修改」按钮。点击后进入独立的全屏申报信息页面。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">申报信息是海关通关的必要信息，必须在提交包裹前完成填写。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注8 - 申报信息页面 -->
+      <div class="anno-item" data-anno="8" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">8</div>
+          <div class="anno-item-title">申报信息页面</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">申报信息独立全屏页面——顶部快捷操作区（一键填入按钮 + 历史申报按钮）+ 申报商品列表（每个商品含中英文品名、申报件数、申报单价USD、自动计算总价，支持添加/删除商品）+ 申报总价汇总（显示总额+限额提示$5~$800，超限/不足时红色提示）+ 申报人信息（手机号必填、身份证号和姓名选填）+ 底部「完成」按钮保存返回。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">一键填入功能根据提包商品信息自动填充申报内容；历史申报可复用过往申报记录。申报总价限额$5~$800为海关规定。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注9 - 增值服务项目 -->
+      <div class="anno-item" data-anno="9" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">9</div>
+          <div class="anno-item-title">增值服务项目</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">增值服务项目——3项独立服务，每项含开关+子项：①代收货款：开关开启后显示代收金额输入框（TWD），问号图标弹出代收货款说明弹窗；②包税服务：开关开启后显示服务说明，「说明」链接弹出包税服务说明弹窗（含包税vs不包税对比表和计费规则）；③保价服务：开关开启后显示保价金额输入框（¥），「说明」链接弹出保价说明弹窗（含费率表和理赔规则）。开启后对应费用项动态出现在收费明细中。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">增值服务为可选项，不影响基础运费计算；开启后费用项动态联动到收费明细卡片。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注10 - 备注 -->
+      <div class="anno-item" data-anno="10" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">10</div>
+          <div class="anno-item-title">备注</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">备注输入区——多行文本输入框，占位文字「如果您对包裹还有其他特殊要求，请在这里备注」；最大300字，右下角实时字数统计。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">备注信息供仓库人员查看，用于处理特殊需求。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注11 - 收费明细卡片 -->
+      <div class="anno-item" data-anno="11" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">11</div>
+          <div class="anno-item-title">收费明细卡片</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">收费明细卡片——展示费用构成：承运计费（首重/续重费用，点击弹出计费明细弹窗）+ 系统服务费 + 动态增值服务费项（包税手续费/保价手续费等，根据增值服务开关状态动态显示/隐藏）+ 优惠券（点击弹出优惠券选择弹窗，展示可用券列表）+ 积分抵扣（输入框+换算规则提示100积分=1元，最低使用100积分）。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">收费明细实时联动增值服务开关和优惠券/积分选择，金额变化自动同步到底部操作栏合计。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注12 - 温馨提示弹窗 -->
+      <div class="anno-item" data-anno="12" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">12</div>
+          <div class="anno-item-title">温馨提示弹窗</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">温馨提示弹窗——底部弹出式，展示运费说明：POKO根据包裹预估重量收取预估运费，最终运费以承运方核定重量为准；产生差额在打包后7天内退还多余部分；核定重量超预估则需补款。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">温馨提示通过底部合计金额旁的 ⓘ 图标触发。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注13 - 计费明细弹窗 -->
+      <div class="anno-item" data-anno="13" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">13</div>
+          <div class="anno-item-title">计费明细弹窗</div>
+          <span class="anno-item-tag display">展示</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">计费明细弹窗——底部弹出式，展示运费计算明细：实际重量、体积重量、计费重量（取较大值）、首重费用、续重费用、合计运费。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">通过收费明细卡片中承运计费行的「明细」链接触发。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标注14 - 底部操作栏与免责声明 -->
+      <div class="anno-item" data-anno="14" onclick="toggleAnnoItem(this)">
+        <div class="anno-item-header">
+          <div class="anno-item-num">14</div>
+          <div class="anno-item-title">底部操作栏与免责声明</div>
+          <span class="anno-item-tag interaction">交互</span>
+          <span class="anno-item-arrow">▶</span>
+        </div>
+        <div class="anno-item-body">
+          <div class="anno-item-section">
+            <div class="anno-item-label">功能说明</div>
+            <div class="anno-item-text">底部固定操作栏——左侧显示合计金额（实时联动收费明细变化）；右侧「提交包裹」按钮（主色调渐变蓝）；提交前需勾选免责声明复选框（「我已阅读并同意《POKO集运免责声明》」），点击免责声明文字弹出免责声明弹窗；未勾选时提交按钮禁用。点击提交后弹出提交确认弹窗，展示收件人、地址、线路、商品、申报信息、费用汇总，需勾选「我确认申报信息真实准确」后点击「确认提交」跳转支付。</div>
+          </div>
+          <div class="anno-item-section">
+            <div class="anno-item-label">业务规则</div>
+            <div class="anno-item-text">免责声明是提交包裹的必要前置条件；确认弹窗为二次确认层，防止提交错误信息。</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== 标注交互 ==========
+function toggleAnnoItem(el) {
+  var wasExpanded = el.classList.contains('expanded');
+  // 收起其他
+  document.querySelectorAll('.anno-item').forEach(function(item) {
+    item.classList.remove('expanded');
+  });
+  // 清除角标高亮
+  document.querySelectorAll('.anno-marker').forEach(function(m) {
+    m.classList.remove('active');
+  });
+
+  if (!wasExpanded) {
+    el.classList.add('expanded');
+    // 联动角标高亮（支持多个同编号角标）
+    var annoNum = el.dataset.anno;
+    document.querySelectorAll('.anno-marker[data-anno="' + annoNum + '"]').forEach(function(marker) {
+      marker.classList.add('active');
+    });
+  }
+}
+
+// 点击角标联动标注面板
+document.querySelectorAll('.anno-marker').forEach(function(marker) {
+  marker.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var annoNum = this.dataset.anno;
+    var panelItem = document.querySelector('.anno-item[data-anno="' + annoNum + '"]');
+    if (panelItem) {
+      // 滚动到对应条目
+      panelItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 展开
+      document.querySelectorAll('.anno-item').forEach(function(item) {
+        item.classList.remove('expanded');
+      });
+      document.querySelectorAll('.anno-marker').forEach(function(m) {
+        m.classList.remove('active');
+      });
+      panelItem.classList.add('expanded');
+      // 高亮所有同编号角标
+      document.querySelectorAll('.anno-marker[data-anno="' + annoNum + '"]').forEach(function(m) {
+        m.classList.add('active');
+      });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
