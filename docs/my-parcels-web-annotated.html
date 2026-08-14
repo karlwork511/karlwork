@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的包裹 - POKO</title>
+<style>
+/* ===== 标注系统固定CSS ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.main-content-area {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ===== 原始原型样式 ===== */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 0 40px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #F5F7FA;
+  color: #1F2937;
+  font-size: 14px;
+}
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: #111827; }
+.page-subtitle { font-size: 13px; color: #6B7280; margin-top: 4px; }
+
+.filter-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.search-box {
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px 0 38px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+  background: #F9FAFB;
+}
+.search-box input:focus {
+  border-color: #3B82F6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #9CA3AF;
+}
+.search-btn {
+  height: 38px;
+  padding: 0 20px;
+  background: #3B82F6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.search-btn:hover { background: #2563EB; }
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.date-range-label { font-size: 13px; color: #6B7280; }
+.date-picker { position: relative; display: flex; align-items: center; }
+.date-picker input {
+  width: 130px;
+  height: 38px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1F2937;
+  background: #F9FAFB;
+  outline: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.date-picker input:focus {
+  border-color: #3B82F6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.date-picker .calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #9CA3AF;
+  pointer-events: none;
+}
+.date-separator { color: #9CA3AF; font-size: 13px; }
+
+.calendar-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  padding: 16px;
+  z-index: 100;
+  display: none;
+  width: auto;
+}
+.calendar-popup.show { display: block; }
+.calendar-header { display: flex; gap: 16px; }
+.calendar-month { width: 240px; }
+.calendar-month-title { text-align: center; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 12px; }
+.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
+.calendar-weekday { text-align: center; font-size: 11px; color: #9CA3AF; padding: 4px 0; font-weight: 500; }
+.calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.calendar-day { text-align: center; font-size: 12px; padding: 6px 0; border-radius: 6px; cursor: pointer; color: #1F2937; transition: all 0.15s; }
+.calendar-day:hover { background: #F3F4F6; }
+.calendar-day.other-month { color: #D1D5DB; }
+.calendar-day.selected { background: #F97316; color: #fff; font-weight: 500; }
+.calendar-day.in-range { background: #FFF7ED; color: #F97316; }
+.calendar-day.today { font-weight: 600; }
+.calendar-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6; }
+.calendar-footer .btn-clear { padding: 5px 14px; font-size: 12px; color: #6B7280; background: #F3F4F6; border: none; border-radius: 6px; cursor: pointer; }
+.calendar-footer .btn-confirm { padding: 5px 14px; font-size: 12px; color: #fff; background: #3B82F6; border: none; border-radius: 6px; cursor: pointer; }
+
+.status-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.status-tab { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #4B5563; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+.status-tab:hover { background: #F3F4F6; }
+.status-tab.active { background: #EFF6FF; color: #2563EB; font-weight: 600; }
+.status-tab .count { font-size: 11px; background: #E5E7EB; color: #6B7280; padding: 1px 6px; border-radius: 10px; }
+.status-tab.active .count { background: #BFDBFE; color: #1D4ED8; }
+
+.table-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead { background: #F9FAFB; }
+.data-table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6B7280; border-bottom: 1px solid #F3F4F6; white-space: nowrap; }
+.data-table td { font-size: 13px; vertical-align: middle; }
+
+.row-header td { padding: 6px 16px; background: #EEF0F4; border-bottom: 1px solid #E2E5EA; }
+.row-header .header-inner { display: flex; align-items: center; gap: 16px; font-size: 12px; }
+.header-package-id { font-family: 'SF Mono', Monaco, monospace; font-size: 13px; font-weight: 600; color: #111827; }
+.header-time { color: #6B7280; }
+.header-warehouse { color: #6B7280; display: flex; align-items: center; gap: 4px; }
+.header-warehouse .wh-icon { font-size: 13px; }
+
+tbody tr.row-header + tr.row-header td,
+tbody tr.row-content + tr.row-header td,
+tbody tr.row-supplement + tr.row-header td {
+  border-top: 8px solid #F5F7FA;
+}
+tbody tr.row-supplement + tr.row-content td {
+  border-top: none;
+}
+
+.row-content td { padding: 4px 16px 14px; border-bottom: 1px solid #F3F4F6; }
+.data-table tbody tr:last-child .row-content td { border-bottom: none; }
+.data-table tbody .row-header:hover td { background: #E8EBF0; }
+.data-table tbody .row-content:hover td { background: #F9FAFB; }
+
+.package-id { font-family: 'SF Mono', Monaco, monospace; font-size: 13px; font-weight: 600; color: #111827; }
+
+.status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.status-badge.pending-pay { background: #FFF7ED; color: #F97316; }
+.status-badge.pending-review { background: #EEF2FF; color: #6366F1; }
+.status-badge.processing { background: #F0F9FF; color: #0284C7; }
+.status-badge.pending-ship { background: #EFF6FF; color: #3B82F6; }
+.status-badge.shipped { background: #ECFDF5; color: #10B981; }
+.status-badge.delivered { background: #F3F4F6; color: #6B7280; }
+.status-badge.cancelled { background: #F3F4F6; color: #9CA3AF; }
+
+.goods-cell { min-width: 260px; }
+.goods-info { display: flex; align-items: center; gap: 10px; }
+.goods-thumbs { display: flex; gap: 4px; flex-shrink: 0; }
+.goods-thumb { width: 40px; height: 40px; border-radius: 6px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #E5E7EB; }
+.goods-thumb.more { background: #fff; color: #9CA3AF; font-size: 10px; font-weight: 600; border: 1px dashed #D1D5DB; }
+.goods-detail { flex: 1; min-width: 0; }
+.goods-name { font-size: 13px; color: #1F2937; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goods-meta { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+.goods-meta .num { color: #6B7280; font-weight: 500; }
+
+.logistics-cell { font-size: 12px; color: #4B5563; }
+.logistics-line { font-weight: 500; color: #1F2937; margin-bottom: 2px; }
+.weight-cell { font-size: 12px; color: #6B7280; }
+
+.fee-cell { font-weight: 600; white-space: nowrap; }
+.fee-cell.red { color: #EF4444; }
+.fee-cell.green { color: #10B981; }
+.fee-cell.gray { color: #9CA3AF; }
+.fee-cell .yen { font-size: 11px; font-weight: 500; }
+.fee-label { font-size: 11px; color: #9CA3AF; font-weight: 400; margin-bottom: 2px; }
+
+.action-cell { white-space: nowrap; }
+.action-group { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.action-item { line-height: 1; }
+.action-link { color: #3B82F6; font-size: 12px; font-weight: 500; cursor: pointer; transition: color 0.2s; display: inline-block; }
+.action-link:hover { color: #2563EB; }
+.action-link.danger { color: #EF4444; }
+.action-link.danger:hover { color: #DC2626; }
+.action-btn { display: inline-block; padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; white-space: nowrap; }
+.action-btn.primary { background: #3B82F6; color: #fff; }
+.action-btn.primary:hover { background: #2563EB; }
+.action-btn.orange { background: #F97316; color: #fff; }
+.action-btn.orange:hover { background: #EA580C; }
+.action-btn.ghost-danger { background: #FEF2F2; color: #EF4444; }
+.action-btn.ghost-danger:hover { background: #FEE2E2; }
+
+.time-cell { font-size: 12px; color: #6B7280; white-space: nowrap; }
+
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid #F3F4F6; background: #fff; }
+.pagination-info { font-size: 12px; color: #6B7280; }
+.pagination-btns { display: flex; gap: 4px; }
+.page-btn { min-width: 32px; height: 32px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 6px; background: #fff; font-size: 12px; color: #4B5563; cursor: pointer; transition: all 0.2s; }
+.page-btn:hover { border-color: #3B82F6; color: #3B82F6; }
+.page-btn.active { background: #3B82F6; border-color: #3B82F6; color: #fff; }
+.page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.row-supplement td { padding: 0 16px 8px !important; background: #fff; border-bottom: none !important; }
+.package-supplement-bar { margin: 0; padding: 10px 16px; background: linear-gradient(135deg, #FFF7ED, #FFEDD5); border: 1px solid #FED7AA; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
+.supplement-text { font-size: 13px; color: #9A3412; font-weight: 500; }
+.supplement-amount { font-size: 15px; color: #EA580C; font-weight: 700; }
+
+.empty-state { padding: 80px 20px; text-align: center; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-text { font-size: 14px; color: #9CA3AF; }
+
+/* ===== 补款弹窗样式 ===== */
+.supplement-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.supplement-modal-overlay.show { display: flex; }
+.supplement-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 480px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+.supplement-modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.supplement-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+}
+.supplement-modal-close {
+  width: 28px; height: 28px;
+  border: none; background: transparent;
+  font-size: 20px; color: #9CA3AF;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+}
+.supplement-modal-close:hover { background: #F3F4F6; color: #374151; }
+.supplement-modal-body {
+  padding: 20px 24px;
+}
+.supplement-info-section {
+  margin-bottom: 16px;
+}
+.supplement-info-label {
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 6px;
+}
+.supplement-info-value {
+  font-size: 14px;
+  color: #1F2937;
+  font-weight: 500;
+}
+.supplement-reason {
+  padding: 12px 16px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #9A3412;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.supplement-fee-detail {
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+.supplement-fee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #4B5563;
+}
+.supplement-fee-row.total {
+  border-top: 1px dashed #E5E7EB;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #EA580C;
+}
+.supplement-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #F3F4F6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.supplement-btn-cancel {
+  padding: 9px 24px;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4B5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.supplement-btn-cancel:hover { background: #F3F4F6; }
+.supplement-btn-confirm {
+  padding: 9px 24px;
+  border: none;
+  background: #F97316;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.supplement-btn-confirm:hover { background: #EA580C; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <div class="main-content-area">
+    <!-- 左侧原型区 -->
+    <div class="preview-area">
+        <div class="page-container" id="anno-1">
+
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <div class="page-title">我的包裹</div>
+                <div class="page-subtitle">查看所有包裹状态和物流信息</div>
+            </div>
+
+            <!-- 筛选区 -->
+            <div class="filter-card" id="anno-2" style="position:relative;">
+                <div class="anno-marker" data-id="2">2</div>
+                <div class="search-row">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" placeholder="搜索包裹单号 / 商品名称 / 国内快递单号">
+                    </div>
+                    <button class="search-btn" onclick="doSearch()">搜索</button>
+                    <div style="flex:1;"></div>
+                    <div class="date-range">
+                        <span class="date-range-label">下单时间</span>
+                        <div class="date-picker" id="startDatePicker">
+                            <input type="text" placeholder="开始日期" readonly onclick="toggleCalendar()" value="2026-07-01">
+                            <span class="calendar-icon">📅</span>
+                        </div>
+                        <span class="date-separator">至</span>
+                        <div class="date-picker" id="endDatePicker">
+                            <input type="text" placeholder="结束日期" readonly onclick="toggleCalendar()" value="2026-07-06">
+                            <span class="calendar-icon">📅</span>
+                            <!-- 日历弹窗 -->
+                            <div class="calendar-popup" id="calendarPopup">
+                                <div class="calendar-header">
+                                    <div class="calendar-month">
+                                        <div class="calendar-month-title">2026年7月</div>
+                                        <div class="calendar-weekdays">
+                                            <span class="calendar-weekday">一</span>
+                                            <span class="calendar-weekday">二</span>
+                                            <span class="calendar-weekday">三</span>
+                                            <span class="calendar-weekday">四</span>
+                                            <span class="calendar-weekday">五</span>
+                                            <span class="calendar-weekday">六</span>
+                                            <span class="calendar-weekday">日</span>
+                                        </div>
+                                        <div class="calendar-days">
+                                            <span class="calendar-day other-month">30</span>
+                                            <span class="calendar-day other-month">1</span>
+                                            <span class="calendar-day">2</span>
+                                            <span class="calendar-day in-range">3</span>
+                                            <span class="calendar-day in-range">4</span>
+                                            <span class="calendar-day in-range">5</span>
+                                            <span class="calendar-day selected">6</span>
+                                            <span class="calendar-day">7</span>
+                                            <span class="calendar-day">8</span>
+                                            <span class="calendar-day">9</span>
+                                            <span class="calendar-day">10</span>
+                                            <span class="calendar-day">11</span>
+                                            <span class="calendar-day">12</span>
+                                            <span class="calendar-day">13</span>
+                                            <span class="calendar-day">14</span>
+                                            <span class="calendar-day">15</span>
+                                            <span class="calendar-day">16</span>
+                                            <span class="calendar-day">17</span>
+                                            <span class="calendar-day">18</span>
+                                            <span class="calendar-day">19</span>
+                                            <span class="calendar-day">20</span>
+                                            <span class="calendar-day">21</span>
+                                            <span class="calendar-day">22</span>
+                                            <span class="calendar-day">23</span>
+                                            <span class="calendar-day">24</span>
+                                            <span class="calendar-day">25</span>
+                                            <span class="calendar-day">26</span>
+                                            <span class="calendar-day">27</span>
+                                            <span class="calendar-day">28</span>
+                                            <span class="calendar-day">29</span>
+                                            <span class="calendar-day">30</span>
+                                            <span class="calendar-day">31</span>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-month">
+                                        <div class="calendar-month-title">2026年8月</div>
+                                        <div class="calendar-weekdays">
+                                            <span class="calendar-weekday">一</span>
+                                            <span class="calendar-weekday">二</span>
+                                            <span class="calendar-weekday">三</span>
+                                            <span class="calendar-weekday">四</span>
+                                            <span class="calendar-weekday">五</span>
+                                            <span class="calendar-weekday">六</span>
+                                            <span class="calendar-weekday">日</span>
+                                        </div>
+                                        <div class="calendar-days">
+                                            <span class="calendar-day other-month">27</span>
+                                            <span class="calendar-day other-month">28</span>
+                                            <span class="calendar-day other-month">29</span>
+                                            <span class="calendar-day other-month">30</span>
+                                            <span class="calendar-day other-month">31</span>
+                                            <span class="calendar-day">1</span>
+                                            <span class="calendar-day">2</span>
+                                            <span class="calendar-day">3</span>
+                                            <span class="calendar-day">4</span>
+                                            <span class="calendar-day">5</span>
+                                            <span class="calendar-day">6</span>
+                                            <span class="calendar-day">7</span>
+                                            <span class="calendar-day">8</span>
+                                            <span class="calendar-day">9</span>
+                                            <span class="calendar-day">10</span>
+                                            <span class="calendar-day">11</span>
+                                            <span class="calendar-day">12</span>
+                                            <span class="calendar-day">13</span>
+                                            <span class="calendar-day">14</span>
+                                            <span class="calendar-day">15</span>
+                                            <span class="calendar-day">16</span>
+                                            <span class="calendar-day">17</span>
+                                            <span class="calendar-day">18</span>
+                                            <span class="calendar-day">19</span>
+                                            <span class="calendar-day">20</span>
+                                            <span class="calendar-day">21</span>
+                                            <span class="calendar-day">22</span>
+                                            <span class="calendar-day">23</span>
+                                            <span class="calendar-day">24</span>
+                                            <span class="calendar-day">25</span>
+                                            <span class="calendar-day">26</span>
+                                            <span class="calendar-day">27</span>
+                                            <span class="calendar-day">28</span>
+                                            <span class="calendar-day">29</span>
+                                            <span class="calendar-day">30</span>
+                                            <span class="calendar-day">31</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="calendar-footer">
+                                    <button class="btn-clear" onclick="clearDate()">清空</button>
+                                    <button class="btn-confirm" onclick="confirmDate()">确定</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-tabs" id="statusTabs">
+                    <div class="status-tab active" data-status="all" onclick="switchTab('all')">
+                        全部 <span class="count">7</span>
+                    </div>
+                    <div class="status-tab" data-status="pending_pay" onclick="switchTab('pending_pay')">
+                        待付款 <span class="count">1</span>
+                    </div>
+                    <div class="status-tab" data-status="pending_review" onclick="switchTab('pending_review')">
+                        待审核 <span class="count">1</span>
+                    </div>
+                    <div class="status-tab" data-status="processing" onclick="switchTab('processing')">
+                        处理中 <span class="count">1</span>
+                    </div>
+                    <div class="status-tab" data-status="pending_ship" onclick="switchTab('pending_ship')">
+                        待发货 <span class="count">2</span>
+                    </div>
+                    <div class="status-tab" data-status="shipped" onclick="switchTab('shipped')">
+                        已发货 <span class="count">1</span>
+                    </div>
+                    <div class="status-tab" data-status="delivered" onclick="switchTab('delivered')">
+                        已收货
+                    </div>
+                    <div class="status-tab" data-status="cancelled" onclick="switchTab('cancelled')">
+                        已取消 <span class="count">1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表格区 -->
+            <div class="table-card" id="anno-4" style="position:relative;">
+                <div class="anno-marker" data-id="4">4</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>商品信息</th>
+                            <th style="width:120px;">物流线路</th>
+                            <th style="width:120px;">重量 / 体积</th>
+                            <th style="width:110px;">费用</th>
+                            <th style="width:90px;">状态</th>
+                            <th style="width:180px; text-align:right; padding-right:24px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+
+                        <!-- 待付款 -->
+                        <tr class="row-header" data-status="pending_pay" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26070384261</span>
+                                    <span class="header-time">下单时间：2026-07-03 14:58</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>深圳宝安仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="pending_pay" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">🎧</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">蓝牙耳机 无线降噪头戴式</div>
+                                            <div class="goods-meta">共 <span class="num">1</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">EMS国际特快</div></div></td>
+                            <td><div class="weight-cell">1.2kg / 0.008m³</div></td>
+                            <td>
+                                <div class="fee-cell red">
+                                    <div class="fee-label">需付款</div>
+                                    <span class="yen">¥</span>299.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending-pay">待付款</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                    <div class="action-item"><button class="action-btn ghost-danger" onclick="cancelPackage()">取消包裹</button></div>
+                                    <div class="action-item"><button class="action-btn orange" onclick="goPay()">去支付</button></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 待审核 -->
+                        <tr class="row-header" data-status="pending_review" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26070392157</span>
+                                    <span class="header-time">下单时间：2026-07-03 12:30</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>广州花都仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="pending_review" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">🎧</div>
+                                            <div class="goods-thumb">📱</div>
+                                            <div class="goods-thumb more">+2</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">蓝牙耳机、手机壳等5件商品</div>
+                                            <div class="goods-meta">共 <span class="num">5</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">顺丰空运专线</div></div></td>
+                            <td><div class="weight-cell">2.4kg / 0.015m³</div></td>
+                            <td>
+                                <div class="fee-cell green">
+                                    <div class="fee-label">实付款</div>
+                                    <span class="yen">¥</span>909.88
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending-review">待审核</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                    <div class="action-item"><button class="action-btn ghost-danger" onclick="cancelPackage()">取消包裹</button></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 处理中 -->
+                        <tr class="row-header" data-status="processing" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26070315873</span>
+                                    <span class="header-time">下单时间：2026-07-03 10:15</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>深圳宝安仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="processing" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">🎮</div>
+                                            <div class="goods-thumb">🎧</div>
+                                            <div class="goods-thumb more">+1</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">游戏手柄、耳机等3件商品</div>
+                                            <div class="goods-meta">共 <span class="num">3</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">顺丰空运专线</div></div></td>
+                            <td><div class="weight-cell">1.5kg / 0.010m³</div></td>
+                            <td>
+                                <div class="fee-cell green">
+                                    <div class="fee-label">实付款</div>
+                                    <span class="yen">¥</span>688.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge processing">处理中</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                    <div class="action-item"><button class="action-btn ghost-danger" onclick="cancelPackage()">取消包裹</button></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 待发货 - 普通 -->
+                        <tr class="row-header" data-status="pending_ship" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26070274362</span>
+                                    <span class="header-time">下单时间：2026-07-02 16:45</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>义乌小商品仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="pending_ship" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">👟</div>
+                                            <div class="goods-thumb">🧴</div>
+                                            <div class="goods-thumb">👕</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">运动鞋、洗护用品等3件商品</div>
+                                            <div class="goods-meta">共 <span class="num">3</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">海运经济线</div></div></td>
+                            <td><div class="weight-cell">1.8kg / 0.012m³</div></td>
+                            <td>
+                                <div class="fee-cell green">
+                                    <div class="fee-label">实付款</div>
+                                    <span class="yen">¥</span>520.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending-ship">待发货</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 待发货 - 存在补款 -->
+                        <tr class="row-header" data-status="pending_ship" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26080561247</span>
+                                    <span class="header-time">下单时间：2026-08-05 09:30</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>深圳宝安仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-supplement" data-status="pending_ship" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="package-supplement-bar">
+                                    <span class="supplement-text">⚠️ 需补款</span>
+                                    <span class="supplement-amount">¥85.00</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="pending_ship" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">💻</div>
+                                            <div class="goods-thumb">🎮</div>
+                                            <div class="goods-thumb more">+1</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">笔记本电脑、游戏手柄等3件商品</div>
+                                            <div class="goods-meta">共 <span class="num">3</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">EMS国际特快</div></div></td>
+                            <td><div class="weight-cell">3.2kg / 0.025m³</div></td>
+                            <td>
+                                <div class="fee-cell green">
+                                    <div class="fee-label">已付</div>
+                                    <span class="yen">¥</span>280.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge pending-ship">待发货</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                    <div class="action-item"><button class="action-btn orange" onclick="openSupplementModal()">去补款</button></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 已发货 -->
+                        <tr class="row-header" data-status="shipped" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26062848519</span>
+                                    <span class="header-time">下单时间：2026-06-28 10:20</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>深圳宝安仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="shipped" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">📱</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">手机壳 iPhone15 透明防摔</div>
+                                            <div class="goods-meta">共 <span class="num">2</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">EMS国际特快</div></div></td>
+                            <td><div class="weight-cell">0.3kg / 0.002m³</div></td>
+                            <td>
+                                <div class="fee-cell green">
+                                    <div class="fee-label">实付款</div>
+                                    <span class="yen">¥</span>89.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge shipped">已发货</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                    <div class="action-item"><span class="action-link" onclick="viewTracking()">查看物流</span></div>
+                                    <div class="action-item"><button class="action-btn primary" onclick="confirmReceive()">确认收货</button></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- 已取消 -->
+                        <tr class="row-header" data-status="cancelled" onclick="goDetail()">
+                            <td colspan="6">
+                                <div class="header-inner">
+                                    <span class="header-package-id">B26062539074</span>
+                                    <span class="header-time">下单时间：2026-06-25 16:12</span>
+                                    <span class="header-warehouse"><span class="wh-icon">🏠</span>广州花都仓</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="row-content" data-status="cancelled" onclick="goDetail()">
+                            <td>
+                                <div class="goods-cell">
+                                    <div class="goods-info">
+                                        <div class="goods-thumbs">
+                                            <div class="goods-thumb">👕</div>
+                                            <div class="goods-thumb">👖</div>
+                                        </div>
+                                        <div class="goods-detail">
+                                            <div class="goods-name">T恤、牛仔裤等2件商品</div>
+                                            <div class="goods-meta">共 <span class="num">2</span> 件商品</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="logistics-cell"><div class="logistics-line">顺丰空运专线</div></div></td>
+                            <td><div class="weight-cell">0.6kg / 0.005m³</div></td>
+                            <td>
+                                <div class="fee-cell gray">
+                                    <div class="fee-label">应付款</div>
+                                    <span class="yen">¥</span>356.00
+                                </div>
+                            </td>
+                            <td><span class="status-badge cancelled">已取消</span></td>
+                            <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
+                                <div class="action-group">
+                                    <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <!-- 分页 -->
+                <div class="pagination">
+                    <div class="pagination-info">共 7 条记录，第 1/1 页</div>
+                    <div class="pagination-btns">
+                        <button class="page-btn" disabled>上一页</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn" disabled>下一页</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ③ 状态标签标注容器 -->
+            <div id="anno-3" style="position:relative;height:0;overflow:visible;">
+                <div class="anno-marker" data-id="3" style="top:-180px;">3</div>
+            </div>
+
+            <!-- ⑤ 费用展示标注容器 -->
+            <div id="anno-5" style="position:relative;height:0;overflow:visible;">
+                <div class="anno-marker" data-id="5" style="top:-620px;">5</div>
+            </div>
+
+            <!-- ⑥ 操作按钮标注容器 -->
+            <div id="anno-6" style="position:relative;height:0;overflow:visible;">
+                <div class="anno-marker" data-id="6" style="top:-620px;">6</div>
+            </div>
+
+            <!-- ⑦ 行点击标注容器 -->
+            <div id="anno-7" style="position:relative;height:0;overflow:visible;">
+                <div class="anno-marker" data-id="7" style="top:-420px;">7</div>
+            </div>
+
+        </div>
+
+        <!-- ⑧ 补款确认弹窗 -->
+        <div id="anno-8" style="position:relative;">
+            <div class="anno-marker" data-id="8">8</div>
+            <div class="supplement-modal-overlay" id="supplementModal">
+                <div class="supplement-modal">
+                    <div class="supplement-modal-header">
+                        <div class="supplement-modal-title">补款确认</div>
+                        <button class="supplement-modal-close" onclick="closeSupplementModal()">×</button>
+                    </div>
+                    <div class="supplement-modal-body">
+                        <div class="supplement-info-section">
+                            <div class="supplement-info-label">原包裹信息</div>
+                            <div class="supplement-info-value">包裹单号：B26080561247</div>
+                            <div class="supplement-info-value">下单时间：2026-08-05 09:30</div>
+                        </div>
+                        <div class="supplement-info-section">
+                            <div class="supplement-info-label">补款原因</div>
+                            <div class="supplement-reason">包裹打包后计费重量超出预估，需补运费差额</div>
+                        </div>
+                        <div class="supplement-info-section">
+                            <div class="supplement-info-label">补款金额明细</div>
+                            <div class="supplement-fee-detail">
+                                <div class="supplement-fee-row">
+                                    <span>运费差额（计费重量超出预估）</span>
+                                    <span>¥85.00</span>
+                                </div>
+                                <div class="supplement-fee-row total">
+                                    <span>合计需补</span>
+                                    <span>¥85.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="supplement-modal-footer">
+                        <button class="supplement-btn-cancel" onclick="closeSupplementModal()">取消</button>
+                        <button class="supplement-btn-confirm" onclick="confirmSupplement()">确认补款</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    </div><!-- end main-content-area -->
+
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== 原始原型JS =====
+function switchTab(status) {
+  document.querySelectorAll('.status-tab').forEach(function(tab) {
+    tab.classList.remove('active');
+    if (tab.dataset.status === status) {
+      tab.classList.add('active');
+    }
+  });
+  var rows = document.querySelectorAll('#tableBody tr.row-content');
+  rows.forEach(function(row) {
+    var prev = row.previousElementSibling;
+    while (prev && (prev.classList.contains('row-header') || prev.classList.contains('row-supplement'))) {
+      if (status === 'all' || row.dataset.status === status) {
+        prev.style.display = '';
+      } else {
+        prev.style.display = 'none';
+      }
+      prev = prev.previousElementSibling;
+      if (!prev || prev.classList.contains('row-content')) break;
+    }
+    if (status === 'all') {
+      row.style.display = '';
+    } else if (row.dataset.status === status) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+function goDetail() { console.log('跳转包裹详情'); }
+function doSearch() { console.log('执行搜索'); }
+function toggleCalendar() {
+  var popup = document.getElementById('calendarPopup');
+  popup.classList.toggle('show');
+  event.stopPropagation();
+}
+function clearDate() {
+  document.querySelector('#startDatePicker input').value = '';
+  document.querySelector('#endDatePicker input').value = '';
+}
+function confirmDate() {
+  document.getElementById('calendarPopup').classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  var popup = document.getElementById('calendarPopup');
+  var endPicker = document.getElementById('endDatePicker');
+  if (popup.classList.contains('show') && !endPicker.contains(e.target)) {
+    popup.classList.remove('show');
+  }
+});
+function cancelPackage() { console.log('取消包裹'); }
+function goPay() { console.log('去支付'); }
+function openSupplementModal() {
+  document.getElementById('supplementModal').classList.add('show');
+}
+function closeSupplementModal() {
+  document.getElementById('supplementModal').classList.remove('show');
+}
+function confirmSupplement() {
+  console.log('跳转收银台支付补款');
+  closeSupplementModal();
+}
+function completeOrder() { console.log('完成订单'); }
+function contactService() { console.log('联系客服'); }
+function viewTracking() { console.log('查看物流'); }
+function confirmReceive() { console.log('确认收货'); }
+function viewDetail() { console.log('查看详情'); }
+
+// 补款弹窗遮罩点击关闭
+document.getElementById('supplementModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSupplementModal();
+});
+
+// ===== 标注系统JS =====
+const STORAGE_KEY = 'annotated-prototype-my-packages';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '我的包裹页是用户端包裹管理的核心页面',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '展示用户所有包裹的状态、费用和操作入口。支持按状态筛选、搜索包裹、查看详情、支付、取消包裹、查看物流、确认收货、补款等操作。'
+        }
+    },
+    {
+        id: 2,
+        title: '搜索筛选区',
+        summary: '搜索框和日期范围筛选',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '提供包裹搜索和时间范围筛选能力，帮助用户快速定位目标包裹',
+            display: '搜索框支持按包裹单号、商品名称、国内快递单号搜索；日期范围选择器展示开始日期和结束日期',
+            interaction: '点击搜索框聚焦输入，支持回车或点击搜索按钮执行搜索；点击日期选择器弹出双月日历弹窗（左右两个月历并排展示，方便跨月选择），选择日期范围后点击确定执行筛选；支持清空日期',
+            business: '搜索支持模糊匹配；日期范围筛选精确到天'
+        }
+    },
+    {
+        id: 3,
+        title: '状态标签筛选',
+        summary: '8个状态标签，快速筛选不同状态的包裹',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '按包裹状态快速筛选列表，每个标签显示该状态下的包裹数量角标',
+            display: '8个状态标签：全部、待付款、待审核、处理中、待发货、已发货、已收货、已取消；每个标签右侧显示数量角标（该状态下的包裹数量），角标始终存在，实时反映各状态包裹数量；已收货状态不显示角标（已完成状态无需关注数量）；当前选中的标签高亮显示',
+            interaction: '点击状态标签筛选对应状态的包裹，标签高亮，列表刷新'
+        }
+    },
+    {
+        id: 4,
+        title: '包裹列表表格',
+        summary: '包裹列表，含行头、补款提示条和内容行',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示用户所有包裹的详细信息，每个包裹由行头（包裹编号+下单时间+仓库）、可选的补款提示条和内容行组成',
+            display: '表头列：商品信息、物流线路、重量/体积、费用、状态、操作；商品信息列展示缩略图（最多3个，超出+N）和商品名称+数量；补款提示条在包裹行上方显示，橙色渐变背景，左侧提示文字，右侧补款金额',
+            interaction: '点击整行任意位置跳转到包裹详情页；操作按钮区域阻止事件冒泡'
+        }
+    },
+    {
+        id: 5,
+        title: '费用展示规则',
+        summary: '不同状态下包裹费用的展示差异',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'state',
+        detail: {
+            feature: '根据包裹当前状态展示不同的费用文案，帮助用户了解当前需要支付或已经支付的金额',
+            state: '待付款状态→显示「需付款 ¥XX」（预估运费，用户需要支付）；已支付相关状态（已支付/待审核/处理中/待发货/已发货）→显示「实付款 ¥XX（已付）」，表示已完成支付；已取消状态→显示「应付款 ¥XX」（原本应该支付的金额但未实际支付）；存在补款时→在包裹行上方显示补款提示条「需补款 ¥XX」',
+            business: '费用金额根据实际重量体积和线路计费规则计算'
+        }
+    },
+    {
+        id: 6,
+        title: '操作按钮规则',
+        summary: '不同状态展示不同按钮，各按钮有对应交互',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '根据包裹状态展示对应的操作按钮，每个按钮点击后执行对应操作',
+            display: '待付款→「查看详情」「取消包裹」「去支付」；待审核/处理中→「查看详情」「取消包裹」；待发货→「查看详情」；待发货+有补款→「查看详情」「去补款」；已发货→「查看详情」「查看物流」「确认收货」；已收货→无操作按钮；已取消→无操作按钮',
+            interaction: '查看详情→跳转到包裹详情页；取消包裹→弹出确认弹窗，确认后取消包裹；去支付→跳转到收银台支付页面；去补款→弹出补款确认弹窗（展示补款原因和金额明细），用户确认后跳转收银台支付补款；查看物流→弹出物流信息弹窗展示物流轨迹；确认收货→弹出确认弹窗，确认后包裹状态变为已收货',
+            business: '已发货和已取消状态的包裹不可再取消；补款由后台打包后发起，补款原因和金额明细由后台填写'
+        }
+    },
+    {
+        id: 7,
+        title: '包裹行点击交互',
+        summary: '整行可点击跳转详情，操作按钮区域阻止冒泡',
+        target: '#anno-7',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '提供便捷的跳转交互，用户点击包裹行任意位置即可进入详情页',
+            interaction: '点击整行任意位置（操作按钮区域除外）→跳转到包裹详情页；操作按钮区域（取消包裹、去支付、去补款、查看物流、确认收货等）阻止事件冒泡，点击不会触发跳转；补款提示条上的「去补款」按钮同样阻止冒泡'
+        }
+    },
+    {
+        id: 8,
+        title: '补款确认弹窗',
+        summary: '补款确认弹窗，展示补款原因和金额明细',
+        target: '#anno-8',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '用户点击「去补款」后弹出此弹窗，让用户确认补款原因和金额后再跳转支付',
+            display: '弹窗标题「补款确认」；原包裹信息（包裹单号、下单时间）；补款原因说明——补款原因为后台发起补款时填写的备注信息，如"包裹打包后计费重量超出预估，需补运费差额"；补款金额明细——展示附加费类型及对应金额（如"运费差额 ¥85.00"，若有多种附加费则逐行列出）；底部两个按钮「取消」和「确认补款」',
+            interaction: '点击「确认补款」→关闭弹窗，跳转到收银台支付补款；点击「取消」或遮罩层→关闭弹窗不做任何操作',
+            business: '补款原因文本由后台发起补款时填写的备注信息决定；补款金额明细展示附加费类型及对应的金额，具体项目和金额由后台生成'
+        }
+    }
+];
+
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+function loadCustomAnnotations() {
+    try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    var list = document.getElementById('annotation-list');
+    var data = getActiveAnnotations();
+    list.innerHTML = data.map(function(item) {
+        return '<div class="annotation-item" data-id="' + item.id + '" onclick="handleAnnotationClick(' + item.id + ')" onmouseenter="highlightMarker(' + item.id + ')" onmouseleave="unhighlightMarker(' + item.id + ')">' +
+            '<div class="annotation-header">' +
+                '<div class="annotation-badge">' + item.id + '</div>' +
+                '<div class="annotation-title">' + item.title + '</div>' +
+            '</div>' +
+            '<div class="annotation-summary">' + item.summary + '</div>' +
+        '</div>';
+    }).join('');
+}
+function highlightMarker(id) {
+    var marker = document.querySelector('.anno-marker[data-id="' + id + '"]');
+    if (marker) marker.classList.add('highlight');
+    var item = document.querySelector('.annotation-item[data-id="' + id + '"]');
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    var marker = document.querySelector('.anno-marker[data-id="' + id + '"]');
+    if (marker) marker.classList.remove('highlight');
+    var item = document.querySelector('.annotation-item[data-id="' + id + '"]');
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(function(marker) {
+    marker.addEventListener('mouseenter', function() { highlightMarker(parseInt(marker.dataset.id)); });
+    marker.addEventListener('mouseleave', function() { unhighlightMarker(parseInt(marker.dataset.id)); });
+    marker.addEventListener('click', function() { showDetail(parseInt(marker.dataset.id)); });
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(function() { showDetail(id); }, 300);
+}
+
+function scrollToAnnotation(id) {
+    var data = getActiveAnnotations();
+    var item = data.find(function(a) { return a.id === id; });
+    if (!item) return;
+    var target = document.querySelector(item.target);
+    var previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        var targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(function() { target.classList.remove('anno-flash'); }, 1500);
+    }
+}
+
+function showDetail(id) {
+    var item = getActiveAnnotations().find(function(a) { return a.id === id; });
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = item.id + '. ' + item.title;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    var detail = item.detail;
+    var rows = [];
+    var moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(function(key) {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    var table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(function(row) {
+            return '<tr><th>' + row.label + '</th><td><textarea data-key="' + row.key + '">' + row.value + '</textarea></td></tr>';
+        }).join('');
+    } else {
+        table.innerHTML = rows.map(function(row) {
+            return '<tr><th>' + row.label + '</th><td>' + row.value.replace(/\n/g, '<br>') + '</td></tr>';
+        }).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    var textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    var item = customAnnotations.find(function(a) { return a.id === currentAnnotation.id; });
+    if (!item) return;
+    textareas.forEach(function(ta) { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    var btn = document.getElementById('save-btn');
+    var original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(function() { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    var original = annotations.find(function(a) { return a.id === currentAnnotation.id; });
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+var PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        var collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    var panel = document.getElementById('annotation-panel');
+    var expandBtn = document.getElementById('panel-expand-btn');
+    var isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+function openEditMode() {
+    var data = getActiveAnnotations();
+    var listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(function(item) {
+        listHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">' +
+            '<div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(' + item.id + ')">' +
+                '<div class="annotation-badge">' + item.id + '</div>' +
+                '<div style="font-size:14px;font-weight:600;color:#333;">' + item.title + '</div>' +
+                '<div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + item.summary + '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;flex-shrink:0;">' +
+                '<button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(' + item.id + ');setTimeout(function(){toggleEdit()},100)">编辑</button>' +
+                (item.id !== 1 ? '<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(' + item.id + ')">删除</button>' : '') +
+            '</div>' +
+        '</div>';
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    var data = getActiveAnnotations();
+    var item = data.find(function(a) { return a.id === id; });
+    if (!item || item.id === 1) return;
+    if (!confirm('确定要删除标注「' + item.title + '」吗？删除后序号会自动重排。')) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(function(a) { return a.id !== id; });
+    customAnnotations.forEach(function(a, i) { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    var newId = customAnnotations.length + 1;
+    var newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: { feature: '请填写功能说明...' }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = newItem.id + '. ' + newItem.title;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm('确定要删除标注「' + currentAnnotation.title + '」吗？删除后序号会自动重排。')) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(function(a) { return a.id !== currentAnnotation.id; });
+    customAnnotations.forEach(function(item, index) { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    var activeData = getActiveAnnotations();
+    var originalHTML = document.documentElement.outerHTML;
+    var dataStr = JSON.stringify(activeData, null, 2);
+    var replacement = 'const annotations = ' + dataStr + ';';
+    var newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    var blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var title = document.title || '带标注原型';
+    var date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = title + '_' + date + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    var btn = document.getElementById('export-btn');
+    var original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(function() { btn.textContent = original; }, 2000);
+}
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+
+</body>
+</html>
