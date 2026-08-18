@@ -101,18 +101,23 @@
     ],
     "groups": [
       {
-        "title": "后台管理",
+        "title": "🏢 平台侧",
         "pages": [
           {
             "name": "提包单列表",
-            "file": "docs/submit-order-list-tenant-v2.html",
+            "file": "docs/parcel-list-admin-annotated.html",
             "icon": "📋"
           },
           {
-            "name": "提包单详情",
-            "file": "docs/submit-order-detail-tenant-v1.html",
-            "icon": "📋"
-          },
+            "name": "平台线路新增/编辑",
+            "file": "docs/platform-route-edit_v2.2.7.html",
+            "icon": "🗺️"
+          }
+        ]
+      },
+      {
+        "title": "🏪 租户侧",
+        "pages": [
           {
             "name": "租户线路管理",
             "file": "docs/tenant-route-manage.html",
@@ -126,7 +131,7 @@
         ]
       },
       {
-        "title": "PC用户端",
+        "title": "💻 PC用户端",
         "pages": [
           {
             "name": "提交包裹",
@@ -146,7 +151,7 @@
         ]
       },
       {
-        "title": "APP用户端",
+        "title": "📱 APP用户端",
         "pages": [
           {
             "name": "提交包裹",
