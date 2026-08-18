@@ -3,610 +3,2032 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POKO - 包裹管理</title>
+<title>提包单管理 - 带标注原型</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #F3F4F6; color: #1F2937; font-size: 13px; }
-.page { max-width: 1600px; margin: 0 auto; padding: 16px; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
 
-/* ===== 列表页 ===== */
-.list-view { display: block; }
-.list-view.hidden { display: none; }
+.app-container { display: flex; height: 100vh; }
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
 
-/* Header */
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.page-title { font-size: 20px; font-weight: 600; color: #111827; }
-.btn-export { padding: 8px 16px; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; cursor: pointer; color: #374151; display: flex; align-items: center; gap: 4px; }
-.btn-export:hover { background: #F9FAFB; }
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-add-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #165DFF;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.panel-add-btn:hover { background: #0E42D2; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
 
-/* Filter */
-.filter-card { background: #fff; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
-.filter-item { display: flex; flex-direction: column; gap: 4px; }
-.filter-item label { font-size: 12px; color: #6B7280; }
-.filter-item input, .filter-item select { height: 34px; padding: 0 10px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; color: #1F2937; background: #fff; outline: none; min-width: 160px; }
-.filter-item input:focus, .filter-item select:focus { border-color: #3B82F6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
-.filter-item .date-range { display: flex; gap: 6px; align-items: center; }
-.filter-item .date-range span { color: #9CA3AF; font-size: 12px; }
-.filter-actions { display: flex; gap: 8px; margin-left: auto; }
-.btn-query { padding: 8px 20px; background: #3B82F6; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; }
-.btn-query:hover { background: #2563EB; }
-.btn-reset { padding: 8px 16px; background: #fff; color: #374151; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.btn-reset:hover { background: #F9FAFB; }
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
 
-/* Tabs */
-.tabs-card { background: #fff; border-radius: 10px; padding: 0 20px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); display: flex; gap: 0; overflow-x: auto; }
-.tab-item { padding: 12px 18px; font-size: 13px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
-.tab-item:hover { color: #3B82F6; }
-.tab-item.active { color: #3B82F6; border-bottom-color: #3B82F6; font-weight: 500; }
-.tab-count { font-size: 11px; background: #F3F4F6; color: #6B7280; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
-.tab-item.active .tab-count { background: #EFF6FF; color: #3B82F6; }
-
-/* Table */
-.table-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow: hidden; }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; min-width: 2800px; border-collapse: collapse; }
-thead th { background: #F9FAFB; padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 500; color: #6B7280; border-bottom: 1px solid #E5E7EB; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
-thead th.group-header { background: #F3F4F6; text-align: center; font-size: 11px; color: #9CA3AF; letter-spacing: 2px; border-bottom: 1px solid #E5E7EB; }
-tbody td { padding: 10px 12px; border-bottom: 1px solid #F3F4F6; font-size: 13px; color: #374151; white-space: nowrap; }
-tbody tr:hover { background: #F9FAFB; }
-.pkg-id { color: #3B82F6; cursor: pointer; font-weight: 500; }
-.pkg-id:hover { text-decoration: underline; }
-.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-.tag-preview { background: #FEF3C7; color: #D97706; }
-.tag-wait-pay { background: #FFF7ED; color: #F97316; }
-.tag-wait-audit { background: #F5F3FF; color: #8B5CF6; }
-.tag-processing { background: #EFF6FF; color: #3B82F6; }
-.tag-wait-supplement { background: #FEFCE8; color: #EAB308; }
-.tag-wait-ship { background: #EEF2FF; color: #6366F1; }
-.tag-shipped { background: #ECFDF5; color: #10B941; }
-.tag-signed { background: #ECFEFF; color: #06B6D4; }
-.tag-completed { background: #F3F4F6; color: #9CA3AF; }
-.tag-cancelled { background: #F9FAFB; color: #D1D5DB; }
-.val-gray { color: #9CA3AF; }
-.val-money { font-weight: 500; }
-.val-positive { color: #EF4444; font-weight: 500; }
-.val-negative { color: #10B941; font-weight: 500; }
-.btn-sm { padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: none; }
-.btn-view { background: #EFF6FF; color: #3B82F6; }
-.btn-view:hover { background: #DBEAFE; }
-.btn-cancel-pkg { background: #FEF2F2; color: #EF4444; margin-left: 4px; }
-.btn-cancel-pkg:hover { background: #FEE2E2; }
-
-/* Pagination */
-.pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid #F3F4F6; }
-.page-info { font-size: 13px; color: #6B7280; }
-.page-btns { display: flex; gap: 4px; }
-.page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; cursor: pointer; background: #fff; color: #374151; }
-.page-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
-.page-btn:hover:not(.active) { background: #F9FAFB; }
-
-/* Cancel Modal */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
 .modal-overlay.show { display: flex; }
-.modal { background: #fff; border-radius: 12px; width: 400px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-.modal-title { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 12px; }
-.modal-body { font-size: 13px; color: #6B7280; line-height: 1.6; margin-bottom: 20px; }
-.modal-body strong { color: #1F2937; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
-.modal-btn { padding: 8px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
-.modal-btn-primary { background: #EF4444; color: #fff; }
-.modal-btn-primary:hover { background: #DC2626; }
-.modal-btn-secondary { background: #F3F4F6; color: #374151; }
-.modal-btn-secondary:hover { background: #E5E7EB; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
 
-/* ===== 详情页 ===== */
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
 
-.detail-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.btn-back { padding: 8px 16px; background: #fff; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; cursor: pointer; color: #374151; display: flex; align-items: center; gap: 4px; }
-.btn-back:hover { background: #F9FAFB; }
-.detail-nav h2 { font-size: 20px; font-weight: 600; color: #111827; }
-.detail-nav .detail-status { margin-left: 8px; }
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
 
-.detail-card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow-x: auto; }
-.detail-section { margin-bottom: 28px; }
-.detail-section:last-child { margin-bottom: 0; }
-.detail-section-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #F3F4F6; }
-.detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.detail-field { display: flex; flex-direction: column; gap: 3px; }
-.detail-field .label { font-size: 12px; color: #9CA3AF; }
-.detail-field .value { font-size: 13px; color: #1F2937; }
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
 
-.detail-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.detail-table th { background: #F9FAFB; padding: 6px 8px; font-size: 11px; font-weight: 500; color: #6B7280; text-align: left; border-bottom: 1px solid #E5E7EB; width: 90px; }
-.detail-table td { padding: 6px 8px; font-size: 12px; color: #374151; border-bottom: 1px solid #F3F4F6; overflow: hidden; text-overflow: ellipsis; word-break: break-all; width: 90px; }
-.detail-table .product-img { width: 36px; height: 36px; border-radius: 4px; background: #F3F4F6; display: inline-block; }
+/* ===== 左侧产品界面样式 ===== */
+.page-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
 
-.sub-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
 
-.fee-group { margin-bottom: 18px; }
-.fee-group-title { font-size: 12px; color: #6B7280; font-weight: 500; margin-bottom: 8px; }
-.fee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
-.fee-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
-.fee-row .fee-label { color: #6B7280; }
-.fee-row .fee-value { color: #1F2937; font-weight: 500; }
-.fee-total { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #E5E7EB; font-size: 14px; font-weight: 600; margin-top: 10px; }
-.fee-total .fee-label { color: #111827; }
-.fee-total .fee-value { color: #EF4444; }
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.page-breadcrumb {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 筛选区 */
+.filter-section {
+    background: #FAFBFC;
+    border: 1px solid #EBEEF5;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
+
+.filter-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+.filter-input,
+.filter-select {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: #165DFF;
+}
+
+.filter-input { width: 150px; }
+.filter-select { width: 140px; }
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    margin-left: auto;
+}
+
+.btn-search {
+    height: 32px;
+    padding: 0 16px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-search:hover { background: #0E42D2; }
+
+.btn-reset {
+    height: 32px;
+    padding: 0 16px;
+    background: #fff;
+    color: #666;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-reset:hover { border-color: #165DFF; color: #165DFF; }
+
+/* 状态标签栏 */
+.status-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #EBEEF5;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.status-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-tab:hover { color: #165DFF; }
+
+.status-tab.active {
+    color: #165DFF;
+    font-weight: 600;
+    border-bottom-color: #165DFF;
+}
+
+.tab-count {
+    font-size: 11px;
+    background: #F0F1F5;
+    color: #666;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 400;
+}
+
+.status-tab.active .tab-count {
+    background: #E8F3FF;
+    color: #165DFF;
+}
+
+/* 数据表格 */
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #EBEEF5;
+    border-radius: 6px;
+}
+
+.data-table {
+    width: 100%;
+    min-width: 3050px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: #FAFBFC;
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #EBEEF5;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.data-table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #F2F3F5;
+    color: #333;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #F8FAFF;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 链接样式 */
+.link-text {
+    color: #165DFF;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.link-text:hover {
+    text-decoration: underline;
+}
+
+/* 标签样式 */
+.tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.tag-blue { background: #E8F3FF; color: #165DFF; }
+.tag-orange { background: #FFF7E8; color: #F97316; }
+.tag-green { background: #E8FFF0; color: #10B941; }
+.tag-gray { background: #F2F3F5; color: #999; }
+.tag-purple { background: #F3E8FF; color: #8B5CF6; }
+.tag-cyan { background: #E8FFFE; color: #06B6D4; }
+.tag-yellow { background: #FFFBEB; color: #D97706; }
+.tag-red { background: #FFF1F0; color: #EF4444; }
+.tag-deepgray { background: #E8E9EC; color: #666; }
+
+/* 操作按钮 */
+.op-btn {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    margin-right: 4px;
+    transition: all 0.2s;
+}
+
+.op-btn-view {
+    background: transparent;
+    color: #165DFF;
+    border: 1px solid #165DFF;
+}
+
+.op-btn-view:hover { background: #E8F3FF; }
+
+.op-btn-cancel {
+    background: transparent;
+    color: #F97316;
+    border: 1px solid #F97316;
+}
+
+.op-btn-cancel:hover { background: #FFF7E8; }
+
+.op-btn-review {
+    background: transparent;
+    color: #10B981;
+    border: 1px solid #10B981;
+}
+
+.op-btn-review:hover { background: #ECFDF5; }
+
+/* 用户信息 */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-name { font-size: 13px; color: #333; font-weight: 500; }
+.user-id { font-size: 11px; color: #999; }
+
+/* 租户信息 */
+.tenant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tenant-name { font-size: 13px; color: #333; font-weight: 500; }
+.tenant-id { font-size: 11px; color: #999; }
+
+/* 快递件数链接 */
+.express-link {
+    color: #165DFF;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+}
+
+/* 申报品名折叠 */
+.declare-names {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 分页 */
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 0 4px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #666;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.page-btn:hover { border-color: #165DFF; color: #165DFF; }
+.page-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+.page-btn.disabled { color: #ccc; cursor: not-allowed; }
+
+.page-size-select {
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    background: #fff;
+    outline: none;
+}
+
+/* 费用小计高亮 */
+.fee-subtotal {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* 金额样式 */
+.amount { font-family: "SF Mono", "Monaco", "Menlo", monospace; }
+
+/* 备注 */
+.remark-text {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #666;
+    font-size: 12px;
+}
+
+/* 脱敏手机号 */
+.phone-masked { color: #666; font-size: 13px; }
+
+/* 后台备注可编辑 */
+.remark-editable {
+    max-width: 130px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.remark-editable:hover .remark-edit-icon { opacity: 1; }
+.remark-edit-icon {
+    font-size: 12px;
+    color: #165DFF;
+    opacity: 0;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+.remark-edit-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #666;
+    font-size: 12px;
+}
+
+/* 快递详情弹窗 */
+.express-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+.express-modal-overlay.show { display: flex; }
+.express-modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 520px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.express-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.express-modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.express-modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.express-modal-close:hover { color: #333; }
+.express-modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.express-info-label { font-size: 12px; color: #999; margin-bottom: 12px; }
+
+.express-list-item {
+    border: 1px solid #EBEEF5;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 24px;
+}
+.express-list-item:last-child { margin-bottom: 0; }
+.express-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.express-field-label { font-size: 11px; color: #999; }
+.express-field-value { font-size: 13px; color: #333; font-weight: 500; }
+
+/* 备注编辑弹窗 */
+.remark-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+.remark-modal-overlay.show { display: flex; }
+.remark-modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 420px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.remark-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.remark-modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.remark-modal-body { padding: 20px 24px; }
+.remark-modal-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.remark-modal-textarea:focus { border-color: #165DFF; }
+.remark-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.remark-modal-hint { font-size: 12px; color: #999; margin-bottom: 10px; }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- ==================== 列表页 ==================== -->
-  <div class="list-view" id="listView">
-    <!-- Header -->
-    <div class="page-header">
-      <div class="page-title">包裹管理</div>
-      <button class="btn-export" onclick="alert('导出Excel')">📥 导出</button>
+<div class="app-container">
+    <!-- 左侧原型区 -->
+    <div class="preview-area">
+        <div class="page-container" id="anno-1" style="position: relative;">
+            <div class="anno-marker" data-id="1">1</div>
+            
+            <!-- 页面头部 -->
+            <div class="page-header">
+                <div>
+                    <div class="page-title">提包单管理</div>
+                    <div class="page-breadcrumb">仓储物流 / 提包单管理</div>
+                </div>
+            </div>
+
+            <!-- 筛选区域 -->
+            <div class="filter-section" id="anno-2" style="position: relative;">
+                <div class="anno-marker" data-id="2">2</div>
+                
+                <!-- 第一行筛选 -->
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <span class="filter-label">提包编号</span>
+                        <input class="filter-input" placeholder="请输入提包编号" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">租户名称</span>
+                        <input class="filter-input" placeholder="请输入租户名称" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">关联单号</span>
+                        <input class="filter-input" placeholder="采购单号/转运单号" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">商品编码</span>
+                        <input class="filter-input" placeholder="请输入商品编码" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">用户信息</span>
+                        <input class="filter-input" placeholder="用户名/用户ID" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">物流线路</span>
+                        <input class="filter-input" placeholder="请输入线路名称" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">快递单号</span>
+                        <input class="filter-input" placeholder="请输入快递单号" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">集运单号</span>
+                        <input class="filter-input" placeholder="请输入集运单号" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">收件国家</span>
+                        <select class="filter-select">
+                            <option>全部国家</option>
+                            <option>美国</option>
+                            <option>中国台湾</option>
+                            <option>澳大利亚</option>
+                            <option>日本</option>
+                            <option>韩国</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 第二行筛选 -->
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <span class="filter-label">提包时间</span>
+                        <input class="filter-input" style="width:220px" placeholder="起始日期 - 结束日期" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">申报类型</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>自主申报</option>
+                            <option>委托申报</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">发货时间</span>
+                        <input class="filter-input" style="width:220px" placeholder="起始日期 - 结束日期" />
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">提包类型</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>正常提包</option>
+                            <option>预演提包</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">补款状态</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>无需补款</option>
+                            <option>待补款</option>
+                            <option>已补款</option>
+                            <option>空</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">是否包税</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>是</option>
+                            <option>否</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">是否保价</span>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>是</option>
+                            <option>否</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-search">查询</button>
+                        <button class="btn-reset">重置</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 状态标签栏 -->
+            <div class="status-tabs" id="anno-3" style="position: relative;">
+                <div class="anno-marker" data-id="3">3</div>
+                <div class="status-tab active">全部 <span class="tab-count">1,286</span></div>
+                <div class="status-tab">待支付 <span class="tab-count">23</span></div>
+                <div class="status-tab">待审核 <span class="tab-count">15</span></div>
+                <div class="status-tab">处理中 <span class="tab-count">42</span></div>
+                <div class="status-tab">待发货 <span class="tab-count">38</span></div>
+                <div class="status-tab">已发货 <span class="tab-count">856</span></div>
+                <div class="status-tab">已收货 <span class="tab-count">298</span></div>
+                <div class="status-tab">已取消 <span class="tab-count">14</span></div>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="table-wrapper" id="anno-4" style="position: relative;">
+                <div class="anno-marker" data-id="4">4</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>提包编号</th>
+                            <th>租户</th>
+                            <th>类型</th>
+                            <th>计费状态</th>
+                            <th>租户支付状态</th>
+                            <th>用户</th>
+                            <th>商品数量</th>
+                            <th>商品总金额</th>
+                            <th>国内快递件数</th>
+                            <th>申报类型</th>
+                            <th>申报品名</th>
+                            <th>申报数量</th>
+                            <th>申报金额</th>
+                            <th>收件国家</th>
+                            <th>收件人名称</th>
+                            <th>收件人电话</th>
+                            <th>是否包税</th>
+                            <th>是否保价</th>
+                            <th>预估重量(kg)</th>
+                            <th>预估体积(cm³)</th>
+                            <th>预估运费</th>
+                            <th>实际重量(kg)</th>
+                            <th>实际体积(cm³)</th>
+                            <th>实际运费</th>
+                            <th>包税费</th>
+                            <th>保价费</th>
+                            <th>其他费用</th>
+                            <th>优惠券</th>
+                            <th>费用小计</th>
+                            <th>补款状态</th>
+                            <th>代收货款</th>
+                            <th>代收货款金额</th>
+                            <th>后台备注</th>
+                            <th>用户备注</th>
+                            <th>物流渠道</th>
+                            <th>物流单号</th>
+                            <th>集运单号</th>
+                            <th>集运单推送</th>
+                            <th>提包状态</th>
+                            <th>提包时间</th>
+                            <th>支付时间</th>
+                            <th>发货时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a class="link-text">B25081037521</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">张三</span><span class="user-id">U88421</span></div></td>
+                            <td>5</td>
+                            <td class="amount">¥1,280.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">3件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">电子产品、衣物...</div></td>
+                            <td>5</td>
+                            <td class="amount">$185.00</td>
+                            <td>美国</td>
+                            <td>John Smith</td>
+                            <td>13812346721</td>
+                            <td>是</td>
+                            <td>否</td>
+                            <td>5</td>
+                            <td>12000</td>
+                            <td class="amount">¥156.00</td>
+                            <td>5.2</td>
+                            <td>12500</td>
+                            <td class="amount">¥168.50</td>
+                            <td class="amount">¥80.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥10.00</td>
+                            <td class="fee-subtotal amount">¥238.50</td>
+                            <td><span class="tag tag-orange">待补款</span></td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-editable" onclick="openRemarkEdit(this)"><span class="remark-edit-text">客户要求加急处理</span><span class="remark-edit-icon">✎</span></div></td>
+                            <td><div class="remark-text" style="color:#333">希望走DHL渠道</div></td>
+                            <td>US-Express</td>
+                            <td>—</td>
+                            <td>JY2026081000037</td>
+                            <td><span class="tag tag-gray">未推送</span></td>
+                            <td><span class="tag tag-cyan">处理中</span></td>
+                            <td>2026-08-10 09:15:00</td>
+                            <td>2026-08-10 09:18:00</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                                <button class="op-btn op-btn-cancel" onclick="confirmCancel(this)">取消</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25081068142</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">李梅</span><span class="user-id">U77234</span></div></td>
+                            <td>2</td>
+                            <td class="amount">¥456.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">1件</a></td>
+                            <td><span class="tag tag-purple">委托申报</span></td>
+                            <td><div class="declare-names">服装配饰</div></td>
+                            <td>2</td>
+                            <td class="amount">$65.00</td>
+                            <td>日本</td>
+                            <td>田中太郎</td>
+                            <td>13912343302</td>
+                            <td>否</td>
+                            <td>是</td>
+                            <td>5</td>
+                            <td>12000</td>
+                            <td class="amount">¥89.00</td>
+                            <td>5.2</td>
+                            <td>12500</td>
+                            <td class="amount">¥85.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥15.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥5.00</td>
+                            <td class="fee-subtotal amount">¥95.00</td>
+                            <td><span class="tag tag-green">无需补款</span></td>
+                            <td><span class="tag tag-blue">是</span></td>
+                            <td class="amount">¥200.00</td>
+                            <td><div class="remark-editable" onclick="openRemarkEdit(this)"><span class="remark-edit-text">—</span><span class="remark-edit-icon">✎</span></div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>JP-Standard</td>
+                            <td>JP2026081000523</td>
+                            <td>JY2026081000038</td>
+                            <td><span class="tag tag-blue">推送中</span></td>
+                            <td><span class="tag tag-yellow">待发货</span></td>
+                            <td>2026-08-10 08:42:00</td>
+                            <td>2026-08-10 08:45:00</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080942918</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">环球转运</span><span class="tenant-id">T10045</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-orange">未支付</span></td>
+                            <td><div class="user-info"><span class="user-name">王磊</span><span class="user-id">U65102</span></div></td>
+                            <td>8</td>
+                            <td class="amount">¥3,560.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">4件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">数码配件、家居用品...</div></td>
+                            <td>8</td>
+                            <td class="amount">$520.00</td>
+                            <td>澳大利亚</td>
+                            <td>David Chen</td>
+                            <td>18612349910</td>
+                            <td>是</td>
+                            <td>是</td>
+                            <td>2</td>
+                            <td>8000</td>
+                            <td class="amount">¥234.00</td>
+                            <td>1.8</td>
+                            <td>8200</td>
+                            <td class="amount">¥256.00</td>
+                            <td class="amount">¥120.00</td>
+                            <td class="amount">¥35.00</td>
+                            <td class="amount">¥20.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="fee-subtotal amount">¥431.00</td>
+                            <td><span class="tag tag-orange">待补款</span></td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-text">含易碎品，已保价</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>AU-FastLine</td>
+                            <td>—</td>
+                            <td>JY2026081000039</td>
+                            <td><span class="tag tag-gray">未推送</span></td>
+                            <td><span class="tag tag-cyan">处理中</span></td>
+                            <td>2026-08-09 16:30:00</td>
+                            <td>2026-08-09 16:35:00</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                                <button class="op-btn op-btn-cancel" onclick="confirmCancel(this)">取消</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080915763</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">环球转运</span><span class="tenant-id">T10045</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-gray">部分退款</span></td>
+                            <td><span class="tag tag-gray">部分退款</span></td>
+                            <td><div class="user-info"><span class="user-name">赵敏</span><span class="user-id">U44521</span></div></td>
+                            <td>1</td>
+                            <td class="amount">¥128.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">1件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">手机壳</div></td>
+                            <td>1</td>
+                            <td class="amount">$18.00</td>
+                            <td>韩国</td>
+                            <td>김민수</td>
+                            <td>13712345541</td>
+                            <td>否</td>
+                            <td>否</td>
+                            <td>8</td>
+                            <td>20000</td>
+                            <td class="amount">¥68.00</td>
+                            <td>8.5</td>
+                            <td>21000</td>
+                            <td class="amount">¥45.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="fee-subtotal amount">¥45.00</td>
+                            <td><span class="tag tag-green">无需补款</span></td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-text">—</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>KR-Express</td>
+                            <td>KR2026081001102</td>
+                            <td>JY2026081000040</td>
+                            <td><span class="tag tag-green">已推送</span></td>
+                            <td><span class="tag tag-blue">已发货</span></td>
+                            <td>2026-08-09 14:20:00</td>
+                            <td>2026-08-09 14:22:00</td>
+                            <td>2026-08-10 10:05:00</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080980234</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">陈浩</span><span class="user-id">U33087</span></div></td>
+                            <td>12</td>
+                            <td class="amount">¥5,890.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">6件</a></td>
+                            <td><span class="tag tag-purple">委托申报</span></td>
+                            <td><div class="declare-names">化妆品、保健品、零食...</div></td>
+                            <td>12</td>
+                            <td class="amount">$860.00</td>
+                            <td>中国台湾</td>
+                            <td>林志明</td>
+                            <td>15812347788</td>
+                            <td>是</td>
+                            <td>否</td>
+                            <td>1</td>
+                            <td>3000</td>
+                            <td class="amount">¥320.00</td>
+                            <td>0.8</td>
+                            <td>3200</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥150.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥20.00</td>
+                            <td class="fee-subtotal amount">—</td>
+                            <td>—</td>
+                            <td><span class="tag tag-blue">是</span></td>
+                            <td class="amount">¥350.00</td>
+                            <td><div class="remark-text">—</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>TW-Standard</td>
+                            <td>—</td>
+                            <td>JY2026081000041</td>
+                            <td><span class="tag tag-gray">未推送</span></td>
+                            <td><span class="tag tag-blue">待审核</span></td>
+                            <td>2026-08-09 11:05:00</td>
+                            <td>2026-08-09 11:08:00</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                                <button class="op-btn op-btn-review" onclick="confirmReview(this)">审核</button>
+                                <button class="op-btn op-btn-cancel" onclick="confirmCancel(this)">取消</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080926471</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-yellow">预演</span></td>
+                            <td><span class="tag tag-orange">待支付</span></td>
+                            <td><span class="tag tag-orange">未支付</span></td>
+                            <td><div class="user-info"><span class="user-name">刘洋</span><span class="user-id">U22156</span></div></td>
+                            <td>3</td>
+                            <td class="amount">¥890.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">2件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">电子配件</div></td>
+                            <td>3</td>
+                            <td class="amount">$130.00</td>
+                            <td>美国</td>
+                            <td>Mike Wang</td>
+                            <td>13512342209</td>
+                            <td>否</td>
+                            <td>否</td>
+                            <td>12</td>
+                            <td>30000</td>
+                            <td class="amount">¥112.00</td>
+                            <td>12.5</td>
+                            <td>31000</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="fee-subtotal amount">—</td>
+                            <td>—</td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-text">—</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>JY2026081000042</td>
+                            <td><span class="tag tag-gray">未推送</span></td>
+                            <td><span class="tag tag-orange">待支付</span></td>
+                            <td>2026-08-09 10:30:00</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                                <button class="op-btn op-btn-cancel" onclick="confirmCancel(this)">取消</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080853892</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">环球转运</span><span class="tenant-id">T10045</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">孙静</span><span class="user-id">U19843</span></div></td>
+                            <td>4</td>
+                            <td class="amount">¥2,100.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">2件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">母婴用品、玩具</div></td>
+                            <td>4</td>
+                            <td class="amount">$310.00</td>
+                            <td>美国</td>
+                            <td>Sarah Liu</td>
+                            <td>18812344456</td>
+                            <td>是</td>
+                            <td>是</td>
+                            <td>3</td>
+                            <td>9000</td>
+                            <td class="amount">¥178.00</td>
+                            <td>2.8</td>
+                            <td>9500</td>
+                            <td class="amount">¥172.00</td>
+                            <td class="amount">¥95.00</td>
+                            <td class="amount">¥25.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥15.00</td>
+                            <td class="fee-subtotal amount">¥277.00</td>
+                            <td><span class="tag tag-green">已补款</span></td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-text">保价金额¥500</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>US-Express</td>
+                            <td>US2026080908821</td>
+                            <td>JY2026081000043</td>
+                            <td><span class="tag tag-green">已推送</span></td>
+                            <td><span class="tag tag-blue">已发货</span></td>
+                            <td>2026-08-08 15:20:00</td>
+                            <td>2026-08-08 15:25:00</td>
+                            <td>2026-08-09 14:30:00</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080871056</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-gray">已退款</span></td>
+                            <td><span class="tag tag-gray">已退款</span></td>
+                            <td><div class="user-info"><span class="user-name">周强</span><span class="user-id">U15672</span></div></td>
+                            <td>1</td>
+                            <td class="amount">¥320.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">1件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">蓝牙耳机</div></td>
+                            <td>1</td>
+                            <td class="amount">$45.00</td>
+                            <td>日本</td>
+                            <td>佐藤花子</td>
+                            <td>13612348823</td>
+                            <td>否</td>
+                            <td>否</td>
+                            <td>4</td>
+                            <td>12000</td>
+                            <td class="amount">¥75.00</td>
+                            <td>4.2</td>
+                            <td>12200</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">—</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="fee-subtotal amount">—</td>
+                            <td>—</td>
+                            <td><span class="tag tag-blue">是</span></td>
+                            <td class="amount">¥150.00</td>
+                            <td><div class="remark-text">用户主动取消</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>JY2026081000044</td>
+                            <td><span class="tag tag-gray">已取消</span></td>
+                            <td><span class="tag tag-gray">已取消</span></td>
+                            <td>2026-08-08 11:40:00</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080839628</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">环球转运</span><span class="tenant-id">T10045</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">吴芳</span><span class="user-id">U12390</span></div></td>
+                            <td>6</td>
+                            <td class="amount">¥1,560.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">3件</a></td>
+                            <td><span class="tag tag-purple">委托申报</span></td>
+                            <td><div class="declare-names">茶叶、丝绸制品、工艺品...</div></td>
+                            <td>6</td>
+                            <td class="amount">$220.00</td>
+                            <td>澳大利亚</td>
+                            <td>Emily Zhang</td>
+                            <td>15912346677</td>
+                            <td>是</td>
+                            <td>否</td>
+                            <td>1</td>
+                            <td>2500</td>
+                            <td class="amount">¥198.00</td>
+                            <td>0.5</td>
+                            <td>2600</td>
+                            <td class="amount">¥195.00</td>
+                            <td class="amount">¥110.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥8.00</td>
+                            <td class="fee-subtotal amount">¥297.00</td>
+                            <td><span class="tag tag-green">无需补款</span></td>
+                            <td>否</td>
+                            <td>—</td>
+                            <td><div class="remark-text">—</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>AU-FastLine</td>
+                            <td>AU2026080905567</td>
+                            <td>JY2026081000045</td>
+                            <td><span class="tag tag-green">已推送</span></td>
+                            <td><span class="tag tag-green">已收货</span></td>
+                            <td>2026-08-08 09:15:00</td>
+                            <td>2026-08-08 09:20:00</td>
+                            <td>2026-08-09 08:45:00</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a class="link-text">B25080764513</a></td>
+                            <td><div class="tenant-info"><span class="tenant-name">速达国际</span><span class="tenant-id">T10023</span></div></td>
+                            <td><span class="tag tag-blue">正常</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><span class="tag tag-green">已支付</span></td>
+                            <td><div class="user-info"><span class="user-name">郑伟</span><span class="user-id">U09876</span></div></td>
+                            <td>2</td>
+                            <td class="amount">¥680.00</td>
+                            <td><a class="link-text" onclick="openExpressDetail(this)">2件</a></td>
+                            <td><span class="tag tag-blue">自主申报</span></td>
+                            <td><div class="declare-names">运动装备</div></td>
+                            <td>2</td>
+                            <td class="amount">$95.00</td>
+                            <td>韩国</td>
+                            <td>박지훈</td>
+                            <td>13312341190</td>
+                            <td>否</td>
+                            <td>是</td>
+                            <td>6</td>
+                            <td>15000</td>
+                            <td class="amount">¥95.00</td>
+                            <td>6.2</td>
+                            <td>15500</td>
+                            <td class="amount">¥92.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥20.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="amount">¥0.00</td>
+                            <td class="fee-subtotal amount">¥112.00</td>
+                            <td><span class="tag tag-green">已补款</span></td>
+                            <td><span class="tag tag-blue">是</span></td>
+                            <td class="amount">¥100.00</td>
+                            <td><div class="remark-text">—</div></td>
+                            <td><div class="remark-text">—</div></td>
+                            <td>KR-Express</td>
+                            <td>KR2026080800341</td>
+                            <td>JY2026081000046</td>
+                            <td><span class="tag tag-green">已推送</span></td>
+                            <td><span class="tag tag-green">已收货</span></td>
+                            <td>2026-08-07 17:50:00</td>
+                            <td>2026-08-07 17:55:00</td>
+                            <td>2026-08-08 16:20:00</td>
+                            <td>
+                                <button class="op-btn op-btn-view">查看</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 页面状态说明标注 -->
+            <div id="anno-7" style="position: relative; height: 0; overflow: visible;">
+                <div class="anno-marker" data-id="7" style="position: absolute; top: -30px; right: 60px;">7</div>
+            </div>
+
+            <!-- 分页区域 -->
+            <div class="pagination-bar" id="anno-5" style="position: relative;">
+                <div class="anno-marker" data-id="5">5</div>
+                <div class="pagination-info">共 1,286 条记录</div>
+                <div class="pagination-controls">
+                    <select class="page-size-select">
+                        <option>10条/页</option>
+                        <option>20条/页</option>
+                        <option>50条/页</option>
+                    </select>
+                    <button class="page-btn disabled">&lt;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">129</button>
+                    <button class="page-btn">&gt;</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Filter -->
-    <div class="filter-card">
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>包裹编号</label>
-          <input type="text" placeholder="请输入包裹编号">
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+            <button class="panel-add-btn" onclick="addAnnotation()" title="新增标注">+</button>
         </div>
-        <div class="filter-item">
-          <label>关联单号</label>
-          <input type="text" placeholder="精准搜索采购单号/转运单号">
-        </div>
-        <div class="filter-item">
-          <label>商品编码</label>
-          <input type="text" placeholder="请输入商品编码">
-        </div>
-        <div class="filter-item">
-          <label>用户信息</label>
-          <input type="text" placeholder="用户名/邮箱">
-        </div>
-        <div class="filter-item">
-          <label>物流线路</label>
-          <input type="text" placeholder="搜索线路名称">
-        </div>
-        <div class="filter-item">
-          <label>收件国家</label>
-          <select>
-            <option value="">全部国家</option>
-            <option>美国</option>
-            <option>加拿大</option>
-            <option>英国</option>
-            <option>澳大利亚</option>
-            <option>日本</option>
-            <option>德国</option>
-            <option>法国</option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <label>提包时间</label>
-          <div class="date-range">
-            <input type="date" style="min-width:130px">
-            <span>至</span>
-            <input type="date" style="min-width:130px">
-          </div>
-        </div>
-        <div class="filter-item">
-          <label>申报类型</label>
-          <select>
-            <option value="">全部</option>
-            <option>自主申报</option>
-            <option>委托申报</option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <label>发货时间</label>
-          <div class="date-range">
-            <input type="date" style="min-width:130px">
-            <span>至</span>
-            <input type="date" style="min-width:130px">
-          </div>
-        </div>
-        <div class="filter-actions">
-          <button class="btn-query">查询</button>
-          <button class="btn-reset">重置</button>
-        </div>
-      </div>
+        <div id="annotation-list"></div>
     </div>
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
 
-    <!-- Tabs -->
-    <div class="tabs-card">
-      <div class="tab-item active" onclick="switchTab(this)">全部<span class="tab-count">128</span></div>
-      <div class="tab-item" onclick="switchTab(this)">待支付<span class="tab-count">8</span></div>
-      <div class="tab-item" onclick="switchTab(this)">待审核<span class="tab-count">5</span></div>
-      <div class="tab-item" onclick="switchTab(this)">处理中<span class="tab-count">23</span></div>
-      <div class="tab-item" onclick="switchTab(this)">待补款<span class="tab-count">3</span></div>
-      <div class="tab-item" onclick="switchTab(this)">待发货<span class="tab-count">15</span></div>
-      <div class="tab-item" onclick="switchTab(this)">已发货<span class="tab-count">32</span></div>
-      <div class="tab-item" onclick="switchTab(this)">已签收<span class="tab-count">20</span></div>
-      <div class="tab-item" onclick="switchTab(this)">已完成<span class="tab-count">18</span></div>
-      <div class="tab-item" onclick="switchTab(this)">已取消<span class="tab-count">4</span></div>
-    </div>
-
-    <!-- Table -->
-    <div class="table-card">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th rowspan="2" style="min-width:110px">包裹编号</th>
-              <th rowspan="2" style="min-width:70px">类型</th>
-              <th rowspan="2" style="min-width:80px">用户</th>
-              <th colspan="3" class="group-header">商品信息</th>
-              <th rowspan="2" style="min-width:70px">申报类型</th>
-              <th rowspan="2" style="min-width:70px">收件国家</th>
-              <th colspan="3" class="group-header">预估信息</th>
-              <th colspan="3" class="group-header">实际信息</th>
-              <th colspan="4" class="group-header">费用信息</th>
-              <th rowspan="2" style="min-width:130px">物流单号</th>
-              <th rowspan="2" style="min-width:80px">包裹状态</th>
-              <th rowspan="2" style="min-width:100px">提包时间</th>
-              <th rowspan="2" style="min-width:100px">支付时间</th>
-              <th rowspan="2" style="min-width:100px">发货时间</th>
-              <th rowspan="2" style="min-width:90px">操作</th>
-            </tr>
-            <tr>
-              <th style="min-width:60px">数量</th>
-              <th style="min-width:80px">总金额</th>
-              <th style="min-width:60px">件数</th>
-              <th style="min-width:80px">预估体积</th>
-              <th style="min-width:80px">预估重量</th>
-              <th style="min-width:80px">预估运费</th>
-              <th style="min-width:80px">体积</th>
-              <th style="min-width:70px">重量</th>
-              <th style="min-width:80px">计费重量</th>
-              <th style="min-width:80px">实际运费</th>
-              <th style="min-width:70px">其他费用</th>
-              <th style="min-width:60px">优惠</th>
-              <th style="min-width:70px">小计</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Row 1: 处理中 - 正常包裹 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260615001</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>张三</td>
-              <td>3</td>
-              <td class="val-money">¥658.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>3件</td>
-              <td class="val-gray">5,200 cm³</td>
-              <td class="val-gray">1.2 kg</td>
-              <td class="val-money">¥89.00</td>
-              <td>6,800 cm³</td>
-              <td>1.8 kg</td>
-              <td>1.8 kg</td>
-              <td class="val-money">—</td>
-              <td class="val-gray">¥12.00</td>
-              <td class="val-negative">-¥5.00</td>
-              <td class="val-money">—</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-processing">处理中</span></td>
-              <td>06-15 14:20</td>
-              <td>06-15 14:25</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-                <button class="btn-sm btn-cancel-pkg" onclick="showCancel()">取消</button>
-              </td>
-            </tr>
-            <!-- Row 2: 待补款 - 正常包裹 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260615002</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>李四</td>
-              <td>5</td>
-              <td class="val-money">¥1,230.00</td>
-              <td><span class="tag" style="background:#F5F3FF;color:#8B5CF6">委托</span></td>
-              <td>5件</td>
-              <td class="val-gray">8,500 cm³</td>
-              <td class="val-gray">2.5 kg</td>
-              <td class="val-money">¥156.00</td>
-              <td>12,200 cm³</td>
-              <td>3.8 kg</td>
-              <td>3.8 kg</td>
-              <td class="val-money">¥218.00</td>
-              <td class="val-gray">¥15.00</td>
-              <td class="val-gray">¥0.00</td>
-              <td class="val-money">¥233.00</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-wait-supplement">待补款</span></td>
-              <td>06-15 10:05</td>
-              <td>06-15 10:12</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 3: 待发货 - 预演包裹 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260614003</span></td>
-              <td><span class="tag tag-preview">预演</span></td>
-              <td>王五</td>
-              <td>2</td>
-              <td class="val-money">¥420.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>2件</td>
-              <td class="val-gray">3,000 cm³</td>
-              <td class="val-gray">0.8 kg</td>
-              <td class="val-gray">—</td>
-              <td>4,500 cm³</td>
-              <td>1.1 kg</td>
-              <td>1.1 kg</td>
-              <td class="val-money">¥125.00</td>
-              <td class="val-gray">¥8.00</td>
-              <td class="val-negative">-¥10.00</td>
-              <td class="val-money">¥123.00</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-wait-ship">待发货</span></td>
-              <td>06-14 09:30</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 4: 已发货 - 正常包裹 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260613004</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>赵六</td>
-              <td>1</td>
-              <td class="val-money">¥188.00</td>
-              <td><span class="tag" style="background:#F5F3FF;color:#8B5CF6">委托</span></td>
-              <td>1件</td>
-              <td class="val-gray">1,200 cm³</td>
-              <td class="val-gray">0.3 kg</td>
-              <td class="val-money">¥45.00</td>
-              <td>1,500 cm³</td>
-              <td>0.5 kg</td>
-              <td>0.5 kg</td>
-              <td class="val-money">¥48.00</td>
-              <td class="val-gray">¥0.00</td>
-              <td class="val-gray">¥0.00</td>
-              <td class="val-money">¥48.00</td>
-              <td>SF1234567890</td>
-              <td><span class="tag tag-shipped">已发货</span></td>
-              <td>06-13 16:45</td>
-              <td>06-13 16:50</td>
-              <td>06-15 11:00</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 5: 待支付 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260616005</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>孙七</td>
-              <td>4</td>
-              <td class="val-money">¥920.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>4件</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-money">¥102.00</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-wait-pay">待支付</span></td>
-              <td>06-16 08:15</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-                <button class="btn-sm btn-cancel-pkg" onclick="showCancel()">取消</button>
-              </td>
-            </tr>
-            <!-- Row 6: 待审核 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260616006</span></td>
-              <td><span class="tag tag-preview">预演</span></td>
-              <td>周八</td>
-              <td>2</td>
-              <td class="val-money">¥350.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>2件</td>
-              <td class="val-gray">2,000 cm³</td>
-              <td class="val-gray">0.6 kg</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-wait-audit">待审核</span></td>
-              <td>06-16 09:30</td>
-              <td>06-16 09:35</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-                <button class="btn-sm btn-cancel-pkg" onclick="showCancel()">取消</button>
-              </td>
-            </tr>
-            <!-- Row 7: 已签收 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260610007</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>吴九</td>
-              <td>6</td>
-              <td class="val-money">¥2,150.00</td>
-              <td><span class="tag" style="background:#F5F3FF;color:#8B5CF6">委托</span></td>
-              <td>6件</td>
-              <td class="val-gray">15,000 cm³</td>
-              <td class="val-gray">4.2 kg</td>
-              <td class="val-money">¥280.00</td>
-              <td>18,000 cm³</td>
-              <td>5.1 kg</td>
-              <td>5.1 kg</td>
-              <td class="val-money">¥310.00</td>
-              <td class="val-gray">¥25.00</td>
-              <td class="val-negative">-¥20.00</td>
-              <td class="val-money">¥315.00</td>
-              <td>DHL9876543210</td>
-              <td><span class="tag tag-signed">已签收</span></td>
-              <td>06-10 11:20</td>
-              <td>06-10 11:25</td>
-              <td>06-11 15:00</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 8: 已完成 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260608008</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>郑十</td>
-              <td>1</td>
-              <td class="val-money">¥95.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>1件</td>
-              <td class="val-gray">800 cm³</td>
-              <td class="val-gray">0.2 kg</td>
-              <td class="val-money">¥32.00</td>
-              <td>900 cm³</td>
-              <td>0.25 kg</td>
-              <td>0.25 kg</td>
-              <td class="val-money">¥35.00</td>
-              <td class="val-gray">¥0.00</td>
-              <td class="val-gray">¥0.00</td>
-              <td class="val-money">¥35.00</td>
-              <td>EMS5678901234</td>
-              <td><span class="tag tag-completed">已完成</span></td>
-              <td>06-08 13:10</td>
-              <td>06-08 13:15</td>
-              <td>06-09 10:00</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 9: 已取消 -->
-            <tr style="opacity:0.6">
-              <td><span class="pkg-id">P20260612009</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>张三</td>
-              <td>2</td>
-              <td class="val-money">¥320.00</td>
-              <td><span class="tag" style="background:#F5F3FF;color:#8B5CF6">委托</span></td>
-              <td>2件</td>
-              <td class="val-gray">3,500 cm³</td>
-              <td class="val-gray">1.0 kg</td>
-              <td class="val-money">¥68.00</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-cancelled">已取消</span></td>
-              <td>06-12 17:00</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-              </td>
-            </tr>
-            <!-- Row 10: 处理中 -->
-            <tr>
-              <td><span class="pkg-id" onclick="showDetail()">P20260615010</span></td>
-              <td><span style="font-size:12px;color:#374151">正常</span></td>
-              <td>李四</td>
-              <td>8</td>
-              <td class="val-money">¥3,680.00</td>
-              <td><span class="tag" style="background:#EFF6FF;color:#3B82F6">自主</span></td>
-              <td>8件</td>
-              <td class="val-gray">—</td>
-              <td class="val-gray">—</td>
-              <td class="val-money">¥198.00</td>
-              <td>22,000 cm³</td>
-              <td>6.5 kg</td>
-              <td>6.5 kg</td>
-              <td class="val-money">—</td>
-              <td class="val-gray">¥30.00</td>
-              <td class="val-negative">-¥15.00</td>
-              <td class="val-money">—</td>
-              <td class="val-gray">—</td>
-              <td><span class="tag tag-processing">处理中</span></td>
-              <td>06-15 15:40</td>
-              <td>06-15 15:45</td>
-              <td class="val-gray">—</td>
-              <td>
-                <button class="btn-sm btn-view" onclick="showDetail()">查看</button>
-                <button class="btn-sm btn-cancel-pkg" onclick="showCancel()">取消</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Pagination -->
-      <div class="pagination">
-        <div class="page-info">共 128 条记录，每页 10 条</div>
-        <div class="page-btns">
-          <div class="page-btn">‹</div>
-          <div class="page-btn active">1</div>
-          <div class="page-btn">2</div>
-          <div class="page-btn">3</div>
-          <div class="page-btn">...</div>
-          <div class="page-btn">13</div>
-          <div class="page-btn">›</div>
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
         </div>
-      </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
     </div>
-  </div>
-
-  <!-- ==================== 详情页 ==================== -->
-<!-- Cancel Modal -->
-<div class="modal-overlay" id="cancelModal">
-  <div class="modal">
-    <div class="modal-title">确认取消包裹</div>
-    <div class="modal-body">
-      取消后包裹将停止处理，已支付运费将退回用户账户余额。包裹内的商品将回退重新入库（已出库 → 待入库）。取消操作将同步更新关联订单状态。
-      <br><br>
-      <strong>注意：此操作不可撤销。</strong>
-    </div>
-    <div class="modal-footer">
-      <button class="modal-btn modal-btn-secondary" onclick="closeCancel()">返回</button>
-      <button class="modal-btn modal-btn-primary" onclick="closeCancel()">确认取消</button>
-    </div>
-  </div>
 </div>
 
 <script>
-function switchTab(el) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+const STORAGE_KEY = 'annotated-prototype-tibaodan-list';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总览',
+        summary: '提包单管理列表页，租户侧仓储物流模块核心页面，管理全量提包单生命周期。',
+        target: '#anno-1',
+        detail: {
+            feature: '提包单后台管理列表页，归属租户侧「仓储物流」模块。\n\n核心用途：\n• 租户查看和管理所有用户的提包单记录\n• 跟踪提包单从创建到结束的完整生命周期\n• 监控费用结算、补款状态和物流进度\n• 支持多维度筛选快速定位目标提包单\n\n数据流：用户勾选已入库快递包裹提交提包 → 生成提包单 → 用户支付运费 → 扣除租户余额 → 向物流供应商服务平台下集运单 → 打包发货',
+            rules: '• 页面入口：租户侧后台 → 仓储物流 → 提包单管理\n• 数据权限：租户只能查看自己名下的提包单数据\n• 默认排序：按提包时间倒序，最新提包单排在最前面\n• 默认分页：每页10条，支持切换10/20/50条\n• 列表字段较多（41列），支持横向滚动查看',
+            exceptions: '• 无数据时展示空状态提示「暂无提包单记录」\n• 网络异常时提示「加载失败，请重试」\n• 数据量较大时采用分页加载，避免一次性加载全量数据',
+            data: '• 提包单编号格式：B + 年月日(6位) + 随机5位数（如 B25081200001）\n• 仓库按国内快递包裹入库，用户以快递包裹为最小单位提交提包\n• 一个提包单可包含多个国内快递包裹'
+        }
+    },
+    {
+        id: 2,
+        title: '筛选条件区',
+        summary: '两行排列的15个筛选条件，支持按编号、租户、用户、时间、状态等多维度组合查询。',
+        target: '#anno-2',
+        detail: {
+            feature: '提供两行筛选条件，支持多维度组合查询提包单。\n\n第一行（8项）：\n• 提包编号：输入框，模糊搜索\n• 租户名称：输入框，模糊搜索\n• 关联单号：输入框，精准搜索采购单号或转运单号\n• 商品编码：输入框，搜索\n• 用户信息：输入框，按用户名或用户ID搜索\n• 物流线路：输入框，按线路名称搜索\n• 快递单号：输入框，搜索关联的国内快递单号\n• 收件国家：下拉选择（美国、中国台湾、澳大利亚、日本、韩国等）\n\n第二行（7项）：\n• 提包时间：日期范围选择器\n• 申报类型：下拉（全部/自主申报/委托申报）\n• 发货时间：日期范围选择器\n• 提包类型：下拉（全部/正常提包/预演提包）\n• 补款状态：下拉（全部/无需补款/待补款/已补款/空）\n• 是否包税：下拉（全部/是/否）\n• 是否保价：下拉（全部/是/否）\n\n操作按钮：查询、重置',
+            rules: '• 所有筛选条件支持组合使用，取交集\n• 输入框支持模糊搜索的字段：提包编号、租户名称、用户信息、物流线路\n• 关联单号和商品编码为精准匹配\n• 日期范围选择器选择起止日期\n• 点击「查询」根据当前条件刷新列表\n• 点击「重置」清空所有筛选条件恢复默认值',
+            exceptions: '• 筛选无结果时列表展示空状态\n• 输入非法字符时前端做基础校验提示',
+            data: '• 收件国家选项从系统配置的目的地国家列表获取\n• 物流线路选项从已配置的线路数据获取\n• 申报类型、提包类型、补款状态等下拉选项为固定枚举值'
+        }
+    },
+    {
+        id: 3,
+        title: '状态标签栏',
+        summary: '8个状态标签横向排列，显示各状态数量，点击切换筛选。含各状态下可执行操作说明。',
+        target: '#anno-3',
+        detail: {
+            feature: '横向排列的状态标签栏，快速按状态筛选提包单。每个标签后显示对应状态的提包单数量。\n\n标签包括：全部、待支付、待审核、处理中、待发货、已发货、已收货、已取消（共7种状态+全部）\n\n【各状态说明及操作限制】\n\n① 待支付\n  含义：用户已提交提包但尚未支付运费\n  可执行操作：查看、取消\n  说明：此阶段提包单刚创建，用户未完成支付\n\n② 待审核\n  含义：用户已支付，等待运营审核\n  可执行操作：查看、审核、取消\n  说明：支付成功后进入审核队列，可在列表直接审核通过或拒绝\n\n③ 处理中\n  含义：审核通过，仓库正在打包\n  可执行操作：查看、取消\n  说明：仓库正在操作打包，尚未完成\n\n④ 待发货\n  含义：打包完成，等待物流供应商取件\n  可执行操作：仅查看（不可取消）\n  说明：包裹已打包完成，不可取消\n\n⑤ 已发货\n  含义：物流供应商已取件发货\n  可执行操作：仅查看\n  说明：已有物流单号，运输中\n\n⑥ 已收货\n  含义：收件人已签收\n  可执行操作：仅查看\n  说明：流程完结\n\n⑦ 已取消\n  含义：提包单已被取消，不再流转\n  可执行操作：仅查看\n  说明：无论是否已支付均可取消；已支付的自动退回租户余额',
+            rules: '• 点击标签切换对应状态筛选，下方表格自动刷新\n• 选中标签高亮显示，标签数字实时更新\n• 「全部」标签显示所有提包单总数\n• 取消操作仅在待支付、待审核、处理中状态下可用\n• 待发货及之后的状态不可取消（包裹已打包完成）\n• 已取消状态仅可查看',
+            exceptions: '• 某状态数量为0时仍显示标签，数量显示0\n• 标签数量随数据变化实时更新',
+            permission: '• 取消操作需要对应提包单处于允许取消的状态\n• 取消已支付的提包单会自动退回租户余额并生成集运扣款退回流水'
+        }
+    },
+    {
+        id: 4,
+        title: '数据列表',
+        summary: '41列字段展示提包单完整信息，包含基础信息、申报信息、费用明细、物流信息和状态。',
+        target: '#anno-4',
+        detail: {
+            feature: '表格展示提包单列表数据，共43列，分为以下几组：\n\n【基础信息】\n• 提包编号：唯一编号，点击跳转详情页\n• 租户：租户名称 + 租户ID\n• 类型：正常/预演（标签区分）\n• 计费状态：待支付/已支付/部分退款/已退款（用户支付状态）\n• 租户支付状态：已支付/未支付/部分退款/已退款（租户对平台支付状态）\n• 用户：用户名 + 用户ID\n• 商品数量：仓库核实后的实际商品总数\n• 商品总金额：所有商品的申报总价值\n• 国内快递件数：关联的国内快递包裹件数，点击查看快递详情（快递单号、快递公司、入库时间、重量、体积）\n\n【申报信息】\n• 申报类型：自主申报/委托申报\n• 申报品名：海关申报商品名称，多个时折叠展示\n• 申报数量：用户自行填写的申报数量（可能与商品数量不一致）\n• 申报金额：用户自行填写的申报总价值\n\n【收件信息】\n• 收件国家、收件人名称、收件人电话（脱敏展示）\n\n【服务标识】\n• 是否包税：是/否\n• 是否保价：是/否\n\n【费用明细】\n• 预估运费：提交提包时基于预估重量/体积计算\n• 实际运费：打包称重后核算\n• 包税费：提交提包时确定\n• 保价费：提交提包时确定\n• 其他费用：打包后服务平台同步（超材费、偏远地区费等）\n• 优惠券：提交时锁定不变\n• 费用小计 = 实际运费 + 包税费 + 保价费 + 其他费用 - 优惠券\n\n【补款与代收】\n• 补款状态：空/无需补款/待补款/已补款\n• 代收货款：是/否\n• 代收货款金额：代收金额，无代收时显示“—”\n\n【备注与物流】\n• 备注：租户物流客服填写，同步给服务平台\n• 物流渠道：国际物流渠道名称\n• 物流单号：物流追踪单号\n• 集运单号：服务平台生成的集运单编号\n• 集运单推送：未推送/推送中/已推送/已取消（集运单推送到服务平台的状态）\n\n【时间信息】\n• 提包时间、支付时间、发货时间\n\n【操作列】\n• 查看：所有状态可用\n• 审核：仅待审核状态可用，弹出审核弹窗（审核意见+审核备注），通过后状态变为处理中，拒绝后状态变为审核拒绝\n• 取消：仅待支付/待审核/处理中可用，点击后弹出二次确认弹窗，确认后执行取消',
+            rules: '• 提包编号为可点击链接，点击跳转详情页\n• 国内快递件数为可点击链接，点击弹出快递详情弹窗（展示每个快递的快递单号、快递公司、入库时间）\n• 申报品名超过1个时折叠展示，鼠标悬停或点击展开全部\n• 收件人电话脱敏展示（如138****6721）\n• 费用小计在打包完成前显示为「—」\n• 实际运费和其他费用在打包完成前显示为「—」\n• 补款状态在打包完成前显示为「—」\n• 备注为空时显示「—」\n• 表格支持横向滚动\n• 金额类字段右对齐，使用等宽字体',
+            exceptions: '• 未产生的费用字段显示「—」\n• 物流单号未生成时显示「—」\n• 发货时间未发货时显示「—」',
+            data: '费用计算规则：\n• 用户已付金额 = 预估运费 + 包税费 + 保价费 - 优惠券\n• 费用小计 = 实际运费 + 包税费 + 保价费 + 其他费用 - 优惠券\n• 补款差额 = 费用小计 - 用户已付金额 =（实际运费 - 预估运费）+ 其他费用\n• 费用小计 > 已付金额 → 补款状态=待补款\n• 费用小计 ≤ 已付金额 → 补款状态=无需补款\n• 费用小计 < 已付金额 → 计费状态=部分退款，差额退回用户\n• 补款状态与发货流程独立，不阻塞发货'
+        }
+    },
+    {
+        id: 5,
+        title: '分页与统计',
+        summary: '底部分页栏，显示总记录数，支持切换每页条数和翻页。',
+        target: '#anno-5',
+        detail: {
+            feature: '底部分页栏，展示总记录数和分页控件。\n\n• 左侧：显示当前筛选条件下的总记录数\n• 右侧：每页条数选择 + 翻页按钮\n• 每页条数选项：10条/页（默认）、20条/页、50条/页\n• 翻页按钮：首页、上一页、页码、下一页、末页',
+            rules: '• 默认每页显示10条\n• 切换每页条数后自动刷新列表\n• 翻页时保持当前筛选条件不变\n• 页码超过5页时中间用「...」省略',
+            exceptions: '• 总记录为0时分页控件不显示页码\n• 筛选条件变化后自动回到第1页'
+        }
+    },
+    {
+        id: 6,
+        title: '操作列与审核、取消逻辑',
+        summary: '查看、审核、取消三个操作按钮，不同状态下显示不同按钮，审核和取消需二次确认。',
+        target: '#anno-4',
+        detail: {
+            feature: '操作列位于表格最右侧，包含三个操作按钮：\n\n【查看】\n• 所有状态下均可点击\n• 点击跳转至提包单详情页面，展示完整信息\n\n【审核】\n• 仅在「待审核」状态下显示\n• 点击弹出审核弹窗，包含：审核意见（通过/拒绝）、审核备注（选填）\n• 审核通过：提包单状态变更为「处理中」，进入仓库打包流程\n• 审核拒绝：提包单状态变更为「审核拒绝」，流程终止，已支付费用自动退回租户余额\n• 审核备注可记录通过或拒绝的原因，供后续追溯\n\n【取消】\n• 仅在以下状态显示：待支付、待审核、处理中\n• 待发货及之后状态不显示取消按钮（包裹已打包完成不可取消）\n• 已取消状态不显示取消按钮\n• 点击后弹出二次确认弹窗：「确定取消该提包单吗？取消后将退回已支付费用并同步更新租户余额。」',
+            rules: '• 取消操作不可撤销\n• 取消已支付的提包单：自动退回已支付费用至租户余额，并生成集运扣款退回流水\n• 取消未支付的提包单：直接关闭，不产生资金流水\n• 取消后提包单状态变为「已取消」，计费状态变为「已退款」（如已支付）\n• 审核通过后提包单状态变为「处理中」，仓库开始打包\n• 审核拒绝后提包单状态变为「审核拒绝」，已支付费用退回\n• 已发货、已收货、已取消状态仅保留查看按钮',
+            exceptions: '• 并发操作时如状态已变化，提示「状态已变更，请刷新」\n• 取消失败时提示原因并保留原状态\n• 审核提交失败时提示原因并保留原状态',
+            permission: '• 审核操作需要对应提包单处于「待审核」状态\n• 取消操作需要对应提包单处于允许取消的状态（待支付/待审核/处理中）\n• 待发货状态起不可取消，因为包裹已打包完成'
+        }
+    },
+    {
+        id: 7,
+        title: '页面状态说明',
+        summary: '页面中除提包单状态外，涉及的计费状态、租户支付状态、补款状态、集运单推送状态等全部枚举值说明。',
+        target: '#anno-7',
+        detail: {
+            feature: '【页面涉及的全部状态枚举说明】\n\n（提包单状态共7种，详见标注③，此处不再重复）\n\n━━━━━━━━━━━━━━━━━━━━\n\n一、计费状态（4种）\n列表字段「计费状态」列展示\n\n① 待支付\n  含义：用户已提交提包，尚未支付运费\n  说明：提包单创建后默认状态，等待用户完成支付\n\n② 已支付\n  含义：用户已完成运费支付\n  说明：支付成功后进入后续流程（审核→打包→发货）\n\n③ 部分退款\n  含义：费用小计 < 用户已付金额，差额已退回用户\n  说明：实际运费低于预估运费且差额未达全额时触发\n\n④ 已退款\n  含义：提包单已取消，费用全额退回\n  说明：仅出现在已取消的提包单中\n\n━━━━━━━━━━━━━━━━━━━━\n\n二、补款状态（4种）\n列表字段「补款状态」列展示\n\n① 空（—）\n  含义：提包单尚未打包完成，费用未核算\n  说明：打包完成前此字段为空，不展示状态\n\n② 无需补款\n  含义：费用小计 ≤ 用户已付金额，无需用户额外补款\n  说明：实际费用未超出预估，正常结算\n\n③ 待补款\n  含义：费用小计 > 用户已付金额，需要用户补款\n  说明：实际运费超出预估或其他费用导致差额\n\n④ 已补款\n  含义：用户已完成补款支付\n  说明：补款流程完结\n\n━━━━━━━━━━━━━━━━━━━━\n\n三、租户支付状态（4种）\n列表字段「租户支付状态」列展示\n\n① 已支付\n  含义：租户已就该提包单向平台完成支付\n  说明：正常结算状态\n\n② 未支付\n  含义：租户尚未向平台支付该提包单费用\n  说明：待结算\n\n③ 部分退款\n  含义：平台已向租户部分退回费用\n  说明：存在部分退费场景\n\n④ 已退款\n  含义：平台已向租户全额退回费用\n  说明：提包单取消后的退费状态\n\n━━━━━━━━━━━━━━━━━━━━\n\n四、集运单推送状态（4种）\n列表字段「集运单推送」列展示\n\n① 未推送\n  含义：集运单尚未推送到服务平台\n  说明：初始状态，还未触发推送\n\n② 推送中\n  含义：正在向服务平台推送集运单\n  说明：推送过程中，等待确认\n\n③ 已推送\n  含义：集运单已成功推送到服务平台\n  说明：服务平台已接收，可执行后续打包发货\n\n④ 已取消\n  含义：集运单推送已取消\n  说明：对应提包单已取消，集运单同步取消',
+            rules: '• 计费状态和补款状态是两个独立维度，互不干扰\n• 补款状态在打包完成前显示为「—」（空）\n• 费用小计在打包完成前同样显示为「—」\n• 补款状态与发货流程独立，待补款不阻塞发货\n• 计费状态为「已退款」仅出现在已取消的提包单中',
+            exceptions: '• 费用小计在打包完成前不展示，对应补款状态也不展示\n• 部分退款与已退款互斥，同一提包单只会有一种计费状态',
+            data: '费用计算关系：\n• 用户已付金额 = 预估运费 + 包税费 + 保价费 - 优惠券\n• 费用小计 = 实际运费 + 包税费 + 保价费 + 其他费用 - 优惠券\n• 补款差额 = 费用小计 - 用户已付金额\n\n状态判定规则：\n• 费用小计 > 已付金额 → 补款状态=待补款\n• 费用小计 ≤ 已付金额 → 补款状态=无需补款\n• 费用小计 < 已付金额 → 计费状态=部分退款\n• 提包单取消且已支付 → 计费状态=已退款'
+        }
+    }
+];
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
 }
-function showCancel() {
-  document.getElementById('cancelModal').classList.add('show');
+function getActiveAnnotations() {
+    if (customAnnotations && customAnnotations.length > 0) return customAnnotations;
+    return annotations;
 }
-function closeCancel() {
-  document.getElementById('cancelModal').classList.remove('show');
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    if (!list) return;
+    const data = getActiveAnnotations();
+    if (!data || data.length === 0) {
+        list.innerHTML = '<div style="padding:16px;color:#999;text-align:center;">暂无标注</div>';
+        return;
+    }
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
 }
-function showDetail() {
-  window.location.href = 'parcel-detail-admin-annotated.html';
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
 }
-// backToList removed - detail is now a separate page
-function toggleFeeGroup(el) {
-  const feeGrid = el.nextElementSibling;
-  const toggleIcon = el.querySelector('.toggle-icon');
-  if (feeGrid.style.display === 'none') {
-    feeGrid.style.display = 'grid';
-    toggleIcon.textContent = '▲ 收起';
-  } else {
-    feeGrid.style.display = 'none';
-    toggleIcon.textContent = '▼ 展开';
-  }
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
 }
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    if (detail.feature) rows.push({ label: '功能说明', value: detail.feature });
+    if (detail.rules) rows.push({ label: '规则约束', value: detail.rules });
+    if (detail.exceptions) rows.push({ label: '异常处理', value: detail.exceptions });
+    if (detail.data) rows.push({ label: '数据要求', value: detail.data });
+    if (detail.permission) rows.push({ label: '权限要求', value: detail.permission });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${getKeyFromLabel(row.label)}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function getKeyFromLabel(label) {
+    const map = { '功能说明': 'feature', '规则约束': 'rules', '异常处理': 'exceptions', '数据要求': 'data', '权限要求': 'permission' };
+    return map[label] || label;
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+// ===== 面板折叠 =====
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+// ===== 新增/删除标注 =====
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        detail: {
+            feature: '请填写功能说明...',
+            rules: '请填写规则约束...',
+            exceptions: '请填写异常处理...'
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+
+// ===== 取消确认弹窗 =====
+let cancelTargetBtn = null;
+function confirmCancel(btn) {
+    cancelTargetBtn = btn;
+    const row = btn.closest('tr');
+    const tibaoId = row ? (row.querySelector('td a.link-text')?.textContent || '该提包单') : '该提包单';
+    document.querySelector('#confirm-cancel-modal .modal-body p').textContent = '确定要取消提包单「' + tibaoId + '」吗？取消后不可恢复。';
+    document.getElementById('confirm-cancel-modal').classList.add('show');
+}
+function closeConfirmCancel() {
+    document.getElementById('confirm-cancel-modal').classList.remove('show');
+    cancelTargetBtn = null;
+}
+function doCancel() {
+    if (cancelTargetBtn) {
+        const row = cancelTargetBtn.closest('tr');
+        if (row) {
+            const tds = row.querySelectorAll('td');
+            const statusCell = tds[35];
+            if (statusCell) {
+                statusCell.innerHTML = '<span class="tag tag-gray">已取消</span>';
+            }
+        }
+    }
+    closeConfirmCancel();
+}
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'confirm-cancel-modal') closeConfirmCancel();
+});
+
+// ===== 审核弹窗 =====
+let reviewTargetBtn = null;
+function confirmReview(btn) {
+    reviewTargetBtn = btn;
+    const row = btn.closest('tr');
+    const tibaoId = row ? (row.querySelector('td a.link-text')?.textContent || '该提包单') : '该提包单';
+    document.getElementById('review-modal-desc').textContent = '审核提包单「' + tibaoId + '」';
+    document.getElementById('review-decision').value = 'pass';
+    document.getElementById('review-remark').value = '';
+    document.getElementById('confirm-review-modal').classList.add('show');
+}
+function closeReviewModal() {
+    document.getElementById('confirm-review-modal').classList.remove('show');
+    reviewTargetBtn = null;
+}
+function doReview() {
+    if (reviewTargetBtn) {
+        const decision = document.getElementById('review-decision').value;
+        const remark = document.getElementById('review-remark').value;
+        const row = reviewTargetBtn.closest('tr');
+        if (row) {
+            const tds = row.querySelectorAll('td');
+            const statusCell = tds[35];
+            if (statusCell && decision === 'pass') {
+                statusCell.innerHTML = '<span class="tag tag-green">处理中</span>';
+            } else if (statusCell && decision === 'reject') {
+                statusCell.innerHTML = '<span class="tag tag-red">审核拒绝</span>';
+            }
+        }
+    }
+    closeReviewModal();
+}
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'confirm-review-modal') closeReviewModal();
+});
+
+// ===== 快递详情弹窗 =====
+const expressData = {
+    '3件': [
+        { tracking: 'SF1234567890', company: '顺丰速运', time: '2026-08-08 14:30:00', weight: 1.5, volume: 4000 },
+        { tracking: 'YT9876543210', company: '圆通速递', time: '2026-08-08 16:20:00', weight: 2.0, volume: 5000 },
+        { tracking: 'ZT1122334455', company: '中通快递', time: '2026-08-09 09:10:00', weight: 1.7, volume: 3500 }
+    ],
+    '1件': [
+        { tracking: 'SF2233445566', company: '顺丰速运', time: '2026-08-09 10:00:00', weight: 0.8, volume: 2000 }
+    ],
+    '4件': [
+        { tracking: 'YT1111222233', company: '圆通速递', time: '2026-08-07 11:30:00', weight: 2.5, volume: 6000 },
+        { tracking: 'ZT3333444455', company: '中通快递', time: '2026-08-07 13:45:00', weight: 2.0, volume: 5000 },
+        { tracking: 'SF4444555566', company: '顺丰速运', time: '2026-08-07 15:20:00', weight: 2.0, volume: 5500 },
+        { tracking: 'YT5555666677', company: '圆通速递', time: '2026-08-08 08:00:00', weight: 2.0, volume: 4500 }
+    ],
+    '2件': [
+        { tracking: 'ZT7777888899', company: '中通快递', time: '2026-08-06 10:30:00', weight: 0.8, volume: 3000 },
+        { tracking: 'SF8888999900', company: '顺丰速运', time: '2026-08-06 14:00:00', weight: 0.7, volume: 3200 }
+    ],
+    '6件': [
+        { tracking: 'YT1010101010', company: '圆通速递', time: '2026-08-05 09:00:00', weight: 2.0, volume: 5000 },
+        { tracking: 'ZT2020202020', company: '中通快递', time: '2026-08-05 10:30:00', weight: 2.5, volume: 6000 },
+        { tracking: 'SF3030303030', company: '顺丰速运', time: '2026-08-05 14:00:00', weight: 2.0, volume: 4800 },
+        { tracking: 'YT4040404040', company: '圆通速递', time: '2026-08-06 08:30:00', weight: 2.0, volume: 5200 },
+        { tracking: 'ZT5050505050', company: '中通快递', time: '2026-08-06 11:00:00', weight: 2.0, volume: 5000 },
+        { tracking: 'SF6060606060', company: '顺丰速运', time: '2026-08-06 15:30:00', weight: 2.0, volume: 5000 }
+    ],
+    '12件': [
+        { tracking: 'YT0101010101', company: '圆通速递', time: '2026-08-04 08:00:00', weight: 1.0, volume: 2500 },
+        { tracking: 'ZT0202020202', company: '中通快递', time: '2026-08-04 09:30:00', weight: 1.2, volume: 3000 },
+        { tracking: 'SF0303030303', company: '顺丰速运', time: '2026-08-04 11:00:00', weight: 1.0, volume: 2800 },
+        { tracking: 'YT0404040404', company: '圆通速递', time: '2026-08-04 14:30:00', weight: 1.1, volume: 2600 },
+        { tracking: 'ZT0505050505', company: '中通快递', time: '2026-08-05 08:00:00', weight: 1.0, volume: 2500 },
+        { tracking: 'SF0606060606', company: '顺丰速运', time: '2026-08-05 10:00:00', weight: 1.2, volume: 3000 },
+        { tracking: 'YT0707070707', company: '圆通速递', time: '2026-08-05 13:30:00', weight: 1.0, volume: 2500 },
+        { tracking: 'ZT0808080808', company: '中通快递', time: '2026-08-05 16:00:00', weight: 1.0, volume: 2500 },
+        { tracking: 'SF0909090909', company: '顺丰速运', time: '2026-08-06 09:00:00', weight: 1.0, volume: 2800 },
+        { tracking: 'YT1010101111', company: '圆通速递', time: '2026-08-06 11:30:00', weight: 1.0, volume: 2500 },
+        { tracking: 'ZT1111111222', company: '中通快递', time: '2026-08-06 14:00:00', weight: 1.0, volume: 2500 },
+        { tracking: 'SF1212121333', company: '顺丰速运', time: '2026-08-06 16:30:00', weight: 1.0, volume: 2500 }
+    ],
+    '5件': [
+        { tracking: 'YT2020202021', company: '圆通速递', time: '2026-08-07 08:30:00', weight: 1.0, volume: 2500 },
+        { tracking: 'ZT3030303031', company: '中通快递', time: '2026-08-07 10:00:00', weight: 1.2, volume: 3000 },
+        { tracking: 'SF4040404041', company: '顺丰速运', time: '2026-08-07 13:00:00', weight: 1.0, volume: 2500 },
+        { tracking: 'YT5050505051', company: '圆通速递', time: '2026-08-07 15:30:00', weight: 1.5, volume: 3800 },
+        { tracking: 'ZT6060606061', company: '中通快递', time: '2026-08-08 09:00:00', weight: 1.0, volume: 2500 }
+    ]
+};
+
+function openExpressDetail(el) {
+    const text = el.textContent.trim();
+    const tbody = document.getElementById('express-detail-tbody');
+    const items = expressData[text] || [];
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">暂无快递明细数据</td></tr>';
+    } else {
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td>${item.tracking}</td>
+                <td>${item.company}</td>
+                <td>${item.time}</td>
+                <td>${item.weight}</td>
+                <td>${item.volume}</td>
+            </tr>
+        `).join('');
+    }
+    document.getElementById('express-modal').classList.add('show');
+}
+
+function closeExpressModal() {
+    document.getElementById('express-modal').classList.remove('show');
+}
+
+// 点击遮罩关闭快递弹窗
+document.getElementById('express-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeExpressModal();
+});
 </script>
+<!-- 快递详情弹窗 -->
+<div class="modal-overlay" id="express-modal">
+    <div class="modal" style="width:700px;">
+        <div class="modal-header">
+            <div class="modal-title">快递明细</div>
+            <button class="modal-close" onclick="closeExpressModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="express-detail-table">
+                <thead>
+                    <tr>
+                        <th>快递单号</th>
+                        <th>快递公司</th>
+                        <th>入库时间</th>
+                        <th>重量(kg)</th>
+                        <th>体积(cm³)</th>
+                    </tr>
+                </thead>
+                <tbody id="express-detail-tbody">
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeExpressModal()">关闭</button>
+        </div>
+    </div>
+</div>
+<!-- 取消确认弹窗 -->
+<div class="modal-overlay" id="confirm-cancel-modal">
+    <div class="modal" style="width:420px;">
+        <div class="modal-header">
+            <div class="modal-title">确认取消</div>
+            <button class="modal-close" onclick="closeConfirmCancel()">×</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:15px;color:#333;margin:20px 0;">确定要取消此提包单吗？取消后不可恢复。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeConfirmCancel()">返回</button>
+            <button class="btn btn-default btn-danger" onclick="doCancel()">确认取消</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="confirm-review-modal">
+    <div class="modal" style="width:480px;">
+        <div class="modal-header">
+            <div class="modal-title">提包单审核</div>
+            <button class="modal-close" onclick="closeReviewModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p id="review-modal-desc" style="font-size:15px;color:#333;margin:16px 0 12px;"></p>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:6px;">审核意见</label>
+                <select id="review-decision" style="width:100%;padding:8px 10px;border:1px solid #D9D9D9;border-radius:4px;font-size:14px;">
+                    <option value="pass">审核通过</option>
+                    <option value="reject">审核拒绝</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:6px;">审核备注</label>
+                <textarea id="review-remark" rows="3" placeholder="请输入审核备注（选填）" style="width:100%;padding:8px 10px;border:1px solid #D9D9D9;border-radius:4px;font-size:14px;resize:vertical;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeReviewModal()">取消</button>
+            <button class="btn btn-primary" onclick="doReview()">确认提交</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
