@@ -117,6 +117,11 @@
             "name": "租户线路管理",
             "file": "docs/tenant-route-manage.html",
             "icon": "🗺️"
+          },
+          {
+            "name": "租户线路详情",
+            "file": "docs/tenant-route-detail.html",
+            "icon": "🗺️"
           }
         ]
       },
