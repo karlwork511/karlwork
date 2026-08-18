@@ -588,7 +588,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
             <div class="status-tab active" data-status="all" onclick="switchTab('all')">全部 <span class="count">6</span></div>
             <div class="status-tab" data-status="pending_pay" onclick="switchTab('pending_pay')">待付款 <span class="count">1</span></div>
             <div class="status-tab" data-status="pending_review" onclick="switchTab('pending_review')">待审核 <span class="count">1</span></div>
-            <div class="status-tab" data-status="processing" onclick="switchTab('processing')">处理中 <span class="count">1</span></div>
+            <div class="status-tab" data-status="processing" onclick="switchTab('pending_pick')">待拣货 <span class="count">1</span></div>
+                <div class="status-tab" data-status="picking" onclick="switchTab('picking')">拣货中 <span class="count">0</span></div>
             <div class="status-tab" data-status="pending_ship" onclick="switchTab('pending_ship')">待发货 <span class="count">2</span></div>
             <div class="status-tab" data-status="shipped" onclick="switchTab('shipped')">已发货 <span class="count">1</span></div>
             <div class="status-tab" data-status="delivered" onclick="switchTab('delivered')">已收货</div>
@@ -671,11 +672,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
               </div>
             </div>
 
-            <!-- 处理中 - 多商品 -->
+            <!-- 待拣货 - 多商品 -->
             <div class="package-card" data-status="processing" onclick="handleCardClick(event)">
               <div class="package-card-header">
                 <span class="package-id">B26070315873</span>
-                <span class="package-status processing">处理中</span>
+                <span class="package-status processing">待拣货</span>
               </div>
               <div class="package-order-time">下单时间：2026-07-03 10:15</div>
               <div class="package-goods">
@@ -983,7 +984,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
           <div class="anno-item-section">
             <div class="anno-item-label">字段/展示规则</div>
             <ul class="anno-item-list">
-              <li>标签列表：全部、待付款、待审核、处理中、待发货、已发货、已收货、已取消</li>
+              <li>标签列表：全部、待付款、待审核、待拣货、拣货中、待发货、已发货、已收货、已取消</li>
               <li>每个标签右侧显示<strong>数量角标</strong>（该状态下包裹数量），角标始终存在</li>
               <li><strong>已收货</strong>不显示角标</li>
             </ul>
@@ -1055,7 +1056,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
             <div class="anno-item-label">状态说明</div>
             <ul class="anno-item-list">
               <li><strong>待付款</strong> → 展示「需付款 ¥XX」</li>
-              <li><strong>已付款（待审核/处理中/待发货）</strong> → 展示「实付款 ¥XX」</li>
+              <li><strong>已付款（待审核/待拣货/拣货中/待发货）</strong> → 展示「实付款 ¥XX」</li>
               <li><strong>已发货/已收货</strong> → 展示「实付款 ¥XX」</li>
               <li><strong>已取消</strong> → 展示「应付款 ¥XX」</li>
             </ul>
@@ -1091,7 +1092,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
             <div class="anno-item-label">状态说明</div>
             <ul class="anno-item-list">
               <li><strong>待付款</strong> → 「取消包裹」「去支付」</li>
-              <li><strong>待审核 / 处理中</strong> → 「取消包裹」</li>
+              <li><strong>待审核 / 待拣货</strong> → 「取消包裹」</li>
               <li><strong>待发货</strong> → 无操作按钮（仅有补款提示条时显示「去补款」）</li>
               <li><strong>已发货</strong> → 「确认收货」（APP端没有"查看物流"按钮）</li>
               <li><strong>已收货 / 已取消</strong> → 无操作按钮</li>
@@ -1262,7 +1263,8 @@ function switchTab(status) {
     var statusNames = {
       'pending_pay': '待付款',
       'pending_review': '待审核',
-      'processing': '处理中',
+      'pending_pick': '待拣货',
+            'picking': '拣货中',
       'pending_ship': '待发货',
       'shipped': '已发货',
       'delivered': '已收货',
