@@ -1708,9 +1708,9 @@ body {
       <span class="package-code" id="packageCodeDisplay">B26070315873</span>
       <span class="status-badge processing" id="statusBadge">
         <span>●</span>
-        <span id="statusText">处理中</span>
+        <span id="statusText">待拣货</span>
       </span>
-      <span class="status-desc" id="statusDesc">包裹正在处理中，预计1-2个工作日发出</span>
+      <span class="status-desc" id="statusDesc">等待仓库拣货，预计1-2个工作日发出</span>
     </div>
   </div>
 
@@ -1730,7 +1730,7 @@ body {
       </div>
       <div class="progress-step active" data-step="2">
         <div class="progress-dot">3</div>
-        <div class="progress-label">待发货</div>
+        <div class="progress-label">待拣货</div>
         <div class="progress-time">进行中</div>
       </div>
       <div class="progress-step" data-step="3">
@@ -2379,7 +2379,7 @@ body {
 <!-- 底部悬浮操作栏 -->
 <div class="bottom-action-bar">
   <div class="bottom-action-bar-inner" id="bottomActionButtons">
-    <!-- 处理中默认 -->
+    <!-- 待拣货默认 -->
     <button class="btn btn-ghost-danger" onclick="showCancelConfirm()">取消包裹</button>
   </div>
 </div>
@@ -2401,7 +2401,8 @@ body {
     <div class="switcher-btns">
       <button class="switcher-btn" data-status="pending_pay" onclick="switchStatus('pending_pay')">待付款</button>
       <button class="switcher-btn" data-status="pending_review" onclick="switchStatus('pending_review')">待审核</button>
-      <button class="switcher-btn active" data-status="processing" onclick="switchStatus('processing')">处理中</button>
+      <button class="switcher-btn active" data-status="pending_pick" onclick="switchStatus('pending_pick')">待拣货</button>
+      <button class="switcher-btn" data-status="picking" onclick="switchStatus('picking')">拣货中</button>
       <button class="switcher-btn" data-status="pending_ship" onclick="switchStatus('pending_ship')">待发货</button>
       <button class="switcher-btn" data-status="supplement" onclick="switchStatus('supplement')">存在补款</button>
       <button class="switcher-btn" data-status="shipped" onclick="switchStatus('shipped')">已发货</button>
@@ -2550,10 +2551,10 @@ const statusConfig = {
     showBilling: false,
     progressTimes: ['07-03 10:15', '07-03 10:16', '进行中', '—', '—']
   },
-  processing: {
-    badge: '处理中',
+  pending_pick: {
+    badge: '待拣货',
     badgeClass: 'processing',
-    desc: '包裹正在处理中，预计1-2个工作日发出',
+    desc: '等待仓库拣货，预计1-2个工作日发出',
     progressStep: 2,
     progressWidth: '50%',
     progressActive: true,
@@ -2561,6 +2562,24 @@ const statusConfig = {
     buttons: [
       { text: '取消包裹', class: 'btn-ghost-danger', action: "showCancelConfirm()" }
     ],
+    feePayLabel: '实付金额',
+    feePayColor: 'green',
+    showSupplement: false,
+    showPayTime: true,
+    showShipTime: false,
+    showCancelTime: false,
+    showBilling: false,
+    progressTimes: ['07-03 10:15', '07-03 10:16', '进行中', '—', '—']
+  },
+  picking: {
+    badge: '拣货中',
+    badgeClass: 'processing',
+    desc: '仓库正在拣货品，此阶段不可取消',
+    progressStep: 2,
+    progressWidth: '50%',
+    progressActive: true,
+    progressProcessing: true,
+    buttons: [],
     feePayLabel: '实付金额',
     feePayColor: 'green',
     showSupplement: false,
@@ -2872,7 +2891,7 @@ const annotations = [
       feature: '展示包裹的费用构成，包括承运计费、附加费、包裹服务费，以及优惠抵扣情况。',
       display: '左侧显示费用项（承运计费、超重费、超长费、包税费、保价费），右侧显示金额；底部显示费用总计、已抵扣金额、实付金额。',
       interaction: '点击「查看明细」打开费用明细弹窗（含费用总计/抵扣明细Tab切换）；点击「i」图标打开计费详情弹窗（展示计费标准、计费方式、费用计算过程）。',
-      business: '若存在附加费（超重费、超长费等），在费用明细弹窗中展示附加费的类型及金额。\n支付标签规则：\n• 待付款 → 需支付\n• 待审核/处理中/待发货/存在补款/已发货 → 已支付\n• 已取消 → 应支付'
+      business: '若存在附加费（超重费、超长费等），在费用明细弹窗中展示附加费的类型及金额。\n支付标签规则：\n• 待付款 → 需支付\n• 待审核/待拣货/拣货中/待发货/存在补款/已发货 → 已支付\n• 已取消 → 应支付'
     }
   },
   {
@@ -2912,7 +2931,7 @@ const annotations = [
     detail: {
       feature: '展示包裹的基础信息，包括编号、创建时间、各状态时间节点、重量体积等。',
       display: '包裹编号（支持复制）、创建时间、支付时间、发货时间、取消时间（按状态动态显示）；预估重量/体积/运费、实际重量/体积、计费重量、实际运费（待发货后显示）。',
-      business: '时间字段规则：\n• 待付款 → 创建时间\n• 待审核/处理中/待发货/存在补款 → 创建时间、支付时间\n• 已发货 → 创建时间、支付时间、发货时间\n• 已取消（已支付）→ 创建时间、支付时间、取消时间\n• 已取消（未支付）→ 创建时间、取消时间\n\n重量计费规则：\n• 待发货前 → 仅显示预估重量/体积/运费\n• 待发货及以后 → 显示实际重量/体积、计费重量（实重与抛重取大者）、实际运费'
+      business: '时间字段规则：\n• 待付款 → 创建时间\n• 待审核/待拣货/拣货中/待发货/存在补款 → 创建时间、支付时间\n• 已发货 → 创建时间、支付时间、发货时间\n• 已取消（已支付）→ 创建时间、支付时间、取消时间\n• 已取消（未支付）→ 创建时间、取消时间\n\n重量计费规则：\n• 待发货前 → 仅显示预估重量/体积/运费\n• 待发货及以后 → 显示实际重量/体积、计费重量（实重与抛重取大者）、实际运费'
     }
   }
 ];
