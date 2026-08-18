@@ -112,6 +112,11 @@
             "name": "提包单详情",
             "file": "docs/submit-order-detail-tenant-v1.html",
             "icon": "📋"
+          },
+          {
+            "name": "租户线路管理",
+            "file": "docs/tenant-route-manage.html",
+            "icon": "🗺️"
           }
         ]
       },
