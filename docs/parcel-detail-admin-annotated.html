@@ -319,15 +319,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
         <div class="fee-sub-section">
             <div class="fee-sub-title">
                 <span class="dot" style="background:#F53F3F;"></span>附加费明细（计入其他费用）
-                <button class="btn btn-sm btn-text" style="margin-left:auto;" onclick="openSurchargeModal()">管理附加费</button>
+                <button class="btn btn-sm btn-text" style="margin-left:auto;" onclick="openSurchargeModal()">增加附加费</button>
             </div>
             <table class="data-table">
-                <thead><tr><th>附加费类型</th><th class="text-right">金额(¥)</th><th>备注</th><th class="text-center">状态</th><th class="text-center">操作</th></tr></thead>
+                <thead><tr><th>附加费类型</th><th class="text-right">金额(¥)</th><th>备注</th><th class="text-center">支付方式</th><th class="text-center">状态</th><th class="text-center">操作</th></tr></thead>
                 <tbody>
                     <tr class="locked">
                         <td><span class="tag tag-orange">超材费</span></td>
                         <td class="text-right money">¥30.00</td>
                         <td style="color:#86909C;">实际体积超出预估</td>
+                        <td class="text-center"><span class="tag tag-blue">扣余额</span></td>
                         <td class="text-center"><span class="tag tag-green">已支付</span></td>
                         <td class="text-center"><span class="btn-text disabled">编辑</span> <span class="btn-text disabled">删除</span></td>
                     </tr>
@@ -335,10 +336,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                         <td><span class="tag tag-orange">偏远附加费</span></td>
                         <td class="text-right money">¥20.00</td>
                         <td style="color:#86909C;">收件地址属于偏远地区</td>
+                        <td class="text-center"><span class="tag" style="background:#E8F3FF;color:#165DFF;">用户支付</span></td>
                         <td class="text-center"><span class="tag tag-orange">未支付</span></td>
                         <td class="text-center"><button class="btn-text">编辑</button> <button class="btn-text" style="color:#F53F3F;">删除</button></td>
                     </tr>
-                    <tr class="summary-row"><td>附加费合计</td><td class="text-right money">¥50.00</td><td colspan="3"></td></tr>
+                    <tr class="summary-row"><td>附加费合计</td><td class="text-right money">¥50.00</td><td colspan="4"></td></tr>
                 </tbody>
             </table>
             <div class="fee-hint">已支付附加费不可编辑/删除；附加费合计 = 其他费用</div>
@@ -494,7 +496,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
     </div>
     <div class="annotation-item" onclick="scrollToTarget('anno-5-target', this)">
         <div class="anno-title"><span class="anno-num">4</span>费用 + 附加费</div>
-        <div class="anno-desc"><strong>费用双视角</strong><br>• 用户费用：租户线路报价<br>• 租户成本：平台线路报价<br>• 利润 = 用户 - 租户<br><br><strong>附加费</strong><br>• 状态：已支付(锁定)/未支付(可编辑)<br>• 8种类型：超材费/转板费/税金/报关费/偏远附加费/派送附加费/罚款/其他<br>• 计入「其他费用」</div>
+        <div class="anno-desc"><strong>费用双视角</strong><br>• 用户费用：租户线路报价<br>• 租户成本：平台线路报价<br>• 利润 = 用户 - 租户<br><br><strong>附加费</strong><br>• 状态：已支付(锁定)/未支付(可编辑)<br>• 8种类型：超材费/转板费/税金/报关费/偏远附加费/派送附加费/罚款/其他<br>• 支付方式：用户支付（生成补款单）/ 扣余额（保存即已支付）<br>• 计入「其他费用」</div>
     </div>
     <div class="annotation-item" onclick="scrollToTarget('anno-5b-target', this)">
         <div class="anno-title"><span class="anno-num">4b</span>支付信息</div>
@@ -562,27 +564,35 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
     </div>
 </div>
 
-<!-- ===== 附加费管理弹窗 ===== -->
+<!-- ===== 增加附加费弹窗 ===== -->
 <div class="modal-overlay" id="surcharge-modal">
-    <div class="modal" style="width:760px;">
-        <div class="modal-header"><div class="modal-title">管理附加费</div><button class="modal-close" onclick="closeSurchargeModal()">×</button></div>
+    <div class="modal" style="width:820px;">
+        <div class="modal-header"><div class="modal-title">增加附加费</div><button class="modal-close" onclick="closeSurchargeModal()">×</button></div>
         <div class="modal-body">
             <div style="font-size:12px;color:#86909C;margin-bottom:12px;">附加费将计入提包单的「其他费用」，同时影响用户侧和租户侧费用</div>
+            <!-- 余额提示区（选择"扣余额"时显示） -->
+            <div id="balance-info-bar" style="display:none;margin-bottom:12px;padding:10px 16px;background:#E8F3FF;border-radius:6px;border:1px solid #B3D4FF;display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#165DFF" stroke-width="1.5"/><path d="M8 4.5v4M8 10.5h.01" stroke="#165DFF" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#165DFF;">用户 <strong>张伟</strong> 当前余额：<strong id="user-balance-display">¥368.50</strong></span>
+            </div>
+            <!-- 余额不足提示 -->
+            <div id="balance-error-bar" style="display:none;margin-bottom:12px;padding:10px 16px;background:#FFF0F0;border-radius:6px;border:1px solid #FFCCC7;display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#F53F3F" stroke-width="1.5"/><path d="M8 4.5v4M8 10.5h.01" stroke="#F53F3F" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#F53F3F;" id="balance-error-text">扣余额的附加费总额超过用户余额，请调整金额或选择用户支付</span>
+            </div>
             <table class="data-table" id="surcharge-edit-table">
-                <thead><tr><th style="width:130px;">类型</th><th class="text-right" style="width:100px;">金额(¥)</th><th>备注</th><th class="text-center">状态</th><th class="text-center" style="width:50px;">操作</th></tr></thead>
-                <tbody>
-                    <tr style="background:#FAFBFC;">
-                        <td><select class="form-select" style="padding:4px 8px;" disabled><option selected>超材费</option></select></td>
-                        <td><input class="form-input" value="30.00" style="padding:4px 8px;text-align:right;" disabled></td>
-                        <td><input class="form-input" value="实际体积超出预估" style="padding:4px 8px;" disabled></td>
-                        <td class="text-center"><span class="tag tag-green">已支付</span></td>
-                        <td class="text-center"><span class="btn-text disabled">删除</span></td>
-                    </tr>
+                <thead><tr><th style="width:130px;">类型</th><th class="text-right" style="width:100px;">金额(¥)</th><th>备注</th><th class="text-center" style="width:130px;">支付方式</th><th class="text-center" style="width:50px;">操作</th></tr></thead>
+                <tbody id="surcharge-edit-tbody">
                     <tr>
                         <td><select class="form-select" style="padding:4px 8px;"><option>超材费</option><option>转板费</option><option>税金</option><option>报关费</option><option selected>偏远附加费</option><option>派送附加费</option><option>罚款</option><option>其他</option></select></td>
-                        <td><input class="form-input" value="20.00" style="padding:4px 8px;text-align:right;"></td>
-                        <td><input class="form-input" value="收件地址属于偏远地区" style="padding:4px 8px;"></td>
-                        <td class="text-center"><span class="tag tag-orange">未支付</span></td>
+                        <td><input class="form-input surcharge-amount" value="0.00" style="padding:4px 8px;text-align:right;" oninput="updateBalanceCheck()"></td>
+                        <td><input class="form-input" placeholder="备注" style="padding:4px 8px;"></td>
+                        <td class="text-center">
+                            <select class="form-select pay-method-select" style="padding:4px 8px;" onchange="onPayMethodChange(this)">
+                                <option value="user_pay">用户支付</option>
+                                <option value="deduct_balance">扣余额</option>
+                            </select>
+                        </td>
                         <td class="text-center"><button class="btn-text" style="color:#F53F3F;" onclick="removeSurchargeRow(this)">删除</button></td>
                     </tr>
                 </tbody>
@@ -590,10 +600,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
             </table>
             <div style="margin-top:12px;padding:10px 16px;background:#FFF7E6;border-radius:6px;border:1px solid #FFD591;display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:13px;color:#614700;font-weight:500;">附加费合计</span>
-                <span style="font-size:16px;font-weight:700;color:#F53F3F;font-family:'SF Mono',monospace;">¥50.00</span>
+                <span id="surcharge-total-display" style="font-size:16px;font-weight:700;color:#F53F3F;font-family:'SF Mono',monospace;">¥0.00</span>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:#86909C;line-height:1.6;">
+                • <strong>用户支付</strong>：保存后该笔附加费将生成一笔补款支付单，待用户支付<br>
+                • <strong>扣余额</strong>：保存后直接从用户余额扣除，附加费状态为「已支付」；金额不得超过用户余额
             </div>
         </div>
-        <div class="modal-footer"><button class="btn" onclick="closeSurchargeModal()">取消</button><button class="btn btn-primary" onclick="closeSurchargeModal()">保存</button></div>
+        <div class="modal-footer"><button class="btn" onclick="closeSurchargeModal()">取消</button><button class="btn btn-primary" onclick="saveSurcharges()">保存</button></div>
     </div>
 </div>
 
@@ -701,18 +715,105 @@ function removeDeclareRow(btn) {
     if (tbody.rows.length > 1) btn.closest('tr').remove();
 }
 
-// 附加费弹窗
-function openSurchargeModal() { document.getElementById('surcharge-modal').classList.add('show'); }
+// 附加费弹窗（增加附加费）
+const USER_BALANCE = 368.50; // 模拟用户余额
+
+function openSurchargeModal() {
+    document.getElementById('balance-info-bar').style.display = 'none';
+    document.getElementById('balance-error-bar').style.display = 'none';
+    document.getElementById('surcharge-modal').classList.add('show');
+    updateBalanceCheck();
+}
 function closeSurchargeModal() { document.getElementById('surcharge-modal').classList.remove('show'); }
+
 function addSurchargeRow() {
-    const tbody = document.querySelector('#surcharge-edit-table tbody');
+    const tbody = document.getElementById('surcharge-edit-tbody');
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><select class="form-select" style="padding:4px 8px;"><option>超材费</option><option>转板费</option><option>税金</option><option>报关费</option><option>偏远附加费</option><option>派送附加费</option><option>罚款</option><option>其他</option></select></td><td><input class="form-input" value="0.00" style="padding:4px 8px;text-align:right;"></td><td><input class="form-input" placeholder="备注" style="padding:4px 8px;"></td><td class="text-center"><span class="tag tag-orange">未支付</span></td><td class="text-center"><button class="btn-text" style="color:#F53F3F;" onclick="removeSurchargeRow(this)">删除</button></td>';
+    tr.innerHTML = '<td><select class="form-select" style="padding:4px 8px;"><option>超材费</option><option>转板费</option><option>税金</option><option>报关费</option><option>偏远附加费</option><option>派送附加费</option><option>罚款</option><option>其他</option></select></td><td><input class="form-input surcharge-amount" value="0.00" style="padding:4px 8px;text-align:right;" oninput="updateBalanceCheck()"></td><td><input class="form-input" placeholder="备注" style="padding:4px 8px;"></td><td class="text-center"><select class="form-select pay-method-select" style="padding:4px 8px;" onchange="onPayMethodChange(this)"><option value="user_pay">用户支付</option><option value="deduct_balance">扣余额</option></select></td><td class="text-center"><button class="btn-text" style="color:#F53F3F;" onclick="removeSurchargeRow(this)">删除</button></td>';
     tbody.appendChild(tr);
+    updateBalanceCheck();
 }
 function removeSurchargeRow(btn) {
-    const tbody = document.querySelector('#surcharge-edit-table tbody');
+    const tbody = document.getElementById('surcharge-edit-tbody');
     if (tbody.rows.length > 1) btn.closest('tr').remove();
+    updateBalanceCheck();
+}
+
+function onPayMethodChange(select) {
+    updateBalanceCheck();
+}
+
+function updateBalanceCheck() {
+    const selects = document.querySelectorAll('.pay-method-select');
+    const amounts = document.querySelectorAll('.surcharge-amount');
+    let hasDeductBalance = false;
+    let deductTotal = 0;
+    let totalAll = 0;
+
+    selects.forEach((sel, idx) => {
+        const amtInput = sel.closest('tr').querySelector('.surcharge-amount');
+        const amt = parseFloat(amtInput.value) || 0;
+        totalAll += amt;
+        if (sel.value === 'deduct_balance') {
+            hasDeductBalance = true;
+            deductTotal += amt;
+        }
+    });
+
+    // Update total display
+    document.getElementById('surcharge-total-display').textContent = '¥' + totalAll.toFixed(2);
+
+    // Show/hide balance info bar
+    const balanceBar = document.getElementById('balance-info-bar');
+    if (hasDeductBalance) {
+        balanceBar.style.display = 'flex';
+        document.getElementById('user-balance-display').textContent = '¥' + USER_BALANCE.toFixed(2);
+    } else {
+        balanceBar.style.display = 'none';
+    }
+
+    // Check balance sufficiency
+    const errorBar = document.getElementById('balance-error-bar');
+    if (hasDeductBalance && deductTotal > USER_BALANCE) {
+        errorBar.style.display = 'flex';
+        document.getElementById('balance-error-text').textContent = '扣余额的附加费合计 ¥' + deductTotal.toFixed(2) + ' 超过用户余额 ¥' + USER_BALANCE.toFixed(2) + '，请调整金额或选择用户支付';
+    } else {
+        errorBar.style.display = 'none';
+    }
+}
+
+function saveSurcharges() {
+    // Validate: check if any deduct_balance rows exceed balance
+    const selects = document.querySelectorAll('.pay-method-select');
+    const amounts = document.querySelectorAll('.surcharge-amount');
+    let deductTotal = 0;
+    let totalAll = 0;
+    let hasAnyRow = false;
+
+    selects.forEach((sel, idx) => {
+        const amtInput = sel.closest('tr').querySelector('.surcharge-amount');
+        const amt = parseFloat(amtInput.value) || 0;
+        totalAll += amt;
+        if (sel.value === 'deduct_balance') {
+            deductTotal += amt;
+        }
+        if (amt > 0) hasAnyRow = true;
+    });
+
+    if (!hasAnyRow) {
+        alert('请至少填写一条附加费');
+        return;
+    }
+
+    if (deductTotal > USER_BALANCE) {
+        document.getElementById('balance-error-bar').style.display = 'flex';
+        document.getElementById('balance-error-text').textContent = '扣余额的附加费合计 ¥' + deductTotal.toFixed(2) + ' 超过用户余额 ¥' + USER_BALANCE.toFixed(2) + '，请调整金额或选择用户支付';
+        return;
+    }
+
+    // Simulate save success
+    closeSurchargeModal();
+    alert('附加费保存成功！\n• 扣余额部分已标记为「已支付」\n• 用户支付部分已生成补款支付单');
 }
 
 // 物流修改弹窗
