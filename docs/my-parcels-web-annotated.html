@@ -772,8 +772,11 @@ tbody tr.row-supplement + tr.row-content td {
                     <div class="status-tab" data-status="pending_review" onclick="switchTab('pending_review')">
                         待审核 <span class="count">1</span>
                     </div>
-                    <div class="status-tab" data-status="processing" onclick="switchTab('processing')">
-                        处理中 <span class="count">1</span>
+                    <div class="status-tab" data-status="pending_pick" onclick="switchTab('pending_pick')">
+                        待拣货 <span class="count">1</span>
+                    </div>
+                    <div class="status-tab" onclick="switchTab('picking')">
+                        拣货中 <span class="count">0</span>
                     </div>
                     <div class="status-tab" data-status="pending_ship" onclick="switchTab('pending_ship')">
                         待发货 <span class="count">2</span>
@@ -891,8 +894,8 @@ tbody tr.row-supplement + tr.row-content td {
                             </td>
                         </tr>
 
-                        <!-- 处理中 -->
-                        <tr class="row-header" data-status="processing" onclick="goDetail()">
+                        <!-- 待拣货 -->
+                        <tr class="row-header" data-status="pending_pick" onclick="goDetail()">
                             <td colspan="6">
                                 <div class="header-inner">
                                     <span class="header-package-id">B26070315873</span>
@@ -901,7 +904,7 @@ tbody tr.row-supplement + tr.row-content td {
                                 </div>
                             </td>
                         </tr>
-                        <tr class="row-content" data-status="processing" onclick="goDetail()">
+                        <tr class="row-content" data-status="pending_pick" onclick="goDetail()">
                             <td>
                                 <div class="goods-cell">
                                     <div class="goods-info">
@@ -925,7 +928,7 @@ tbody tr.row-supplement + tr.row-content td {
                                     <span class="yen">¥</span>688.00
                                 </div>
                             </td>
-                            <td><span class="status-badge processing">处理中</span></td>
+                            <td><span class="status-badge processing">待拣货</span></td>
                             <td style="text-align:right; padding-right:24px;" onclick="event.stopPropagation()">
                                 <div class="action-group">
                                     <div class="action-item"><span class="action-link" onclick="viewDetail()">查看详情</span></div>
@@ -1352,7 +1355,7 @@ const annotations = [
         type: 'area',
         detail: {
             feature: '按包裹状态快速筛选列表，每个标签显示该状态下的包裹数量角标',
-            display: '8个状态标签：全部、待付款、待审核、处理中、待发货、已发货、已收货、已取消；每个标签右侧显示数量角标（该状态下的包裹数量），角标始终存在，实时反映各状态包裹数量；已收货状态不显示角标（已完成状态无需关注数量）；当前选中的标签高亮显示',
+            display: '9个状态标签：全部、待付款、待审核、待拣货、拣货中、待发货、已发货、已收货、已取消；每个标签右侧显示数量角标（该状态下的包裹数量），角标始终存在，实时反映各状态包裹数量；已收货状态不显示角标（已完成状态无需关注数量）；当前选中的标签高亮显示',
             interaction: '点击状态标签筛选对应状态的包裹，标签高亮，列表刷新'
         }
     },
@@ -1378,7 +1381,7 @@ const annotations = [
         type: 'state',
         detail: {
             feature: '根据包裹当前状态展示不同的费用文案，帮助用户了解当前需要支付或已经支付的金额',
-            state: '待付款状态→显示「需付款 ¥XX」（预估运费，用户需要支付）；已支付相关状态（已支付/待审核/处理中/待发货/已发货）→显示「实付款 ¥XX（已付）」，表示已完成支付；已取消状态→显示「应付款 ¥XX」（原本应该支付的金额但未实际支付）；存在补款时→在包裹行上方显示补款提示条「需补款 ¥XX」',
+            state: '待付款状态→显示「需付款 ¥XX」（预估运费，用户需要支付）；已支付相关状态（已支付/待审核/待拣货/拣货中/待发货/已发货）→显示「实付款 ¥XX（已付）」，表示已完成支付；已取消状态→显示「应付款 ¥XX」（原本应该支付的金额但未实际支付）；存在补款时→在包裹行上方显示补款提示条「需补款 ¥XX」',
             business: '费用金额根据实际重量体积和线路计费规则计算'
         }
     },
@@ -1391,7 +1394,7 @@ const annotations = [
         type: 'interaction',
         detail: {
             feature: '根据包裹状态展示对应的操作按钮，每个按钮点击后执行对应操作',
-            display: '待付款→「查看详情」「取消包裹」「去支付」；待审核/处理中→「查看详情」「取消包裹」；待发货→「查看详情」；待发货+有补款→「查看详情」「去补款」；已发货→「查看详情」「查看物流」「确认收货」；已收货→无操作按钮；已取消→无操作按钮',
+            display: '待付款→「查看详情」「取消包裹」「去支付」；待审核/待拣货→「查看详情」「取消包裹」；拣货中→「查看详情」（不可取消）；待发货→「查看详情」；待发货+有补款→「查看详情」「去补款」；已发货→「查看详情」「查看物流」「确认收货」；已收货→无操作按钮；已取消→无操作按钮',
             interaction: '查看详情→跳转到包裹详情页；取消包裹→弹出确认弹窗，确认后取消包裹；去支付→跳转到收银台支付页面；去补款→弹出补款确认弹窗（展示补款原因和金额明细），用户确认后跳转收银台支付补款；查看物流→弹出物流信息弹窗展示物流轨迹；确认收货→弹出确认弹窗，确认后包裹状态变为已收货',
             business: '已发货和已取消状态的包裹不可再取消；补款由后台打包后发起，补款原因和金额明细由后台填写'
         }
