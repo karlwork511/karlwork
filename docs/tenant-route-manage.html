@@ -5,906 +5,305 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POKO SaaS - 物流线路管理（租户侧）</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: #f0f2f5; color: #303133; font-size: 14px;
-  }
-  .container { display: flex; min-height: 100vh; width: 100%; position: relative; }
-  .left-panel { width: 100%; position: relative; background: #f0f2f5; padding-bottom: 40px; }
-  .right-panel {
-    width: 18%; background: #fff;
-    border-left: 1px solid #e4e7ed; padding: 20px 16px;
-    position: fixed; right: 0; top: 0; height: 100vh; overflow-y: auto; z-index: 100;
-  }
-  .right-panel h3 {
-    font-size: 15px; font-weight: 600; color: #303133;
-    margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #3B82F6;
-  }
-  .annotation-item {
-    margin-bottom: 16px; padding-left: 12px; border-left: 3px solid #3B82F6;
-    cursor: pointer; transition: all 0.2s; position: relative;
-  }
-  .annotation-item:hover { background: #f5f7fa; border-radius: 0 4px 4px 0; }
-  .annotation-item .num {
-    display: inline-block; width: 20px; height: 20px; line-height: 20px;
-    text-align: center; background: #3B82F6; color: #fff; border-radius: 50%;
-    font-size: 12px; font-weight: 600; margin-right: 6px;
-  }
-  .annotation-item h4 {
-    font-size: 13px; font-weight: 600; color: #303133;
-    margin-bottom: 6px; display: inline-block;
-  }
-  .annotation-item .anno-content {
-    font-size: 12px; color: #606266; line-height: 1.6; margin-top: 4px;
-    height: 60px; overflow: hidden; position: relative;
-  }
-  .annotation-item .anno-content::after {
-    content: '...'; position: absolute; bottom: 0; right: 0;
-    padding-left: 20px; background: linear-gradient(to right, transparent, #fff 50%);
-  }
-  .annotation-item .view-more {
-    font-size: 11px; color: #3B82F6; margin-top: 4px; text-align: right;
-  }
-  .anno-section { position: relative; }
-  .anno-badge {
-    position: absolute; top: -8px; left: -8px; z-index: 10;
-    width: 22px; height: 22px; line-height: 22px; text-align: center;
-    background: #3B82F6; color: #fff;
-    border-radius: 50%; font-size: 12px; font-weight: 600;
-    cursor: pointer; user-select: none;
-    transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(59,130,246,0.3);
-  }
-  .anno-section:hover .anno-badge {
-    transform: scale(1.2);
-    background: #2563eb;
-    box-shadow: 0 4px 12px rgba(59,130,246,0.4);
-  }
+/* ===== 新版标注原型系统 CSS（来自技能模板，禁止修改） ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+.annotation-toolbar { display: flex; align-items: center; justify-content: flex-end; padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED; flex-shrink: 0; z-index: 100; }
+.toolbar-edit-btn { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #333; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px 32px; position: relative; }
+.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease; }
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header { padding: 16px; font-size: 15px; font-weight: 600; color: #333; border-bottom: 1px solid #E4E7ED; background: #F7F8FA; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 8px; }
+.panel-toggle-btn { width: 24px; height: 24px; border: none; background: #E8EAED; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 36px; height: 48px; background: #165DFF; color: #fff; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15); }
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item { padding: 14px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.2s; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge { width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+.anno-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none; }
+.anno-marker.highlight, .anno-marker:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th { background: #FAFAFA; width: 100px; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; vertical-align: top; }
+.detail-table td { padding: 12px 16px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.7; }
+.detail-table textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; }
+.detail-table textarea:focus { border-color: #165DFF; }
+.btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); } 100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); } }
 
-  /* 通用弹窗 */
-  .modal-mask {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); display: none;
-    justify-content: center; align-items: center; z-index: 9999;
-  }
-  .modal-mask.show { display: flex; }
-  .modal-box {
-    background: #FFF7E6; border: 1px solid #FFD591; border-radius: 12px; width: 560px; max-height: 70vh;
-    display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(173,104,0,0.2);
-  }
-  .modal-header {
-    padding: 14px 20px; border-bottom: 1px solid #FFD591;
-    display: flex; justify-content: space-between; align-items: center;
-    background: #FFE7BA; border-radius: 12px 12px 0 0;
-  }
-  .modal-header h3 { font-size: 15px; font-weight: 600; color: #AD6800; }
-  .modal-close {
-    width: 24px; height: 24px; border: none; background: #FFD591;
-    border-radius: 50%; cursor: pointer; font-size: 14px; color: #AD6800;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .modal-close:hover { background: #FFBB5C; color: #8B4513; }
-  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+/* ===== 页面内容样式 ===== */
+.top-nav { height: 56px; background: #fff; border-bottom: 1px solid #e4e7ed; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+.logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
+.logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #8B5CF6, #a78bfa); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.user-info { display: flex; align-items: center; gap: 8px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center; color: #606266; }
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 600; color: #303133; }
+.tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab-item { padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; background: #fff; color: #606266; border: 1px solid #e4e7ed; transition: all 0.2s; }
+.tab-item.active { background: #3B82F6; color: #fff; border-color: #3B82F6; font-weight: 500; }
+.tab-item .tab-count { font-size: 12px; opacity: 0.8; margin-left: 2px; }
+.filter-bar { background: #fff; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.filter-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-row:last-child { margin-bottom: 0; }
+.filter-item { display: flex; align-items: center; gap: 8px; }
+.filter-label { font-size: 13px; color: #606266; white-space: nowrap; }
+.filter-select { height: 32px; padding: 0 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 13px; color: #303133; background: #fff; cursor: pointer; min-width: 130px; }
+.filter-select:focus { outline: none; border-color: #3B82F6; }
+.filter-input { height: 32px; padding: 0 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 13px; color: #303133; width: 200px; }
+.filter-input:focus { outline: none; border-color: #3B82F6; }
+.btn { height: 36px; padding: 0 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #3B82F6; color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-default { background: #fff; color: #606266; border: 1px solid #dcdfe6; }
+.btn-default:hover { color: #3B82F6; border-color: #c6e2ff; background: #ecf5ff; }
+.btn-sm { height: 32px; padding: 0 14px; font-size: 13px; border-radius: 6px; }
+.btn-text { background: transparent; color: #3B82F6; padding: 0; border: none; font-size: 13px; cursor: pointer; margin-right: 12px; }
+.btn-text:hover { text-decoration: underline; }
+.btn-text.danger { color: #EF4444; }
+.table-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; }
+.table-card .toolbar { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5; }
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+th { background: #fafafa; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 500; color: #606266; border-bottom: 1px solid #ebeef5; white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: #3B82F6; }
+th .sort-icon { font-size: 10px; margin-left: 4px; color: #c0c4cc; }
+td { padding: 12px 14px; font-size: 13px; color: #303133; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+tr:hover td { background: #fafbfc; }
+tr:last-child td { border-bottom: none; }
+.line-name { display: flex; flex-direction: column; gap: 3px; }
+.line-title { font-size: 14px; font-weight: 500; color: #303133; display: flex; align-items: center; gap: 8px; }
+.line-code { font-size: 12px; color: #909399; font-family: "SF Mono", "Monaco", "Inconsolata", monospace; }
+.line-desc { font-size: 12px; color: #909399; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+.source-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; color: #fff; }
+.source-tag.platform { background: #3B82F6; }
+.source-tag.self { background: #F59E0B; }
+.transport-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.transport-tag.air { background: #dbeafe; color: #1d4ed8; }
+.transport-tag.sea { background: #cffafe; color: #0891b2; }
+.transport-tag.sea-express { background: #ede9fe; color: #6d28d9; }
+.transport-tag.land { background: #ffedd5; color: #c2410c; }
+.status-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.status-tag.active { background: #dcfce7; color: #15803d; }
+.status-tag.inactive { background: #f3f4f6; color: #6b7280; }
+.amount { font-family: "SF Mono", "Monaco", "Inconsolata", monospace; font-weight: 500; color: #303133; }
+.amount-unit { color: #606266; font-size: 12px; }
+.service-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.service-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; background: #f0f9ff; color: #0284c7; }
+.service-tag.tax { background: #fef3c7; color: #d97706; }
+.service-tag.insure { background: #f0fdf4; color: #15803d; }
+.action-col { white-space: nowrap; }
+.pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid #f0f2f5; }
+.pagination-info { font-size: 13px; color: #606266; }
+.pagination-controls { display: flex; gap: 4px; align-items: center; }
+.page-btn { min-width: 32px; height: 32px; padding: 0 10px; border: 1px solid #dcdfe6; border-radius: 4px; background: #fff; color: #606266; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.page-btn:hover { color: #3B82F6; border-color: #c6e2ff; }
+.page-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+.page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.page-size-select { height: 32px; padding: 0 8px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; color: #606266; background: #fff; cursor: pointer; }
+.country-multi { font-size: 13px; color: #303133; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
+.country-multi .country-more { color: #909399; font-size: 12px; margin-left: 2px; }
+.warehouse-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; background: #f0f2f5; color: #606266; }
+.provider-name { font-size: 13px; color: #303133; }
 
-  /* 引用平台线路弹窗 - 白底样式 */
-  #importModal .modal-box.wide {
-    width: 800px;
-    background: #fff;
-    border: 1px solid #e4e7ed;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    max-height: 80vh;
-  }
-  #importModal .modal-header {
-    background: #fff;
-    border-bottom: 1px solid #e4e7ed;
-    border-radius: 8px 8px 0 0;
-    padding: 16px 24px;
-  }
-  #importModal .modal-header h3 {
-    color: #303133;
-    font-size: 16px;
-    font-weight: 600;
-  }
-  #importModal .modal-close {
-    background: transparent;
-    color: #909399;
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
-    border-radius: 4px;
-  }
-  #importModal .modal-close:hover {
-    background: #f5f7fa;
-    color: #606266;
-  }
-  #importModal .modal-body {
-    padding: 20px 24px;
-  }
-  #importModal .import-line-list {
-    max-height: 320px;
-  }
-
-  /* 标注详情表格 */
-  .annotation-table {
-    width: 100%; border-collapse: collapse;
-    border: 1px solid #FFD591; border-radius: 8px; overflow: hidden;
-  }
-  .annotation-table th {
-    background: #FFE7BA; color: #AD6800;
-    padding: 10px 14px; text-align: left;
-    font-size: 13px; font-weight: 600;
-    border-bottom: 1px solid #FFD591;
-  }
-  .annotation-table td {
-    padding: 10px 14px; font-size: 13px;
-    color: #AD6800; line-height: 1.7;
-    border-bottom: 1px solid #FFE0B2;
-    background: #FFF7E6;
-  }
-  .annotation-table tr:last-child td { border-bottom: none; }
-  .annotation-table td:first-child {
-    width: 100px; font-weight: 600;
-    color: #AD6800; white-space: nowrap;
-  }
-  .annotation-table ul {
-    margin: 4px 0; padding-left: 18px;
-  }
-  .annotation-table li {
-    font-size: 12px; color: #AD6800; line-height: 1.7;
-    margin-bottom: 2px;
-  }
-  .form-item { display: flex; flex-direction: column; gap: 6px; }
-  .form-item.full { grid-column: 1 / -1; }
-  .form-label {
-    font-size: 13px; color: #606266;
-  }
-  .form-label .required { color: #EF4444; margin-right: 2px; }
-  .form-input, .form-select, .form-textarea {
-    height: 36px; padding: 0 12px; border: 1px solid #dcdfe6;
-    border-radius: 6px; font-size: 13px; color: #303133; background: #fff;
-    transition: border-color 0.2s;
-  }
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    outline: none; border-color: #3B82F6;
-  }
-  .form-textarea {
-    height: 80px; padding: 10px 12px; resize: vertical;
-    font-family: inherit; line-height: 1.6;
-  }
-  .form-row-inline {
-    display: flex; gap: 16px; align-items: flex-start;
-  }
-  .checkbox-group {
-    display: flex; gap: 20px; flex-wrap: wrap; padding: 8px 0;
-  }
-  .checkbox-item {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-    font-size: 13px; color: #303133;
-  }
-  .checkbox-item input[type="checkbox"] { cursor: pointer; }
-
-  .radio-group {
-    display: flex; gap: 20px; padding: 8px 0;
-  }
-  .radio-item {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-    font-size: 13px; color: #303133;
-  }
-  .radio-item input[type="radio"] { cursor: pointer; }
-
-  /* 平台后台样式 */
-  .top-nav {
-    height: 56px; background: #fff; border-bottom: 1px solid #e4e7ed;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; }
-  .logo-icon {
-    width: 32px; height: 32px; background: linear-gradient(135deg, #8B5CF6, #a78bfa);
-    border-radius: 8px; display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 700;
-  }
-  .nav-right { display: flex; align-items: center; gap: 20px; }
-  .user-info { display: flex; align-items: center; gap: 8px; }
-  .avatar {
-    width: 32px; height: 32px; border-radius: 50%; background: #f0f2f5;
-    display: flex; align-items: center; justify-content: center; color: #606266;
-  }
-
-  .main-content { display: flex; }
-  .sidebar {
-    width: 200px; background: #fff; border-right: 1px solid #e4e7ed; padding: 16px 0;
-  }
-  .menu-group { margin-bottom: 4px; }
-  .menu-title { padding: 10px 20px; font-size: 12px; color: #909399; font-weight: 500; }
-  .menu-item {
-    padding: 10px 20px 10px 40px; cursor: pointer; font-size: 14px; color: #606266;
-    transition: all 0.2s; display: flex; align-items: center; gap: 10px;
-  }
-  .menu-item:hover { background: #f5f7fa; color: #303133; }
-  .menu-item.active {
-    background: #ecf5ff; color: #3B82F6; font-weight: 500;
-    border-right: 3px solid #3B82F6;
-  }
-  .menu-item .icon-dot { width: 6px; height: 6px; border-radius: 50%; background: #c0c4cc; }
-  .menu-item.active .icon-dot { background: #3B82F6; }
-
-  .content { flex: 1; padding: 20px; width: calc(100% - 200px); }
-  .page-header { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
-  .page-title { font-size: 20px; font-weight: 600; }
-  .breadcrumb { font-size: 13px; color: #909399; }
-  .breadcrumb span { margin: 0 4px; }
-  .breadcrumb .current { color: #606266; }
-
-  .btn {
-    height: 36px; padding: 0 20px; border-radius: 6px;
-    font-size: 14px; cursor: pointer; border: none;
-    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-primary { background: #3B82F6; color: #fff; }
-  .btn-primary:hover { background: #2563eb; }
-  .btn-default {
-    background: #fff; color: #606266; border: 1px solid #dcdfe6;
-  }
-  .btn-default:hover {
-    color: #3B82F6; border-color: #c6e2ff; background: #ecf5ff;
-  }
-  .btn-danger { background: #EF4444; color: #fff; }
-  .btn-danger:hover { background: #dc2626; }
-  .btn-text {
-    background: transparent; color: #3B82F6; padding: 0; border: none;
-    font-size: 13px; cursor: pointer; margin-right: 12px;
-  }
-  .btn-text:hover { text-decoration: underline; }
-  .btn-text.danger { color: #EF4444; }
-  .btn-text.warn { color: #F59E0B; }
-  .btn-sm { height: 32px; padding: 0 14px; font-size: 13px; border-radius: 6px; }
-
-  /* TAB切换 */
-  .tab-bar {
-    display: flex; gap: 8px; margin-bottom: 16px;
-  }
-  .tab-item {
-    padding: 8px 20px; border-radius: 20px; font-size: 14px; cursor: pointer;
-    background: #fff; color: #606266; border: 1px solid #e4e7ed;
-    transition: all 0.2s;
-  }
-  .tab-item:hover { color: #3B82F6; border-color: #c6e2ff; }
-  .tab-item.active {
-    background: #3B82F6; color: #fff; border-color: #3B82F6;
-    font-weight: 500;
-  }
-  .tab-item .tab-count { font-size: 12px; opacity: 0.8; margin-left: 2px; }
-
-  /* 筛选区域 */
-  .filter-bar {
-    background: #fff; border-radius: 10px; padding: 16px 20px;
-    margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  .filter-row {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .filter-row:last-child { margin-bottom: 0; }
-  .filter-item { display: flex; align-items: center; gap: 8px; }
-  .filter-label { font-size: 13px; color: #606266; white-space: nowrap; }
-  .filter-select {
-    height: 32px; padding: 0 12px; border: 1px solid #dcdfe6; border-radius: 6px;
-    font-size: 13px; color: #303133; background: #fff; cursor: pointer; min-width: 130px;
-  }
-  .filter-select:focus { outline: none; border-color: #3B82F6; }
-  .filter-input {
-    height: 32px; padding: 0 12px; border: 1px solid #dcdfe6; border-radius: 6px;
-    font-size: 13px; color: #303133; width: 200px;
-  }
-  .filter-input:focus { outline: none; border-color: #3B82F6; }
-
-  /* 表格 */
-  .table-card {
-    background: #fff; border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    background: #fafafa; padding: 12px 14px; text-align: left;
-    font-size: 13px; font-weight: 500; color: #606266;
-    border-bottom: 1px solid #ebeef5; white-space: nowrap;
-  }
-  th.sortable { cursor: pointer; user-select: none; }
-  th.sortable:hover { color: #3B82F6; }
-  th .sort-icon { font-size: 10px; margin-left: 4px; color: #c0c4cc; }
-  th.sortable.active .sort-icon { color: #3B82F6; }
-  td {
-    padding: 12px 14px; font-size: 13px; color: #303133;
-    border-bottom: 1px solid #f0f2f5; vertical-align: middle;
-  }
-  tr:hover td { background: #fafbfc; }
-  tr:last-child td { border-bottom: none; }
-
-  .line-name {
-    display: flex; flex-direction: column; gap: 3px;
-  }
-  .line-title {
-    font-size: 14px; font-weight: 500; color: #303133;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .line-code {
-    font-size: 12px; color: #909399;
-    font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
-  }
-  .line-desc {
-    font-size: 12px; color: #909399; margin-top: 1px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 200px;
-  }
-
-  /* 来源标签 */
-  .source-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 500; color: #fff;
-  }
-  .source-tag.platform { background: #3B82F6; }
-  .source-tag.self { background: #F59E0B; }
-
-  .transport-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 12px; font-weight: 500;
-  }
-  .transport-tag.air { background: #dbeafe; color: #1d4ed8; }
-  .transport-tag.sea { background: #cffafe; color: #0891b2; }
-  .transport-tag.sea-express { background: #ede9fe; color: #6d28d9; }
-  .transport-tag.land { background: #ffedd5; color: #c2410c; }
-
-  .status-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 10px;
-    font-size: 11px; font-weight: 500;
-  }
-  .status-tag.active { background: #dcfce7; color: #15803d; }
-  .status-tag.inactive { background: #f3f4f6; color: #6b7280; }
-
-  .amount {
-    font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
-    font-weight: 500; color: #303133;
-  }
-  .amount-unit { color: #606266; font-size: 12px; }
-
-  .service-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .service-tag {
-    display: inline-block; padding: 1px 6px; border-radius: 3px;
-    font-size: 11px; font-weight: 500;
-    background: #f0f9ff; color: #0284c7;
-  }
-  .service-tag.tax { background: #fef3c7; color: #d97706; }
-  .service-tag.insure { background: #f0fdf4; color: #15803d; }
-
-  .action-col { white-space: nowrap; }
-
-  /* 分页 */
-  .pagination {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 20px; border-top: 1px solid #f0f2f5;
-  }
-  .pagination-info { font-size: 13px; color: #606266; }
-  .pagination-controls { display: flex; gap: 4px; align-items: center; }
-  .page-btn {
-    min-width: 32px; height: 32px; padding: 0 10px;
-    border: 1px solid #dcdfe6; border-radius: 4px;
-    background: #fff; color: #606266; font-size: 13px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .page-btn:hover { color: #3B82F6; border-color: #c6e2ff; }
-  .page-btn.active {
-    background: #3B82F6; color: #fff; border-color: #3B82F6;
-  }
-  .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .page-size-select {
-    height: 32px; padding: 0 8px; border: 1px solid #dcdfe6; border-radius: 4px;
-    font-size: 13px; color: #606266; background: #fff; cursor: pointer;
-  }
-
-  /* 多选目的国展示 */
-  .country-multi {
-    font-size: 13px; color: #303133;
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    position: relative;
-    cursor: default;
-  }
-  .country-multi .country-more {
-    color: #909399;
-    font-size: 12px;
-    margin-left: 2px;
-  }
-  .country-tags {
-    display: flex; flex-wrap: wrap; gap: 4px;
-  }
-  .country-tag-sm {
-    display: inline-flex; align-items: center; gap: 2px;
-    padding: 1px 6px; border-radius: 3px;
-    background: #ecf5ff; color: #409EFF;
-    font-size: 12px; font-weight: 500;
-  }
-
-  .country-tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 13px; color: #303133;
-  }
-  .warehouse-tag {
-    display: inline-block; padding: 1px 6px; border-radius: 3px;
-    font-size: 11px; font-weight: 500;
-    background: #f0f2f5; color: #606266;
-  }
-  .provider-name {
-    font-size: 13px; color: #303133;
-  }
-
-  /* 引用弹窗线路列表 */
-  .import-line-list {
-    border: 1px solid #ebeef5; border-radius: 8px;
-    max-height: 240px; overflow-y: auto;
-  }
-  .import-line-row {
-    display: grid;
-    grid-template-columns: 40px 2fr 1.2fr 1fr 1fr 1fr 1.5fr;
-    gap: 10px; align-items: center;
-    padding: 10px 12px; border-bottom: 1px solid #f0f2f5;
-    cursor: pointer; transition: background 0.15s;
-  }
-  .import-line-row:hover { background: #f5f7fa; }
-  .import-line-row.selected { background: #ecf5ff; }
-  .import-line-row:last-child { border-bottom: none; }
-  .import-line-row .line-info-sm {
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .import-line-row .line-name-sm {
-    font-size: 13px; font-weight: 500; color: #303133;
-  }
-  .import-line-row .line-code-sm {
-    font-size: 11px; color: #909399;
-    font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
-  }
-  .import-filter-row {
-    display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
-  }
-  .import-filter-row .filter-select { height: 30px; font-size: 12px; min-width: 100px; }
-  .import-filter-row .filter-input { height: 30px; font-size: 12px; width: 140px; }
-
-  /* 报价设置弹窗 */
-  .quote-info-card {
-    background: #f8fafc; border-radius: 8px; padding: 14px 16px;
-    display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 16px;
-  }
-  .quote-info-card .qi-left { display: flex; flex-direction: column; gap: 4px; }
-  .quote-info-card .qi-name { font-size: 14px; font-weight: 600; color: #303133; }
-  .quote-info-card .qi-meta { font-size: 12px; color: #909399; }
-  .quote-info-card .qi-right { text-align: right; }
-  .quote-info-card .qi-price-label { font-size: 11px; color: #909399; margin-bottom: 2px; }
-  .quote-info-card .qi-price-val {
-    font-size: 13px; font-weight: 500; color: #303133;
-    font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
-  }
-
-  .quote-preview-card {
-    background: linear-gradient(135deg, #3B82F6, #60A5FA);
-    border-radius: 8px; padding: 16px 20px; color: #fff;
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 14px;
-  }
-  .quote-preview-card .qp-title { font-size: 12px; opacity: 0.9; margin-bottom: 4px; }
-  .quote-preview-card .qp-values { display: flex; gap: 24px; }
-  .quote-preview-card .qp-item { display: flex; flex-direction: column; gap: 2px; }
-  .quote-preview-card .qp-label { font-size: 11px; opacity: 0.8; }
-  .quote-preview-card .qp-value {
-    font-size: 18px; font-weight: 600;
-    font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
-  }
-  .quote-preview-card .qp-value small { font-size: 12px; font-weight: 400; opacity: 0.8; }
-
-  .warn-tip {
-    background: #FEF3C7; border-left: 3px solid #F59E0B;
-    padding: 10px 14px; border-radius: 4px;
-    font-size: 12px; color: #92400E; line-height: 1.6;
-    margin-top: 14px;
-  }
-
-  .import-desc {
-    font-size: 13px; color: #606266; line-height: 1.6; margin-bottom: 14px;
-    padding: 10px 14px; background: #f0f9ff; border-radius: 6px;
-    border-left: 3px solid #3B82F6;
-  }
-
-  /* ===== 新版标注系统 - 左右分栏式 (anno-前缀) ===== */
-  .anno-container {
-    width: 100%;
-    position: relative;
-    min-height: 100vh;
-  }
-  .anno-left-panel {
-    width: 100%;
-    position: relative;
-    overflow-x: auto;
-    padding-right: 280px;
-    box-sizing: border-box;
-  }
-  .anno-left-panel .page-content-inner {
-    min-width: 1400px;
-  }
-  /* 确保原有布局在新容器内正确显示 */
-  
-  .anno-right-panel {
-    width: 260px;
-    background: #F7F8FA;
-    border-left: 1px solid #E4E7ED;
-    padding: 20px 14px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: fixed;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 200;
-    box-sizing: border-box;
-  }
-  .anno-right-panel h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #303133;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E4E7ED;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .anno-right-panel h3::before {
-    content: '';
-    width: 3px;
-    height: 14px;
-    background: #3B82F6;
-    border-radius: 2px;
-  }
-  .anno-item {
-    padding: 10px 10px;
-    margin-bottom: 2px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 6px;
-  }
-  .anno-item:hover {
-    background: #EEF0F3;
-  }
-  .anno-item.active {
-    background: #E8F0FE;
-  }
-  .anno-item.active .anno-item-num {
-    background: #3B82F6;
-    transform: scale(1.1);
-  }
-  .anno-item-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-    background: #909399;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 600;
-    margin-right: 8px;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-  }
-  .anno-item-header {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 4px;
-  }
-  .anno-item-title {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: #303133;
-    margin: 0;
-    line-height: 1.4;
-    flex: 1;
-    padding-top: 1px;
-  }
-  .anno-item-desc {
-    font-size: 11.5px;
-    color: #606266;
-    line-height: 1.5;
-    padding-left: 28px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    opacity: 0.85;
-  }
-
-  /* 左侧元素上的数字角标 - 覆盖原有样式 */
-  .anno-badge {
-    position: absolute;
-    top: -8px !important;
-    left: -8px !important;
-    width: 22px !important;
-    height: 22px !important;
-    line-height: 22px !important;
-    text-align: center !important;
-    background: rgba(59, 130, 246, 0.75) !important;
-    color: #fff !important;
-    border-radius: 50% !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    z-index: 150 !important;
-    transition: all 0.25s ease !important;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35) !important;
-    user-select: none !important;
-    opacity: 0.85 !important;
-  }
-  .anno-badge:hover,
-  .anno-badge.active {
-    opacity: 1 !important;
-    transform: scale(1.3) !important;
-    background: #3B82F6 !important;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5) !important;
-  }
-  .anno-section, .anno-target {
-    position: relative;
-  }
-
-  /* 详情弹窗 */
-  .anno-modal-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-    backdrop-filter: blur(2px);
-  }
-  .anno-modal-mask.show {
-    display: flex;
-  }
-  .anno-modal-box {
-    background: #fff;
-    border-radius: 12px;
-    width: 580px;
-    max-width: 90vw;
-    max-height: 75vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-  }
-  .anno-modal-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid #E4E7ED;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-  }
-  .anno-modal-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0;
-  }
-  .anno-modal-close {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-  .anno-modal-close:hover {
-    background: rgba(255, 255, 255, 0.35);
-    transform: rotate(90deg);
-  }
-  .anno-modal-body {
-    padding: 20px 24px;
-    overflow-y: auto;
-    flex: 1;
-  }
-  .anno-modal-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    word-break: break-word;
-  }
-  .anno-modal-table th {
-    background: #F5F7FA;
-    color: #303133;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 14px;
-    text-align: left;
-    border-bottom: 1px solid #E4E7ED;
-    width: 100px;
-    vertical-align: top;
-  }
-  .anno-modal-table td {
-    background: #fff;
-    color: #606266;
-    font-size: 13px;
-    padding: 10px 14px;
-    border-bottom: 1px solid #F0F2F5;
-    line-height: 1.7;
-    vertical-align: top;
-  }
-  .anno-modal-table tr:last-child th,
-  .anno-modal-table tr:last-child td {
-    border-bottom: none;
-  }
-  .anno-modal-table ul {
-    padding-left: 18px;
-    margin: 4px 0;
-  }
-  .anno-modal-table li {
-    margin-bottom: 4px;
-    color: #606266;
-    line-height: 1.6;
-  }
-  .anno-modal-tag {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 500;
-    margin-right: 4px;
-    background: #DBEAFE;
-    color: #2563EB;
-  }
+/* 弹窗样式 */
+.modal-box { background: #FFF7E6; border: 1px solid #FFD591; border-radius: 12px; width: 560px; max-height: 70vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(173,104,0,0.2); }
+.modal-box.wide { width: 800px; background: #fff; border: 1px solid #e4e7ed; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 80vh; }
+.modal-header { padding: 14px 20px; border-bottom: 1px solid #FFD591; display: flex; justify-content: space-between; align-items: center; background: #FFE7BA; border-radius: 12px 12px 0 0; }
+.modal-box.wide .modal-header { background: #fff; border-bottom: 1px solid #e4e7ed; border-radius: 8px 8px 0 0; padding: 16px 24px; }
+.modal-header h3 { font-size: 15px; font-weight: 600; color: #AD6800; }
+.modal-box.wide .modal-header h3 { color: #303133; font-size: 16px; }
+.modal-close { width: 24px; height: 24px; border: none; background: #FFD591; border-radius: 50%; cursor: pointer; font-size: 14px; color: #AD6800; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: #FFBB5C; color: #8B4513; }
+.modal-box.wide .modal-close { background: transparent; color: #909399; width: 28px; height: 28px; font-size: 18px; border-radius: 4px; }
+.modal-box.wide .modal-close:hover { background: #f5f7fa; color: #606266; }
+.modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.modal-box.wide .modal-body { padding: 20px 24px; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid #e4e7ed; display: flex; justify-content: space-between; align-items: center; }
+.footer-right { display: flex; gap: 10px; }
+.footer-left { font-size: 13px; color: #606266; }
+.annotation-table { width: 100%; border-collapse: collapse; border: 1px solid #FFD591; border-radius: 8px; overflow: hidden; }
+.annotation-table th { background: #FFE7BA; color: #AD6800; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 1px solid #FFD591; }
+.annotation-table td { padding: 10px 14px; font-size: 13px; color: #AD6800; line-height: 1.7; border-bottom: 1px solid #FFE0B2; background: #FFF7E6; }
+.annotation-table tr:last-child td { border-bottom: none; }
+.annotation-table td:first-child { width: 100px; font-weight: 600; color: #AD6800; white-space: nowrap; }
+.annotation-table ul { margin: 4px 0; padding-left: 18px; }
+.annotation-table li { font-size: 12px; color: #AD6800; line-height: 1.7; margin-bottom: 2px; }
+.form-item { display: flex; flex-direction: column; gap: 6px; }
+.form-item.full { grid-column: 1 / -1; }
+.form-label { font-size: 13px; color: #606266; }
+.form-label .required { color: #EF4444; margin-right: 2px; }
+.form-input, .form-select, .form-textarea { height: 36px; padding: 0 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 13px; color: #303133; background: #fff; transition: border-color 0.2s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #3B82F6; }
+.form-textarea { height: 80px; padding: 10px 12px; resize: vertical; font-family: inherit; line-height: 1.6; }
+.form-row-inline { display: flex; gap: 16px; align-items: flex-start; }
+.checkbox-group { display: flex; gap: 20px; flex-wrap: wrap; padding: 8px 0; }
+.checkbox-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #303133; }
+.checkbox-item input[type="checkbox"] { cursor: pointer; }
+.radio-group { display: flex; gap: 20px; padding: 8px 0; }
+.radio-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #303133; }
+.radio-item input[type="radio"] { cursor: pointer; }
+.import-line-list { border: 1px solid #ebeef5; border-radius: 8px; max-height: 240px; overflow-y: auto; }
+.import-line-row { display: grid; grid-template-columns: 40px 2fr 1.2fr 1fr 1fr 1fr 1.5fr; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid #f0f2f5; cursor: pointer; transition: background 0.15s; }
+.import-line-row:hover { background: #f5f7fa; }
+.import-line-row.selected { background: #ecf5ff; }
+.import-line-row:last-child { border-bottom: none; }
+.import-line-row .line-info-sm { display: flex; flex-direction: column; gap: 2px; }
+.import-line-row .line-name-sm { font-size: 13px; font-weight: 500; color: #303133; }
+.import-line-row .line-code-sm { font-size: 11px; color: #909399; font-family: "SF Mono", "Monaco", "Inconsolata", monospace; }
+.import-filter-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.import-filter-row .filter-select { height: 30px; font-size: 12px; min-width: 100px; }
+.import-filter-row .filter-input { height: 30px; font-size: 12px; width: 140px; }
+.quote-info-card { background: #f8fafc; border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.quote-info-card .qi-left { display: flex; flex-direction: column; gap: 4px; }
+.quote-info-card .qi-name { font-size: 14px; font-weight: 600; color: #303133; }
+.quote-info-card .qi-meta { font-size: 12px; color: #909399; }
+.quote-info-card .qi-right { text-align: right; }
+.quote-info-card .qi-price-label { font-size: 11px; color: #909399; margin-bottom: 2px; }
+.quote-info-card .qi-price-val { font-size: 13px; font-weight: 500; color: #303133; font-family: "SF Mono", "Monaco", "Inconsolata", monospace; }
+.quote-preview-card { background: linear-gradient(135deg, #3B82F6, #60A5FA); border-radius: 8px; padding: 16px 20px; color: #fff; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.quote-preview-card .qp-title { font-size: 12px; opacity: 0.9; margin-bottom: 4px; }
+.quote-preview-card .qp-values { display: flex; gap: 24px; }
+.quote-preview-card .qp-item { display: flex; flex-direction: column; gap: 2px; }
+.quote-preview-card .qp-label { font-size: 11px; opacity: 0.8; }
+.quote-preview-card .qp-value { font-size: 18px; font-weight: 600; font-family: "SF Mono", "Monaco", "Inconsolata", monospace; }
+.quote-preview-card .qp-value small { font-size: 12px; font-weight: 400; opacity: 0.8; }
+.warn-tip { background: #FEF3C7; border-left: 3px solid #F59E0B; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #92400E; line-height: 1.6; margin-top: 14px; }
+.import-desc { font-size: 13px; color: #606266; line-height: 1.6; margin-bottom: 14px; padding: 10px 14px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #3B82F6; }
 </style>
 </head>
-<body><div class="anno-container">
-  <div class="anno-left-panel">
+<body>
 
-<div class="container">
-  <div class="left-panel" id="leftPanel">
-    <!-- 顶部导航 -->
-    <div class="top-nav">
-      <div class="logo">
-        <div class="logo-icon">P</div>
-        <span>POKO 商户后台</span>
-      </div>
-      <div class="nav-right">
-        <div class="user-info">
-          <div class="avatar">租</div>
-          <span>租户管理员</span>
-        </div>
-      </div>
-    </div>
+<div class="app-container">
+  <!-- 顶部标注工具栏 -->
+  <div class="annotation-toolbar">
+    <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+  </div>
 
-    <div class="main-content">
-      <!-- 左侧菜单 -->
-      <div class="sidebar">
-        <div class="menu-group">
-          <div class="menu-title">资金管理</div>
-          <div class="menu-item"><span class="icon-dot"></span>账户总览</div>
-          <div class="menu-item"><span class="icon-dot"></span>充值记录</div>
-          <div class="menu-item"><span class="icon-dot"></span>利润明细</div>
+  <!-- 左侧原型区 -->
+  <div class="preview-area">
+    <div class="page-container">
+
+      <!-- 顶部导航 -->
+      <div class="top-nav">
+        <div class="logo">
+          <div class="logo-icon">P</div>
+          <span>POKO 商户后台</span>
         </div>
-        <div class="menu-group">
-          <div class="menu-title">物流管理</div>
-          <div class="menu-item active"><span class="icon-dot"></span>线路管理</div>
-        </div>
-        <div class="menu-group">
-          <div class="menu-title">系统设置</div>
-          <div class="menu-item"><span class="icon-dot"></span>租户管理</div>
-          <div class="menu-item"><span class="icon-dot"></span>套餐管理</div>
-          <div class="menu-item"><span class="icon-dot"></span>系统设置</div>
+        <div class="nav-right">
+          <div class="user-info">
+            <div class="avatar">租</div>
+            <span>租户管理员</span>
+          </div>
         </div>
       </div>
 
-      <!-- 主内容区 -->
-      <div class="content">
-        <!-- 页面标题 -->
-        <div class="page-header anno-section">
-          <span class="anno-badge" style="top:0;right:0;background:rgba(59,130,246,0.15);" data-anno-id="1">1</span>
-          <div>
-            <div class="page-title">线路管理</div>
+      <!-- 页面标题 -->
+      <div class="page-header" id="anno-1" style="position:relative;">
+        <div class="page-title">线路管理</div>
+      </div>
+
+      <!-- 筛选区域 -->
+      <div class="filter-bar" id="anno-2" style="position:relative;">
+        <div class="anno-marker" data-id="2">2</div>
+        <div class="filter-row">
+          <div class="filter-item">
+            <span class="filter-label">运输方式</span>
+            <select class="filter-select">
+              <option>全部</option>
+              <option>空运</option>
+              <option>海运</option>
+              <option>海快</option>
+              <option>陆运</option>
+            </select>
           </div>
-        </div>
-
-        <!-- TAB切换 -->
-        <div class="tab-bar anno-section" id="tabBar" style="display:none;">
-          <span class="anno-badge" style="top:6px;right:8px;" data-anno-id="2">2</span>
-          <div class="tab-item active" onclick="switchTab(this,'all')">全部线路<span class="tab-count">(8)</span></div>
-        </div>
-
-        <!-- 筛选区域 -->
-        <div class="filter-bar anno-section" id="filterBar">
-          <span class="anno-badge" style="top:6px;right:8px;" data-anno-id="3">3</span>
-          <div class="filter-row">
-            <div class="filter-item">
-              <span class="filter-label">运输方式</span>
-              <select class="filter-select">
-                <option>全部</option>
-                <option>空运</option>
-                <option>海运</option>
-                <option>海快</option>
-                <option>陆运</option>
-              </select>
-            </div>
-            <div class="filter-item">
-              <span class="filter-label">线路状态</span>
-              <select class="filter-select">
-                <option>全部</option>
-                <option>已启用</option>
-                <option>已停用</option>
-              </select>
-            </div>
-            <div class="filter-item">
-              <span class="filter-label">服务支持</span>
-              <select class="filter-select">
-                <option>全部</option>
-                <option>保价</option>
-                <option>包税</option>
-              </select>
-            </div>
-            <div class="filter-item">
-              <span class="filter-label">目的国</span>
-              <select class="filter-select">
-                <option>全部</option>
-                <option>美国</option>
-                <option>英国</option>
-                <option>法国</option>
-                <option>德国</option>
-                <option>加拿大</option>
-                <option>墨西哥</option>
-                <option>澳大利亚</option>
-                <option>新西兰</option>
-                <option>日本</option>
-                <option>韩国</option>
-                <option>中国香港</option>
-                <option>中国台湾</option>
-              </select>
-            </div>
-            <div class="filter-item">
-              <span class="filter-label">关键词</span>
-              <input type="text" class="filter-input" placeholder="搜索线路名称/编码">
-            </div>
-            <div style="margin-left: auto; display: flex; gap: 10px;">
-              <button class="btn btn-default" onclick="resetFilter()">重置</button>
-              <button class="btn btn-primary" onclick="doSearch()">查询</button>
-            </div>
+          <div class="filter-item">
+            <span class="filter-label">线路状态</span>
+            <select class="filter-select">
+              <option>全部</option>
+              <option>已启用</option>
+              <option>已停用</option>
+            </select>
           </div>
-        </div>
-
-        <!-- 操作栏 + 表格 -->
-        <div class="table-card" id="tableCard">
-
-          <div style="padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f2f5;">
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button class="btn btn-primary btn-sm" onclick="openImportModal()">+ 引用平台线路</button>
-            </div>
-            <div style="font-size:13px;color:#606266;">共 <b style="color:#303133;">8</b> 条线路</div>
+          <div class="filter-item">
+            <span class="filter-label">服务支持</span>
+            <select class="filter-select">
+              <option>全部</option>
+              <option>保价</option>
+              <option>包税</option>
+            </select>
           </div>
+          <div class="filter-item">
+            <span class="filter-label">目的国</span>
+            <select class="filter-select">
+              <option>全部</option>
+              <option>美国</option>
+              <option>英国</option>
+              <option>法国</option>
+              <option>德国</option>
+              <option>加拿大</option>
+              <option>澳大利亚</option>
+              <option>新西兰</option>
+              <option>日本</option>
+              <option>中国香港</option>
+              <option>中国台湾</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">仓库</span>
+            <select class="filter-select">
+              <option>全部</option>
+              <option>广州仓</option>
+              <option>深圳仓</option>
+            </select>
+          </div>
+          <div class="filter-item" style="flex:1;">
+            <input type="text" class="filter-input" placeholder="搜索线路名称/编码" style="width:220px;">
+          </div>
+          <button class="btn btn-default btn-sm">搜索</button>
+          <button class="btn btn-default btn-sm">重置</button>
+        </div>
+      </div>
 
-          <table style="min-width:1400px;">
+      <!-- 表格区域 -->
+      <div class="table-card" id="anno-3" style="position:relative;">
+        <div class="anno-marker" data-id="3">3</div>
+        <div class="toolbar">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary btn-sm" onclick="openImportModal()">+ 引用平台线路</button>
+          </div>
+          <div style="font-size:13px;color:#606266;">共 <b style="color:#303133;">8</b> 条线路</div>
+        </div>
+        <div class="table-wrapper">
+          <table>
             <thead>
               <tr>
-                <th class="anno-target" id="anno-target-4" width="220"><span class="anno-badge" data-anno-id="4" onclick="openAnnoModal(4)">4</span>线路信息</th>
+                <th width="220">线路信息</th>
                 <th width="70" class="sortable" title="排序值越小越靠前">排序<span class="sort-icon">↕</span></th>
                 <th width="100">物流渠道</th>
                 <th width="80">目的国</th>
@@ -916,13 +315,16 @@
                 <th width="80">计费方式</th>
                 <th width="100">服务支持</th>
                 <th width="95">引用时间</th>
-                <th class="anno-target" id="anno-target-5" width="65"><span class="anno-badge" data-anno-id="5" onclick="openAnnoModal(5)">5</span>状态</th>
-                <th class="anno-target action-col" id="anno-target-6" width="170"><span class="anno-badge" data-anno-id="6" onclick="openAnnoModal(6)">6</span>操作</th>
+                <th width="65" id="anno-4" style="position:relative;">
+                  <div class="anno-marker" data-id="4">4</div>状态
+                </th>
+                <th class="action-col" width="170" id="anno-5" style="position:relative;">
+                  <div class="anno-marker" data-id="5">5</div>操作
+                </th>
               </tr>
             </thead>
             <tbody id="tableBody">
-              <!-- 平台线路1 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">英国空运专线</div>
@@ -933,20 +335,18 @@
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">1</span></td>
                 <td><span class="provider-name">英伦物流</span></td>
                 <td>
-                    <div class="country-multi" title="英国, 法国, 德国">
-                      🇬🇧 英国, 🇫🇷 法国, 🇩🇪 德国
-                    </div>
-                  </td>
+                  <div class="country-multi" title="英国, 法国, 德国">🇬🇧 英国, 🇫🇷 法国, 🇩🇪 德国</div>
+                </td>
                 <td><span class="warehouse-tag">广州仓</span></td>
                 <td><span class="transport-tag air">空运</span></td>
                 <td>3-5工作日</td>
                 <td><span class="amount">¥96</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥50<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥50<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实抛取大</td>
                 <td>
                   <div class="service-tags">
@@ -955,15 +355,17 @@
                   </div>
                 </td>
                 <td style="font-size:12px;color:#909399;">2026-03-15</td>
-                <td><span class="anno-badge" data-anno-id="7" onclick="openAnnoModal(7)" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#409EFF;color:#fff;font-size:11px;margin-right:4px;cursor:pointer;vertical-align:middle;">7</span><span class="status-tag active">已启用</span><div style="margin-top:2px;"><span style="display:inline-block;padding:1px 6px;background:#FEF3C7;color:#D97706;font-size:10px;border-radius:2px;">价格已变更</span></div></td>
+                <td>
+                  <span class="status-tag active">已启用</span>
+                  <div style="margin-top:2px;"><span style="display:inline-block;padding:1px 6px;background:#FEF3C7;color:#D97706;font-size:10px;border-radius:2px;">价格已变更</span></div>
+                </td>
                 <td class="action-col">
                   <button class="btn-text" onclick="goDetail()">查看</button>
                   <button class="btn-text danger" onclick="openQuoteModal()">报价设置</button>
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路2 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">中美海运大件专线</div>
@@ -974,20 +376,18 @@
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">2</span></td>
                 <td><span class="provider-name">广州海运</span></td>
                 <td>
-                    <div class="country-multi" title="美国, 加拿大, 墨西哥">
-                      🇺🇸 美国, 🇨🇦 加拿大, 🇲🇽 墨西哥
-                    </div>
-                  </td>
+                  <div class="country-multi" title="美国, 加拿大, 墨西哥">🇺🇸 美国, 🇨🇦 加拿大, 🇲🇽 墨西哥</div>
+                </td>
                 <td><span class="warehouse-tag">广州仓</span></td>
                 <td><span class="transport-tag sea">海运</span></td>
                 <td>25-35工作日</td>
                 <td><span class="amount">¥28</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥12<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥12<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实重</td>
                 <td>
                   <div class="service-tags">
@@ -1003,8 +403,7 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路3 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">加拿大海快专线</div>
@@ -1015,20 +414,18 @@
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">3</span></td>
                 <td><span class="provider-name">海逸物流</span></td>
                 <td>
-                    <div class="country-multi" title="加拿大, 美国">
-                      🇨🇦 加拿大, 🇺🇸 美国
-                    </div>
-                  </td>
+                  <div class="country-multi" title="加拿大, 美国">🇨🇦 加拿大, 🇺🇸 美国</div>
+                </td>
                 <td><span class="warehouse-tag">深圳仓</span></td>
                 <td><span class="transport-tag sea-express">海快</span></td>
                 <td>10-15工作日</td>
                 <td><span class="amount">¥45</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥22<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥22<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实抛取大</td>
                 <td>
                   <div class="service-tags">
@@ -1036,6 +433,7 @@
                     <span class="service-tag tax">包税</span>
                   </div>
                 </td>
+                <td style="font-size:12px;color:#909399;">2026-05-10</td>
                 <td><span class="status-tag active">已启用</span></td>
                 <td class="action-col">
                   <button class="btn-text" onclick="goDetail()">查看</button>
@@ -1043,8 +441,7 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路4 - 已停用 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">中港陆运快线</div>
@@ -1054,17 +451,17 @@
                 </td>
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">5</span></td>
                 <td><span class="provider-name">深圳速达</span></td>
-                <td><span class="country-tag">🇭🇰 中国香港</span></td>
+                <td><span class="country-multi">🇭🇰 中国香港</span></td>
                 <td><span class="warehouse-tag">深圳仓</span></td>
                 <td><span class="transport-tag land">陆运</span></td>
                 <td>1-2工作日</td>
                 <td><span class="amount">¥18</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥8<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥8<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实抛取大</td>
                 <td>
                   <div class="service-tags">
@@ -1072,15 +469,17 @@
                   </div>
                 </td>
                 <td style="font-size:12px;color:#909399;">2026-02-20</td>
-                <td><span class="status-tag inactive">已停用</span><div style="margin-top:2px;"><span style="display:inline-block;padding:1px 6px;background:#FEE2E2;color:#DC2626;font-size:10px;border-radius:2px;">平台已停用</span></div></td>
+                <td>
+                  <span class="status-tag inactive">已停用</span>
+                  <div style="margin-top:2px;"><span style="display:inline-block;padding:1px 6px;background:#FEE2E2;color:#DC2626;font-size:10px;border-radius:2px;">平台已停用</span></div>
+                </td>
                 <td class="action-col">
                   <button class="btn-text" onclick="goDetail()">查看</button>
                   <button class="btn-text danger" onclick="openQuoteModal()">报价设置</button>
                   <button class="btn-text">启用</button>
                 </td>
               </tr>
-              <!-- 平台线路5 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">澳洲空运专线</div>
@@ -1091,20 +490,18 @@
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">8</span></td>
                 <td><span class="provider-name">澳航物流</span></td>
                 <td>
-                    <div class="country-multi" title="澳大利亚, 新西兰, 中国台湾">
-                      🇦🇺 澳新, 🇹🇼 中国台湾<span class="country-more">+1</span>
-                    </div>
-                  </td>
+                  <div class="country-multi" title="澳大利亚, 新西兰, 中国台湾">🇦🇺 澳新, 🇹🇼 中国台湾<span class="country-more">+1</span></div>
+                </td>
                 <td><span class="warehouse-tag">广州仓</span></td>
                 <td><span class="transport-tag air">空运</span></td>
                 <td>5-7工作日</td>
                 <td><span class="amount">¥72</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥38<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥38<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实重</td>
                 <td>
                   <div class="service-tags">
@@ -1120,8 +517,7 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路6 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">新西兰海运</div>
@@ -1131,23 +527,24 @@
                 </td>
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">10</span></td>
                 <td><span class="provider-name">远洋物流</span></td>
-                <td><span class="country-tag">🇳🇿 新西兰</span></td>
+                <td><span class="country-multi">🇳🇿 新西兰</span></td>
                 <td><span class="warehouse-tag">广州仓</span></td>
                 <td><span class="transport-tag sea">海运</span></td>
                 <td>30-40工作日</td>
                 <td><span class="amount">¥32</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥15<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥15<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实重</td>
                 <td>
                   <div class="service-tags">
                     <span class="service-tag tax">包税</span>
                   </div>
                 </td>
+                <td style="font-size:12px;color:#909399;">2026-06-10</td>
                 <td><span class="status-tag active">已启用</span></td>
                 <td class="action-col">
                   <button class="btn-text" onclick="goDetail()">查看</button>
@@ -1155,8 +552,7 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路7 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">德国空运专线</div>
@@ -1167,20 +563,18 @@
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">15</span></td>
                 <td><span class="provider-name">欧航物流</span></td>
                 <td>
-                    <div class="country-multi" title="德国, 法国, 荷兰, 比利时">
-                      🇩🇪 德国, 🇫🇷 法国, 🇳🇱 荷兰<span class="country-more">+1</span>
-                    </div>
-                  </td>
+                  <div class="country-multi" title="德国, 法国, 荷兰, 比利时">🇩🇪 德国, 🇫🇷 法国, 🇳🇱 荷兰<span class="country-more">+1</span></div>
+                </td>
                 <td><span class="warehouse-tag">深圳仓</span></td>
                 <td><span class="transport-tag air">空运</span></td>
                 <td>4-6工作日</td>
                 <td><span class="amount">¥88</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥45<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥45<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实抛取大</td>
                 <td>
                   <div class="service-tags">
@@ -1196,8 +590,7 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              <!-- 平台线路8 -->
-              <tr data-source="platform">
+              <tr>
                 <td>
                   <div class="line-name">
                     <div class="line-title">日本海运专线</div>
@@ -1207,23 +600,24 @@
                 </td>
                 <td style="text-align:center;"><span class="amount" style="font-size:14px;font-weight:600;">20</span></td>
                 <td><span class="provider-name">日通海运</span></td>
-                <td><span class="country-tag">🇯🇵 日本</span></td>
+                <td><span class="country-multi">🇯🇵 日本</span></td>
                 <td><span class="warehouse-tag">广州仓</span></td>
                 <td><span class="transport-tag sea">海运</span></td>
                 <td>15-20工作日</td>
                 <td><span class="amount">¥25</span><span class="amount-unit">/kg</span></td>
                 <td>
-                    <div style="display:flex;flex-direction:column;gap:2px;">
-                      <span class="amount" style="font-size:13px;">¥11<span class="amount-unit">/kg起</span></span>
-                      <span style="font-size:11px;color:#909399;">3个重量段</span>
-                    </div>
-                  </td>
+                  <div style="display:flex;flex-direction:column;gap:2px;">
+                    <span class="amount" style="font-size:13px;">¥11<span class="amount-unit">/kg起</span></span>
+                    <span style="font-size:11px;color:#909399;">3个重量段</span>
+                  </div>
+                </td>
                 <td>实重</td>
                 <td>
                   <div class="service-tags">
                     <span class="service-tag insure">保价</span>
                   </div>
                 </td>
+                <td style="font-size:12px;color:#909399;">2026-07-01</td>
                 <td><span class="status-tag active">已启用</span></td>
                 <td class="action-col">
                   <button class="btn-text" onclick="goDetail()">查看</button>
@@ -1231,49 +625,81 @@
                   <button class="btn-text danger">停用</button>
                 </td>
               </tr>
-              </tbody>
+            </tbody>
           </table>
+        </div>
 
-          <!-- 分页 -->
-          <div class="pagination">
-            <div class="pagination-info">
-              共 <b>12</b> 条记录，第 <b>1</b> / <b>2</b> 页
-            </div>
-            <div class="pagination-controls">
-              <select class="page-size-select">
-                <option>10条/页</option>
-                <option>20条/页</option>
-                <option>50条/页</option>
-              </select>
-              <button class="page-btn" disabled onclick="prevPage()">上一页</button>
-              <button class="page-btn active" onclick="goPage(this,1)">1</button>
-              <button class="page-btn" onclick="goPage(this,2)">2</button>
-              <button class="page-btn" onclick="nextPage()">下一页</button>
-            </div>
+        <!-- 分页 -->
+        <div class="pagination">
+          <div class="pagination-info">共 <b>12</b> 条记录，第 <b>1</b> / <b>2</b> 页</div>
+          <div class="pagination-controls">
+            <select class="page-size-select">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+            <button class="page-btn" disabled>上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">下一页</button>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /page-container -->
+  </div><!-- /preview-area -->
 
   <!-- 右侧标注面板 -->
-  
-</div>
+  <div class="annotation-panel" id="annotation-panel">
+    <div class="panel-header">
+      <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+      <span>📌 标注说明</span>
+    </div>
+    <div id="annotation-list"></div>
+  </div>
 
-<!-- 标注详情弹窗 -->
-<div class="modal-mask" id="detailModal">
-  <div class="modal-box">
+  <!-- 折叠态悬浮按钮 -->
+  <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+
+</div><!-- /app-container -->
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
     <div class="modal-header">
-      <h3 id="modalTitle">标注详情</h3>
+      <div class="modal-title" id="modal-title">标注详情</div>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
-    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-body">
+      <table class="detail-table" id="detail-table"></table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+      <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+      <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+      <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+      <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📌 标注管理</div>
+      <button class="modal-close" onclick="closeManageModal()">×</button>
+    </div>
+    <div class="modal-body" id="manage-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+    </div>
   </div>
 </div>
 
 <!-- 引用平台线路弹窗 -->
-<div class="modal-mask" id="importModal">
-  <div class="modal-box wide">
+<div class="modal-overlay" id="importModal">
+  <div class="modal wide">
     <div class="modal-header">
       <h3>引用平台线路</h3>
       <button class="modal-close" onclick="closeImportModal()">×</button>
@@ -1282,29 +708,28 @@
       <div class="import-desc">
         选择要引用的平台线路，设置加价后用户端展示加价后的价格。平台线路由运营总台统一维护，质量有保障。
       </div>
-
-      <h4>选择线路</h4>
+      <h4 style="font-size:14px;font-weight:600;color:#303133;margin-bottom:10px;">选择线路</h4>
       <div class="import-filter-row">
         <select class="filter-select">
-            <option>全部目的国</option>
-            <option>美国</option>
-            <option>英国</option>
-            <option>德国</option>
-            <option>加拿大</option>
-            <option>澳大利亚</option>
-            <option>新西兰</option>
-            <option>日本</option>
-            <option>中国香港</option>
-            <option>中国台湾</option>
-          </select>
-        <select class="filter-select" style="height:30px;font-size:12px;min-width:100px;">
+          <option>全部运输方式</option>
+          <option>空运</option>
+          <option>海运</option>
+          <option>海快</option>
+          <option>陆运</option>
+        </select>
+        <select class="filter-select">
           <option>全部目的国</option>
           <option>美国</option>
           <option>英国</option>
+          <option>德国</option>
           <option>加拿大</option>
           <option>澳大利亚</option>
+          <option>新西兰</option>
+          <option>日本</option>
+          <option>中国香港</option>
+          <option>中国台湾</option>
         </select>
-        <input type="text" class="filter-input" style="height:30px;font-size:12px;width:160px;" placeholder="搜索线路名称/编码">
+        <input type="text" class="filter-input" placeholder="搜索线路名称/编码" style="width:180px;">
       </div>
       <div class="import-line-list">
         <div class="import-line-row selected" onclick="selectImportLine(this)">
@@ -1313,15 +738,13 @@
             <div class="line-name-sm">英国空运专线</div>
             <div class="line-code-sm">TL000001</div>
           </div>
-          <div style="font-size:12px;color:#30333;">
-            <div class="country-multi" title="英国, 法国, 德国" style="max-width:90px;">🇬🇧 英, 🇫🇷 法, 🇩🇪 德</div>
-          </div>
+          <div style="font-size:12px;color:#303133;"><div class="country-multi" title="英国, 法国, 德国" style="max-width:90px;">🇬🇧 英, 🇫🇷 法, 🇩🇪 德</div></div>
           <div><span class="transport-tag air">空运</span></div>
           <div><span class="amount">¥96</span><span class="amount-unit">/kg</span></div>
           <div style="font-size:12px;">
-                    <div><span class="amount" style="font-size:12px;">¥50起</span><span class="amount-unit">/kg</span></div>
-                    <div style="font-size:10px;color:#909399;">3段</div>
-                  </div>
+            <div><span class="amount" style="font-size:12px;">¥50起</span><span class="amount-unit">/kg</span></div>
+            <div style="font-size:10px;color:#909399;">3段</div>
+          </div>
           <div>
             <span class="service-tag insure">保价</span>
             <span class="service-tag tax">包税</span>
@@ -1333,15 +756,13 @@
             <div class="line-name-sm">中美海运大件专线</div>
             <div class="line-code-sm">TL000002</div>
           </div>
-          <div style="font-size:12px;color:#30333;">
-            <div class="country-multi" title="美国, 加拿大, 墨西哥" style="max-width:90px;">🇺🇸 美, 🇨🇦 加, 🇲🇽 墨</div>
-          </div>
+          <div style="font-size:12px;color:#303133;"><div class="country-multi" title="美国, 加拿大, 墨西哥" style="max-width:90px;">🇺🇸 美, 🇨🇦 加, 🇲🇽 墨</div></div>
           <div><span class="transport-tag sea">海运</span></div>
           <div><span class="amount">¥28</span><span class="amount-unit">/kg</span></div>
           <div style="font-size:12px;">
-                    <div><span class="amount" style="font-size:12px;">¥12起</span><span class="amount-unit">/kg</span></div>
-                    <div style="font-size:10px;color:#909399;">3段</div>
-                  </div>
+            <div><span class="amount" style="font-size:12px;">¥12起</span><span class="amount-unit">/kg</span></div>
+            <div style="font-size:10px;color:#909399;">3段</div>
+          </div>
           <div>
             <span class="service-tag insure">保价</span>
             <span class="service-tag tax">包税</span>
@@ -1353,15 +774,13 @@
             <div class="line-name-sm">加拿大海快专线</div>
             <div class="line-code-sm">TL000003</div>
           </div>
-          <div style="font-size:12px;color:#30333;">
-            <div class="country-multi" title="加拿大, 美国" style="max-width:90px;">🇨🇦 加拿大, 🇺🇸 美国</div>
-          </div>
+          <div style="font-size:12px;color:#303133;"><div class="country-multi" title="加拿大, 美国" style="max-width:90px;">🇨🇦 加拿大, 🇺🇸 美国</div></div>
           <div><span class="transport-tag sea-express">海快</span></div>
           <div><span class="amount">¥45</span><span class="amount-unit">/kg</span></div>
           <div style="font-size:12px;">
-                    <div><span class="amount" style="font-size:12px;">¥22起</span><span class="amount-unit">/kg</span></div>
-                    <div style="font-size:10px;color:#909399;">3段</div>
-                  </div>
+            <div><span class="amount" style="font-size:12px;">¥22起</span><span class="amount-unit">/kg</span></div>
+            <div style="font-size:10px;color:#909399;">3段</div>
+          </div>
           <div>
             <span class="service-tag insure">保价</span>
             <span class="service-tag tax">包税</span>
@@ -1373,15 +792,13 @@
             <div class="line-name-sm">澳洲空运专线</div>
             <div class="line-code-sm">TL000005</div>
           </div>
-          <div style="font-size:12px;color:#30333;">
-            <div class="country-multi" title="澳大利亚, 新西兰, 中国台湾" style="max-width:90px;">🇦🇺 澳, 🇳🇿 新, 🇹🇼 台</div>
-          </div>
+          <div style="font-size:12px;color:#303133;"><div class="country-multi" title="澳大利亚, 新西兰, 中国台湾" style="max-width:90px;">🇦🇺 澳, 🇳🇿 新, 🇹🇼 台</div></div>
           <div><span class="transport-tag air">空运</span></div>
           <div><span class="amount">¥72</span><span class="amount-unit">/kg</span></div>
           <div style="font-size:12px;">
-                    <div><span class="amount" style="font-size:12px;">¥38起</span><span class="amount-unit">/kg</span></div>
-                    <div style="font-size:10px;color:#909399;">3段</div>
-                  </div>
+            <div><span class="amount" style="font-size:12px;">¥38起</span><span class="amount-unit">/kg</span></div>
+            <div style="font-size:10px;color:#909399;">3段</div>
+          </div>
           <div>
             <span class="service-tag insure">保价</span>
             <span class="service-tag tax">包税</span>
@@ -1389,18 +806,16 @@
         </div>
       </div>
 
-      <h4>报价加价设置</h4>
-      <div class="form-grid" style="margin-bottom:14px;">
-        <div class="form-item">
-          <label class="form-label">排序</label>
-          <div style="display:flex;align-items:center;">
-            <input type="number" class="form-input" placeholder="选填，越小越靠前" style="width:160px;">
-            <span style="margin-left:8px;font-size:12px;color:#909399;">不填默认排最后</span>
-          </div>
+      <h4 style="font-size:14px;font-weight:600;color:#303133;margin:20px 0 12px;">报价加价设置</h4>
+      <div style="margin-bottom:14px;">
+        <div class="form-label" style="margin-bottom:6px;">排序</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <input type="number" class="form-input" placeholder="选填，越小越靠前" style="width:180px;">
+          <span style="font-size:12px;color:#909399;">不填默认排最后</span>
         </div>
       </div>
-      <div class="form-grid">
-        <div class="form-item full">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+        <div class="form-item">
           <label class="form-label"><span class="required">*</span>加价方式</label>
           <div class="radio-group">
             <label class="radio-item">
@@ -1418,28 +833,16 @@
             <span style="margin-left:8px;font-size:13px;color:#909399;" id="markupFirstUnit">%</span>
           </div>
         </div>
-        <div class="form-item">
-          <label class="form-label">首重重量</label>
-          <div style="display:flex;align-items:center;">
-            <input type="number" class="form-input" value="1" readonly style="background:#f5f7fa;">
-            <span style="margin-left:8px;font-size:13px;color:#909399;">kg</span>
-          </div>
-        </div>
       </div>
 
-      <!-- 多段续重加价 -->
       <div style="margin-top:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <label class="form-label" style="font-weight:600;"><span class="required">*</span>续重分段加价</label>
-        </div>
+        <label class="form-label" style="font-weight:600;display:block;margin-bottom:10px;"><span class="required">*</span>续重分段加价</label>
         <div style="background:#f8fafc;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0;">
           <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;font-size:12px;color:#64748b;margin-bottom:8px;padding:0 4px;">
-            <span>重量段</span>
-            <span>平台单价</span>
-            <span>加价后单价</span>
+            <span>重量段</span><span>平台单价</span><span>加价后单价</span>
           </div>
           <div id="importMarkupTiers">
-            <div class="import-markup-tier" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
               <div style="font-size:13px;color:#334155;">1 - 10 kg</div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥50/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
@@ -1447,7 +850,7 @@
                 <span class="tier-markup-unit" style="font-size:12px;color:#909399;white-space:nowrap;">%</span>
               </div>
             </div>
-            <div class="import-markup-tier" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
               <div style="font-size:13px;color:#334155;">10 - 30 kg</div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥42/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
@@ -1455,8 +858,8 @@
                 <span class="tier-markup-unit" style="font-size:12px;color:#909399;white-space:nowrap;">%</span>
               </div>
             </div>
-            <div class="import-markup-tier tier-last" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;align-items:center;">
-              <div style="font-size:13px;color:#334155;">30 - <span style="color:#909399;font-family:Georgia, serif;font-size:15px;">+∞</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;align-items:center;">
+              <div style="font-size:13px;color:#334155;">30 - <span style="color:#909399;font-family:Georgia,serif;font-size:15px;">+∞</span></div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥35/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <input type="number" class="form-input tier-markup" value="15" min="0" step="0.1" style="height:30px;font-size:12px;flex:1;" oninput="calcQuotePrice()">
@@ -1471,22 +874,10 @@
         <div style="width:100%;">
           <div class="qp-title">加价后用户端展示价</div>
           <div class="qp-values" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;">
-            <div class="qp-item">
-              <span class="qp-label">首重</span>
-              <span class="qp-value" id="previewFirst">¥110.4<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重1-10kg</span>
-              <span class="qp-value" id="previewTier1">¥57.5<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重10-30kg</span>
-              <span class="qp-value" id="previewTier2">¥48.3<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重30+∞kg</span>
-              <span class="qp-value" id="previewTier3">¥40.3<small>/kg</small></span>
-            </div>
+            <div class="qp-item"><span class="qp-label">首重</span><span class="qp-value" id="previewFirst">¥110.4<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重1-10kg</span><span class="qp-value" id="previewTier1">¥57.5<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重10-30kg</span><span class="qp-value" id="previewTier2">¥48.3<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重30+∞kg</span><span class="qp-value" id="previewTier3">¥40.3<small>/kg</small></span></div>
           </div>
         </div>
       </div>
@@ -1502,17 +893,16 @@
 </div>
 
 <!-- 报价设置弹窗 -->
-<div class="modal-mask" id="quoteModal">
-  <div class="modal-box medium">
+<div class="modal-overlay" id="quoteModal">
+  <div class="modal wide">
     <div class="modal-header">
       <h3>报价设置</h3>
       <button class="modal-close" onclick="closeQuoteModal()">×</button>
     </div>
     <div class="modal-body">
-      <!-- 线路信息卡 -->
       <div class="quote-info-card">
         <div class="qi-left">
-          <div class="qi-name">英国空运专线 <span class="source-tag platform" style="font-size:10px;padding:1px 6px;vertical-align:middle;">平台线路</span></div>
+          <div class="qi-name">英国空运专线 <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;color:#fff;background:#3B82F6;vertical-align:middle;">平台线路</span></div>
           <div class="qi-meta">TL000001 · 空运 · 英国/法国/德国 · 3-5工作日</div>
         </div>
         <div class="qi-right">
@@ -1523,7 +913,7 @@
         </div>
       </div>
 
-      <h4>加价方式</h4>
+      <h4 style="font-size:14px;font-weight:600;color:#303133;margin-bottom:10px;">加价方式</h4>
       <div class="radio-group" style="padding:4px 0 8px;">
         <label class="radio-item">
           <input type="radio" name="quoteMarkupType" value="percent" checked onchange="toggleMarkupType('percent', true)"> 按百分比加价
@@ -1533,7 +923,7 @@
         </label>
       </div>
 
-      <div class="form-grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
         <div class="form-item">
           <label class="form-label"><span class="required">*</span>首重加价</label>
           <div style="display:flex;align-items:center;">
@@ -1550,19 +940,14 @@
         </div>
       </div>
 
-      <!-- 多段续重加价 -->
       <div style="margin-top:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <label class="form-label" style="font-weight:600;"><span class="required">*</span>续重分段加价</label>
-        </div>
+        <label class="form-label" style="font-weight:600;display:block;margin-bottom:10px;"><span class="required">*</span>续重分段加价</label>
         <div style="background:#f8fafc;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0;">
           <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;font-size:12px;color:#64748b;margin-bottom:8px;padding:0 4px;">
-            <span>重量段</span>
-            <span>平台单价</span>
-            <span>加价输入</span>
+            <span>重量段</span><span>平台单价</span><span>加价输入</span>
           </div>
           <div id="quoteMarkupTiers">
-            <div class="quote-markup-tier" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
               <div style="font-size:13px;color:#334155;">1 - 10 kg</div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥50/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
@@ -1570,7 +955,7 @@
                 <span class="quote-tier-markup-unit" style="font-size:12px;color:#909399;white-space:nowrap;">%</span>
               </div>
             </div>
-            <div class="quote-markup-tier" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:8px;align-items:center;">
               <div style="font-size:13px;color:#334155;">10 - 30 kg</div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥42/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
@@ -1578,8 +963,8 @@
                 <span class="quote-tier-markup-unit" style="font-size:12px;color:#909399;white-space:nowrap;">%</span>
               </div>
             </div>
-            <div class="quote-markup-tier tier-last" style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;align-items:center;">
-              <div style="font-size:13px;color:#334155;">30 - <span style="color:#909399;font-family:Georgia, serif;font-size:15px;">+∞</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;align-items:center;">
+              <div style="font-size:13px;color:#334155;">30 - <span style="color:#909399;font-family:Georgia,serif;font-size:15px;">+∞</span></div>
               <div style="font-size:13px;color:#334155;font-family:monospace;">¥35/kg</div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <input type="number" class="form-input quote-tier-markup" value="15" min="0" step="0.1" style="height:30px;font-size:12px;flex:1;" oninput="calcQuotePrice(true)">
@@ -1593,30 +978,16 @@
       <div class="quote-preview-card">
         <div style="width:100%;">
           <div class="qp-title">加价后用户端展示价</div>
-          <div class="qp-values" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px;">
-            <div class="qp-item">
-              <span class="qp-label">首重</span>
-              <span class="qp-value" id="quotePreviewFirst">¥110.4<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重1-10kg</span>
-              <span class="qp-value" id="quotePreviewTier1">¥57.5<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重10-30kg</span>
-              <span class="qp-value" id="quotePreviewTier2">¥48.3<small>/kg</small></span>
-            </div>
-            <div class="qp-item">
-              <span class="qp-label">续重30+∞kg</span>
-              <span class="qp-value" id="quotePreviewTier3">¥40.3<small>/kg</small></span>
-            </div>
+          <div class="qp-values" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;">
+            <div class="qp-item"><span class="qp-label">首重</span><span class="qp-value" id="quotePreviewFirst">¥110.4<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重1-10kg</span><span class="qp-value" id="quotePreviewTier1">¥57.5<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重10-30kg</span><span class="qp-value" id="quotePreviewTier2">¥48.3<small>/kg</small></span></div>
+            <div class="qp-item"><span class="qp-label">续重30+∞kg</span><span class="qp-value" id="quotePreviewTier3">¥40.3<small>/kg</small></span></div>
           </div>
         </div>
       </div>
 
-      <div class="warn-tip">
-        修改报价立即生效，新建运单按新价格计算，已生成的运单不受影响。
-      </div>
+      <div class="warn-tip">修改报价立即生效，新建运单按新价格计算，已生成的运单不受影响。</div>
     </div>
     <div class="modal-footer">
       <div></div>
@@ -1629,463 +1000,335 @@
 </div>
 
 <script>
-// ==================== 标注数据 ====================
+// ===== 标注数据 =====
 const annotations = [
   {
+    id: 1,
     title: '页面总说明',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>租户线路列表展示租户所有已引用的平台线路，支持查看、管理和配置租户的物流报价体系。MVP仅支持平台引用模式，无自建线路功能。顶部提供「引用平台线路」按钮。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>默认按排序值升序排列，排序值相同时按引用时间倒序，每页20条</li><li>MVP仅平台引用模式，无自建线路入口和TAB</li><li>状态仅2种：已启用/已停用，与平台侧解耦</li><li>目的国多选展示（标签，超3个折叠）</li><li>运输方式列：陆运/海快/空运/海运</li><li>引用时间列展示租户引用该线路的时间</li><li>操作列：报价设置、启用/停用、查看详情</li></ul></td></tr>
-        <tr><td>异常处理</td><td>暂无线路时显示空状态，引导引用平台线路；引用的平台线路被删除时展示"平台线路已失效"。</td></tr>
-      </table>
-    `
+    summary: '租户线路列表展示租户所有已引用的平台线路，支持查看、管理和配置物流报价体系。',
+    target: '#anno-1',
+    showMarker: false,
+    type: 'overview',
+    detail: {
+      feature: '线路管理页面供租户管理员管理已引用的平台物流线路，支持查看每条线路的报价、服务支持和启用状态，并可对单条线路进行报价设置、启用/停用操作。MVP阶段仅支持平台线路引用模式，无自建线路功能。顶部提供「引用平台线路」按钮。',
+      business: '列表默认按排序值升序排列，排序值相同时按引用时间倒序；每页最多显示20条记录；状态仅2种：已启用/已停用，与平台侧状态解耦。'
+    }
   },
   {
-    title: '线路筛选',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>支持按线路名称搜索，按状态、目的国、运输方式等多维度筛选线路，帮助租户快速定位目标线路。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>关键词搜索：支持线路名称/别名模糊搜索</li><li>状态筛选：全部/已启用/已停用</li><li>目的国筛选：支持多选</li><li>运输方式筛选：陆运/海快/空运/海运</li><li>无线路类型筛选（MVP仅平台引用）</li></ul></td></tr>
-        <tr><td>异常处理</td><td>筛选条件组合无数据时显示空状态，可重置筛选。</td></tr>
-      </table>
-    `
+    id: 2,
+    title: '线路筛选区',
+    summary: '支持按运输方式、线路状态、服务支持、目的国、仓库等多维度筛选线路。',
+    target: '#anno-2',
+    showMarker: true,
+    type: 'area',
+    detail: {
+      feature: '筛选区提供多维度组合筛选能力，帮助租户快速定位目标线路。',
+      display: '筛选维度包括：运输方式（空运/海运/海快/陆运）、线路状态（已启用/已停用）、服务支持（保价/包税）、目的国（下拉多选）、仓库（广州仓/深圳仓）。支持关键词搜索线路名称或编码。',
+      interaction: '点击「搜索」按当前条件过滤列表；点击「重置」清空所有筛选条件。',
+      exception: '筛选组合无数据时列表显示空状态提示。'
+    }
   },
   {
-    title: '引用平台线路',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>点击顶部「引用平台线路」按钮弹出引用弹窗，展示所有平台已启用的线路，选择后设置排序和加价方式，完成引用。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>一条平台线路租户只能引用一次</li><li>排序：选填，数值越小越靠前；不填默认排最后</li><li>加价方式2种：百分比% / 固定金额元/kg</li><li>首重加价和各段续重加价均≥0（允许0加价）</li><li>续重段数与平台线路一致，自动生成</li><li>实时价格预览：首重+各段续重价</li><li>线路别名选填，留空默认显示平台线路名称</li><li>引用后默认状态为已启用</li></ul></td></tr>
-        <tr><td>异常处理</td><td>平台无可引用线路时提示运营尚未启用线路；加价值为负数时提交不通过。</td></tr>
-      </table>
-    `
+    id: 3,
+    title: '引用平台线路弹窗',
+    summary: '从平台已启用的线路中选择一条，设置排序值和加价方式后完成引用。',
+    target: '#anno-3',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '点击顶部「引用平台线路」按钮弹出引用弹窗，租户从平台已启用线路列表中选择一条，设置排序和加价方式后完成引用，引用后默认状态为已启用。',
+      display: '弹窗左侧展示平台线路列表（支持按运输方式和目的国筛选），右侧设置排序值和各段加价。排序选填，不填默认排最后；加价方式支持按百分比和按固定金额两种。',
+      business: '一条平台线路租户只能引用一次；引用成功后自动出现在列表顶部；续重加价分段数与平台线路一致，自动生成对应段数；实时展示加价后各段用户端展示价格预览。',
+      exception: '平台无可引用线路时提示"运营尚未启用线路"；加价值为负数时提交不通过并提示。'
+    }
   },
   {
-    title: '线路核心字段',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>列表每行展示租户引用线路的核心信息，帮助租户快速了解线路属性和价格情况。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>线路编码：TL+6位数字，租户侧独立编码</li><li>线路名称/别名：设置别名则显示别名，否则显示平台线路名称</li><li>排序：数值越小越靠前，引用时可填写，不填默认排最后；支持点击表头排序</li><li>目的国：标签形式，超3个折叠</li><li>首重价=平台首重价+首重加价（用户价）</li><li>状态：已启用/已停用（与平台侧解耦，租户独立控制）</li><li>引用时间：租户引用该线路的时间</li></ul></td></tr>
-        <tr><td>异常处理</td><td>无</td></tr>
-      </table>
-    `
-  },
-  {
-    title: '平台状态提示',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>当关联的平台线路被停用时，展示"平台已停用"提示标签，提醒租户该线路平台侧已不可用。价格有变更时展示"价格已变更"提示。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>"平台已停用"是提示标签，不是状态变更，线路本身状态不变</li><li>平台停用后新提包不可选该线路，但租户启停开关仍可用</li><li>"价格已变更"提示标识，点击查看变更详情弹窗</li><li>租户查看价格变更后提示消失</li><li>加价是否调整由租户自行决定</li></ul></td></tr>
-        <tr><td>异常处理</td><td>无</td></tr>
-      </table>
-    `
-  },
-  {
-    title: '操作说明',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>功能说明</td><td>每条线路支持报价设置、启用/停用、查看详情三种操作，租户可灵活管理自己的线路报价和可用性。</td></tr>
-        <tr><td>规则约束</td><td><ul><li>报价设置：打开加价设置弹窗，修改加价方式和各段加价</li><li>启用/停用：租户独立控制线路状态，与平台侧解耦</li><li>查看详情：跳转到线路详情页</li><li>无删除功能，停用即可</li><li>修改加价后新提包按新价格计算，历史包裹不受影响</li><li>核心物流属性租户不可修改，从平台侧同步</li></ul></td></tr>
-        <tr><td>异常处理</td><td>启用/停用失败时给出错误提示。</td></tr>
-      </table>
-    `
-  },
-  {
+    id: 4,
     title: '线路状态说明',
-    content: `
-      <table class="annotation-table">
-        <tr><th>项目</th><th>说明</th></tr>
-        <tr><td>状态枚举</td><td>
-          <ul>
-            <li><span class="status-tag active" style="display:inline-block;padding:2px 8px;border-radius:4px;background:#f0f9eb;color:#67C23A;font-size:12px;">已启用</span> - 线路正常使用中，用户下单时可选</li>
-            <li><span class="status-tag inactive" style="display:inline-block;padding:2px 8px;border-radius:4px;background:#fef0f0;color:#F56C6C;font-size:12px;">已停用</span> - 线路暂停使用，用户下单时不可选</li>
-          </ul>
-        </td></tr>
-        <tr><td>触发条件</td><td><ul>
-          <li>引用平台线路后默认为"已启用"</li>
-          <li>租户手动点击"启用/停用"按钮切换状态</li>
-          <li>与平台侧解耦：即使平台线路停用，租户侧仍可独立控制启用/停用</li>
-        </ul></td></tr>
-        <tr><td>业务影响</td><td><ul>
-          <li><strong>已启用</strong>：用户下单时可选择该线路；报价正常展示；支持报价设置</li>
-          <li><strong>已停用</strong>：用户下单时不可选择该线路；报价数据保留但暂不生效；可重新启用恢复</li>
-        </ul></td></tr>
-        <tr><td>状态筛选</td><td>列表顶部支持按状态筛选：全部/已启用/已停用</td></tr>
-        <tr><td>异常处理</td><td>无。状态切换即时生效，无需审批。</td></tr>
-      </table>
-    `
+    summary: '线路状态分为已启用/已停用两种，与平台侧解耦，租户独立控制。',
+    target: '#anno-4',
+    showMarker: true,
+    type: 'state',
+    detail: {
+      feature: '每条线路独立展示启用状态，状态由租户手动控制，与平台侧状态解耦。',
+      state: '已启用：线路正常使用，用户下单时可选；已停用：线路暂停使用，用户下单时不可选，报价数据保留可重新启用。',
+      business: '当关联的平台线路被停用时，租户侧展示"平台已停用"提示标签（不影响租户侧启用状态）；平台价格发生变更时展示"价格已变更"提示，点击可查看变更详情。',
+      exception: '状态切换即时生效，无需审批或审核流程。'
+    }
+  },
+  {
+    id: 5,
+    title: '操作列说明',
+    summary: '每条线路支持查看详情、报价设置、启用/停用三种操作。',
+    target: '#anno-5',
+    showMarker: true,
+    type: 'interaction',
+    detail: {
+      feature: '操作列提供单条线路的快捷管理能力，包括查看详情、修改报价、切换启用状态。',
+      interaction: '「查看」：跳转线路详情页；「报价设置」：打开报价设置弹窗，修改各段加价值；「停用」/「启用」：切换线路状态。',
+      business: '修改报价后新建运单立即按新价格计算，历史已生成运单不受影响；租户不可修改核心物流属性（路由、重量限制等），如需调整须联系运营总台修改平台线路后重新引用。',
+      exception: '无删除功能线路停用即可；操作失败时给出错误提示。'
+    }
   }
 ];
 
-// ==================== TAB切换 ====================
-function switchTab(el, type) {
-  var tabs = document.querySelectorAll('.tab-item');
-  tabs.forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
-}
+const DETAIL_LABELS = {
+  feature: '功能说明',
+  display: '字段/展示规则',
+  interaction: '交互规则',
+  business: '业务规则',
+  state: '状态说明',
+  exception: '异常/边界',
+  copywriting: '文案规范'
+};
 
-// ==================== 引用平台线路弹窗 ====================
-function openImportModal() {
-  document.getElementById('importModal').classList.add('show');
-  calcQuotePrice();
-}
-function closeImportModal() {
-  document.getElementById('importModal').classList.remove('show');
-}
-function selectImportLine(row) {
-  var rows = document.querySelectorAll('.import-line-row');
-  rows.forEach(function(r) {
-    r.classList.remove('selected');
-    var radio = r.querySelector('input[type="radio"]');
-    if (radio) radio.checked = false;
-  });
-  row.classList.add('selected');
-  var radio = row.querySelector('input[type="radio"]');
-  if (radio) radio.checked = true;
-  calcQuotePrice();
-}
-function submitImport() {
-  alert('平台线路引用成功');
-  closeImportModal();
-}
+const STORAGE_KEY = 'annotated-prototype-tenant-route-manage';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
 
-// ==================== 报价设置弹窗 ====================
-function openQuoteModal() {
-  document.getElementById('quoteModal').classList.add('show');
-  calcQuotePrice(true);
+function loadCustomAnnotations() {
+  try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) customAnnotations = JSON.parse(saved); } catch(e) {}
 }
-function closeQuoteModal() {
-  document.getElementById('quoteModal').classList.remove('show');
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+  const list = document.getElementById('annotation-list');
+  const data = getActiveAnnotations();
+  list.innerHTML = data.map(item => `
+    <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+      <div class="annotation-header">
+        <div class="annotation-badge">${item.id}</div>
+        <div class="annotation-title">${item.title}</div>
+      </div>
+      <div class="annotation-summary">${item.summary}</div>
+    </div>
+  `).join('');
 }
-function submitQuote() {
-  alert('报价设置保存成功');
-  closeQuoteModal();
+function highlightMarker(id) {
+  const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+  if (marker) marker.classList.add('highlight');
+  const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+  if (item) item.classList.add('active');
 }
-
-// ==================== 加价方式切换 & 价格计算 ====================
-function toggleMarkupType(type, isQuote) {
-  var firstUnit = document.getElementById((isQuote ? 'quote' : '') + 'MarkupFirstUnit');
-  
-  if (type === 'percent') {
-    firstUnit.textContent = '%';
-  } else {
-    firstUnit.textContent = '元/kg';
+function unhighlightMarker(id) {
+  const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+  if (marker) marker.classList.remove('highlight');
+  const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+  if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+  marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+  marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+  marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) {
+  scrollToAnnotation(id);
+  setTimeout(() => showDetail(id), 300);
+}
+function scrollToAnnotation(id) {
+  const item = getActiveAnnotations().find(a => a.id === id);
+  const previewArea = document.querySelector('.preview-area');
+  if (item && previewArea) {
+    const target = document.querySelector(item.target);
+    if (target) {
+      const targetTop = target.offsetTop - 20;
+      previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+      target.classList.remove('anno-flash');
+      void target.offsetWidth;
+      target.classList.add('anno-flash');
+      setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
   }
-  // 续重分段的单位在calcQuotePrice中统一处理
+}
+function showDetail(id) {
+  const item = getActiveAnnotations().find(a => a.id === id);
+  if (!item) return;
+  currentAnnotation = item;
+  isEditing = false;
+  document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+  renderDetailTable(item);
+  document.getElementById('edit-btn').style.display = 'inline-flex';
+  document.getElementById('save-btn').style.display = 'none';
+  document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+  document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+  document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+  const detail = item.detail;
+  const rows = [];
+  const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+  moduleOrder.forEach(key => { if (detail[key]) rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key }); });
+  const table = document.getElementById('detail-table');
+  if (isEditing) {
+    table.innerHTML = rows.map(row => `<tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>`).join('');
+  } else {
+    table.innerHTML = rows.map(row => `<tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>`).join('');
+  }
+}
+function toggleEdit() {
+  isEditing = !isEditing;
+  renderDetailTable(currentAnnotation);
+  document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+  document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+  const textareas = document.querySelectorAll('#detail-table textarea');
+  if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+  const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+  if (!item) return;
+  textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+  currentAnnotation = item;
+  isEditing = false;
+  renderDetailTable(item);
+  document.getElementById('edit-btn').style.display = 'inline-flex';
+  document.getElementById('save-btn').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'inline-flex';
+  renderAnnotationList();
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '已保存 ✓';
+  setTimeout(() => { btn.textContent = '保存'; }, 1500);
+}
+function resetAnnotation() {
+  if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  customAnnotations = null;
+  const original = annotations.find(a => a.id === currentAnnotation.id);
+  currentAnnotation = original;
+  isEditing = false;
+  renderDetailTable(original);
+  document.getElementById('edit-btn').style.display = 'inline-flex';
+  document.getElementById('save-btn').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'none';
+  document.getElementById('delete-btn').style.display = 'none';
+  renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+  try { const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1'; if (collapsed) { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {}
+}
+function togglePanel() {
+  const panel = document.getElementById('annotation-panel');
+  const expandBtn = document.getElementById('panel-expand-btn');
+  const isCollapsed = panel.classList.toggle('collapsed');
+  expandBtn.classList.toggle('show', isCollapsed);
+  try { localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0'); } catch(e) {}
+}
+function openEditMode() {
+  const data = getActiveAnnotations();
+  let listHtml = '<div style="display:flex;flex-direction:column;">';
+  data.forEach(item => {
+    listHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+        <div class="annotation-badge">${item.id}</div>
+        <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+        <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+        ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+      </div>
+    </div>`;
+  });
+  listHtml += '</div>';
+  document.getElementById('manage-modal-body').innerHTML = listHtml;
+  document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+  const data = getActiveAnnotations();
+  const item = data.find(a => a.id === id);
+  if (!item || item.id === 1) return;
+  if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+  if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+  customAnnotations = customAnnotations.filter(a => a.id !== id);
+  customAnnotations.forEach((a, i) => { a.id = i + 1; });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+  renderAnnotationList();
+  openEditMode();
+}
+function deleteAnnotation() {
+  if (!currentAnnotation || currentAnnotation.id === 1) return;
+  if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+  if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+  customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+  customAnnotations.forEach((item, index) => { item.id = index + 1; });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+  closeModal();
+  renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+  const activeData = getActiveAnnotations();
+  const originalHTML = document.documentElement.outerHTML;
+  const dataStr = JSON.stringify(activeData, null, 2);
+  const replacement = 'const annotations = ' + dataStr + ';';
+  const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+  const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `物流线路管理_租户侧_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  const btn = document.getElementById('export-btn');
+  btn.textContent = '导出成功 ✓';
+  setTimeout(() => { btn.textContent = '导出HTML'; }, 2000);
+}
+
+// 业务逻辑
+function openImportModal() { document.getElementById('importModal').classList.add('show'); calcQuotePrice(); }
+function closeImportModal() { document.getElementById('importModal').classList.remove('show'); }
+function selectImportLine(row) {
+  document.querySelectorAll('.import-line-row').forEach(r => { r.classList.remove('selected'); r.querySelector('input[type="radio"]').checked = false; });
+  row.classList.add('selected');
+  row.querySelector('input[type="radio"]').checked = true;
+}
+function submitImport() { alert('平台线路引用成功'); closeImportModal(); }
+function openQuoteModal() { document.getElementById('quoteModal').classList.add('show'); calcQuotePrice(true); }
+function closeQuoteModal() { document.getElementById('quoteModal').classList.remove('show'); }
+function submitQuote() { alert('报价设置保存成功'); closeQuoteModal(); }
+function toggleMarkupType(type, isQuote) {
+  const unit = type === 'percent' ? '%' : '元/kg';
+  const prefix = isQuote ? 'quote' : '';
+  const firstUnit = document.getElementById(prefix + 'MarkupFirstUnit');
+  if (firstUnit) firstUnit.textContent = unit;
+  document.querySelectorAll('.' + prefix + 'tier-markup-unit').forEach(el => { el.textContent = unit; });
   calcQuotePrice(isQuote);
 }
-
 function calcQuotePrice(isQuote) {
-  // 平台基础价格（以英国空运专线为例）
-  var baseFirst = 96;
-  var baseTiers = [50, 42, 35]; // 三段续重单价
-  
-  var prefix = isQuote ? 'quote' : '';
-  var markupFirstEl = document.getElementById((isQuote ? 'quote' : '') + 'MarkupFirst');
-  var previewFirstEl = document.getElementById((isQuote ? 'quote' : '') + 'PreviewFirst');
-  var markupFirst = parseFloat(markupFirstEl.value) || 0;
-  
-  // 判断加价方式
-  var type = 'percent';
-  var radios = document.querySelectorAll('input[name="' + (isQuote ? 'quote' : '') + 'MarkupType"]');
-  radios.forEach(function(r) {
-    if (r.checked) type = r.value;
+  const baseFirst = 96;
+  const baseTiers = [50, 42, 35];
+  const prefix = isQuote ? 'quote' : '';
+  const markupFirst = parseFloat(document.getElementById(prefix + 'MarkupFirst')?.value) || 0;
+  const type = document.querySelector('input[name="' + prefix + 'MarkupType"]')?.checked ? 'percent' : 'fixed';
+  const radios = document.querySelectorAll('input[name="' + (isQuote ? 'quote' : '') + 'MarkupType"]');
+  radios.forEach(r => { if (r.checked) { type.valueOf = r.value; } });
+  let resultFirst;
+  if (type === 'percent') { resultFirst = baseFirst * (1 + markupFirst / 100); } else { resultFirst = baseFirst + markupFirst; }
+  const firstEl = document.getElementById(prefix + 'PreviewFirst');
+  if (firstEl) firstEl.innerHTML = '¥' + resultFirst.toFixed(1) + '<small>/kg</small>';
+  const tierInputs = document.querySelectorAll((isQuote ? '.quote-tier-markup' : '.tier-markup'));
+  tierInputs.forEach((input, i) => {
+    const markup = parseFloat(input.value) || 0;
+    let result;
+    if (type === 'percent') { result = baseTiers[i] * (1 + markup / 100); } else { result = baseTiers[i] + markup; }
+    const el = document.getElementById(prefix + 'PreviewTier' + (i + 1));
+    if (el) el.innerHTML = '¥' + result.toFixed(1) + '<small>/kg</small>';
   });
-  
-  // 更新单位显示
-  var unitText = type === 'percent' ? '%' : '元/kg';
-  var tierMarkupClass = isQuote ? '.quote-tier-markup-unit' : '.tier-markup-unit';
-  document.querySelectorAll(tierMarkupClass).forEach(function(el) {
-    el.textContent = unitText;
-  });
-  
-  // 计算首重
-  var resultFirst;
-  if (type === 'percent') {
-    resultFirst = baseFirst * (1 + markupFirst / 100);
-  } else {
-    resultFirst = baseFirst + markupFirst;
-  }
-  previewFirstEl.innerHTML = '¥' + resultFirst.toFixed(1) + '<small>/kg</small>';
-  
-  // 计算各段续重
-  var tierInputs = document.querySelectorAll(isQuote ? '.quote-tier-markup' : '.tier-markup');
-  for (var i = 0; i < tierInputs.length && i < baseTiers.length; i++) {
-    var markup = parseFloat(tierInputs[i].value) || 0;
-    var result;
-    if (type === 'percent') {
-      result = baseTiers[i] * (1 + markup / 100);
-    } else {
-      result = baseTiers[i] + markup;
-    }
-    var previewEl = document.getElementById((isQuote ? 'quote' : '') + 'PreviewTier' + (i + 1));
-    if (previewEl) {
-      previewEl.innerHTML = '¥' + result.toFixed(1) + '<small>/kg</small>';
-    }
-  }
 }
+function goDetail() { alert('跳转到线路详情页'); }
+document.getElementById('importModal').addEventListener('click', function(e) { if (e.target === this) closeImportModal(); });
+document.getElementById('quoteModal').addEventListener('click', function(e) { if (e.target === this) closeQuoteModal(); });
 
-// ==================== 通用功能 ====================
-function resetFilter() {
-  console.log('重置筛选');
-}
-function doSearch() {
-  console.log('执行查询');
-}
-function goDetail() {
-  alert('跳转到线路详情页');
-}
-
-function goPage(el, n) {
-  document.querySelectorAll('.page-btn').forEach(function(b) {
-    if (b.textContent.match(/^\d+$/)) b.classList.remove('active');
-  });
-  el.classList.add('active');
-}
-function prevPage() { console.log('上一页'); }
-function nextPage() { console.log('下一页'); }
-
-// ==================== 标注详情 ====================
-function showDetail(index) {
-  document.getElementById('modalTitle').textContent = annotations[index].title;
-  document.getElementById('modalBody').innerHTML = annotations[index].content;
-  document.getElementById('detailModal').classList.add('show');
-}
-function closeModal() {
-  document.getElementById('detailModal').classList.remove('show');
-}
-
-// ==================== 弹窗点击遮罩关闭 ====================
-document.getElementById('detailModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-// 标注徽章点击弹窗
-document.querySelectorAll('.anno-badge').forEach(function(badge, idx) {
-  badge.style.pointerEvents = 'auto';
-  badge.addEventListener('click', function(e) {
-    e.stopPropagation();
-    showDetail(idx);
-  });
-});
-document.getElementById('importModal').addEventListener('click', function(e) {
-  if (e.target === this) closeImportModal();
-});
-document.getElementById('quoteModal').addEventListener('click', function(e) {
-  if (e.target === this) closeQuoteModal();
-});
-</script>
-  </div>
-
-  <div class="anno-right-panel">
-    <h3>页面标注</h3>
-    <div class="anno-item" data-anno-id="1">
-      <div class="anno-item-header">
-        <span class="anno-item-num">1</span>
-        <div class="anno-item-title">页面总说明</div>
-      </div>
-    </div>
-    <div class="anno-item" data-anno-id="2">
-      <div class="anno-item-header">
-        <span class="anno-item-num">2</span>
-        <div class="anno-item-title">线路筛选</div>
-      </div>
-    </div>
-    <div class="anno-item" data-anno-id="3">
-      <div class="anno-item-header">
-        <span class="anno-item-num">3</span>
-        <div class="anno-item-title">引用平台线路</div>
-      </div>
-    </div>
-    <div class="anno-item" data-anno-id="4">
-      <div class="anno-item-header">
-        <span class="anno-item-num">4</span>
-        <div class="anno-item-title">线路核心字段</div>
-      </div>
-    </div>
-    <div class="anno-item" data-anno-id="5">
-      <div class="anno-item-header">
-        <span class="anno-item-num">5</span>
-        <div class="anno-item-title">平台状态提示</div>
-      </div>
-    </div>
-    <div class="anno-item" data-anno-id="6">
-      <div class="anno-item-header">
-        <span class="anno-item-num">6</span>
-        <div class="anno-item-title">操作说明</div>
-      </div>
-    </div>
-  </div>
-<div class="anno-item" data-anno-id="7">
-  <div class="anno-item-header">
-    <span class="anno-item-num">7</span>
-    <div class="anno-item-title">线路状态说明</div>
-  </div>
-  <div class="anno-item-desc">线路状态分为已启用/已停用两种，与平台侧解耦，租户独立控制。</div>
-</div>
-</div>
-
-<!-- 标注详情弹窗 -->
-<div class="anno-modal-mask" id="annoModalMask" onclick="annoCloseModalOnMask(event)">
-  <div class="anno-modal-box">
-    <div class="anno-modal-header">
-      <h3 id="annoModalTitle">标注详情</h3>
-      <button class="anno-modal-close" onclick="annoCloseModal()">×</button>
-    </div>
-    <div class="anno-modal-body" id="annoModalBody"></div>
-  </div>
-</div>
-
-<script>
-// ===== 新版标注系统交互逻辑 =====
-(function() {
-  // 获取所有标注数据（兼容两种格式）
-  function getAnnotationData() {
-    if (typeof annoData !== 'undefined') {
-      // 对象格式: { 1: {title, desc, rules, exception}, ... }
-      return annoData;
-    }
-    if (typeof annotations !== 'undefined') {
-      // 数组格式: [{title, content}, ...]
-      var result = {};
-      annotations.forEach(function(item, index) {
-        result[index + 1] = {
-          title: item.title,
-          desc: item.desc || '',
-          content: item.content || '',
-          rules: item.rules || '',
-          exception: item.exception || ''
-        };
-      });
-      return result;
-    }
-    return {};
-  }
-
-  var data = getAnnotationData();
-  var keys = Object.keys(data).map(Number).sort(function(a, b) { return a - b; });
-
-  // 为左侧角标添加data-anno-id属性
-  var badges = document.querySelectorAll('.anno-badge');
-  badges.forEach(function(badge, index) {
-    if (!badge.getAttribute('data-anno-id')) {
-      var num = badge.textContent.trim();
-      if (!isNaN(parseInt(num))) {
-        badge.setAttribute('data-anno-id', parseInt(num));
-      } else {
-        badge.setAttribute('data-anno-id', index + 1);
-      }
-    }
-    // 绑定点击事件打开弹窗
-    badge.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var id = badge.getAttribute('data-anno-id');
-      openAnnoDetailModal(parseInt(id));
-    });
-  });
-
-  // 为右侧标注条目绑定事件
-  var annoItems = document.querySelectorAll('.anno-item');
-  annoItems.forEach(function(item) {
-    var id = item.getAttribute('data-anno-id');
-    
-    // 悬停联动
-    item.addEventListener('mouseenter', function() {
-      highlightAnno(id);
-    });
-    item.addEventListener('mouseleave', function() {
-      unhighlightAnno(id);
-    });
-    
-    // 点击打开弹窗
-    item.addEventListener('click', function() {
-      openAnnoDetailModal(parseInt(id));
-    });
-  });
-
-  // 左侧角标悬停联动
-  badges.forEach(function(badge) {
-    var id = badge.getAttribute('data-anno-id');
-    var target = badge.closest('.anno-target') || badge.closest('.anno-section') || badge.parentElement;
-    if (target) {
-      target.addEventListener('mouseenter', function() {
-        highlightAnno(id);
-      });
-      target.addEventListener('mouseleave', function() {
-        unhighlightAnno(id);
-      });
-    }
-  });
-
-  function highlightAnno(id) {
-    var badge = document.querySelector('.anno-badge[data-anno-id="' + id + '"]');
-    var item = document.querySelector('.anno-item[data-anno-id="' + id + '"]');
-    if (badge) badge.classList.add('active');
-    if (item) item.classList.add('active');
-  }
-
-  function unhighlightAnno(id) {
-    var badge = document.querySelector('.anno-badge[data-anno-id="' + id + '"]');
-    var item = document.querySelector('.anno-item[data-anno-id="' + id + '"]');
-    if (badge) badge.classList.remove('active');
-    if (item) item.classList.remove('active');
-  }
-
-  function openAnnoDetailModal(id) {
-    var item = data[id];
-    if (!item) return;
-
-    document.getElementById('annoModalTitle').textContent = item.title || '标注详情';
-    
-    var bodyHtml = '';
-    // 如果有content字段（数组格式），直接使用
-    if (item.content) {
-      bodyHtml = item.content;
-      // 替换旧的table class
-      bodyHtml = bodyHtml.replace(/annotation-table/g, 'anno-modal-table');
-    } else {
-      // 对象格式：生成表格
-      bodyHtml = '<table class="anno-modal-table">';
-      if (item.desc) {
-        bodyHtml += '<tr><th>功能说明</th><td>' + item.desc + '</td></tr>';
-      }
-      if (item.rules) {
-        bodyHtml += '<tr><th>规则约束</th><td>' + item.rules + '</td></tr>';
-      }
-      if (item.exception) {
-        bodyHtml += '<tr><th>异常处理</th><td>' + item.exception + '</td></tr>';
-      }
-      bodyHtml += '</table>';
-    }
-    
-    document.getElementById('annoModalBody').innerHTML = bodyHtml;
-    document.getElementById('annoModalMask').classList.add('show');
-  }
-
-  // 暴露给全局使用
-  window.annoOpenModal = openAnnoDetailModal;
-  window.annoCloseModal = function() {
-    document.getElementById('annoModalMask').classList.remove('show');
-  };
-  window.annoCloseModalOnMask = function(e) {
-    if (e.target.id === 'annoModalMask') {
-      window.annoCloseModal();
-    }
-  };
-
-  // ESC键关闭弹窗
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      window.annoCloseModal();
-    }
-  });
-})();
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
 </script>
 </body>
 </html>
