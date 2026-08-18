@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平台线路新增编辑_v2.2.7</title>
+<style>
+/* ====== 标注系统CSS ====== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; }
+.app-container { display: flex; min-height: 100vh; }
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease; }
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header { padding: 16px; font-size: 15px; font-weight: 600; color: #333; border-bottom: 1px solid #E4E7ED; background: #F7F8FA; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 8px; }
+.panel-toggle-btn { width: 24px; height: 24px; border: none; background: #E8EAED; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-add-btn { width: 24px; height: 24px; border: none; background: #165DFF; color: #fff; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; margin-left: auto; flex-shrink: 0; }
+.panel-add-btn:hover { background: #0E42D2; }
+.panel-expand-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 36px; height: 48px; background: #165DFF; color: #fff; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15); }
+.panel-expand-btn.show { display: block; }
+.annotation-item { padding: 14px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.2s; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge { width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+.anno-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none; }
+.anno-marker.highlight, .anno-marker:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th { background: #FAFAFA; width: 100px; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; vertical-align: top; }
+.detail-table td { padding: 12px 16px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.7; }
+.detail-table textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; }
+.detail-table textarea:focus { border-color: #165DFF; }
+.btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); } 100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); } }
+
+/* ====== 产品界面样式 ====== */
+.page-container { background: #f0f2f5; min-height: 100vh; padding: 0; }
+.page-breadcrumb { padding: 12px 24px; font-size: 13px; color: #666; background: #fff; border-bottom: 1px solid #E4E7ED; }
+.page-breadcrumb a { color: #165DFF; text-decoration: none; }
+.page-breadcrumb span { margin: 0 6px; color: #ccc; }
+.page-header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.page-header h2 { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+.page-body { padding: 20px 24px; max-width: 900px; margin: 0 auto; }
+.section-block { margin-bottom: 20px; background: #fff; border-radius: 8px; padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: relative; }
+.section-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; gap: 6px; }
+.section-title::before { content: ''; width: 3px; height: 14px; background: #165DFF; border-radius: 2px; display: inline-block; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; margin-bottom: 14px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 13px; color: #555; font-weight: 500; }
+.form-label .required { color: #F53F3F; margin-left: 2px; }
+.form-input { height: 34px; padding: 0 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; color: #333; outline: none; background: #fff; }
+.form-input:focus { border-color: #165DFF; box-shadow: 0 0 0 2px rgba(22,93,255,0.1); }
+.form-input.readonly { background: #F7F8FA; color: #999; cursor: not-allowed; }
+.form-select { height: 34px; padding: 0 28px 0 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; color: #333; outline: none; appearance: none; background: #fff url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center; cursor: pointer; }
+.form-select:focus { border-color: #165DFF; }
+.form-select.placeholder { color: #bbb; }
+.tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #DCDFE6; color: #666; background: #fff; transition: all 0.15s; }
+.tag.selected { background: #E8F3FF; border-color: #165DFF; color: #165DFF; }
+.tag:hover { border-color: #165DFF; }
+.switch-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.switch { width: 36px; height: 20px; border-radius: 10px; background: #ccc; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.switch.on { background: #165DFF; }
+.switch::after { content: ''; width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.switch.on::after { left: 18px; }
+.switch-label { font-size: 13px; color: #333; }
+.price-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.price-table th { background: #FAFAFA; padding: 8px 10px; font-size: 12px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; text-align: center; }
+.price-table td { padding: 6px 8px; border: 1px solid #E4E7ED; text-align: center; }
+.price-table input { width: 100%; height: 28px; padding: 0 6px; border: 1px solid #DCDFE6; border-radius: 3px; font-size: 12px; text-align: center; outline: none; }
+.price-table input:focus { border-color: #165DFF; }
+.hint-text { font-size: 11px; color: #999; margin-top: 3px; }
+.hint-text.warn { color: #F97316; }
+.supply-hint { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #165DFF; margin-top: 2px; }
+.supply-hint svg { width: 12px; height: 12px; }
+.link-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #E8F3FF; color: #165DFF; border-radius: 3px; font-size: 11px; }
+.page-footer { padding: 16px 24px; background: #fff; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; max-width: 900px; margin: 0 auto; }
+.btn-cancel { padding: 8px 20px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #DCDFE6; background: #fff; color: #666; }
+.btn-cancel:hover { border-color: #999; }
+.btn-save { padding: 8px 20px; border-radius: 4px; font-size: 13px; cursor: pointer; border: none; background: #165DFF; color: #fff; font-weight: 500; }
+.btn-save:hover { background: #0E42D2; }
+.inline-group { display: flex; align-items: center; gap: 8px; }
+.unit { font-size: 12px; color: #999; flex-shrink: 0; }
+.cargo-checkbox-group { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.cargo-checkbox { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #333; cursor: pointer; }
+.cargo-checkbox input[type="checkbox"] { width: 15px; height: 15px; accent-color: #165DFF; cursor: pointer; }
+.textarea-field { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; line-height: 1.5; resize: vertical; outline: none; }
+.textarea-field:focus { border-color: #165DFF; }
+.cargo-type-mapping { display: flex; flex-direction: column; gap: 10px; }
+.cargo-type-row { display: flex; align-items: flex-start; gap: 8px; }
+.cargo-type-label { font-size: 12px; color: #666; white-space: nowrap; min-width: 90px; line-height: 28px; flex-shrink: 0; }
+.cargo-tags-readonly { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 28px; }
+.cargo-tag-readonly { padding: 3px 10px; border-radius: 4px; font-size: 12px; background: #F2F3F5; color: #4E5969; border: 1px solid #E4E7ED; }
+.cargo-tag-readonly.supplier { background: #FFF7E6; color: #D46B08; border-color: #FFE4B5; }
+.cargo-checkbox-group-sm { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.cargo-checkbox-sm { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #333; cursor: pointer; }
+.cargo-checkbox-sm input[type="checkbox"] { width: 14px; height: 14px; accent-color: #165DFF; cursor: pointer; }
+.country-tags-readonly { display: flex; flex-wrap: wrap; gap: 6px; }
+.country-tag-readonly { padding: 3px 10px; border-radius: 4px; font-size: 12px; background: #E8F3FF; color: #165DFF; border: 1px solid #BEDAFF; }
+.form-input.linked-readonly { background: #F7F8FA; color: #4E5969; border-color: #E4E7ED; }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <div class="preview-area">
+        <div class="page-container" id="anno-1" style="position: relative;">
+            <div class="anno-marker" data-id="1">1</div>
+
+            <!-- 面包屑 -->
+            <div class="page-breadcrumb">
+                <a href="#">首页</a><span>/</span><a href="#">物流管理</a><span>/</span><a href="#">平台线路</a><span>/</span>新增平台线路
+            </div>
+
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <h2>新增平台线路</h2>
+            </div>
+
+            <!-- 页面主体 -->
+            <div class="page-body">
+
+                <!-- 标注2：基本信息模块 -->
+                <div class="section-block" id="anno-2" style="position: relative;">
+                    <div class="anno-marker" data-id="2">2</div>
+                    <div class="section-title">基本信息</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">线路名称<span class="required">*</span></label>
+                            <input class="form-input" value="美国专线-优品南山" placeholder="从关联线路带出，可修改">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">线路编码</label>
+                            <input class="form-input readonly" value="LN-20260615-0038" readonly>
+                            <span class="hint-text">系统自动生成，不可修改</span>
+                        </div>
+                    </div>
+                    <!-- 四级级联选择：物流供应商 → 物流渠道 → 渠道产品 → 仓库 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">物流供应商<span class="required">*</span></label>
+                            <select class="form-select" id="cascade-supplier" onchange="onSupplierChange()">
+                                <option value="">请选择物流供应商</option>
+                                <option value="深圳优品供应链">深圳优品供应链</option>
+                                <option value="广州环球物流">广州环球物流</option>
+                                <option value="义乌集货通">义乌集货通</option>
+                            </select>
+                            <span class="supply-hint"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 10.5a.75.75 0 110-1.5.75.75 0 010 1.5zM8.75 4.5v4a.75.75 0 01-1.5 0v-4a.75.75 0 011.5 0z"/></svg>选择后联动物流渠道列表</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">物流渠道<span class="required">*</span></label>
+                            <select class="form-select" id="cascade-channel" onchange="onChannelChange()" disabled>
+                                <option value="">请先选择物流供应商</option>
+                            </select>
+                            <span class="hint-text">数据来源：所选物流供应商下的渠道</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">渠道产品<span class="required">*</span></label>
+                            <select class="form-select" id="cascade-product" onchange="onProductChange()" disabled>
+                                <option value="">请先选择物流渠道</option>
+                            </select>
+                            <span class="hint-text">数据来源：所选物流渠道下的产品</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">仓库<span class="required">*</span></label>
+                            <select class="form-select" id="cascade-warehouse" disabled>
+                                <option value="">请先选择渠道产品</option>
+                            </select>
+                            <span class="hint-text">数据来源：所选渠道产品可用的仓库</span>
+                        </div>
+                    </div>
+                    <div style="padding: 6px 10px; background: #F0F5FF; border-radius: 4px; margin-bottom: 14px; font-size: 11px; color: #4E5969; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="#165DFF"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 10.5a.75.75 0 110-1.5.75.75 0 010 1.5zM8.75 4.5v4a.75.75 0 01-1.5 0v-4a.75.75 0 011.5 0z"/></svg>
+                        级联关系：物流供应商 → 物流渠道 → 渠道产品 → 仓库，每级选择后自动过滤下级选项
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">时效<span class="required">*</span></label>
+                            <div class="inline-group">
+                                <input class="form-input" value="7-12" style="width: 80px;">
+                                <span class="unit">个工作日</span>
+                            </div>
+                        </div>
+                        <div class="form-group"></div>
+                    </div>
+
+                    <!-- 渠道产品联动区域：选择渠道产品后自动填充 -->
+                    <div id="channelProductInfo" style="display:none; margin-top: 4px;">
+                        <div style="padding: 6px 10px; background: #F0F5FF; border-radius: 4px; margin-bottom: 14px; font-size: 11px; color: #4E5969; display: flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="#165DFF"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 10.5a.75.75 0 110-1.5.75.75 0 010 1.5zM8.75 4.5v4a.75.75 0 01-1.5 0v-4a.75.75 0 011.5 0z"/></svg>
+                            以下字段从所选渠道产品自动带出
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">货物类型映射<span class="required">*</span></label>
+                                <div class="cargo-type-mapping">
+                                    <div class="cargo-type-row">
+                                        <span class="cargo-type-label">供应商货物类型：</span>
+                                        <div class="cargo-tags-readonly" id="supplierCargoTags">
+                                            <span class="cargo-tag-readonly supplier">普货</span>
+                                        </div>
+                                    </div>
+                                    <div class="cargo-type-row">
+                                        <span class="cargo-type-label">平台货物类型：</span>
+                                        <div class="cargo-checkbox-group-sm" id="platformCargoChecks">
+                                            <label class="cargo-checkbox-sm"><input type="checkbox" checked> 普货</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="hint-text">供应商货物类型只读；平台货物类型根据映射关系默认勾选，可编辑</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">目的国<span class="required">*</span></label>
+                                <div class="country-tags-readonly" id="productCountries">
+                                    <span class="country-tag-readonly">美国 🇺🇸</span>
+                                </div>
+                                <span class="link-badge">🔗 从渠道产品带出（只读）</span>
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin-top: 14px;">
+                            <div class="form-group">
+                                <label class="form-label">运输方式<span class="required">*</span></label>
+                                <input class="form-input linked-readonly" id="productTransport" value="空运" readonly>
+                                <span class="link-badge">🔗 从渠道产品带出（只读）</span>
+                            </div>
+                            <div class="form-group"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 标注3：价格配置模块 -->
+                <div class="section-block" id="anno-3" style="position: relative;">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <div class="section-title">价格配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><span style="color:#EF4444;margin-right:2px;">*</span>计费方式</label>
+                            <select class="form-select" id="billingType" onchange="onBillingTypeChange()">
+                                <option selected>实重</option>
+                                <option>实重与抛重取大</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="throwRatioField" style="display:none;">
+                            <label class="form-label"><span style="color:#EF4444;margin-right:2px;">*</span>抛比</label>
+                            <input class="form-input" id="throwRatio" placeholder="请输入抛比，如：5000">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><span style="color:#EF4444;margin-right:2px;">*</span>首重重量（kg）</label>
+                            <input class="form-input" value="1" placeholder="请输入首重重量">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><span style="color:#EF4444;margin-right:2px;">*</span>首重价格（元）</label>
+                            <input class="form-input" placeholder="请输入首重价格">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <label class="form-label" style="margin-bottom:0;"><span style="color:#EF4444;margin-right:2px;">*</span>续重分段价格</label>
+                            <button type="button" style="padding:4px 14px;font-size:12px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;" onclick="alert('添加分段')">+ 添加分段</button>
+                        </div>
+                        <table class="price-table">
+                            <thead>
+                                <tr><th>重量段</th><th>起始重量(kg)</th><th>结束重量(kg)</th><th>单价(元/kg)</th><th style="width:60px;">操作</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td style="color:#666;font-size:13px;">1</td>
+                                    <td><input value="10" style="width:80px;"></td>
+                                    <td><input value="50" style="width:80px;"></td>
+                                    <td style="color:#F53F3F;cursor:pointer;font-size:13px;">删除</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td style="color:#666;font-size:13px;">10</td>
+                                    <td><input value="30" style="width:80px;"></td>
+                                    <td><input value="42" style="width:80px;"></td>
+                                    <td style="color:#F53F3F;cursor:pointer;font-size:13px;">删除</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td style="color:#666;font-size:13px;">30</td>
+                                    <td><input placeholder="请输入" style="width:80px;border-color:#165DFF;"></td>
+                                    <td><input placeholder="请输入" style="width:80px;"></td>
+                                    <td style="color:#F53F3F;cursor:pointer;font-size:13px;">删除</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td id="last-start-weight" style="color:#666;font-size:13px;">30</td>
+                                    <td><span style="color:#999;font-size:13px;">+∞</span></td>
+                                    <td><input value="35" style="width:80px;"></td>
+                                    <td style="color:#999;font-size:13px;">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top:8px;font-size:12px;color:#86909C;display:flex;align-items:flex-start;gap:4px;">
+                            <span style="color:#F59E0B;">💡</span>
+                            <span>起始重量自动联动上一段结束重量；首重量变化时第1段起始重量同步更新；最后一段为无限续重（+∞）不可删除，最少保留1段续重。</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 标注4：收寄限制 -->
+                <div class="section-block" id="anno-4" style="position: relative;">
+                    <div class="anno-marker" data-id="4">4</div>
+                    <div class="section-title">收寄限制</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">最小限重（kg）</label>
+                            <input class="form-input" placeholder="如：0.1">
+                            <span class="hint-text">低于此重量的包裹不收件</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">最大限重（kg）</label>
+                            <input class="form-input" placeholder="如：30">
+                            <span class="hint-text">超过此重量的包裹不收件</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">最长边限制（cm）</label>
+                            <input class="form-input" placeholder="如：120">
+                            <span class="hint-text">包裹任一边超过此值不收件</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">三边之和限制（cm）</label>
+                            <input class="form-input" placeholder="如：200">
+                            <span class="hint-text">长+宽+高之和超过此值不收件</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 标注5：保价与包税配置 -->
+                <div class="section-block" id="anno-5" style="position: relative;">
+                    <div class="anno-marker" data-id="5">5</div>
+                    <div class="section-title">保价与包税配置</div>
+                    <!-- 保价服务区块 -->
+                    <div style="background:#F7F8FA;border-radius:6px;padding:16px;margin-bottom:14px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#165DFF;cursor:pointer;">
+                            <span style="font-size:14px;font-weight:600;color:#1a1a1a;">支持保价服务</span>
+                        </div>
+                        <div class="form-row" style="margin-bottom:0;">
+                            <div class="form-group">
+                                <label class="form-label">保价费率（%）</label>
+                                <input class="form-input" placeholder="如：2" style="height:36px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">最低保价费（元）</label>
+                                <input class="form-input" placeholder="如：50" style="height:36px;">
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin-top:14px;margin-bottom:0;">
+                            <div class="form-group">
+                                <label class="form-label">最高赔付上限（元）</label>
+                                <input type="number" class="form-input" placeholder="如：30000" style="height:36px;">
+                            </div>
+                            <div class="form-group"></div>
+                        </div>
+                    </div>
+                    <!-- 包税服务区块 -->
+                    <div style="background:#F7F8FA;border-radius:6px;padding:16px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#165DFF;cursor:pointer;">
+                            <span style="font-size:14px;font-weight:600;color:#1a1a1a;">支持包税服务</span>
+                        </div>
+                        <div class="form-row" style="margin-bottom:0;">
+                            <div class="form-group">
+                                <label class="form-label">包税计费方式</label>
+                                <select class="form-select" id="taxBillingType" style="height:36px;" onchange="onTaxBillingTypeChange()">
+                                    <option selected>按重量（元/kg）</option>
+                                    <option>按申报金额（%）</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" id="taxRateLabel">包税费率（元/kg）</label>
+                                <input class="form-input" id="taxRateInput" placeholder="请输入每公斤包税费用" style="height:36px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 标注6：禁寄品类与线路信息 -->
+                <div class="section-block" id="anno-6" style="position: relative;">
+                    <div class="anno-marker" data-id="6">6</div>
+                    <div class="section-title">禁寄品类与线路信息</div>
+                    <div style="padding: 8px 12px; background: #F7F8FA; border-radius: 4px; margin-bottom: 14px; font-size: 12px; color: #666;">
+                        💡 支持货物类型已移至上方「基本信息」的货物类型映射区域，由渠道产品自动带出并可编辑平台货物类型。
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label class="form-label">禁寄品类</label>
+                        <div class="tag-group">
+                            <span class="tag selected">易燃易爆品</span>
+                            <span class="tag selected">管制刀具</span>
+                            <span class="tag">仿牌商品</span>
+                            <span class="tag">活体动物</span>
+                            <span class="tag">毒品/违禁药品</span>
+                            <span class="tag" style="border-style: dashed; color: #165DFF;">+ 添加</span>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label class="form-label">线路描述</label>
+                            <textarea class="textarea-field" placeholder="选填，简要描述线路特点和服务范围">美国专线，覆盖美国全境（含阿拉斯加、夏威夷），支持普货和电子产品寄送，时效稳定。末端由USPS/UPS派送。</textarea>
+                        </div>
+                    </div>
+                    <div class="form-row full" style="margin-top: 10px;">
+                        <div class="form-group">
+                            <label class="form-label">备注</label>
+                            <textarea class="textarea-field" placeholder="选填，内部备注信息（不对外展示）" style="min-height: 40px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 页面底部按钮 -->
+            <div class="page-footer">
+                <button class="btn-cancel">取消</button>
+                <button class="btn-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+            <button class="panel-add-btn" onclick="addAnnotation()" title="新增标注">+</button>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 标注详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body"><table class="detail-table" id="detail-table"></table></div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-platform-route-edit';
+let currentAnnotation = null; let isEditing = false; let customAnnotations = null;
+const annotations = [
+    {
+        id: 1,
+        title: '页面总览',
+        summary: '平台线路新增/编辑页面，平铺展示基本信息、价格配置、收寄限制、保价包税、禁寄品类五大模块。',
+        target: '#anno-1',
+        detail: {
+            feature: '平台线路新增/编辑页面，采用标准后台管理页面布局。\n\n页面包含面包屑导航、页面标题、五大内容区块（基本信息、价格配置、收寄限制、保价包税、禁寄品类与线路信息），以及底部操作按钮。\n\n所有内容区块以卡片形式排列，确保用户一目了然。\n\n页面最大内容宽度约900px，居中展示。',
+            rules: '1. 新增时标题为"新增平台线路"，编辑时为"编辑平台线路（线路名称）"\n2. 面包屑路径：首页 / 物流管理 / 平台线路 / 新增（或编辑）\n3. 保存前需校验所有必填项\n4. 所属仓库决定该线路在用户端的可用性——仓库停用则线路不可用\n5. 底部固定"取消"和"保存"按钮',
+            exceptions: '1. 关联线路被删除时，页面顶部提示"关联线路已失效"并引导返回列表\n2. 供应商/仓库状态异常时，保存前进行二次确认\n3. 网络异常保存失败时提示重试',
+            data: '线路编码格式：LN-{YYYYMMDD}-{4位序号}\n保存成功后刷新列表页并高亮新增/编辑行',
+            permission: '操作权限：物流配置-线路管理-新增/编辑\n所属供应商和仓库受租户权限范围限制'
+        }
+    },
+    {
+        id: 2,
+        title: '基本信息模块',
+        summary: '线路名称（从关联线路带出可修改）、线路编码（系统生成不可改）、四级级联选择（物流供应商→物流渠道→渠道产品→仓库）、渠道产品联动区域（货物类型映射、目的国、运输方式自动带出）、时效。',
+        target: '#anno-2',
+        detail: {
+            feature: '基本信息模块包含以下字段：\n\n• 线路名称：必填，从关联物流商线路自动带出，支持手动修改\n• 线路编码：系统自动生成，只读展示\n• 物流供应商：必填，四级级联选择的第一级，下拉选择供应商后联动展示该供应商下的物流渠道\n• 物流渠道：必填，四级级联选择的第二级，选择供应商后联动出现\n• 渠道产品：必填，四级级联选择的第三级，选择物流渠道后联动出现，展示格式为"渠道产品名称（编码）"\n• 仓库：必填，四级级联选择的第四级，选择渠道产品后联动出现\n\n【渠道产品联动区域】选择渠道产品后自动展示：\n• 货物类型映射：\n  - 供应商货物类型：只读标签，从渠道产品带出（普货/特货/特A/特B/特C/食品专线）\n  - 平台货物类型：多选checkbox，根据供应商货物类型默认映射勾选，可手动编辑修改\n  - 映射关系代码写死：普货→普货；特A→带电产品+品牌/仿牌；特B→液体/膏体+粉末；特C→数码设备+医药保健；特货→全部特货类；食品专线→食品\n• 目的国：只读标签，从渠道产品带出\n• 运输方式：只读输入框，从渠道产品带出\n\n• 时效：手动填写，格式为"X-Y个工作日"\n\n级联关系：物流供应商→物流渠道→渠道产品→仓库，每级选择后自动过滤下级选项。',
+            rules: '1. 线路名称不可与已有线路重复（保存时校验）\n2. 四个级联字段均为必填，未选择上级时下级下拉框置灰不可操作\n3. 切换上级选择时，自动清空并重置所有下级选项，同时隐藏渠道产品联动区域\n4. 选择渠道产品后，联动区域自动展示货物类型映射、目的国、运输方式\n5. 供应商货物类型只读，不可修改\n6. 平台货物类型根据映射关系默认勾选，用户可手动增减\n7. 目的国和运输方式只读，数据来源为渠道产品\n8. 时效为必填，格式校验：正整数-正整数\n9. 编辑模式下四个级联字段均有预选值，联动区域自动展示对应数据',
+            exceptions: '1. 某级联下无可选数据时，下级下拉框显示"暂无可选数据"提示\n2. 线路名称重复时标红提示\n3. 级联数据源异常（如供应商被停用）时，页面顶部提示"关联数据已失效"\n4. 渠道产品未配置货物类型/目的国/运输方式时，联动区域提示"该渠道产品信息不完整，请先到供应商管理中完善"',
+            data: '物流供应商数据：关联供应商管理模块，仅展示状态为"合作中"的供应商\n物流渠道数据：根据供应商过滤\n渠道产品数据：根据物流渠道过滤，展示格式为"产品名称（产品编码）"\n仓库数据：根据渠道产品过滤，仅展示可用且状态为"正常"的仓库\n货物类型映射关系：代码写死，不通过后台配置',
+            permission: '物流供应商/渠道/产品/仓库的选择受当前操作人员的租户权限范围限制'
+        }
+    },
+    {
+        id: 3,
+        title: '价格配置模块',
+        summary: '计费方式（实重/实重与抛重取大，选后者显示抛比必填项）、首重重量+首重价格、续重分段价格表格（起始重量自动联动只读）。',
+        target: '#anno-3',
+        detail: {
+            feature: '价格配置模块支持灵活的运费计算规则：\n• 计费方式：实重 / 实重与抛重取大（两个选项），选择"实重与抛重取大"时展示抛比输入框（必填）\n• 首重配置：首重重量(kg) + 首重价格(元)\n• 续重分段价格：多段阶梯式，起始重量自动联动（第一段=首重重量，后续=上段结束重量），用户只需填写结束重量和单价；最后一段为无限续重（+∞）不可删除；支持动态添加分段',
+            rules: '1. 选择"实重与抛重取大"时抛比字段为必填\n2. 续重起始重量自动等于上段结束重量（第一段等于首重重量），不可手动修改\n3. 最后一段为无限续重（+∞），不可删除\n4. 续重单价必须 > 0\n5. 首重价格必须 > 0\n6. 最少保留1段续重\n7. 重量区间规则：≤首重按首重价格；>首重且≤续重段结束重量按续重计费',
+            exceptions: '1. 续重段区间不连续时保存报错并标红对应行\n2. 首段起始重量与首重不一致时提示修正\n3. 重复区间校验失败时提示"续重段区间重叠"\n4. 删除无限续重段时提示"最后一段不可删除"',
+            data: '金额精度：保留2位小数\n重量精度：保留3位小数\n续重段数无上限，但建议不超过10段',
+            permission: '价格配置修改需物流配置权限；价格变更立即生效，影响后续订单计费'
+        }
+    },
+    {
+        id: 4,
+        title: '收寄限制',
+        summary: '包裹收寄的物理规格限制：最小限重、最大限重、最长边限制、三边之和限制，均为选填。超出限制的包裹将被拒绝收件。',
+        target: '#anno-4',
+        detail: {
+            feature: '收寄限制模块，用于配置该物流线路对包裹物理规格的收寄门槛：\n\n• 最小限重（kg）：包裹低于此重量时不予收件\n• 最大限重（kg）：包裹超过此重量时不予收件\n• 最长边限制（cm）：包裹任意一边超过此长度时不予收件\n• 三边之和限制（cm）：包裹长+宽+高之和超过此值时不予收件\n\n所有字段均为选填，未填写表示该项不限制。\n\n与价格配置模块分离，因为收寄限制是准入条件（能不能寄），不是计费规则（收多少钱）。',
+            rules: '1. 最大限重必须 ≥ 最小限重（若两者都填写）\n2. 所有字段均为选填，留空表示不限制\n3. 重量单位为千克（kg），尺寸单位为厘米（cm）\n4. 限制值必须为正数\n5. 用户提交包裹时，系统根据这些限制自动校验包裹是否符合收寄条件',
+            exceptions: '1. 最大限重 < 最小限重时，保存时提示"最大限重不能小于最小限重"\n2. 用户提交的包裹超出任一限制时，在提包环节提示具体超限项并推荐其他可用线路',
+            data: '重量精度：保留2位小数\n尺寸精度：保留1位小数',
+            permission: '收寄限制修改需物流配置权限；变更立即生效，影响后续提包校验'
+        }
+    },
+    {
+        id: 5,
+        title: '保价与包税配置',
+        summary: '保价服务（checkbox勾选，保价费率/最低保价费/最高赔付上限）；包税服务（checkbox勾选，包税计费方式二选一，包税费率随计费方式联动变化）。两个服务各自独立区块。',
+        target: '#anno-5',
+        detail: {
+            feature: '保价与包税配置采用两个独立区块：\n\n保价服务区块：\n• 支持保价服务勾选框（默认勾选，加粗标题）\n• 保价费率（%）：输入保价费率百分比\n• 最低保价费（元）：保价收费的最低金额\n• 最高赔付上限（元）：保价赔偿的最大金额\n\n包税服务区块：\n• 支持包税服务勾选框（默认勾选，加粗标题）\n• 包税计费方式：下拉选择，两种模式：\n  - 按重量（元/kg）：包税费率填写每公斤多少元\n  - 按申报金额（%）：包税费率填写申报金额的百分比\n• 包税费率：输入框，标签和提示文字随计费方式自动切换\n  - 选"按重量"时，标签显示"包税费率（元/kg）"，提示"请输入每公斤包税费用"\n  - 选"按申报金额"时，标签显示"包税费率（%）"，提示"请输入申报金额百分比"',
+            rules: '1. 保价费率必须 > 0\n2. 最低保价费必须 ≥ 0\n3. 最高赔付上限必须 > 最低保价费\n4. 包税费率必须 > 0\n5. 取消勾选保价服务时，保价相关字段不提交\n6. 取消勾选包税服务时，包税相关字段不提交\n7. 切换包税计费方式时，包税费率标签和占位提示自动联动更新',
+            exceptions: '1. 保价费率超过合理范围时提示"费率异常，请确认"\n2. 最高赔付上限低于最低保价费时提示"赔付上限不能低于最低保价费"\n3. 取消勾选后如已有订单使用该服务，提示"已有订单使用该服务，请确认是否关闭"',
+            data: '保价费率精度：保留2位小数\n最低保价费精度：保留2位小数\n最高赔付上限：整数，范围100~1000000元\n包税费率精度：保留4位小数',
+            permission: '保价/包税配置修改需审批后方可生效（首次配置）'
+        }
+    },
+    {
+        id: 6,
+        title: '禁寄品类与线路信息',
+        summary: '禁寄品类（多选标签）、线路描述（选填）、备注（选填）。货物类型已移至基本信息模块的联动区域。',
+        target: '#anno-6',
+        detail: {
+            feature: '禁寄品类与线路信息配置：\n\n• 支持货物类型：已移至上方「基本信息」模块的渠道产品联动区域，由渠道产品的供应商货物类型自动映射为平台货物类型，用户可编辑\n• 禁寄品类：多选标签形式，包括易燃易爆品、管制刀具、仿牌商品、活体动物、毒品/违禁药品等\n• 线路描述：选填，文本域，简要描述线路特点和服务范围\n• 备注：选填，文本域，内部备注信息不对外展示',
+            rules: '1. 禁寄品类为可选配置\n2. 线路描述最大长度500字符\n3. 备注最大长度1000字符\n4. 禁寄品类会在用户端展示，提醒用户注意\n5. 货物类型由渠道产品联动决定，不在本区域配置',
+            exceptions: '1. 禁寄品类与支持的货物类型有逻辑冲突时提示\n2. 渠道产品未配置货物类型时，联动区域提示完善信息',
+            data: '禁寄品类选项来源于系统字典表\n线路描述和备注支持换行\n货物类型映射关系代码写死',
+            permission: '禁寄品类的变更会影响用户端展示，需确保准确性\n备注信息仅内部可见，用户端不展示'
+        }
+    }
+];
+function loadCustomAnnotations() { try { const s = localStorage.getItem(STORAGE_KEY); if (s) customAnnotations = JSON.parse(s); } catch(e) {} }
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() { const list = document.getElementById('annotation-list'); const data = getActiveAnnotations(); list.innerHTML = data.map(item => `<div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})"><div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div><div class="annotation-summary">${item.summary}</div></div>`).join(''); }
+function highlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.add('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.add('active'); }
+function unhighlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.remove('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.remove('active'); }
+document.querySelectorAll('.anno-marker').forEach(marker => { marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id))); marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id))); marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id))); });
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) { const data = getActiveAnnotations(); const item = data.find(a => a.id === id); if (!item) return; const target = document.querySelector(item.target); const pa = document.querySelector('.preview-area'); if (target && pa) { pa.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' }); target.classList.remove('anno-flash'); void target.offsetWidth; target.classList.add('anno-flash'); setTimeout(() => target.classList.remove('anno-flash'), 1500); } }
+function showDetail(id) { const item = getActiveAnnotations().find(a => a.id === id); if (!item) return; currentAnnotation = item; isEditing = false; document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`; renderDetailTable(item); document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none'; document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none'; document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none'; document.getElementById('detail-modal').classList.add('show'); }
+function renderDetailTable(item) { const d = item.detail; const rows = []; if (d.feature) rows.push({label:'功能说明',value:d.feature}); if (d.rules) rows.push({label:'规则约束',value:d.rules}); if (d.exceptions) rows.push({label:'异常处理',value:d.exceptions}); if (d.data) rows.push({label:'数据要求',value:d.data}); if (d.permission) rows.push({label:'权限要求',value:d.permission}); const t = document.getElementById('detail-table'); if (isEditing) { t.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td><textarea data-key="${getKeyFromLabel(r.label)}">${r.value}</textarea></td></tr>`).join(''); } else { t.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join(''); } }
+function getKeyFromLabel(l) { return {'功能说明':'feature','规则约束':'rules','异常处理':'exceptions','数据要求':'data','权限要求':'permission'}[l]||l; }
+function toggleEdit() { isEditing = !isEditing; renderDetailTable(currentAnnotation); document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex'; document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none'; }
+function saveAnnotation() { const tas = document.querySelectorAll('#detail-table textarea'); if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations)); const item = customAnnotations.find(a => a.id === currentAnnotation.id); if (!item) return; tas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; }); localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); currentAnnotation = item; isEditing = false; renderDetailTable(item); document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none'; document.getElementById('reset-btn').style.display = 'inline-flex'; document.getElementById('delete-btn').style.display = (currentAnnotation.id !== 1) ? 'inline-flex' : 'none'; renderAnnotationList(); }
+function resetAnnotation() { if (!confirm('确定要重置？')) return; localStorage.removeItem(STORAGE_KEY); customAnnotations = null; const o = annotations.find(a => a.id === currentAnnotation.id); currentAnnotation = o; isEditing = false; renderDetailTable(o); document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none'; document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'none'; renderAnnotationList(); }
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() { try { const c = localStorage.getItem(PANEL_STATE_KEY) === '1'; if (c) { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {} }
+function togglePanel() { const p = document.getElementById('annotation-panel'); const b = document.getElementById('panel-expand-btn'); const ic = p.classList.toggle('collapsed'); b.classList.toggle('show', ic); try { localStorage.setItem(PANEL_STATE_KEY, ic ? '1' : '0'); } catch(e) {} }
+function addAnnotation() { if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations)); const n = customAnnotations.length + 1; const ni = {id:n, title:'新标注'+n, summary:'点击编辑修改...', target:'#anno-'+n, detail:{feature:'请填写功能说明...',rules:'请填写规则约束...',exceptions:'请填写异常处理...'}}; customAnnotations.push(ni); localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); renderAnnotationList(); currentAnnotation = ni; isEditing = true; document.getElementById('modal-title').textContent = `${ni.id}. ${ni.title}`; renderDetailTable(ni); document.getElementById('edit-btn').style.display = 'none'; document.getElementById('save-btn').style.display = 'inline-flex'; document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'inline-flex'; document.getElementById('detail-modal').classList.add('show'); }
+function deleteAnnotation() { if (!currentAnnotation || currentAnnotation.id === 1) return; if (!confirm(`确定删除「${currentAnnotation.title}」？`)) return; customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id); customAnnotations.forEach((it,i) => { it.id = i+1; }); localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); closeModal(); renderAnnotationList(); }
+function exportAnnotatedHTML() { const ad = getActiveAnnotations(); const oh = document.documentElement.outerHTML; const ds = JSON.stringify(ad, null, 2); const rp = 'const annotations = ' + ds + ';'; const nh = oh.replace(/const annotations = \[[\s\S]*?\n\];/, rp); const b = new Blob([nh], {type:'text/html;charset=utf-8'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; const t = document.title || '带标注原型'; const d = new Date().toISOString().slice(0,10).replace(/-/g,''); a.download = `${t}_${d}.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); }
+// ====== 包税计费方式切换：联动包税费率标签和提示 ======
+function onTaxBillingTypeChange() {
+    var taxType = document.getElementById('taxBillingType').value;
+    var label = document.getElementById('taxRateLabel');
+    var input = document.getElementById('taxRateInput');
+    if (taxType === '按申报金额（%）') {
+        label.textContent = '包税费率（%）';
+        input.placeholder = '请输入申报金额百分比，如：15';
+    } else {
+        label.textContent = '包税费率（元/kg）';
+        input.placeholder = '请输入每公斤包税费用';
+    }
+}
+
+// ====== 计费方式切换：控制抛比字段显隐 ======
+function onBillingTypeChange() {
+    var billingType = document.getElementById('billingType').value;
+    var throwRatioField = document.getElementById('throwRatioField');
+    if (billingType === '实重与抛重取大') {
+        throwRatioField.style.display = '';
+    } else {
+        throwRatioField.style.display = 'none';
+    }
+}
+
+// ====== 续重分段联动：起始重量=首重重量或上段结束重量 ======
+function syncContRows() {
+    var rows = document.querySelectorAll('.price-table tbody tr');
+    if (rows.length === 0) return;
+    // 找首重重量输入框
+    var fwVal = '1';
+    var allLabels = document.querySelectorAll('.form-label');
+    for (var i = 0; i < allLabels.length; i++) {
+        if (allLabels[i].textContent.indexOf('首重重量') !== -1) {
+            var inp = allLabels[i].closest('.form-group').querySelector('.form-input');
+            if (inp) fwVal = inp.value || '1';
+            break;
+        }
+    }
+    // 第一段起始重量 = 首重重量
+    var firstCells = rows[0].querySelectorAll('td');
+    if (firstCells.length >= 2) firstCells[1].textContent = fwVal;
+    // 后续每段起始重量 = 上段结束重量
+    for (var r = 1; r < rows.length; r++) {
+        var cells = rows[r].querySelectorAll('td');
+        var prevEndInput = rows[r - 1].querySelector('td:nth-child(3) input');
+        if (prevEndInput && cells.length >= 2) {
+            cells[1].textContent = prevEndInput.value || '-';
+        }
+    }
+    // +∞ 行的起始重量 = 最后数据行的结束重量
+    var lastStartEl = document.getElementById('last-start-weight');
+    if (lastStartEl && rows.length >= 2) {
+        var lastDataEnd = rows[rows.length - 2].querySelector('td:nth-child(3) input');
+        if (lastDataEnd) lastStartEl.textContent = lastDataEnd.value || '-';
+    }
+}
+
+// 监听首重重量变化
+var fwInput = null;
+var allInputs = document.querySelectorAll('.form-row .form-input');
+for (var i = 0; i < allInputs.length; i++) {
+    if (allInputs[i].closest('.form-group') && allInputs[i].closest('.form-group').querySelector('.form-label') && allInputs[i].closest('.form-group').querySelector('.form-label').textContent.indexOf('首重重量') !== -1) {
+        fwInput = allInputs[i];
+        break;
+    }
+}
+if (fwInput) {
+    fwInput.addEventListener('input', syncContRows);
+    fwInput.addEventListener('change', syncContRows);
+}
+
+// 监听续重结束重量变化，联动下一行起始重量
+document.querySelectorAll('.price-table tbody tr').forEach(function(row, idx, allRows) {
+    var endInput = row.querySelector('td:nth-child(3) input');
+    if (endInput) {
+        endInput.addEventListener('input', function() {
+            if (idx + 1 < allRows.length) {
+                var nextRow = allRows[idx + 1];
+                var nextStartCell = nextRow.querySelectorAll('td')[1];
+                if (nextStartCell) nextStartCell.textContent = endInput.value || '-';
+            }
+        });
+    }
+});
+
+// 初始化联动
+syncContRows();
+
+// ====== 四级级联选择数据与逻辑 ======
+const cascadeData = {
+    '深圳优品供应链': {
+        'DHL': {
+            'DHL美国专线(CH-DHL-US-001)': { warehouses: ['南山仓', '宝安仓'], cargoType: '普货', country: '美国', transport: '空运' },
+            'DHL欧洲专线(CH-DHL-EU-002)': { warehouses: ['南山仓'], cargoType: '普货', country: '英国', transport: '空运' }
+        },
+        'FedEx': {
+            'FedEx标准专线(CH-FEDEX-STD-001)': { warehouses: ['宝安仓'], cargoType: '特A', country: '日本', transport: '空运' }
+        }
+    },
+    '广州环球物流': {
+        'UPS': {
+            'UPS全球速递(CH-UPS-EX-001)': { warehouses: ['南山仓', '宝安仓', '龙岗仓'], cargoType: '特B', country: '美国', transport: '空运' }
+        },
+        'USPS': {
+            'USPS经济小包(CH-USPS-EC-001)': { warehouses: ['南山仓'], cargoType: '食品专线', country: '美国', transport: '海运' }
+        }
+    },
+    '义乌集货通': {
+        '云途物流': {
+            '云途经济小包(CH-YT-EC-001)': { warehouses: ['南山仓', '宝安仓'], cargoType: '特C', country: '澳大利亚', transport: '空运' }
+        },
+        '燕文物流': {
+            '燕文标准专线(CH-YW-STD-001)': { warehouses: ['南山仓'], cargoType: '普货', country: '加拿大', transport: '海运' }
+        }
+    }
+};
+
+// 供应商货物类型 → 平台货物类型映射（代码写死）
+function getPlatformCargoTypes(supplierType) {
+    const mapping = {
+        '普货': ['普货'],
+        '特A': ['带电产品', '品牌/仿牌'],
+        '特B': ['液体/膏体', '粉末'],
+        '特C': ['数码设备', '医药保健'],
+        '特货': ['带电产品', '品牌/仿牌', '液体/膏体', '粉末', '数码设备', '医药保健'],
+        '食品专线': ['食品']
+    };
+    return mapping[supplierType] || ['普货'];
+}
+
+const allPlatformCargoOptions = ['普货', '带电产品', '品牌/仿牌', '液体/膏体', '粉末', '数码设备', '医药保健', '食品'];
+
+function updateAutoFillFields(productFullName) {
+    const infoSection = document.getElementById('channelProductInfo');
+    if (!productFullName) {
+        infoSection.style.display = 'none';
+        return;
+    }
+    var meta = null;
+    var supplier = document.getElementById('cascade-supplier').value;
+    var channel = document.getElementById('cascade-channel').value;
+    if (supplier && channel && cascadeData[supplier] && cascadeData[supplier][channel] && cascadeData[supplier][channel][productFullName]) {
+        meta = cascadeData[supplier][channel][productFullName];
+    }
+    if (!meta) {
+        infoSection.style.display = 'none';
+        return;
+    }
+    infoSection.style.display = '';
+    // 供应商货物类型（只读标签）
+    document.getElementById('supplierCargoTags').innerHTML = '<span class="cargo-tag-readonly supplier">' + meta.cargoType + '</span>';
+    // 平台货物类型（默认映射勾选，可编辑）
+    var mappedTypes = getPlatformCargoTypes(meta.cargoType);
+    document.getElementById('platformCargoChecks').innerHTML = allPlatformCargoOptions.map(function(opt) {
+        var checked = mappedTypes.indexOf(opt) !== -1 ? ' checked' : '';
+        return '<label class="cargo-checkbox-sm"><input type="checkbox"' + checked + '> ' + opt + '</label>';
+    }).join('');
+    // 目的国（只读标签）
+    document.getElementById('productCountries').innerHTML = '<span class="country-tag-readonly">' + meta.country + '</span>';
+    // 运输方式（只读输入框）
+    document.getElementById('productTransport').value = meta.transport;
+}
+
+function resetSelect(el, placeholder) {
+    el.innerHTML = '<option value="">' + placeholder + '</option>';
+    el.disabled = true;
+}
+
+function fillSelect(el, options, selectedValue) {
+    el.innerHTML = '<option value="">请选择</option>';
+    options.forEach(function(opt) {
+        var o = document.createElement('option');
+        o.value = opt;
+        o.textContent = opt;
+        if (opt === selectedValue) o.selected = true;
+        el.appendChild(o);
+    });
+    el.disabled = false;
+}
+
+function onSupplierChange() {
+    var supplier = document.getElementById('cascade-supplier').value;
+    var channelEl = document.getElementById('cascade-channel');
+    var productEl = document.getElementById('cascade-product');
+    var warehouseEl = document.getElementById('cascade-warehouse');
+    if (!supplier) {
+        resetSelect(channelEl, '请先选择物流供应商');
+        resetSelect(productEl, '请先选择物流渠道');
+        resetSelect(warehouseEl, '请先选择渠道产品');
+        updateAutoFillFields(null);
+        return;
+    }
+    var channels = Object.keys(cascadeData[supplier] || {});
+    fillSelect(channelEl, channels);
+    resetSelect(productEl, '请先选择物流渠道');
+    resetSelect(warehouseEl, '请先选择渠道产品');
+    updateAutoFillFields(null);
+}
+
+function onChannelChange() {
+    var supplier = document.getElementById('cascade-supplier').value;
+    var channel = document.getElementById('cascade-channel').value;
+    var productEl = document.getElementById('cascade-product');
+    var warehouseEl = document.getElementById('cascade-warehouse');
+    if (!channel) {
+        resetSelect(productEl, '请先选择物流渠道');
+        resetSelect(warehouseEl, '请先选择渠道产品');
+        updateAutoFillFields(null);
+        return;
+    }
+    var products = Object.keys(cascadeData[supplier][channel] || {});
+    fillSelect(productEl, products);
+    resetSelect(warehouseEl, '请先选择渠道产品');
+    updateAutoFillFields(null);
+}
+
+function onProductChange() {
+    var supplier = document.getElementById('cascade-supplier').value;
+    var channel = document.getElementById('cascade-channel').value;
+    var product = document.getElementById('cascade-product').value;
+    var warehouseEl = document.getElementById('cascade-warehouse');
+    if (!product) {
+        resetSelect(warehouseEl, '请先选择渠道产品');
+        updateAutoFillFields(null);
+        return;
+    }
+    var productData = cascadeData[supplier][channel][product];
+    var warehouses = Array.isArray(productData) ? productData : (productData.warehouses || []);
+    fillSelect(warehouseEl, warehouses);
+    updateAutoFillFields(product);
+}
+
+// 编辑模式下预选值
+function initCascadeDefaults() {
+    var supplierEl = document.getElementById('cascade-supplier');
+    supplierEl.value = '深圳优品供应链';
+    onSupplierChange();
+    var channelEl = document.getElementById('cascade-channel');
+    channelEl.value = 'DHL';
+    onChannelChange();
+    var productEl = document.getElementById('cascade-product');
+    productEl.value = 'DHL美国专线(CH-DHL-US-001)';
+    onProductChange();
+    var warehouseEl = document.getElementById('cascade-warehouse');
+    warehouseEl.value = '南山仓';
+}
+initCascadeDefaults();
+
+loadCustomAnnotations(); renderAnnotationList(); initPanelState();
+</script>
+</body>
+</html>
