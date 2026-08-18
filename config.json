@@ -109,6 +109,11 @@
             "icon": "📋"
           },
           {
+            "name": "提包单详情",
+            "file": "docs/parcel-detail-admin-annotated.html",
+            "icon": "📋"
+          },
+          {
             "name": "平台线路新增/编辑",
             "file": "docs/platform-route-edit_v2.2.7.html",
             "icon": "🗺️"
