@@ -424,7 +424,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   background: #fff; color: #3B82F6; font-weight: 600;
 }
 
-/* 处理中状态天蓝主题 */
+/* 待拣货状态天蓝主题 */
 .order-info-card.processing {
   background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%);
 }
@@ -1019,7 +1019,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
         <div class="status-switch">
           <div class="status-switch-btn" id="btnPendingPay" onclick="switchStatus('pending_pay')">待付款</div>
           <div class="status-switch-btn" id="btnPending" onclick="switchStatus('pending')">待审核</div>
-          <div class="status-switch-btn" id="btnProcessing" onclick="switchStatus('processing')">处理中</div>
+          <div class="status-switch-btn" id="btnPendingPick" onclick="switchStatus('pending_pick')">待拣货</div>
+          <div class="status-switch-btn" id="btnPicking" onclick="switchStatus('picking')">拣货中</div>
           <div class="status-switch-btn active" id="btnShipped" onclick="switchStatus('shipped')">待发货</div>
           <div class="status-switch-btn supplement-hint" id="btnSupplement" onclick="switchStatus('supplement')">存在补款</div>
           <div class="status-switch-btn" id="btnReceived" onclick="switchStatus('received')">已收货</div>
@@ -1832,9 +1833,9 @@ function switchStatus(status) {
   } else if (status === 'processing') {
     card.classList.add('processing');
     btnProcessing.classList.add('active');
-    badge.textContent = '处理中';
+    badge.textContent = '待拣货';
     statusAmount.style.display = 'none';
-    desc.textContent = '包裹正在处理中，预计1-2个工作日发出';
+    desc.textContent = '等待仓库拣货，预计1-2个工作日发出';
     payTimeVal.textContent = '2026-07-03 15:12:30';
     recvLabel.textContent = '已支付';
     recvLabel.style.color = '#111827';
@@ -2167,9 +2168,9 @@ function switchStatus(status) {
   } else if (status === 'processing') {
     card.classList.add('processing');
     btnProcessing.classList.add('active');
-    badge.textContent = '处理中';
+    badge.textContent = '待拣货';
     statusAmount.style.display = 'none';
-    desc.textContent = '包裹正在处理中，预计1-2个工作日发出';
+    desc.textContent = '等待仓库拣货，预计1-2个工作日发出';
     payTimeVal.textContent = '2026-07-03 15:12:30';
     recvLabel.textContent = '已支付';
     recvLabel.style.color = '#111827';
@@ -2287,8 +2288,9 @@ const annotations = [
     showMarker: false,
     type: 'overview',
     detail: {
-      feature: '页面展示单个包裹的完整生命周期信息。顶部设有7个状态切换按钮（待付款/待审核/处理中/待发货/存在补款/已收货/已取消），用于演示不同状态下的页面变化。',
-      state: '各状态核心差异：\n• 待付款：显示需付金额，底部为「取消包裹」+「去支付」\n• 待审核：已支付，底部为「取消包裹」+「完成订单」\n• 处理中：已支付，底部仅「取消包裹」\n• 待发货：已支付，显示重量计费信息，底部为「取消包裹」+「确认发货」\n• 存在补款：在待发货基础上增加补款提示横幅，底部主按钮变为「去补款」\n• 已收货：显示发货时间，底部操作栏隐藏\n• 已取消：显示取消时间，应收金额变为应支付，底部操作栏隐藏'
+      feature: '页面展示单个包裹的完整生命周期信息。顶部设有8个状态切换按钮（待付款/待审核/待拣货/拣货中/待发货/存在补款/已收货/已取消），用于演示不同状态下的页面变化。',
+      state: '各状态核心差异：\n• 待付款：显示需付金额，底部为「取消包裹」+「去支付」\n• 待审核：已支付，底部为「取消包裹」+「完成订单」\n• 待拣货：已支付，底部仅「取消包裹」
+• 拣货中：已支付，不可取消（仓库已启动拣货）\n• 待发货：已支付，显示重量计费信息，底部为「取消包裹」+「确认发货」\n• 存在补款：在待发货基础上增加补款提示横幅，底部主按钮变为「去补款」\n• 已收货：显示发货时间，底部操作栏隐藏\n• 已取消：显示取消时间，应收金额变为应支付，底部操作栏隐藏'
     }
   },
   {
@@ -2302,7 +2304,7 @@ const annotations = [
       feature: '展示包裹当前状态的核心信息，是用户进入页面后最先关注的区域。',
       display: '• 状态名称：根据当前状态显示对应文字\n• 金额标签：仅待付款状态显示需付金额，其他状态隐藏\n• 状态描述：各状态对应不同提示文案\n• 包裹编号：显示包裹编号，右侧有复制按钮',
       interaction: '点击包裹编号右侧的复制按钮，可将编号复制到剪贴板，点击后提示已复制。',
-      state: '顶部卡片背景样式随状态变化，不同状态使用不同主题色区分（待付款橙色、待审核蓝色、处理中天蓝、待发货绿色、已收货深绿、已取消灰色）。'
+      state: '顶部卡片背景样式随状态变化，不同状态使用不同主题色区分（待付款橙色、待审核蓝色、待拣货天蓝、待发货绿色、已收货深绿、已取消灰色）。'
     }
   },
   {
@@ -2397,7 +2399,7 @@ const annotations = [
     detail: {
       feature: '根据包裹状态展示不同的操作按钮，是用户对包裹进行操作的主要入口。',
       interaction: '点击「取消包裹」按钮，弹出取消确认弹窗，用户确认后执行取消操作。',
-      state: '各状态按钮配置：\n• 待付款：「取消包裹」+「去支付」（跳转支付）\n• 待审核：「取消包裹」+「完成订单」\n• 处理中：仅「取消包裹」\n• 待发货：「取消包裹」+「确认发货」\n• 存在补款：「取消包裹」+「去补款」（跳转补款支付）\n• 已收货/已取消：底部操作栏隐藏',
+      state: '各状态按钮配置：\n• 待付款：「取消包裹」+「去支付」（跳转支付）\n• 待审核：「取消包裹」+「完成订单」\n• 待拣货：仅「取消包裹」\n• 待发货：「取消包裹」+「确认发货」\n• 存在补款：「取消包裹」+「去补款」（跳转补款支付）\n• 已收货/已取消：底部操作栏隐藏',
       copywriting: '取消确认弹窗包含提示文案「取消后包裹商品将退回仓库，已支付费用将原路退回」，提供「再想想」和「确认取消」两个按钮。'
     }
   }
