@@ -176,5 +176,34 @@
         ]
       }
     ]
+  },
+  {
+    "id": "member-management",
+    "name": "会员管理模块",
+    "desc": "会员注册、列表、详情完整管理，含9个数据Tab和收货地址实名认证",
+    "docs": [
+      {
+        "name": "会员管理模块PRD",
+        "file": "https://zcn9mbpydspc.feishu.cn/wiki/AbabwGMgpiOxYxkQZNNc5B2anBe?from=from_copylink",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "会员管理",
+        "pages": [
+          {
+            "name": "会员列表页",
+            "file": "docs/member-list-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "会员详情页",
+            "file": "docs/member-detail-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   }
 ]
