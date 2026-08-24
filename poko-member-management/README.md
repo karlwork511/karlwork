@@ -14,9 +14,9 @@
 
 | 文件 | 说明 |
 |------|------|
-| [PRD_会员管理模块.md](./PRD_会员管理模块.md) | 产品需求文档（含数据模型、功能需求、交互说明、验收标准） |
-| [prototypes/会员列表页.html](./prototypes/会员列表页.html) | 会员列表页交互原型 |
-| [prototypes/会员详情页.html](./prototypes/会员详情页.html) | 会员详情页交互原型（含 9 个 Tab + 收货地址 + 实名认证） |
+| [PRD_member_management.md](./PRD_member_management.md) | 产品需求文档（含数据模型、功能需求、交互说明、验收标准） |
+| [prototypes/member_list.html](./prototypes/member_list.html) | 会员列表页交互原型 |
+| [prototypes/member_detail.html](./prototypes/member_detail.html) | 会员详情页交互原型（含 9 个 Tab + 收货地址 + 实名认证） |
 
 ## 会员列表页
 
