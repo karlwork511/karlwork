@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员列表页 - POKO代购平台后台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+
+        /* 顶部标注工具栏 */
+        .annotation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 8px 16px;
+            background: #fff;
+            border-bottom: 1px solid #E4E7ED;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .toolbar-edit-btn {
+            padding: 6px 14px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+
+        /* 右侧标注面板 */
+        .annotation-panel {
+            width: 300px;
+            background: #F7F8FA;
+            border-left: 1px solid #E4E7ED;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+        .annotation-panel.collapsed {
+            width: 0;
+            border-left: none;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #E4E7ED;
+            background: #F7F8FA;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-toggle-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #E8EAED;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+        .panel-expand-btn {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 48px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 999;
+            display: none;
+            box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+        }
+        .panel-expand-btn.show { display: block; }
+        .panel-expand-btn:hover { background: #0E42D2; }
+        .annotation-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #E4E7ED;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .annotation-item:hover { background: #EEF0F3; }
+        .annotation-item.active { background: #E8F3FF; }
+        .annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .annotation-badge {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+        .annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+        /* 数字角标 */
+        .anno-marker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            z-index: 9999;
+            user-select: none;
+        }
+        .anno-marker.highlight,
+        .anno-marker:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 560px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+        .modal-close {
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            font-size: 20px; color: #999;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { color: #333; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #E4E7ED;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 详情表格 */
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            background: #FAFAFA;
+            width: 100px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border: 1px solid #E4E7ED;
+            vertical-align: top;
+        }
+        .detail-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #E4E7ED;
+            line-height: 1.7;
+        }
+        .detail-table textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+        .detail-table textarea:focus { border-color: #165DFF; }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #165DFF; color: #fff; border-color: #165DFF; }
+        .btn-primary:hover { background: #0E42D2; border-color: #0E42D2; }
+        .btn-default { background: #fff; border-color: #DCDFE6; color: #606266; }
+        .btn-default:hover { border-color: #165DFF; color: #165DFF; }
+        .btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+        .btn-danger:hover { background: #F53F3F; color: #fff; }
+
+        /* 滚动定位闪烁动画 */
+        .anno-flash {
+            animation: flashHighlight 1.5s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+            100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+        }
+
+        /* ===== 自定义页面样式 ===== */
+        
+/* ====== 页面布局基础 ====== */
+.page-container {
+    position: relative;
+    min-height: 100%;
+}
+
+.breadcrumb {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+}
+.breadcrumb-sep {
+    margin: 0 8px;
+    color: #C9CDD4;
+}
+.breadcrumb-current {
+    color: #333;
+    font-weight: 500;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.page-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1D2129;
+}
+.page-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ====== 通用按钮 ====== */
+.btn {
+    padding: 7px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+.btn-primary {
+    background: #165DFF;
+    color: #fff;
+    border-color: #165DFF;
+}
+.btn-primary:hover {
+    background: #0E42D2;
+    border-color: #0E42D2;
+}
+.btn-default {
+    background: #fff;
+    border-color: #DCDFE6;
+    color: #606266;
+}
+.btn-default:hover {
+    border-color: #165DFF;
+    color: #165DFF;
+}
+.btn-danger {
+    background: #fff;
+    border-color: #F53F3F;
+    color: #F53F3F;
+}
+.btn-danger:hover {
+    background: #F53F3F;
+    color: #fff;
+}
+
+/* ====== 筛选卡片 ====== */
+.filter-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 16px;
+}
+.filter-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+.filter-row:last-child {
+    margin-bottom: 0;
+    justify-content: space-between;
+}
+.search-box {
+    flex: 1;
+    max-width: 360px;
+    position: relative;
+}
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #C9CDD4;
+}
+.search-input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px 0 36px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+.search-input:focus {
+    border-color: #165DFF;
+}
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.filter-label {
+    font-size: 13px;
+    color: #606266;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.select-wrapper::after {
+    content: "▾";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #909399;
+    font-size: 12px;
+    pointer-events: none;
+}
+.form-select {
+    height: 34px;
+    padding: 0 28px 0 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+    min-width: 120px;
+    transition: border-color 0.2s;
+}
+.form-select:focus {
+    border-color: #165DFF;
+}
+.filter-date-group {
+    flex: 1;
+}
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.form-input {
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+.form-input:focus {
+    border-color: #165DFF;
+}
+.date-input {
+    width: 150px;
+}
+.date-sep {
+    color: #909399;
+    font-size: 13px;
+}
+.filter-btns {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+/* ====== 列表卡片 ====== */
+.list-card {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #F2F3F5;
+}
+.list-total {
+    font-size: 13px;
+    color: #606266;
+}
+.list-total strong {
+    color: #1D2129;
+    font-weight: 600;
+    margin: 0 2px;
+}
+.toolbar-right {
+    display: flex;
+    gap: 12px;
+    color: #909399;
+    font-size: 16px;
+}
+.toolbar-right span {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.toolbar-right span:hover {
+    color: #165DFF;
+}
+
+/* ====== 表格 ====== */
+.table-wrap {
+    overflow-x: auto;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 1200px;
+}
+.data-table th {
+    background: #F7F8FA;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #4E5969;
+    border-bottom: 1px solid #E4E7ED;
+    white-space: nowrap;
+}
+.data-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #F2F3F5;
+    color: #333;
+    vertical-align: middle;
+}
+.data-table tbody tr:hover {
+    background: #F7F8FA !important;
+}
+.cell-strong {
+    font-weight: 500;
+    color: #1D2129;
+}
+.text-right {
+    text-align: right !important;
+}
+
+/* 运营备注预览 */
+.remark-preview {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    transition: background 0.2s;
+}
+.remark-preview:hover {
+    background: #F2F3F5;
+}
+.remark-preview.empty {
+    color: #C0C4CC;
+    font-style: italic;
+}
+.remark-preview.empty:hover {
+    color: #165DFF;
+}
+
+/* 头像 */
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 状态标签 */
+.status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* 操作列 */
+.action-btns {
+    display: flex;
+    gap: 12px;
+}
+.action-link {
+    color: #165DFF;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.action-link:hover {
+    text-decoration: underline;
+}
+.action-danger {
+    color: #F53F3F;
+}
+.action-primary {
+    color: #00B42A;
+}
+
+/* ====== 分页 ====== */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-top: 1px solid #F2F3F5;
+    background: #fff;
+}
+.pagination-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.page-size-select .form-select {
+    min-width: auto;
+    width: 80px;
+}
+.pagination-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #606266;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.page-btn:hover:not(:disabled) {
+    border-color: #165DFF;
+    color: #165DFF;
+}
+.page-btn.active {
+    background: #165DFF;
+    border-color: #165DFF;
+    color: #fff;
+}
+.page-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: #F5F7FA;
+}
+.page-ellipsis {
+    color: #909399;
+    padding: 0 4px;
+    font-size: 13px;
+}
+.page-jump {
+    font-size: 13px;
+    color: #606266;
+    margin-left: 8px;
+}
+.jump-input {
+    width: 48px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    margin: 0 4px;
+    outline: none;
+}
+.jump-input:focus {
+    border-color: #165DFF;
+}
+
+/* ====== 禁用会员弹窗 ====== */
+.disable-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+.disable-modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 480px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.disable-modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.disable-modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1D2129;
+}
+.disable-modal-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    color: #909399;
+    cursor: pointer;
+}
+.disable-modal-close:hover {
+    color: #333;
+}
+.disable-modal-body {
+    padding: 24px;
+}
+.form-row {
+    margin-bottom: 18px;
+}
+.form-row:last-child {
+    margin-bottom: 0;
+}
+.form-label {
+    display: block;
+    font-size: 13px;
+    color: #4E5969;
+    margin-bottom: 8px;
+}
+.form-label.required::before {
+    content: "*";
+    color: #F53F3F;
+    margin-right: 4px;
+}
+.form-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-textarea:focus {
+    border-color: #165DFF;
+}
+.disable-tip {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #FFF7E8;
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+.tip-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.tip-text {
+    font-size: 12px;
+    color: #7A5A00;
+    line-height: 1.6;
+}
+.disable-modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ====== 标注角标样式补充（标注系统模板已有，这里确保覆盖） ====== */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 列表内状态标签和操作列角标位置微调 - 用外层td包装 */
+#anno-4-wrap, #anno-5-wrap, #anno-6-wrap {
+    position: relative;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <div class="main-wrapper">
+        <!-- 左侧原型区 -->
+        <div class="preview-area">
+            
+        <!-- 页面容器 — 标注① 页面总说明（不打角标） -->
+        <div class="page-container" id="anno-1">
+            <!-- 面包屑 -->
+            <div class="breadcrumb">
+                <span>会员管理</span>
+                <span class="breadcrumb-sep">/</span>
+                <span class="breadcrumb-current">会员列表</span>
+            </div>
+
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <h1 class="page-title">会员列表</h1>
+                <div class="page-actions">
+                </div>
+            </div>
+
+            <!-- 搜索筛选区 — 标注② -->
+            <div class="filter-card" id="anno-2" style="position:relative;">
+                <div class="anno-marker" data-id="2">2</div>
+                <!-- 搜索行 -->
+                <div class="filter-row">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="请输入会员ID / 邮箱 / 昵称搜索">
+                    </div>
+                </div>
+                <!-- 筛选行 -->
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">会员状态</label>
+                        <div class="select-wrapper">
+                            <select class="form-select">
+                                <option>全部</option>
+                                <option>正常</option>
+                                <option>禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">同步状态</label>
+                        <div class="select-wrapper">
+                            <select class="form-select">
+                                <option>全部</option>
+                                <option>未同步</option>
+                                <option>已同步</option>
+                                <option>同步中</option>
+                                <option>同步失败</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">注册端口</label>
+                        <div class="select-wrapper">
+                            <select class="form-select">
+                                <option>全部</option>
+                                <option>PC</option>
+                                <option>H5</option>
+                                <option>APP</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- 时间范围行 -->
+                <div class="filter-row">
+                    <div class="filter-group filter-date-group">
+                        <label class="filter-label">注册时间</label>
+                        <div class="date-range">
+                            <input type="text" class="form-input date-input" placeholder="开始日期">
+                            <span class="date-sep">至</span>
+                            <input type="text" class="form-input date-input" placeholder="结束日期">
+                        </div>
+                    </div>
+                    <div class="filter-btns">
+                        <button class="btn btn-default">重置</button>
+                        <button class="btn btn-primary">搜索</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 列表卡片 — 标注③ -->
+            <div class="list-card" id="anno-3" style="position:relative;">
+                <div class="anno-marker" data-id="3">3</div>
+
+                <!-- 列表工具栏 -->
+                <div class="list-toolbar">
+                    <span class="list-total">共 <strong>1,286</strong> 条会员数据</span>
+                    <div class="toolbar-right">
+                        <span class="refresh-btn" title="刷新">🔄</span>
+                        <span class="col-setting-btn" title="列设置">⚙️</span>
+                    </div>
+                </div>
+
+                <!-- 数据表格 -->
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width:90px;">会员ID</th>
+                                <th style="width:110px;">集运会员ID</th>
+                                <th style="width:90px;">租户ID</th>
+                                <th style="width:100px;">昵称</th>
+                                <th style="width:200px;">邮箱</th>
+                                <th style="width:80px;">注册端口</th>
+                                <th style="width:80px;">会员状态</th>
+                                <th style="width:90px;">同步状态</th>
+                                <th style="width:100px;text-align:right;">余额</th>
+                                <th style="width:100px;text-align:right;">累计代购单</th>
+                                <th style="width:100px;text-align:right;">累计提包单</th>
+                                <th style="width:160px;">注册时间</th>
+                                <th style="width:160px;">最后登录时间</th>
+                                <th style="width:160px;">运营备注</th>
+                                <th style="width:120px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                    <tr style="background:#FFFFFF;">
+                        <td style="color:#165DFF;cursor:pointer;font-weight:500;">M10001</td>
+                        <td style="color:#666;">JY-M10001</td>
+                        <td style="color:#666;">T10086</td>
+                        <td class="cell-strong">张小明</td>
+                        <td style="color:#666;">zhangxm@example.com</td>
+                        <td>PC</td>
+                        <td id="anno-4" style="position:relative;">
+                            <div class="anno-marker" data-id="4">4</div>
+                            <span class="status-tag" style="background:#E8FFEA;color:#00B42A;">正常</span>
+                        </td>
+                        <td id="anno-5" style="position:relative;">
+                            <div class="anno-marker" data-id="5">5</div>
+                            <span class="status-tag" style="background:#E8FFEA;color:#00B42A;">已同步</span>
+                        </td>
+                        <td style="text-align:right;font-weight:500;">¥2,580.00</td>
+                        <td style="text-align:right;">128</td>
+                        <td style="text-align:right;">86</td>
+                        <td style="color:#666;">2024-03-15 10:30:25</td>
+                        <td style="color:#666;">2026-08-23 18:45:12</td>
+                        <td><div class="remark-preview" onclick="openRemarkModal('M10001','张小明','重点客户，优先处理')" title="重点客户，优先处理">重点客户，优先处理</div></td>
+                        <td id="anno-6" style="position:relative;">
+                            <div class="anno-marker" data-id="6">6</div>
+                            <div class="action-btns">
+                            <a class="action-link">查看详情</a>
+                            <a class="action-link action-danger" onclick="openDisableModal('M10001', '张小明')">禁用</a>
+                        </div>
+                        </td>
+                    </tr>
+                    <tr style="background:#FAFBFC;">
+                        <td style="color:#165DFF;cursor:pointer;font-weight:500;">M10002</td>
+                        <td style="color:#666;">JY-M10002</td>
+                        <td style="color:#666;">T10086</td>
+                        <td class="cell-strong">李美丽</td>
+                        <td style="color:#666;">limeili@example.com</td>
+                        <td>APP</td>
+                        <td>
+                            <span class="status-tag" style="background:#E8FFEA;color:#00B42A;">正常</span>
+                        </td>
+                        <td>
+                            <span class="status-tag" style="background:#E8F3FF;color:#165DFF;">同步中</span>
+                        </td>
+                        <td style="text-align:right;font-weight:500;">¥6,890.50</td>
+                        <td style="text-align:right;">56</td>
+                        <td style="text-align:right;">38</td>
+                        <td style="color:#666;">2024-06-22 14:20:18</td>
+                        <td style="color:#666;">2026-08-22 09:12:30</td>
+                        <td><div class="remark-preview empty" onclick="openRemarkModal('M10002','李美丽','')" title="点击添加备注">-</div></td>
+                        <td>
+                            <div class="action-btns">
+                                <a class="action-link" href="javascript:;">查看详情</a><a class="action-link action-danger" href="javascript:;" onclick="openDisableModal('M10002', '李美丽')">禁用</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr style="background:#F7F8FA;">
+                        <td style="color:#165DFF;cursor:pointer;font-weight:500;">M10003</td>
+                        <td style="color:#999;">-</td>
+                        <td style="color:#666;">T10088</td>
+                        <td class="cell-strong">王大锤</td>
+                        <td style="color:#666;">wangdc@example.com</td>
+                        <td>H5</td>
+                        <td><span class="status-tag" style="background:#FFECE8;color:#F53F3F;">禁用</span></td>
+                        <td><span class="status-tag" style="background:#FFECE8;color:#F53F3F;">同步失败</span></td>
+                        <td style="text-align:right;font-weight:500;">¥0.00</td>
+                        <td style="text-align:right;">3</td>
+                        <td style="text-align:right;">1</td>
+                        <td style="color:#666;">2025-01-08 16:45:33</td>
+                        <td style="color:#666;">2025-02-14 11:20:45</td>
+                        <td><div class="remark-preview empty" onclick="openRemarkModal('M10003','王大锤','')" title="点击添加备注">-</div></td>
+                        <td><div class="action-btns">
+                            <a class="action-link">查看详情</a>
+                            <a class="action-link action-primary">启用</a>
+                        </div></td>
+                    </tr>
+                    <tr style="background:#FAFBFC;">
+                        <td style="color:#165DFF;cursor:pointer;font-weight:500;">M10004</td>
+                        <td style="color:#666;">JY-M10004</td>
+                        <td style="color:#666;">T10086</td>
+                        <td class="cell-strong">赵雨晴</td>
+                        <td style="color:#666;">zhaoyq@example.com</td>
+                        <td>PC</td>
+                        <td>
+                            <span class="status-tag" style="background:#E8FFEA;color:#00B42A;">正常</span>
+                        </td>
+                        <td>
+                            <span class="status-tag" style="background:#F2F3F5;color:#86909C;">未同步</span>
+                        </td>
+                        <td style="text-align:right;font-weight:500;">¥23,450.00</td>
+                        <td style="text-align:right;">89</td>
+                        <td style="text-align:right;">62</td>
+                        <td style="color:#666;">2024-09-03 09:10:55</td>
+                        <td style="color:#666;">2026-08-20 21:08:17</td>
+                        <td><div class="remark-preview empty" onclick="openRemarkModal('M10004','赵雨晴','')" title="点击添加备注">-</div></td>
+                        <td>
+                            <div class="action-btns">
+                                <a class="action-link" href="javascript:;">查看详情</a><a class="action-link action-danger" href="javascript:;" onclick="openDisableModal('M10004', '赵雨晴')">禁用</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr style="background:#FFFFFF;">
+                        <td style="color:#165DFF;cursor:pointer;font-weight:500;">M10005</td>
+                        <td style="color:#666;">JY-M10005</td>
+                        <td style="color:#666;">T10090</td>
+                        <td class="cell-strong">陈思远</td>
+                        <td style="color:#666;">chensy@example.com</td>
+                        <td>APP</td>
+                        <td><span class="status-tag" style="background:#E8FFEA;color:#00B42A;">正常</span></td>
+                        <td><span class="status-tag" style="background:#E8FFEA;color:#00B42A;">已同步</span></td>
+                        <td style="text-align:right;font-weight:500;">¥15,680.00</td>
+                        <td style="text-align:right;">234</td>
+                        <td style="text-align:right;">156</td>
+                        <td style="color:#666;">2023-11-25 11:30:42</td>
+                        <td style="color:#666;">2026-08-24 08:30:00</td>
+                        <td><div class="remark-preview empty" onclick="openRemarkModal('M10005','陈思远','')" title="点击添加备注">-</div></td>
+                        <td><div class="action-btns">
+                            <a class="action-link">查看详情</a>
+                            <a class="action-link action-danger">禁用</a>
+                        </div></td>
+                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页区 -->
+                <div class="pagination">
+                    <div class="pagination-left">
+                        <span style="color:#666;font-size:13px;">每页显示</span>
+                        <div class="select-wrapper page-size-select">
+                            <select class="form-select">
+                                <option>10</option>
+                                <option>20</option>
+                                <option>50</option>
+                            </select>
+                        </div>
+                        <span style="color:#666;font-size:13px;">条</span>
+                    </div>
+                    <div class="pagination-right">
+                        <button class="page-btn" disabled>‹</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <span class="page-ellipsis">...</span>
+                        <button class="page-btn">129</button>
+                        <button class="page-btn">›</button>
+                        <span class="page-jump">前往 <input type="text" class="jump-input" value="1"> 页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- 右侧标注面板 -->
+        <div class="annotation-panel" id="annotation-panel">
+            <div class="panel-header">
+                <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+                <span>📌 标注说明</span>
+            </div>
+            <div id="annotation-list"></div>
+        </div>
+    </div>
+
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 禁用会员弹窗（业务弹窗） -->
+
+        <!-- 禁用会员弹窗 — 标注⑦（角标打在弹窗上） -->
+        <div class="disable-modal-overlay" id="disable-modal" style="display:none;">
+            <div class="disable-modal" id="anno-7" style="position:relative;">
+                <div class="anno-marker" data-id="7">7</div>
+                <div class="disable-modal-header">
+                    <div class="disable-modal-title">禁用会员</div>
+                    <button class="disable-modal-close" onclick="closeDisableModal()">×</button>
+                </div>
+                <div class="disable-modal-body">
+                    <div class="form-row">
+                        <label class="form-label required">禁用原因</label>
+                        <div class="select-wrapper">
+                            <select class="form-select" id="disable-reason" onchange="handleReasonChange()">
+                                <option value="">请选择禁用原因</option>
+                                <option value="violation">违反平台规则</option>
+                                <option value="refund">恶意退款索赔</option>
+                                <option value="false_declare">虚假申报</option>
+                                <option value="security">账号安全风险</option>
+                                <option value="debt">欠款未结清</option>
+                                <option value="user_apply">用户主动申请</option>
+                                <option value="other">其他原因</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" id="other-reason-row" style="display:none;">
+                        <label class="form-label required">其他原因</label>
+                        <input type="text" class="form-input" placeholder="请输入具体原因">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">补充说明</label>
+                        <textarea class="form-textarea" placeholder="请输入补充说明（选填）" rows="3"></textarea>
+                    </div>
+                    <div class="disable-tip">
+                        <span class="tip-icon">⚠️</span>
+                        <span class="tip-text" id="disable-tip-text">禁用后该会员将无法登录平台和下单，请谨慎操作。</span>
+                    </div>
+                </div>
+                <div class="disable-modal-footer">
+                    <button class="btn btn-default" onclick="closeDisableModal()">取消</button>
+                    <button class="btn btn-primary">确认禁用</button>
+                </div>
+            </div>
+        </div>
+
+
+<!-- 运营备注编辑弹窗 -->
+<div class="disable-modal-overlay" id="remark-modal" style="display:none;">
+    <div class="disable-modal">
+        <div class="disable-modal-header">
+            <div class="disable-modal-title">编辑运营备注</div>
+            <button class="disable-modal-close" onclick="closeRemarkModal()">×</button>
+        </div>
+        <div class="disable-modal-body">
+            <div class="form-row">
+                <label class="form-label">会员：<span id="remark-member-info"></span></label>
+            </div>
+            <div class="form-row">
+                <label class="form-label">运营备注</label>
+                <textarea class="form-textarea" id="remark-textarea" placeholder="请输入运营备注信息（选填）" rows="5"></textarea>
+            </div>
+        </div>
+        <div class="disable-modal-footer">
+            <button class="btn btn-default" onclick="closeRemarkModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveRemark()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-member-list';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+  {
+    "id": 1,
+    "title": "页面总说明",
+    "summary": "POKO代购平台会员管理列表页，支持按多维度搜索筛选会员，查看会员信息、余额和订单统计，支持启用/禁用操作",
+    "target": "#anno-1",
+    "showMarker": false,
+    "type": "overview",
+    "detail": {
+      "feature": "会员列表页是后台运营人员管理平台注册会员的核心入口。运营人员可以在此页面查看所有注册会员的基本信息、账号状态、同步状态、账户余额以及订单统计数据，通过多维度筛选快速定位目标会员，并对异常会员执行启用或禁用操作。"
+    }
+  },
+  {
+    "id": 2,
+    "title": "搜索筛选区",
+    "summary": "支持按会员ID/邮箱/昵称搜索，按会员状态、同步状态、注册端口筛选，支持注册时间范围筛选",
+    "target": "#anno-2",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "提供多维度的会员搜索与筛选能力，帮助运营人员从大量会员中快速定位到目标会员。",
+      "display": "顶部为关键词搜索框，支持按会员ID、邮箱、昵称模糊搜索；下方排列三个下拉筛选器：会员状态、同步状态、注册端口；再下方为注册时间范围选择器；右下角为搜索和重置操作按钮。",
+      "interaction": "输入关键词或选择筛选条件后，点击搜索按钮刷新列表数据；点击重置按钮清空所有筛选条件并恢复默认列表；时间范围选择器支持快捷选择（近7天、近30天等）和自定义日期范围。",
+      "business": "会员状态筛选包括：全部、正常、禁用；同步状态筛选包括：全部、未同步、已同步、同步中、同步失败；注册端口筛选包括：全部、PC、H5、APP；多个筛选条件之间为且的关系。"
+    }
+  },
+  {
+    "id": 3,
+    "title": "会员列表区",
+    "summary": "展示会员核心信息，含余额和订单统计，状态用颜色标签区分，支持点击查看详情跳转",
+    "target": "#anno-3",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "以表格形式展示会员的核心信息，是运营人员查看和管理会员数据的主要区域。",
+      "display": "表格列包括：会员ID、集运会员ID、租户ID、昵称、邮箱、注册端口、会员状态、同步状态、余额、累计代购单、累计提包单、注册时间、最后登录时间、运营备注、操作列。表格采用斑马纹样式，行高适中便于阅读。",
+      "interaction": "点击会员ID或昵称可跳转到会员详情页；点击运营备注列的编辑按钮可弹窗编辑备注；点击操作列的查看详情跳转到详情页；点击启用/禁用按钮可切换会员状态。",
+      "exception": "当会员数据为空时，表格区域展示空状态插画和提示文案，引导运营人员调整筛选条件或确认数据是否正常。"
+    }
+  },
+  {
+    "id": 4,
+    "title": "会员状态标签",
+    "summary": "正常状态绿色、禁用状态红色，直观区分会员当前状态",
+    "target": "#anno-4",
+    "showMarker": true,
+    "type": "state",
+    "detail": {
+      "feature": "通过颜色标签直观展示会员账号当前的可用状态，帮助运营人员快速识别异常账号。",
+      "state": "正常状态：绿色标签，表示账号可正常登录和使用全部功能；禁用状态：红色标签，表示账号被限制登录，无法下单和使用平台服务。",
+      "business": "会员状态会影响会员能否登录平台、能否下单、能否参与活动等核心操作；禁用操作需要选择具体原因并记录，便于后续审计和追溯。"
+    }
+  },
+  {
+    "id": 5,
+    "title": "同步状态标签",
+    "summary": "未同步灰色、已同步绿色、同步中蓝色、同步失败红色，便于运营快速识别同步异常",
+    "target": "#anno-5",
+    "showMarker": true,
+    "type": "state",
+    "detail": {
+      "feature": "展示会员数据在各系统间的同步状态，便于运营人员及时发现和处理同步异常的会员数据。",
+      "state": "未同步：灰色标签，表示会员数据尚未同步到下游系统；已同步：绿色标签，表示会员数据已成功同步；同步中：蓝色标签，表示会员数据正在同步过程中；同步失败：红色标签，表示会员数据同步失败，需要人工干预处理。",
+      "business": "同步状态用于追踪会员注册信息、订单数据、会员等级等数据在不同系统间的一致性；同步失败的会员需要运营人员手动触发重新同步或联系技术排查原因。"
+    }
+  },
+  {
+    "id": 6,
+    "title": "操作列",
+    "summary": "查看详情跳转到详情页，启用/禁用切换会员状态，禁用需选择原因",
+    "target": "#anno-6",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "提供针对单个会员的快捷操作入口，包括查看会员详情和切换会员启用/禁用状态。",
+      "interaction": "点击查看详情，跳转到该会员的详情页面，展示更完整的会员信息；点击禁用按钮，弹出禁用原因选择弹窗，选择原因并确认后将会员状态切换为禁用；状态为禁用的会员，操作列显示启用按钮，点击直接启用，无需填写原因。",
+      "business": "禁用会员需要填写禁用原因，原因会记录在会员操作日志中；启用操作无需填写原因，但同样需要记录操作人和操作时间；只有拥有会员管理权限的运营人员才能执行启用/禁用操作。",
+      "copywriting": "禁用确认弹窗标题为「禁用会员」，确认按钮文案为「确认禁用」，启用按钮直接显示「启用」无需二次确认弹窗。"
+    }
+  },
+  {
+    "id": 7,
+    "title": "禁用会员弹窗",
+    "summary": "禁用原因必填下拉选择，选「其他原因」展开自定义输入，补充说明选填",
+    "target": "#anno-7",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "禁用会员时弹出的确认弹窗，用于收集禁用原因和补充说明，确保操作可追溯。",
+      "display": "弹窗包含：禁用原因下拉选择框（必填）、其他原因输入框（选择其他原因时显示）、补充说明多行文本框（选填）、确认和取消按钮。",
+      "interaction": "选择禁用原因后点击确认，会员状态切换为禁用并关闭弹窗；选择「其他原因」时，下方展开自定义原因输入框，需手动输入原因；点击取消或弹窗遮罩关闭弹窗，不执行任何操作。",
+      "business": "禁用原因选项包括：违反平台规则、恶意退款索赔、虚假申报、账号安全风险、欠款未结清、用户主动申请、其他原因；禁用原因必填，未选择时确认按钮置灰不可点击；选择其他原因时，自定义输入框为必填项；补充说明为选填，最多可输入500字。",
+      "copywriting": "禁用原因下拉默认占位文字为「请选择禁用原因」；其他原因输入框占位文字为「请输入具体原因」；补充说明占位文字为「请输入补充说明（选填）」；确认按钮文案为「确认禁用」。"
+    }
+  },
+  {
+    "id": 8,
+    "title": "运营备注列与编辑弹窗",
+    "summary": "列表新增运营备注列，点击「编辑」弹出备注编辑弹窗，支持查看和修改运营备注内容",
+    "target": "#anno-3",
+    "showMarker": false,
+    "type": "interaction",
+    "detail": {
+      "feature": "列表页新增运营备注列，运营人员可快速点击编辑按钮弹出弹窗，查看或修改该会员的运营备注信息。",
+      "display": "列表运营备注列显示「编辑」链接按钮；点击后弹出编辑弹窗，弹窗顶部显示当前会员信息（昵称+会员ID），中间为多行文本框展示当前备注内容，底部为取消和保存按钮。",
+      "interaction": "点击编辑按钮弹出弹窗，文本框自动填充当前备注内容（若为空则显示占位提示文字）；修改后点击保存，系统保存备注并关闭弹窗，Toast提示保存成功；点击取消或遮罩关闭弹窗不保存。",
+      "business": "运营备注用于记录会员的特殊情况、跟进记录、注意事项等，仅后台可见，会员端不展示。备注内容为选填，支持多行文本，最多500字。保存后立即生效，下次进入列表页或详情页时可见最新备注。"
+    }
+  }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+// 点击标注：先滚动定位，再弹详情
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+// 滚动定位到对应模块
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        // 闪烁高亮
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    // 删除按钮：第1号（页面总说明）不允许删除
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    // 按固定顺序遍历7个模块，有内容才展示
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+// ===== 面板折叠 =====
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+// ===== 标注管理（顶部「编辑标注」按钮）=====
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode(); // 刷新管理列表
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    // 关闭管理弹窗，打开新增的标注详情直接进入编辑
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    // 序号重排
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+// ===== 页面业务脚本 =====
+
+// ===== 禁用会员弹窗控制 =====
+function openDisableModal(memberId, nickname) {
+    document.getElementById('disable-tip-text').textContent =
+        '禁用后会员「' + nickname + '（' + memberId + '）」将无法登录平台和下单，请谨慎操作。';
+    document.getElementById('disable-modal').style.display = 'flex';
+}
+function closeDisableModal() {
+    document.getElementById('disable-modal').style.display = 'none';
+    document.getElementById('disable-reason').value = '';
+    document.getElementById('other-reason-row').style.display = 'none';
+}
+function handleReasonChange() {
+    var val = document.getElementById('disable-reason').value;
+    document.getElementById('other-reason-row').style.display =
+        val === 'other' ? 'block' : 'none';
+}
+// ===== 运营备注弹窗 =====
+var currentRemarkMember = null;
+function openRemarkModal(memberId, nickname, currentRemark) {
+    currentRemarkMember = memberId;
+    document.getElementById('remark-member-info').textContent = nickname + '（' + memberId + '）';
+    document.getElementById('remark-textarea').value = currentRemark || '';
+    document.getElementById('remark-modal').style.display = 'flex';
+}
+function closeRemarkModal() {
+    document.getElementById('remark-modal').style.display = 'none';
+    document.getElementById('remark-textarea').value = '';
+    currentRemarkMember = null;
+}
+function saveRemark() {
+    var remark = document.getElementById('remark-textarea').value;
+    alert('已保存备注：' + (remark || '（空）'));
+    closeRemarkModal();
+}
+// 点击遮罩关闭
+document.addEventListener('DOMContentLoaded', function() {
+    var overlay = document.getElementById('disable-modal');
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closeDisableModal();
+        });
+    }
+    var remarkOverlay = document.getElementById('remark-modal');
+    if (remarkOverlay) {
+        remarkOverlay.addEventListener('click', function(e) {
+            if (e.target === this) closeRemarkModal();
+        });
+    }
+});
+
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+
+</body>
+</html>
