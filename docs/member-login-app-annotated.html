@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户端登录注册 - 第三方登录绑定流程</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0; z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff;
+    border-radius: 4px; cursor: pointer; font-size: 13px; color: #333;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+/* 主体布局 */
+.main-body { display: flex; flex: 1; overflow: hidden; }
+
+.preview-area {
+    flex: 1; min-width: 0; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column; align-items: center;
+    background: #F5F7FA;
+}
+
+/* ===== DEMO 切换区域 ===== */
+.demo-switcher {
+    background: #fff; border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px;
+    width: 100%; max-width: 420px;
+}
+.demo-switcher-title {
+    font-size: 13px; font-weight: 600; color: #666; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+}
+.demo-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-btn {
+    padding: 6px 12px; border: 1px solid #DCDFE6; background: #fff;
+    border-radius: 16px; cursor: pointer; font-size: 12px; color: #666;
+    transition: all 0.2s; white-space: nowrap;
+}
+.demo-btn:hover { border-color: #165DFF; color: #165DFF; }
+.demo-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+
+/* ===== 手机模拟框架 ===== */
+.phone-wrapper {
+    width: 375px; min-height: 680px; background: #fff;
+    border-radius: 40px; border: 6px solid #1a1a1a;
+    overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    position: relative; display: flex; flex-direction: column;
+}
+.phone-notch {
+    width: 150px; height: 28px; background: #1a1a1a;
+    border-radius: 0 0 18px 18px; margin: 0 auto; flex-shrink: 0;
+}
+.status-bar {
+    height: 20px; padding: 0 20px; display: flex;
+    justify-content: space-between; align-items: center;
+    font-size: 11px; font-weight: 600; color: #333; flex-shrink: 0;
+}
+.status-bar-right { display: flex; gap: 4px; align-items: center; }
+.phone-content {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+}
+
+/* ===== 各 DEMO 视图样式 ===== */
+.demo-view { display: none; flex-direction: column; flex: 1; }
+.demo-view.active { display: flex; }
+
+/* -- 通用导航栏 -- */
+.app-nav-bar {
+    display: flex; align-items: center; padding: 12px 16px;
+    border-bottom: 1px solid #F0F0F0; flex-shrink: 0;
+}
+.back-arrow { font-size: 20px; cursor: pointer; margin-right: 12px; color: #333; }
+.nav-title { font-size: 17px; font-weight: 600; color: #333; }
+
+/* -- 绑定邮箱页 -- */
+.bind-form-area { padding: 24px 20px; flex: 1; }
+.form-label { font-size: 14px; color: #333; font-weight: 500; margin-bottom: 10px; }
+.form-sublabel { font-size: 12px; color: #999; margin-bottom: 16px; line-height: 1.5; }
+.form-input {
+    width: 100%; height: 44px; border: 1px solid #E4E7ED; border-radius: 8px;
+    padding: 0 12px; font-size: 15px; color: #333; background: #FAFAFA;
+    outline: none;
+}
+.form-input:focus { border-color: #165DFF; background: #fff; }
+.form-input.locked { background: #F5F5F5; color: #999; }
+.form-input.error { border-color: #F53F3F; }
+.input-error-text { font-size: 12px; color: #F53F3F; margin-top: 6px; }
+.code-input-row { display: flex; gap: 10px; margin-top: 16px; }
+.code-input-row .form-input { flex: 1; }
+.send-code-btn {
+    padding: 0 14px; border: 1px solid #165DFF; background: #fff;
+    color: #165DFF; border-radius: 8px; font-size: 13px; cursor: pointer;
+    white-space: nowrap; flex-shrink: 0;
+}
+.send-code-btn.disabled { border-color: #DCDFE6; color: #999; cursor: not-allowed; }
+.countdown-text { font-size: 12px; color: #999; margin-top: 8px; text-align: right; }
+.confirm-btn-area { margin-top: 32px; }
+.confirm-btn {
+    width: 100%; height: 48px; border: none; border-radius: 10px;
+    background: #165DFF; color: #fff; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+}
+.confirm-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+.step-divider { height: 1px; background: #F0F0F0; margin: 24px 0; }
+
+/* -- 首页 -- */
+.home-header {
+    padding: 16px 20px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid #F0F0F0;
+}
+.home-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: #E8F3FF;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.home-greeting { flex: 1; margin-left: 12px; }
+.home-greeting-text { font-size: 16px; font-weight: 600; color: #333; }
+.home-greeting-sub { font-size: 12px; color: #999; margin-top: 2px; }
+.home-grid { display: grid; grid-template-columns: repeat(4,1fr); padding: 20px 16px; gap: 16px; }
+.home-grid-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.home-grid-icon {
+    width: 44px; height: 44px; border-radius: 12px; background: #F5F7FA;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.home-grid-label { font-size: 11px; color: #666; }
+.home-section { padding: 0 16px 16px; }
+.home-section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #333; }
+.home-card {
+    background: #F9FAFB; border-radius: 10px; padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+}
+.home-card-icon { font-size: 28px; }
+.home-card-info { flex: 1; }
+.home-card-title { font-size: 14px; font-weight: 500; color: #333; }
+.home-card-desc { font-size: 12px; color: #999; margin-top: 2px; }
+.home-card-arrow { color: #CCC; font-size: 18px; }
+
+/* -- 底部导航 -- */
+.bottom-nav {
+    display: flex; border-top: 1px solid #F0F0F0;
+    padding: 6px 0 12px; flex-shrink: 0; background: #fff;
+}
+.bottom-nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 4px 0; cursor: pointer;
+}
+.bottom-nav-icon { font-size: 20px; }
+.bottom-nav-label { font-size: 10px; color: #999; }
+.bottom-nav-item.active .bottom-nav-label { color: #165DFF; font-weight: 600; }
+
+/* -- Toast -- */
+.toast-msg {
+    position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.75); color: #fff; padding: 10px 20px;
+    border-radius: 20px; font-size: 14px; z-index: 50; white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* -- 弹窗（手机内） -- */
+.phone-dialog-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45); display: flex;
+    align-items: center; justify-content: center; z-index: 40;
+}
+.phone-dialog {
+    width: 280px; background: #fff; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.phone-dialog-body { padding: 24px 20px; text-align: center; }
+.phone-dialog-icon { font-size: 36px; margin-bottom: 12px; }
+.phone-dialog-title { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.phone-dialog-text { font-size: 14px; color: #666; line-height: 1.6; }
+.phone-dialog-actions {
+    border-top: 1px solid #F0F0F0; display: flex;
+}
+.phone-dialog-btn {
+    flex: 1; padding: 14px; text-align: center; font-size: 16px;
+    cursor: pointer; border: none; background: transparent; color: #165DFF;
+    font-weight: 500; border-right: 1px solid #F0F0F0;
+}
+.phone-dialog-btn:last-child { border-right: none; font-weight: 600; }
+.phone-dialog-btn.primary { color: #165DFF; }
+.phone-dialog-btn.single { border-right: none; }
+
+/* ===== 标注系统样式（固定模板）===== */
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED;
+    overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease;
+}
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header {
+    padding: 16px; font-size: 15px; font-weight: 600; color: #333;
+    border-bottom: 1px solid #E4E7ED; background: #F7F8FA;
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px; height: 24px; border: none; background: #E8EAED;
+    border-radius: 4px; cursor: pointer; font-size: 12px; color: #666;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+    width: 36px; height: 48px; background: #165DFF; color: #fff;
+    border: none; border-radius: 8px 0 0 8px; cursor: pointer;
+    font-size: 18px; z-index: 999; display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px; border-bottom: 1px solid #E4E7ED;
+    cursor: pointer; transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #165DFF; color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.5; transition: all 0.2s ease; cursor: pointer;
+    z-index: 9999; user-select: none;
+}
+.anno-marker.highlight, .anno-marker:hover {
+    opacity: 1; transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); display: none;
+    align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff; border-radius: 8px; width: 560px; max-height: 80vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px; border-bottom: 1px solid #E4E7ED;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px; border: none; background: transparent;
+    font-size: 20px; color: #999; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px; border-top: 1px solid #E4E7ED;
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA; width: 100px; padding: 12px 16px;
+    text-align: left; font-size: 13px; font-weight: 600; color: #666;
+    border: 1px solid #E4E7ED; vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px; font-size: 13px; color: #333;
+    border: 1px solid #E4E7ED; line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%; min-height: 80px; padding: 8px 12px;
+    border: 1px solid #DCDFE6; border-radius: 4px;
+    font-size: 13px; font-family: inherit; line-height: 1.6;
+    resize: vertical; outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* 场景提示标签 */
+.scenario-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; margin-bottom: 12px;
+}
+.scenario-tag.blue { background: #E8F3FF; color: #165DFF; }
+.scenario-tag.green { background: #E8FFF0; color: #00B42A; }
+.scenario-tag.orange { background: #FFF7E8; color: #FF7D00; }
+.scenario-tag.red { background: #FFECE8; color: #F53F3F; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <div class="main-body">
+        <!-- 左侧原型区 -->
+        <div class="preview-area">
+
+            <!-- DEMO 切换器 -->
+            <div class="demo-switcher" id="anno-1" style="position:relative;">
+                <div class="anno-marker" data-id="2">2</div>
+                <div class="demo-switcher-title">🔄 DEMO 场景切换</div>
+                <div class="demo-btns">
+                    <button class="demo-btn active" onclick="switchDemo('step1')">① 输入邮箱</button>
+                    <button class="demo-btn" onclick="switchDemo('step2')">② 验证码</button>
+                    <button class="demo-btn" onclick="switchDemo('success')">③ 绑定成功</button>
+                    <button class="demo-btn" onclick="switchDemo('occupied')">④ 邮箱被占用</button>
+                    <button class="demo-btn" onclick="switchDemo('bound')">⑤ 已绑定当前渠道</button>
+                </div>
+            </div>
+
+            <!-- 手机模拟框架 -->
+            <div class="phone-wrapper">
+                <!-- 刘海 -->
+                <div class="phone-notch"></div>
+                <!-- 状态栏 -->
+                <div class="status-bar">
+                    <span>11:24</span>
+                    <div class="status-bar-right">
+                        <span>📶</span>
+                        <span>🔋</span>
+                    </div>
+                </div>
+
+                <!-- 手机内容区 -->
+                <div class="phone-content">
+
+                    <!-- ===== DEMO ① 绑定邮箱 - 第一步 ===== -->
+                    <div class="demo-view active" id="view-step1">
+                        <div class="app-nav-bar" id="anno-3" style="position:relative;">
+                            <div class="anno-marker" data-id="3">3</div>
+                            <span class="back-arrow">‹</span>
+                            <span class="nav-title">绑定邮箱</span>
+                        </div>
+                        <div class="bind-form-area" id="anno-4" style="position:relative;">
+                            <div class="anno-marker" data-id="4">4</div>
+                            <div class="scenario-tag blue">场景：第三方登录未返回邮箱</div>
+                            <div class="form-label">请输入您的常用邮箱</div>
+                            <div class="form-sublabel">该邮箱将作为您的账户登录凭证和找回密码的方式</div>
+                            <input class="form-input" type="email" placeholder="请输入邮箱地址" value="" />
+                            <div class="code-input-row" id="anno-5" style="position:relative;">
+                                <div class="anno-marker" data-id="5">5</div>
+                                <input class="form-input" type="text" placeholder="请输入验证码" maxlength="6" />
+                                <button class="send-code-btn">获取验证码</button>
+                            </div>
+                            <div class="countdown-text" style="visibility:hidden;">60s 后可重新发送</div>
+                            <div class="confirm-btn-area" id="anno-6" style="position:relative;">
+                                <div class="anno-marker" data-id="6">6</div>
+                                <button class="confirm-btn disabled">确认绑定</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== DEMO ② 绑定邮箱 - 第二步（验证码确认） ===== -->
+                    <div class="demo-view" id="view-step2">
+                        <div class="app-nav-bar">
+                            <span class="back-arrow">‹</span>
+                            <span class="nav-title">绑定邮箱</span>
+                        </div>
+                        <div class="bind-form-area">
+                            <div class="scenario-tag blue">场景：邮箱已验证，进入验证码确认</div>
+                            <div class="form-label">请输入验证码</div>
+                            <div class="form-sublabel">验证码已发送至以下邮箱，请查收</div>
+                            <input class="form-input locked" type="email" value="user@example.com" readonly style="margin-bottom:16px;" />
+                            <div class="code-input-row">
+                                <input class="form-input" type="text" placeholder="请输入6位验证码" maxlength="6" value="836291" />
+                                <button class="send-code-btn disabled">58s</button>
+                            </div>
+                            <div class="countdown-text">验证码有效期 5 分钟</div>
+                            <div class="confirm-btn-area">
+                                <button class="confirm-btn">确认绑定</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== DEMO ③ 绑定成功 + 首页 ===== -->
+                    <div class="demo-view" id="view-success">
+                        <div class="home-header">
+                            <div style="display:flex;align-items:center;flex:1;">
+                                <div class="home-avatar">👤</div>
+                                <div class="home-greeting">
+                                    <div class="home-greeting-text">你好，欢迎回来</div>
+                                    <div class="home-greeting-sub">user@example.com</div>
+                                </div>
+                            </div>
+                            <div style="font-size:20px;cursor:pointer;">⚙️</div>
+                        </div>
+                        <!-- Toast -->
+                        <div class="toast-msg" id="anno-9" style="position:relative;">
+                            <div class="anno-marker" data-id="9" style="top:-30px;right:auto;left:50%;transform:translateX(-50%);">9</div>
+                            ✅ 绑定成功
+                        </div>
+                        <div class="home-grid">
+                            <div class="home-grid-item"><div class="home-grid-icon">📦</div><div class="home-grid-label">我的仓库</div></div>
+                            <div class="home-grid-item"><div class="home-grid-icon">📋</div><div class="home-grid-label">我的订单</div></div>
+                            <div class="home-grid-item"><div class="home-grid-icon">🚚</div><div class="home-grid-label">提包发货</div></div>
+                            <div class="home-grid-item"><div class="home-grid-icon">💰</div><div class="home-grid-label">我的余额</div></div>
+                        </div>
+                        <div class="home-section">
+                            <div class="home-section-title">快捷操作</div>
+                            <div class="home-card">
+                                <div class="home-card-icon">🛒</div>
+                                <div class="home-card-info">
+                                    <div class="home-card-title">采购商品</div>
+                                    <div class="home-card-desc">淘宝/1688商品一键采购</div>
+                                </div>
+                                <div class="home-card-arrow">›</div>
+                            </div>
+                        </div>
+                        <div class="bottom-nav">
+                            <div class="bottom-nav-item active"><div class="bottom-nav-icon">🏠</div><div class="bottom-nav-label">首页</div></div>
+                            <div class="bottom-nav-item"><div class="bottom-nav-icon">📦</div><div class="bottom-nav-label">仓库</div></div>
+                            <div class="bottom-nav-item"><div class="bottom-nav-icon">📋</div><div class="bottom-nav-label">订单</div></div>
+                            <div class="bottom-nav-item"><div class="bottom-nav-icon">👤</div><div class="bottom-nav-label">我的</div></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== DEMO ④ 邮箱被占用提示弹窗 ===== -->
+                    <div class="demo-view" id="view-occupied">
+                        <div class="app-nav-bar">
+                            <span class="back-arrow">‹</span>
+                            <span class="nav-title">绑定邮箱</span>
+                        </div>
+                        <div class="bind-form-area" style="opacity:0.3;">
+                            <div class="form-label">请输入您的常用邮箱</div>
+                            <input class="form-input" type="email" value="existing@example.com" />
+                            <div class="code-input-row">
+                                <input class="form-input" type="text" placeholder="请输入验证码" />
+                                <button class="send-code-btn">获取验证码</button>
+                            </div>
+                            <div class="confirm-btn-area">
+                                <button class="confirm-btn disabled">确认绑定</button>
+                            </div>
+                        </div>
+                        <!-- 弹窗 -->
+                        <div class="phone-dialog-overlay" id="anno-7" style="position:relative;">
+                            <div class="anno-marker" data-id="7">7</div>
+                            <div class="phone-dialog">
+                                <div class="phone-dialog-body">
+                                    <div class="phone-dialog-icon">⚠️</div>
+                                    <div class="phone-dialog-title">邮箱已被占用</div>
+                                    <div class="phone-dialog-text">该邮箱已绑定账户，<br>您可以换绑其他邮箱，<br>或直接使用邮箱登录</div>
+                                </div>
+                                <div class="phone-dialog-actions">
+                                    <button class="phone-dialog-btn" style="font-size:14px;">换绑邮箱</button>
+                                    <button class="phone-dialog-btn primary" style="font-size:14px;">去登录</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== DEMO ⑤ 邮箱已绑定当前第三方提示弹窗 ===== -->
+                    <div class="demo-view" id="view-bound">
+                        <div class="app-nav-bar">
+                            <span class="back-arrow">‹</span>
+                            <span class="nav-title">Google 登录</span>
+                        </div>
+                        <div class="bind-form-area" style="opacity:0.3;">
+                            <div style="text-align:center;padding:30px 0;">
+                                <div style="font-size:48px;margin-bottom:12px;">G</div>
+                                <div style="font-size:15px;color:#666;">正在使用 Google 账号登录...</div>
+                                <div style="font-size:13px;color:#999;margin-top:4px;">account@gmail.com</div>
+                            </div>
+                        </div>
+                        <!-- 弹窗 -->
+                        <div class="phone-dialog-overlay" id="anno-8" style="position:relative;">
+                            <div class="anno-marker" data-id="8">8</div>
+                            <div class="phone-dialog">
+                                <div class="phone-dialog-body">
+                                    <div class="phone-dialog-icon">🔗</div>
+                                    <div class="phone-dialog-title">该邮箱已绑定账户</div>
+                                    <div class="phone-dialog-text">该邮箱已绑定账户，<br>请直接登录</div>
+                                </div>
+                                <div class="phone-dialog-actions">
+                                    <button class="phone-dialog-btn primary single" style="font-size:14px;">去登录</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /phone-content -->
+            </div><!-- /phone-wrapper -->
+
+            <!-- 场景说明区 -->
+            <div style="width:100%;max-width:420px;margin-top:20px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div style="font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">📋 场景对照说明</div>
+                <div style="font-size:12px;color:#666;line-height:2;">
+                    <div><span class="scenario-tag blue" style="margin-right:8px;">①②</span> 第三方无邮箱 → 用户输入邮箱 → 发送验证码 → 确认绑定</div>
+                    <div><span class="scenario-tag green" style="margin-right:8px;">③</span> 绑定成功 → Toast提示 → 自动跳转首页</div>
+                    <div><span class="scenario-tag orange" style="margin-right:8px;">④</span> 用户手动输入的邮箱已被占用 → 弹窗（换绑/去登录）</div>
+                    <div><span class="scenario-tag red" style="margin-right:8px;">⑤</span> 第三方返回的邮箱已绑定当前渠道 → 弹窗（去登录）</div>
+                </div>
+            </div>
+
+        </div><!-- /preview-area -->
+
+        <!-- 右侧标注面板 -->
+        <div class="annotation-panel" id="annotation-panel">
+            <div class="panel-header">
+                <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+                <span>📌 标注说明</span>
+            </div>
+            <div id="annotation-list"></div>
+        </div>
+
+        <!-- 折叠态悬浮按钮 -->
+        <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    </div><!-- /main-body -->
+</div><!-- /app-container -->
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== DEMO 切换逻辑 =====
+function switchDemo(viewId) {
+    document.querySelectorAll('.demo-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// ===== 标注系统 =====
+const STORAGE_KEY = 'annotated-prototype-user-login-bindflow';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '用户端第三方登录绑定流程，覆盖6种核心场景的页面与交互',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '用户端第三方登录注册模块原型，展示第三方OAuth登录后的邮箱绑定完整流程。包含6种核心分支场景：\n① 第三方无邮箱 → 用户输入邮箱 → 发送验证码 → 绑定成功\n② 第三方有邮箱且邮箱不存在 → 直接注册并绑定\n③ 第三方有邮箱且已绑定当前渠道 → 提示已绑定，引导登录\n④ 第三方有邮箱且邮箱存在但未绑定当前渠道 → 验证码验证后绑定\n⑤ 用户手动输入邮箱已被占用 → 提示换绑或登录\n⑥ 绑定成功 → Toast提示 → 跳转首页\n\n本原型通过DEMO切换按钮展示各场景页面，通过顶部切换器在不同场景间切换。',
+            interaction: '通过顶部DEMO切换按钮在不同场景间切换。所有场景共用同一个手机框架，切换时直接替换手机内展示内容。'
+        }
+    },
+    {
+        id: 2,
+        title: 'DEMO 场景切换器',
+        summary: '顶部切换按钮，用于在不同流程场景间切换展示',
+        target: '#anno-1',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '提供5个切换按钮，对应原型中展示的核心页面/弹窗状态。点击按钮即可在手机框架内切换查看对应场景。',
+            interaction: '点击按钮切换手机内展示内容，当前选中按钮高亮显示。切换即时生效，无需过渡动画。\n\n① 输入邮箱：绑定邮箱页第一步（用户输入邮箱+验证码）\n② 验证码：绑定邮箱页第二步（邮箱已填入，验证码确认）\n③ 绑定成功：首页+Toast提示\n④ 邮箱被占用：弹窗（手动输入邮箱已注册）\n⑤ 已绑定当前渠道：弹窗（第三方返回邮箱已绑定）'
+        }
+    },
+    {
+        id: 3,
+        title: '页面导航栏',
+        summary: '绑定邮箱页顶部导航，含返回按钮和标题',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '绑定邮箱页面顶部导航栏，提供返回上级页面的能力。标题根据第三方登录渠道动态显示，如"绑定邮箱"或"Google 登录"。',
+            interaction: '点击左侧返回箭头，返回至第三方登录选择页或上一页。返回时清除当前绑定流程的临时数据。',
+            business: '导航栏标题根据触发来源动态展示。若从第三方登录回调直接进入，标题可显示"绑定邮箱"；若从特定渠道登录页进入，标题可显示对应渠道名称。'
+        }
+    },
+    {
+        id: 4,
+        title: '邮箱输入区域',
+        summary: '用户输入常用邮箱，用于绑定第三方登录账号',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '当第三方OAuth登录未返回邮箱地址时，要求用户手动输入常用邮箱。该邮箱将作为账户的登录凭证和找回密码的方式。\n\n页面提示文案："请输入您的常用邮箱"，副文案说明邮箱用途（登录凭证+找回密码）。',
+            display: '邮箱输入框：标准邮箱格式输入，支持自动补全常见邮箱域名。\n占位文案："请输入邮箱地址"',
+            interaction: '输入邮箱后，邮箱格式合法时可激活"获取验证码"按钮。\n邮箱格式不正确时，输入框下方显示错误提示文案。',
+            business: '邮箱格式校验规则：\n① 必须符合标准邮箱格式（xxx@xxx.xxx）\n② 不支持中文域名\n③ 域名部分需为有效顶级域名\n\n邮箱输入后，系统不立即校验是否已注册，验证码发送成功后再异步校验邮箱状态。',
+            exception: '邮箱格式不正确：输入框标红，下方显示"请输入有效的邮箱地址"。\n输入为空时提交：提示"请输入邮箱地址"。'
+        }
+    },
+    {
+        id: 5,
+        title: '验证码输入与发送',
+        summary: '发送邮箱验证码并输入，支持60秒倒计时',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '用户点击"获取验证码"后，系统向指定邮箱发送6位数字验证码。用户收到后在此输入验证码，完成邮箱所有权验证。\n\n此模块同时覆盖两种进入场景：\n① 第三方无邮箱，用户手动输入邮箱后进入\n② 第三方返回邮箱已存在但未绑定当前渠道，邮箱自动填入后进入',
+            display: '验证码输入框：6位数字，maxlength=6\n发送按钮状态：\n- 默认态：可点击，文案"获取验证码"\n- 发送后：灰态不可点击，显示倒计时"60s"\n- 倒计时结束：恢复可点击状态\n\n倒计时提示文案："60s 后可重新发送"\n验证码有效期提示："验证码有效期 5 分钟"',
+            interaction: '点击"获取验证码"：\n① 前端校验邮箱格式，不合法则提示\n② 调用发送验证码接口\n③ 按钮进入60秒倒计时，显示剩余秒数\n④ 倒计时结束后可重新获取\n\n验证码输入满6位后，"确认绑定"按钮激活。',
+            business: '验证码规则：\n① 6位纯数字\n② 有效期5分钟\n③ 60秒内不可重复发送\n④ 同一邮箱每日发送上限10次\n⑤ 每次生成新验证码，旧验证码自动失效',
+            exception: '发送失败：弹窗提示"验证码发送失败，请稍后重试"。\n验证码错误：提示"验证码错误，请重新输入"。\n验证码过期：提示"验证码已过期，请重新获取"。\n发送频率过快：按钮灰态倒计时中，不可操作。\n邮箱不存在：发送验证码后异步校验，返回"该邮箱未注册，请先完成注册"。'
+        }
+    },
+    {
+        id: 6,
+        title: '确认绑定按钮',
+        summary: '提交邮箱和验证码，完成第三方账号绑定',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '用户填写完邮箱和验证码后，点击此按钮提交绑定请求。验证通过后完成第三方账号与会员账号的绑定。',
+            interaction: '按钮状态：\n- 邮箱或验证码未填写完整：灰态不可点击\n- 邮箱和验证码均已填写：激活可点击\n\n点击后流程：\n① 前端校验输入完整性\n② 调用绑定接口（验证码+OpenID+渠道标识）\n③ 验证通过 → 绑定成功 → Toast提示"绑定成功" → 1.5秒后跳转首页\n④ 验证失败 → 对应错误提示',
+            business: '绑定逻辑：\n① 验证码校验通过后，查询该邮箱是否已注册\n② 邮箱已存在 → 将第三方OpenID绑定至现有会员\n③ 邮箱不存在 → 自动创建新会员（生成会员ID），再绑定\n④ 绑定成功后生成会员ID（M+租户后3位+月日4位+随机6位）',
+            exception: '绑定接口失败：弹窗提示"绑定失败，请稍后重试"，提供"重试"按钮。\n网络异常：提示"网络连接异常，请检查网络后重试"。\n绑定过程中页面显示加载状态，防止重复提交。'
+        }
+    },
+    {
+        id: 7,
+        title: '邮箱被占用提示弹窗（用户手动输入）',
+        summary: '用户手动输入的邮箱已被注册，提供换绑或登录选项',
+        target: '#anno-7',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当用户在绑定邮箱页手动输入了一个已被其他账户注册的邮箱时，弹出此提示。告知用户该邮箱已不可用，提供两个选择：换一个邮箱重新绑定，或直接用该邮箱去登录。',
+            display: '弹窗样式：居中模态弹窗\n图标：⚠️ 警告图标\n标题："邮箱已被占用"\n正文："该邮箱已绑定账户，您可以换绑其他邮箱，或直接使用邮箱登录"\n底部按钮：\n- 左："换绑邮箱"（次要按钮）\n- 右："去登录"（主要按钮）',
+            interaction: '点击"换绑邮箱"：关闭弹窗，清空邮箱输入框和验证码，用户重新输入新邮箱。\n点击"去登录"：关闭弹窗，跳转至邮箱+密码登录页。如用户未设置密码，跳转至忘记密码页。',
+            business: '此弹窗仅在用户手动输入邮箱的场景触发（第三方未返回邮箱时）。\n邮箱占用判定：验证码发送成功即表示邮箱已存在于系统中。',
+            copywriting: '文案要点：\n- 标题用"邮箱已被占用"，直接说明问题\n- 正文提供两个明确的操作方向\n- "换绑邮箱"用词区别于"更换邮箱"，强调绑定动作\n- "去登录"简洁引导，不啰嗦'
+        }
+    },
+    {
+        id: 8,
+        title: '邮箱已绑定当前第三方提示弹窗',
+        summary: '第三方返回的邮箱已绑定当前渠道，引导用户直接登录',
+        target: '#anno-8',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当第三方OAuth登录返回了邮箱地址，且该邮箱已绑定当前第三方渠道时触发。说明用户之前已经用同样的第三方账号登录过，无需重复绑定，直接引导登录即可。',
+            display: '弹窗样式：居中模态弹窗\n图标：🔗 链接图标\n标题："该邮箱已绑定账户"\n正文："该邮箱已绑定账户，请直接登录"\n底部按钮：\n- "去登录"（单个主要按钮，居中）',
+            interaction: '点击"去登录"：关闭弹窗，跳转至邮箱+密码登录页（或邮箱+验证码登录页）。\n不允许从此弹窗直接发起新的绑定操作。',
+            business: '触发条件：\n① 第三方OAuth返回了邮箱地址\n② 该邮箱在系统中已存在\n③ 该邮箱已绑定当前第三方渠道（同一渠道同一OpenID）\n\n此场景说明用户重复登录，无需绑定流程。',
+            copywriting: '文案要点：\n- 与"邮箱被占用"弹窗区分：此场景不提供"换绑"选项\n- 原因：邮箱来自第三方平台确认，用户不需要更换\n- 正文简洁："请直接登录"，不做多余解释\n- 只提供一个按钮，降低用户决策成本'
+        }
+    },
+    {
+        id: 9,
+        title: '绑定成功 Toast 与跳转',
+        summary: '绑定完成后轻量提示并自动跳转首页',
+        target: '#anno-9',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '邮箱绑定成功后，在首页顶部展示轻量Toast提示"绑定成功"，随后自动消失。用户直接进入首页使用平台功能，无需额外操作。',
+            interaction: '绑定接口返回成功后：\n① 立即跳转至首页\n② 首页右上角区域弹出Toast"✅ 绑定成功"\n③ Toast 2秒后自动消失（渐隐动画）\n④ 用户可正常浏览和操作首页内容',
+            business: '跳转逻辑：\n① 绑定成功后不经过任何中间页，直接跳首页\n② 首页需刷新用户数据（显示最新绑定的邮箱信息）\n③ Toast提示为全局轻量通知，不阻断用户操作',
+            exception: 'Toast显示失败：不影响功能，用户已在首页视为绑定成功。\n首页加载失败：显示首页骨架屏+重试按钮，Toast不展示。'
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+// ===== 面板折叠 =====
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try { localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0'); } catch(e) {}
+}
+
+// ===== 标注管理 =====
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id})">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: { feature: '请填写功能说明...' }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((a, index) => { a.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+</body>
+</html>
