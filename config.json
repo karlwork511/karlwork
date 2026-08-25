@@ -180,7 +180,7 @@
   {
     "id": "member-management",
     "name": "会员管理模块",
-    "desc": "会员注册、列表、详情完整管理，含9个数据Tab和收货地址实名认证",
+    "desc": "会员注册、列表、详情完整管理，含9个数据Tab和收货地址实名认证，以及PC/APP用户端登录注册流程",
     "docs": [
       {
         "name": "会员管理模块PRD",
@@ -190,7 +190,7 @@
     ],
     "groups": [
       {
-        "title": "会员管理",
+        "title": "后台管理",
         "pages": [
           {
             "name": "会员列表页",
@@ -200,6 +200,26 @@
           {
             "name": "会员详情页",
             "file": "docs/member-detail-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "💻 PC用户端",
+        "pages": [
+          {
+            "name": "登录注册（网页版标注）",
+            "file": "docs/member-login-web-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "📱 APP用户端",
+        "pages": [
+          {
+            "name": "登录注册（APP标注）",
+            "file": "docs/member-login-app-annotated.html",
             "icon": "📋"
           }
         ]
