@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POKO用户端登录注册 - 标注原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+.content-row { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+.annotation-toolbar { display: flex; align-items: center; justify-content: flex-end; padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED; flex-shrink: 0; z-index: 100; }
+.toolbar-edit-btn { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #333; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; position: relative; background: #FFF8F0; }
+
+#anno-1 { position: relative; min-height: 100%; }
+
+/* ===== 左侧原型区 - POKO网页版 ===== */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+    background: #fff;
+    border-bottom: 1px solid #F0F0F0;
+}
+.header-left { display: flex; align-items: center; gap: 32px; }
+.site-logo {
+    width: 80px; height: 32px;
+    background: #F97316;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px; font-weight: 700; font-style: italic;
+    letter-spacing: 1px;
+}
+.header-nav { display: flex; gap: 24px; }
+.header-nav a { text-decoration: none; color: #333; font-size: 14px; }
+.header-nav a.active { color: #F97316; font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 20px; }
+.header-lang { font-size: 13px; color: #666; cursor: pointer; }
+.header-icon { font-size: 18px; color: #666; cursor: pointer; }
+.header-login-btn { font-size: 14px; color: #333; cursor: pointer; font-weight: 500; }
+.header-register-btn {
+    padding: 8px 24px; background: #F97316; color: #fff; border: none; border-radius: 20px;
+    font-size: 14px; cursor: pointer; font-weight: 500;
+}
+
+.site-banner {
+    position: relative;
+    height: 580px;
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 50%, #FFF0E6 100%);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+.banner-left {
+    flex: 1;
+    padding: 40px 48px 40px 64px;
+    position: relative;
+    z-index: 1;
+}
+.banner-title { font-size: 48px; font-weight: 800; color: #1a1a1a; margin-bottom: 16px; }
+.banner-title .highlight { color: #F97316; }
+.banner-subtitle { font-size: 18px; color: #666; margin-bottom: 24px; }
+.banner-coupon {
+    display: inline-flex;
+    align-items: baseline;
+    background: #F97316;
+    color: #fff;
+    border-radius: 8px;
+    padding: 12px 24px;
+    margin-bottom: 16px;
+}
+.banner-coupon .amount { font-size: 56px; font-weight: 800; }
+.banner-coupon .unit { font-size: 20px; margin-left: 4px; }
+.banner-desc { font-size: 16px; color: #F97316; font-weight: 600; }
+.banner-decoration {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.15;
+    font-size: 120px;
+}
+
+.site-footer {
+    padding: 60px 64px;
+    background: #fff;
+    border-top: 1px solid #F0F0F0;
+    display: flex;
+    gap: 80px;
+}
+.footer-col h4 { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; }
+.footer-col p, .footer-col a { font-size: 13px; color: #999; line-height: 2.2; text-decoration: none; display: block; }
+
+/* DEMO切换器 */
+.demo-switcher {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    z-index: 50;
+    background: rgba(255,255,255,0.95);
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.demo-btn {
+    padding: 5px 10px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #666;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+.demo-btn:hover { border-color: #F97316; color: #F97316; }
+.demo-btn.active { background: #F97316; color: #fff; border-color: #F97316; }
+
+/* 右侧登录卡片区域 */
+.login-card-wrapper {
+    position: absolute;
+    right: 64px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 380px;
+    z-index: 10;
+}
+.login-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+.card-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+.card-logo-icon {
+    width: 56px; height: 56px;
+    background: #F97316;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 22px; font-weight: 700; font-style: italic;
+}
+.card-tabs {
+    display: flex;
+    border-bottom: 2px solid #F0F0F0;
+    margin-bottom: 24px;
+}
+.card-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 16px;
+    color: #999;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+.card-tab.active { color: #F97316; border-bottom-color: #F97316; font-weight: 600; }
+
+.form-group { margin-bottom: 16px; position: relative; }
+.form-input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border: 1px solid #E4E7ED;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #FAFAFA;
+}
+.form-input:focus { border-color: #F97316; background: #fff; }
+.form-input::placeholder { color: #C0C4CC; }
+.form-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #C0C4CC;
+}
+.form-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #C0C4CC;
+    cursor: pointer;
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 20px;
+    font-size: 13px;
+    color: #666;
+}
+.form-checkbox input { margin-top: 2px; accent-color: #F97316; }
+.form-checkbox a { color: #F97316; text-decoration: none; }
+
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background: #F97316;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 12px;
+}
+.btn-login:hover { background: #EA6B0F; }
+
+.btn-email-code {
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #F97316;
+    border: 1px solid #F97316;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+}
+.btn-email-code:hover { background: #FFF5EB; }
+
+.forgot-link {
+    display: block;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    text-decoration: none;
+}
+.forgot-link:hover { color: #F97316; }
+
+/* 验证码行 */
+.code-row { display: flex; gap: 10px; }
+.code-row .form-input { flex: 1; }
+.code-send-btn {
+    padding: 0 16px;
+    background: #FFF5EB;
+    color: #F97316;
+    border: 1px solid #F97316;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.code-send-btn:hover { background: #FFE8D6; }
+
+/* 第三方登录区 */
+.third-party-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #F0F0F0;
+}
+.third-party-title {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 14px;
+    position: relative;
+}
+.third-party-title::before, .third-party-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 60px;
+    height: 1px;
+    background: #E4E7ED;
+}
+.third-party-title::before { left: 20%; }
+.third-party-title::after { right: 20%; }
+.third-party-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.tp-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.tp-icon:hover { transform: scale(1.1); }
+.tp-google { background: #4285F4; color: #fff; }
+.tp-facebook { background: #1877F2; color: #fff; }
+.tp-apple { background: #000; color: #fff; }
+.tp-wechat { background: #07C160; color: #fff; }
+
+/* DEMO内容区域 */
+.demo-content { display: none; }
+.demo-content.active { display: block; }
+
+/* DEMO 3: 邮箱验证码绑定 */
+.bind-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+.bind-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 24px;
+}
+.btn-bind {
+    width: 100%;
+    padding: 14px;
+    background: #F97316;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+/* DEMO 4: 邮箱被占用弹窗 */
+.modal-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: 12px;
+}
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 28px;
+    width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.modal-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: #FEF3C7;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 16px;
+}
+.modal-msg {
+    text-align: center;
+    font-size: 15px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+.modal-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+}
+.modal-btn-primary { background: #F97316; color: #fff; }
+.modal-btn-secondary { background: #fff; color: #666; border: 1px solid #E4E7ED; }
+.modal-btn-danger { background: #fff; color: #F97316; border: 1px solid #F97316; }
+
+/* DEMO 5: 已绑定当前渠道弹窗 */
+.modal-icon-blue {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: #E8F3FF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 16px;
+}
+
+/* ===== 标注系统固定CSS ===== */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px; height: 24px;
+    border: none; background: #E8EAED; border-radius: 4px;
+    cursor: pointer; font-size: 12px; color: #666;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+    width: 36px; height: 48px; background: #165DFF; color: #fff;
+    border: none; border-radius: 8px 0 0 8px; cursor: pointer;
+    font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item { padding: 14px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.2s; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+.anno-marker {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none;
+}
+.anno-marker.highlight, .anno-marker:hover {
+    opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22,93,255,0.4);
+}
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff; border-radius: 8px; width: 560px; max-height: 80vh;
+    display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+}
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px; border: none; background: transparent;
+    font-size: 20px; color: #999; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA; width: 100px; padding: 12px 16px;
+    text-align: left; font-size: 13px; font-weight: 600; color: #666;
+    border: 1px solid #E4E7ED; vertical-align: top;
+}
+.detail-table td { padding: 12px 16px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.7; }
+.detail-table textarea {
+    width: 100%; min-height: 80px; padding: 8px 12px;
+    border: 1px solid #DCDFE6; border-radius: 4px;
+    font-size: 13px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+.btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22,93,255,0.6); } 100% { box-shadow: 0 0 0 3px rgba(22,93,255,0); } }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <div class="content-row">
+    <div class="preview-area">
+        <!-- 页面总说明锚点（包裹所有页面内容） -->
+        <div id="anno-1" style="position:relative; min-height:100%;">
+
+        <!-- DEMO切换器 -->
+        <div class="demo-switcher" id="anno-2">
+            <div class="anno-marker" data-id="2">2</div>
+            <button class="demo-btn active" onclick="switchDemo(2)">①第三方返回邮箱</button>
+            <button class="demo-btn" onclick="switchDemo(3)">②邮箱绑定</button>
+            <button class="demo-btn" onclick="switchDemo(4)">③邮箱被占用</button>
+            <button class="demo-btn" onclick="switchDemo(5)">④已绑定渠道</button>
+        </div>
+
+        <!-- 顶部导航栏 -->
+        <div class="site-header" id="anno-3">
+            <div class="anno-marker" data-id="3">3</div>
+            <div class="header-left">
+                <div class="site-logo">poko</div>
+                <div class="header-nav">
+                    <a href="#" class="active">首页</a>
+                    <a href="#">运费预估</a>
+                    <a href="#">专家代购</a>
+                    <a href="#">关于我们</a>
+                    <a href="#">集运助手</a>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="header-lang">中文(简体)/CNY ▾</span>
+                <span class="header-icon">🛒</span>
+                <span class="header-icon">🎧</span>
+                <span class="header-icon">💬</span>
+                <span class="header-login-btn">登录</span>
+                <button class="header-register-btn">新用户</button>
+            </div>
+        </div>
+
+        <!-- 主内容区：Banner + 登录卡片 -->
+        <div class="site-banner" id="anno-4" style="position:relative;">
+            <div class="anno-marker" data-id="4">4</div>
+            <div class="banner-left">
+                <div class="banner-title">新会员<span class="highlight">首购礼</span></div>
+                <div class="banner-coupon">
+                    <span class="amount">88</span>
+                    <span class="unit">元物流券</span>
+                </div>
+                <div class="banner-desc">注册即领，代购集运更划算</div>
+            </div>
+            <div class="banner-decoration">🛍️</div>
+
+            <!-- 右侧登录卡片区域 -->
+            <div class="login-card-wrapper" id="anno-5">
+                <div class="anno-marker" data-id="5">5</div>
+                <div class="login-card">
+                    <div class="card-logo">
+                        <div class="card-logo-icon">poko</div>
+                    </div>
+
+                    <!-- DEMO 2: 第三方返回邮箱（邮箱不存在→直接注册绑定） -->
+                    <div class="demo-content active" id="demo-2">
+                        <div class="card-tabs" id="anno-6">
+                            <div class="anno-marker" data-id="6">6</div>
+                            <div class="card-tab active">绑定邮箱</div>
+                        </div>
+                        <div class="bind-title">绑定邮箱账户</div>
+                        <div class="bind-subtitle">检测到您使用第三方账号授权登录，请绑定邮箱完成注册</div>
+                        <div class="form-group">
+                            <span class="form-icon">👤</span>
+                            <input class="form-input" type="text" placeholder="请输入常用邮箱地址" value="user@gmail.com" readonly style="background:#F5F5F5;color:#666;">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon">🔑</span>
+                            <input class="form-input" type="text" placeholder="请输入验证码">
+                            <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" checked>
+                            <span>我已阅读并同意 <a href="#">《用户协议》</a>和 <a href="#">《隐私政策》</a></span>
+                        </div>
+                        <button class="btn-bind">确认绑定</button>
+                    </div>
+
+                    <!-- DEMO 3: 第三方绑定邮箱+验证码页 -->
+                    <div class="demo-content" id="demo-3">
+                        <div class="card-tabs">
+                            <div class="card-tab active">绑定邮箱</div>
+                        </div>
+                        <div class="bind-title">绑定邮箱账户</div>
+                        <div class="bind-subtitle">第三方账号需绑定邮箱完成注册</div>
+                        <div class="form-group">
+                            <span class="form-icon">👤</span>
+                            <input class="form-input" type="text" placeholder="请输入常用邮箱地址">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon">🔑</span>
+                            <input class="form-input" type="text" placeholder="请输入验证码">
+                            <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" checked>
+                            <span>我已阅读并同意 <a href="#">《用户协议》</a>和 <a href="#">《隐私政策》</a></span>
+                        </div>
+                        <button class="btn-bind">确认绑定</button>
+                    </div>
+
+                    <!-- DEMO 4: 邮箱被占用弹窗（手动输入场景） -->
+                    <div class="demo-content" id="demo-4">
+                        <div class="card-tabs">
+                            <div class="card-tab active">绑定邮箱</div>
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon"></span>
+                            <input class="form-input" type="text" placeholder="请输入常用邮箱地址" value="test@example.com">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon"></span>
+                            <input class="form-input" type="text" placeholder="请输入验证码">
+                            <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
+                        </div>
+                        <!-- 弹窗 -->
+                        <div class="modal-mask" id="anno-7">
+                            <div class="anno-marker" data-id="7">7</div>
+                            <div class="modal-box">
+                                <div class="modal-icon">⚠️</div>
+                                <div class="modal-msg">该邮箱已被其他账户绑定，请更换邮箱或使用其他方式登录</div>
+                                <div class="modal-actions">
+                                    <button class="modal-btn modal-btn-primary">更换邮箱</button>
+                                    <button class="modal-btn modal-btn-danger">去登录</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEMO 5: 已绑定当前渠道弹窗 -->
+                    <div class="demo-content" id="demo-5">
+                        <div class="card-tabs">
+                            <div class="card-tab active">绑定邮箱</div>
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon">👤</span>
+                            <input class="form-input" type="text" placeholder="请输入常用邮箱地址" value="test@example.com">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-icon">🔑</span>
+                            <input class="form-input" type="text" placeholder="请输入验证码">
+                            <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
+                        </div>
+                        <!-- 弹窗 -->
+                        <div class="modal-mask" id="anno-8">
+                            <div class="anno-marker" data-id="8">8</div>
+                            <div class="modal-box">
+                                <div class="modal-icon-blue">️</div>
+                                <div class="modal-msg">该邮箱已绑定Google账号，请直接使用该邮箱登录</div>
+                                <div class="modal-actions">
+                                    <button class="modal-btn modal-btn-primary">去登录</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <div class="site-footer" id="anno-9">
+            <div class="anno-marker" data-id="9">9</div>
+            <div class="footer-col">
+                <h4>服务支持</h4>
+                <p>帮助中心</p>
+                <p>新手攻略</p>
+            </div>
+            <div class="footer-col">
+                <h4>关于我们</h4>
+                <p>公司简介</p>
+                <p>用户协议</p>
+                <p>隐私政策</p>
+            </div>
+            <div class="footer-col">
+                <h4>联系我们</h4>
+                <p>3123986621@qq.com</p>
+                <p>8619373116884</p>
+                <p>9:00-21:00</p>
+            </div>
+            <div class="footer-col">
+                <h4>下载应用程序</h4>
+                <p>扫描二维码或直接从应用商店下载</p>
+                <div style="display:flex;gap:12px;margin-top:8px;">
+                    <div style="background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;">Google Play</div>
+                    <div style="background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;">App Store</div>
+                </div>
+            </div>
+        </div>
+        </div><!-- /#anno-1 -->
+    </div><!-- /.preview-area -->
+
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span> 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    </div><!-- /.content-row -->
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none;margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-poko-login-register-web';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: 'POKO用户端网页版邮箱绑定全流程原型，包含第三方返回邮箱、手动输入邮箱绑定、异常弹窗4种DEMO场景',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '本页面为POKO用户端网页版邮箱绑定模块的完整标注原型。左侧展示POKO官网首页布局（导航栏+营销Banner+底部信息），右侧悬浮登录卡片区域。通过顶部DEMO切换按钮，可在4种场景间切换：①第三方返回邮箱（邮箱不存在→直接注册绑定） ②邮箱绑定（手动输入邮箱+验证码） ③邮箱被占用弹窗 ④邮箱已绑定当前渠道弹窗。所有场景共享同一登录卡片容器，仅内部表单内容不同。',
+            interaction: '顶部DEMO切换器点击后，右侧卡片内容即时切换，其余页面元素（导航、Banner、底部）保持不变。每个DEMO对应一个独立的业务场景，标注中分别说明其交互逻辑和异常处理。'
+        }
+    },
+    {
+        id: 2,
+        title: 'DEMO切换器',
+        summary: '顶部悬浮切换按钮组，用于在4种邮箱绑定业务场景间切换展示',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '悬浮于页面左上角的场景切换控件，包含4个按钮：第三方返回邮箱、邮箱绑定、邮箱被占用、已绑定渠道。点击后右侧登录卡片区域切换为对应DEMO内容，帮助用户/开发快速浏览不同业务场景。',
+            interaction: '点击任一按钮，按钮高亮为激活态，其余按钮恢复默认。右侧卡片区域同步切换为对应DEMO内容，切换无动画过渡。当前激活的按钮背景为橙色，其余为白色描边。',
+            exception: '切换不影响页面其他区域（导航、Banner、底部）。弹窗类DEMO（④⑤）中，弹窗以半透明遮罩覆盖在卡片上方，底层表单仍然可见但不可操作。'
+        }
+    },
+    {
+        id: 3,
+        title: '顶部导航栏',
+        summary: 'POKO官网全局导航，包含Logo、主导航菜单、语言切换、功能入口和登录注册按钮',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '网站全局导航栏，贯穿所有页面。左侧为品牌Logo和5个主导航入口，右侧为语言/货币切换、购物车、客服、消息入口，以及登录/注册操作按钮。',
+            display: '导航菜单项：首页（当前高亮）、运费预估、专家代购、关于我们、集运助手。右侧功能区：语言切换（中文/CNY）、购物车图标、客服图标、消息图标、"登录"文字按钮、"新用户"橙色圆角按钮。',
+            interaction: '点击导航菜单项跳转对应页面。点击"登录"弹出登录卡片。点击"新用户"跳转到注册页。未登录状态下购物车、消息入口显示数量徽标或引导登录提示。'
+        }
+    },
+    {
+        id: 4,
+        title: '营销Banner区',
+        summary: '首页首屏营销位，展示新会员首购礼活动信息',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '首页主视觉Banner，用于展示当前营销活动（新会员首购礼88元物流券）。左侧为文案区，右侧为装饰图案。登录卡片悬浮于Banner右侧区域上方，不占用Banner布局空间。',
+            display: '主标题"新会员首购礼"，其中"首购礼"为橙色高亮。下方橙色券面展示"88元物流券"。底部引导文案"注册即领，代购集运更划算"。',
+            interaction: 'Banner为静态展示，无可点击交互。注册成功后自动领取物流券并展示在用户账户中。'
+        }
+    },
+    {
+        id: 5,
+        title: '登录卡片容器',
+        summary: '右侧悬浮的白色卡片，承载所有登录/注册/绑定场景的表单内容',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '悬浮于Banner右侧的白色圆角卡片，是所有登录、注册、绑定场景的统一容器。卡片顶部居中展示POKO品牌Logo，下方根据DEMO切换展示不同表单内容。卡片带阴影，与背景形成层次感。',
+            display: '卡片宽度380px，圆角12px，白色背景，带投影。内部元素统一左对齐，输入框全宽。所有DEMO共用此容器，通过隐藏/显示内部demo-content区块实现切换。',
+            interaction: '卡片始终悬浮显示，不随页面滚动消失。通过顶部DEMO切换器控制内部内容切换。卡片内不同DEMO的表单结构见各场景标注。'
+        }
+    },
+    {
+        id: 6,
+        title: '第三方返回邮箱场景（邮箱不存在→直接注册绑定）',
+        summary: '第三方OAuth授权返回邮箱且系统中不存在时，展示邮箱（只读）+验证码，用户确认后直接注册并绑定',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当用户通过第三方OAuth授权登录时，若第三方返回的邮箱地址在系统中不存在，系统自动将第三方邮箱预填入邮箱输入框（只读状态，灰色背景），用户只需输入验证码即可完成注册并绑定。此场景对应业务场景2（第三方有邮箱且邮箱不存在→直接注册并绑定）。',
+            interaction: '邮箱输入框展示第三方返回的邮箱地址，设置为只读（灰色背景），用户无法修改。验证码输入框可正常输入。点击"获取验证码"向该邮箱发送6位数字验证码，按钮进入60秒倒计时。用户输入验证码后点击"确认绑定"→ 验证通过→ Toast提示"绑定成功"（2秒自动消失）→ 自动跳转首页。',
+            copywriting: '卡片顶部Tab固定为"绑定邮箱"，不可切换。标题"绑定邮箱账户"。副标题"检测到您使用第三方账号授权登录，请绑定邮箱完成注册"。确认按钮文案"确认绑定"。协议文案"我已阅读并同意《用户协议》和《隐私政策》"。',
+            exception: '验证码错误时，输入框下方显示红色错误提示"验证码错误，请重新输入"，不弹窗。验证码过期（超过10分钟）时，提示"验证码已过期，请重新获取"。验证码发送频率限制：同一邮箱60秒内不可重复发送。'
+        }
+    },
+    {
+        id: 7,
+        title: '邮箱被占用提示弹窗（用户手动输入场景）',
+        summary: '用户手动输入邮箱被占用时弹出的双选项提示弹窗',
+        target: '#anno-7',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当用户在绑定邮箱流程中手动输入的邮箱地址已被其他账户绑定时，弹出此提示弹窗。弹窗以半透明遮罩覆盖登录卡片，底层表单不可操作。',
+            interaction: '弹窗提供两个操作按钮：①"更换邮箱"→ 关闭弹窗，清空邮箱输入框，光标回到邮箱输入框，用户重新输入 ②"去登录"→ 关闭弹窗，关闭弹窗，清空邮箱输入框，光标回到邮箱输入框。',
+            copywriting: '弹窗标题图标为橙色警告标识。文案：「该邮箱已被其他账户绑定，请更换邮箱或使用其他方式登录」。两个按钮文案：「更换邮箱」（橙色主按钮）、「去登录」（橙色描边按钮）。',
+            exception: '此弹窗文案仅适用于用户手动输入邮箱的场景。如果是第三方返回的邮箱被占用，文案不同（见DEMO⑤标注）。邮箱格式校验不通过时（如缺少@、域名无效），在输入框下方直接显示红色错误提示，不弹此弹窗。'
+        }
+    },
+    {
+        id: 8,
+        title: '邮箱已绑定当前渠道提示弹窗',
+        summary: '第三方返回的邮箱已绑定当前第三方渠道时，引导用户直接登录',
+        target: '#anno-8',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当第三方授权返回的邮箱地址已被识别为已绑定当前第三方渠道（如Google）时，弹出此提示弹窗。与DEMO③不同，此场景下邮箱来自第三方确认，用户无法更换，因此只提供"去登录"一个操作。',
+            interaction: '弹窗仅提供一个操作按钮：①"去登录"→ 关闭弹窗，跳转到登录页面，邮箱输入框自动填入第三方返回的邮箱地址，引导用户通过邮箱+密码或邮箱+验证码完成登录。',
+            copywriting: '弹窗图标为蓝色信息标识。文案：「该邮箱已绑定XX账号，请直接使用该邮箱登录」，其中XX为具体第三方渠道名称（如Google、Facebook、Apple、微信）。按钮文案：「去登录」（橙色主按钮）。',
+            exception: '此弹窗仅在第三方返回邮箱且系统检测到该邮箱已绑定同一第三方渠道时触发。与DEMO④的核心区别：不提供"更换邮箱"选项，因为邮箱来源是第三方授权返回，用户不应也不能在此流程中更换。验证码发送失败时（如邮箱地址无效），在输入框下方显示红色错误提示。'
+        }
+    },
+    {
+        id: 9,
+        title: '页面底部信息区',
+        summary: '网站底部导航，包含服务支持、关于我们、联系方式和APP下载入口',
+        target: '#anno-9',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '网站全局底部信息区，分为4列：服务支持、关于我们、联系我们、下载应用程序。提供帮助中心、用户协议、隐私政策等链接，以及客服邮箱、电话和APP下载入口。',
+            display: '四列布局，每列一个标题+若干链接/信息。联系方式列包含邮箱、电话、服务时间。下载列包含二维码和Google Play/App Store按钮。',
+            interaction: '点击各链接跳转到对应页面。APP下载按钮点击后跳转到对应应用商店。此区域在所有页面保持一致。'
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== DEMO切换逻辑 =====
+function switchDemo(id) {
+    document.querySelectorAll('.demo-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('demo-' + id).classList.add('active');
+    document.querySelectorAll('.demo-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// ===== 标注系统固定JS =====
+function loadCustomAnnotations() {
+    try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) customAnnotations = JSON.parse(saved); } catch(e) {}
+}
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => { if (detail[key]) rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key }); });
+    const table = document.getElementById('detail-table');
+    if (isEditing) { table.innerHTML = rows.map(row => `<tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>`).join(''); }
+    else { table.innerHTML = rows.map(row => `<tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>`).join(''); }
+}
+function toggleEdit() { isEditing = !isEditing; renderDetailTable(currentAnnotation); document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex'; document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none'; }
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item; isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent; btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY); customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original; isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try { const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1'; if (collapsed) { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try { localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0'); } catch(e) {}
+}
+
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = { id: newId, title: '新标注 ' + newId, summary: '点击编辑修改标注内容...', target: '#anno-' + newId, showMarker: true, type: 'area', detail: { feature: '请填写功能说明...' } };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); closeManageModal();
+    currentAnnotation = newItem; isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal(); renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent; btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+</body>
+</html>
