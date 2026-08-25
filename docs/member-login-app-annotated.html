@@ -344,15 +344,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
         <div class="preview-area">
 
             <!-- DEMO 切换器 -->
-            <div class="demo-switcher" id="anno-1" style="position:relative;">
-                <div class="anno-marker" data-id="2">2</div>
+            <div class="demo-switcher">
                 <div class="demo-switcher-title">🔄 DEMO 场景切换</div>
                 <div class="demo-btns">
                     <button class="demo-btn active" onclick="switchDemo('step1')">① 输入邮箱</button>
                     <button class="demo-btn" onclick="switchDemo('step2')">② 验证码</button>
-                    <button class="demo-btn" onclick="switchDemo('success')">③ 绑定成功</button>
-                    <button class="demo-btn" onclick="switchDemo('occupied')">④ 邮箱被占用</button>
-                    <button class="demo-btn" onclick="switchDemo('bound')">⑤ 已绑定当前渠道</button>
+                    <button class="demo-btn" onclick="switchDemo('occupied')">③ 邮箱被占用</button>
+                    <button class="demo-btn" onclick="switchDemo('bound')">④ 已绑定当前渠道</button>
                 </div>
             </div>
 
@@ -374,25 +372,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
 
                     <!-- ===== DEMO ① 绑定邮箱 - 第一步 ===== -->
                     <div class="demo-view active" id="view-step1">
-                        <div class="app-nav-bar" id="anno-3" style="position:relative;">
-                            <div class="anno-marker" data-id="3">3</div>
+                        <div class="app-nav-bar" id="anno-2" style="position:relative;">
+                            <div class="anno-marker" data-id="2">2</div>
                             <span class="back-arrow">‹</span>
                             <span class="nav-title">绑定邮箱</span>
                         </div>
-                        <div class="bind-form-area" id="anno-4" style="position:relative;">
-                            <div class="anno-marker" data-id="4">4</div>
+                        <div class="bind-form-area" id="anno-3" style="position:relative;">
+                            <div class="anno-marker" data-id="3">3</div>
                             <div class="scenario-tag blue">场景：第三方登录未返回邮箱</div>
                             <div class="form-label">请输入您的常用邮箱</div>
                             <div class="form-sublabel">该邮箱将作为您的账户登录凭证和找回密码的方式</div>
                             <input class="form-input" type="email" placeholder="请输入邮箱地址" value="" />
-                            <div class="code-input-row" id="anno-5" style="position:relative;">
-                                <div class="anno-marker" data-id="5">5</div>
+                            <div class="code-input-row" id="anno-4" style="position:relative;">
+                                <div class="anno-marker" data-id="4">4</div>
                                 <input class="form-input" type="text" placeholder="请输入验证码" maxlength="6" />
                                 <button class="send-code-btn">获取验证码</button>
                             </div>
                             <div class="countdown-text" style="visibility:hidden;">60s 后可重新发送</div>
-                            <div class="confirm-btn-area" id="anno-6" style="position:relative;">
-                                <div class="anno-marker" data-id="6">6</div>
+                            <div class="confirm-btn-area" id="anno-5" style="position:relative;">
+                                <div class="anno-marker" data-id="5">5</div>
                                 <button class="confirm-btn disabled">确认绑定</button>
                             </div>
                         </div>
@@ -420,48 +418,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                         </div>
                     </div>
 
-                    <!-- ===== DEMO ③ 绑定成功 + 首页 ===== -->
-                    <div class="demo-view" id="view-success">
-                        <div class="home-header">
-                            <div style="display:flex;align-items:center;flex:1;">
-                                <div class="home-avatar">👤</div>
-                                <div class="home-greeting">
-                                    <div class="home-greeting-text">你好，欢迎回来</div>
-                                    <div class="home-greeting-sub">user@example.com</div>
-                                </div>
-                            </div>
-                            <div style="font-size:20px;cursor:pointer;">⚙️</div>
-                        </div>
-                        <!-- Toast -->
-                        <div class="toast-msg" id="anno-9" style="position:relative;">
-                            <div class="anno-marker" data-id="9" style="top:-30px;right:auto;left:50%;transform:translateX(-50%);">9</div>
-                            ✅ 绑定成功
-                        </div>
-                        <div class="home-grid">
-                            <div class="home-grid-item"><div class="home-grid-icon">📦</div><div class="home-grid-label">我的仓库</div></div>
-                            <div class="home-grid-item"><div class="home-grid-icon">📋</div><div class="home-grid-label">我的订单</div></div>
-                            <div class="home-grid-item"><div class="home-grid-icon">🚚</div><div class="home-grid-label">提包发货</div></div>
-                            <div class="home-grid-item"><div class="home-grid-icon">💰</div><div class="home-grid-label">我的余额</div></div>
-                        </div>
-                        <div class="home-section">
-                            <div class="home-section-title">快捷操作</div>
-                            <div class="home-card">
-                                <div class="home-card-icon">🛒</div>
-                                <div class="home-card-info">
-                                    <div class="home-card-title">采购商品</div>
-                                    <div class="home-card-desc">淘宝/1688商品一键采购</div>
-                                </div>
-                                <div class="home-card-arrow">›</div>
-                            </div>
-                        </div>
-                        <div class="bottom-nav">
-                            <div class="bottom-nav-item active"><div class="bottom-nav-icon">🏠</div><div class="bottom-nav-label">首页</div></div>
-                            <div class="bottom-nav-item"><div class="bottom-nav-icon">📦</div><div class="bottom-nav-label">仓库</div></div>
-                            <div class="bottom-nav-item"><div class="bottom-nav-icon">📋</div><div class="bottom-nav-label">订单</div></div>
-                            <div class="bottom-nav-item"><div class="bottom-nav-icon">👤</div><div class="bottom-nav-label">我的</div></div>
-                        </div>
-                    </div>
-
                     <!-- ===== DEMO ④ 邮箱被占用提示弹窗 ===== -->
                     <div class="demo-view" id="view-occupied">
                         <div class="app-nav-bar">
@@ -480,8 +436,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                             </div>
                         </div>
                         <!-- 弹窗 -->
-                        <div class="phone-dialog-overlay" id="anno-7" style="position:relative;">
-                            <div class="anno-marker" data-id="7">7</div>
+                        <div class="phone-dialog-overlay" id="anno-6" style="position:relative;">
+                            <div class="anno-marker" data-id="6">6</div>
                             <div class="phone-dialog">
                                 <div class="phone-dialog-body">
                                     <div class="phone-dialog-icon">⚠️</div>
@@ -510,8 +466,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                             </div>
                         </div>
                         <!-- 弹窗 -->
-                        <div class="phone-dialog-overlay" id="anno-8" style="position:relative;">
-                            <div class="anno-marker" data-id="8">8</div>
+                        <div class="phone-dialog-overlay" id="anno-7" style="position:relative;">
+                            <div class="anno-marker" data-id="7">7</div>
                             <div class="phone-dialog">
                                 <div class="phone-dialog-body">
                                     <div class="phone-dialog-icon">🔗</div>
@@ -533,7 +489,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                 <div style="font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">📋 场景对照说明</div>
                 <div style="font-size:12px;color:#666;line-height:2;">
                     <div><span class="scenario-tag blue" style="margin-right:8px;">①②</span> 第三方无邮箱 → 用户输入邮箱 → 发送验证码 → 确认绑定</div>
-                    <div><span class="scenario-tag green" style="margin-right:8px;">③</span> 绑定成功 → Toast提示 → 自动跳转首页</div>
                     <div><span class="scenario-tag orange" style="margin-right:8px;">④</span> 用户手动输入的邮箱已被占用 → 弹窗（换绑/去登录）</div>
                     <div><span class="scenario-tag red" style="margin-right:8px;">⑤</span> 第三方返回的邮箱已绑定当前渠道 → 弹窗（去登录）</div>
                 </div>
@@ -614,27 +569,15 @@ const annotations = [
         showMarker: false,
         type: 'overview',
         detail: {
-            feature: '用户端第三方登录注册模块原型，展示第三方OAuth登录后的邮箱绑定完整流程。包含6种核心分支场景：\n① 第三方无邮箱 → 用户输入邮箱 → 发送验证码 → 绑定成功\n② 第三方有邮箱且邮箱不存在 → 直接注册并绑定\n③ 第三方有邮箱且已绑定当前渠道 → 提示已绑定，引导登录\n④ 第三方有邮箱且邮箱存在但未绑定当前渠道 → 验证码验证后绑定\n⑤ 用户手动输入邮箱已被占用 → 提示换绑或登录\n⑥ 绑定成功 → Toast提示 → 跳转首页\n\n本原型通过DEMO切换按钮展示各场景页面，通过顶部切换器在不同场景间切换。',
+            feature: '用户端第三方登录注册模块原型，展示第三方OAuth登录后的邮箱绑定完整流程。包含6种核心分支场景：\n① 第三方无邮箱 → 用户输入邮箱 → 发送验证码 → 绑定成功\n② 第三方有邮箱且邮箱不存在 → 直接注册并绑定\n③ 第三方有邮箱且已绑定当前渠道 → 提示已绑定，引导登录\n④ 第三方有邮箱且邮箱存在但未绑定当前渠道 → 验证码验证后绑定\n⑤ 用户手动输入邮箱已被占用 → 提示换绑或登录\n本原型通过DEMO切换按钮展示各场景页面，通过顶部切换器在不同场景间切换。',
             interaction: '通过顶部DEMO切换按钮在不同场景间切换。所有场景共用同一个手机框架，切换时直接替换手机内展示内容。'
         }
     },
     {
         id: 2,
-        title: 'DEMO 场景切换器',
-        summary: '顶部切换按钮，用于在不同流程场景间切换展示',
-        target: '#anno-1',
-        showMarker: true,
-        type: 'interaction',
-        detail: {
-            feature: '提供5个切换按钮，对应原型中展示的核心页面/弹窗状态。点击按钮即可在手机框架内切换查看对应场景。',
-            interaction: '点击按钮切换手机内展示内容，当前选中按钮高亮显示。切换即时生效，无需过渡动画。\n\n① 输入邮箱：绑定邮箱页第一步（用户输入邮箱+验证码）\n② 验证码：绑定邮箱页第二步（邮箱已填入，验证码确认）\n③ 绑定成功：首页+Toast提示\n④ 邮箱被占用：弹窗（手动输入邮箱已注册）\n⑤ 已绑定当前渠道：弹窗（第三方返回邮箱已绑定）'
-        }
-    },
-    {
-        id: 3,
         title: '页面导航栏',
         summary: '绑定邮箱页顶部导航，含返回按钮和标题',
-        target: '#anno-3',
+        target: '#anno-2',
         showMarker: true,
         type: 'area',
         detail: {
@@ -644,10 +587,10 @@ const annotations = [
         }
     },
     {
-        id: 4,
+        id: 3,
         title: '邮箱输入区域',
         summary: '用户输入常用邮箱，用于绑定第三方登录账号',
-        target: '#anno-4',
+        target: '#anno-3',
         showMarker: true,
         type: 'area',
         detail: {
@@ -659,10 +602,10 @@ const annotations = [
         }
     },
     {
-        id: 5,
+        id: 4,
         title: '验证码输入与发送',
         summary: '发送邮箱验证码并输入，支持60秒倒计时',
-        target: '#anno-5',
+        target: '#anno-4',
         showMarker: true,
         type: 'area',
         detail: {
@@ -674,10 +617,10 @@ const annotations = [
         }
     },
     {
-        id: 6,
+        id: 5,
         title: '确认绑定按钮',
         summary: '提交邮箱和验证码，完成第三方账号绑定',
-        target: '#anno-6',
+        target: '#anno-5',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -688,10 +631,10 @@ const annotations = [
         }
     },
     {
-        id: 7,
+        id: 6,
         title: '邮箱被占用提示弹窗（用户手动输入）',
         summary: '用户手动输入的邮箱已被注册，提供换绑或登录选项',
-        target: '#anno-7',
+        target: '#anno-6',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -703,10 +646,10 @@ const annotations = [
         }
     },
     {
-        id: 8,
+        id: 7,
         title: '邮箱已绑定当前第三方提示弹窗',
         summary: '第三方返回的邮箱已绑定当前渠道，引导用户直接登录',
-        target: '#anno-8',
+        target: '#anno-7',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -715,20 +658,6 @@ const annotations = [
             interaction: '点击"去登录"：关闭弹窗，跳转至邮箱+密码登录页（或邮箱+验证码登录页）。\n不允许从此弹窗直接发起新的绑定操作。',
             business: '触发条件：\n① 第三方OAuth返回了邮箱地址\n② 该邮箱在系统中已存在\n③ 该邮箱已绑定当前第三方渠道（同一渠道同一OpenID）\n\n此场景说明用户重复登录，无需绑定流程。',
             copywriting: '文案要点：\n- 与"邮箱被占用"弹窗区分：此场景不提供"换绑"选项\n- 原因：邮箱来自第三方平台确认，用户不需要更换\n- 正文简洁："请直接登录"，不做多余解释\n- 只提供一个按钮，降低用户决策成本'
-        }
-    },
-    {
-        id: 9,
-        title: '绑定成功 Toast 与跳转',
-        summary: '绑定完成后轻量提示并自动跳转首页',
-        target: '#anno-9',
-        showMarker: true,
-        type: 'interaction',
-        detail: {
-            feature: '邮箱绑定成功后，在首页顶部展示轻量Toast提示"绑定成功"，随后自动消失。用户直接进入首页使用平台功能，无需额外操作。',
-            interaction: '绑定接口返回成功后：\n① 立即跳转至首页\n② 首页右上角区域弹出Toast"✅ 绑定成功"\n③ Toast 2秒后自动消失（渐隐动画）\n④ 用户可正常浏览和操作首页内容',
-            business: '跳转逻辑：\n① 绑定成功后不经过任何中间页，直接跳首页\n② 首页需刷新用户数据（显示最新绑定的邮箱信息）\n③ Toast提示为全局轻量通知，不阻断用户操作',
-            exception: 'Toast显示失败：不影响功能，用户已在首页视为绑定成功。\n首页加载失败：显示首页骨架屏+重试按钮，Toast不展示。'
         }
     }
 ];
