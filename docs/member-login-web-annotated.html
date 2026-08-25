@@ -521,17 +521,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
 
         <!-- DEMO切换器 -->
         <div class="demo-switcher" id="anno-2">
-            <div class="anno-marker" data-id="2">2</div>
-            <button class="demo-btn active" onclick="switchDemo(2)">①第三方返回邮箱</button>
+                        <button class="demo-btn active" onclick="switchDemo(2)">①第三方返回邮箱</button>
             <button class="demo-btn" onclick="switchDemo(3)">②邮箱绑定</button>
             <button class="demo-btn" onclick="switchDemo(4)">③邮箱被占用</button>
             <button class="demo-btn" onclick="switchDemo(5)">④已绑定渠道</button>
         </div>
 
         <!-- 顶部导航栏 -->
-        <div class="site-header" id="anno-3">
-            <div class="anno-marker" data-id="3">3</div>
-            <div class="header-left">
+        <div class="site-header" >
+                        <div class="header-left">
                 <div class="site-logo">poko</div>
                 <div class="header-nav">
                     <a href="#" class="active">首页</a>
@@ -552,9 +550,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
         </div>
 
         <!-- 主内容区：Banner + 登录卡片 -->
-        <div class="site-banner" id="anno-4" style="position:relative;">
-            <div class="anno-marker" data-id="4">4</div>
-            <div class="banner-left">
+        <div class="site-banner"  style="position:relative;">
+                        <div class="banner-left">
                 <div class="banner-title">新会员<span class="highlight">首购礼</span></div>
                 <div class="banner-coupon">
                     <span class="amount">88</span>
@@ -565,17 +562,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
             <div class="banner-decoration">🛍️</div>
 
             <!-- 右侧登录卡片区域 -->
-            <div class="login-card-wrapper" id="anno-5">
-                <div class="anno-marker" data-id="5">5</div>
-                <div class="login-card">
+            <div class="login-card-wrapper" >
+                                <div class="login-card">
                     <div class="card-logo">
                         <div class="card-logo-icon">poko</div>
                     </div>
 
                     <!-- DEMO 2: 第三方返回邮箱（邮箱不存在→直接注册绑定） -->
                     <div class="demo-content active" id="demo-2">
-                        <div class="card-tabs" id="anno-6">
-                            <div class="anno-marker" data-id="6">6</div>
+                        <div class="card-tabs" id="anno-2">
+                            <div class="anno-marker" data-id="2">6</div>
                             <div class="card-tab active">绑定邮箱</div>
                         </div>
                         <div class="bind-title">绑定邮箱账户</div>
@@ -634,8 +630,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                             <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
                         </div>
                         <!-- 弹窗 -->
-                        <div class="modal-mask" id="anno-7">
-                            <div class="anno-marker" data-id="7">7</div>
+                        <div class="modal-mask" id="anno-3">
+                            <div class="anno-marker" data-id="3">7</div>
                             <div class="modal-box">
                                 <div class="modal-icon">⚠️</div>
                                 <div class="modal-msg">该邮箱已被其他账户绑定，请更换邮箱或使用其他方式登录</div>
@@ -662,8 +658,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                             <button class="code-send-btn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);">获取验证码</button>
                         </div>
                         <!-- 弹窗 -->
-                        <div class="modal-mask" id="anno-8">
-                            <div class="anno-marker" data-id="8">8</div>
+                        <div class="modal-mask" id="anno-4">
+                            <div class="anno-marker" data-id="4">8</div>
                             <div class="modal-box">
                                 <div class="modal-icon-blue">️</div>
                                 <div class="modal-msg">该邮箱已绑定Google账号，请直接使用该邮箱登录</div>
@@ -678,9 +674,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
         </div>
 
         <!-- 底部 -->
-        <div class="site-footer" id="anno-9">
-            <div class="anno-marker" data-id="9">9</div>
-            <div class="footer-col">
+        <div class="site-footer" >
+                        <div class="footer-col">
                 <h4>服务支持</h4>
                 <p>帮助中心</p>
                 <p>新手攻略</p>
@@ -770,67 +765,19 @@ const annotations = [
         showMarker: false,
         type: 'overview',
         detail: {
-            feature: '本页面为POKO用户端网页版邮箱绑定模块的完整标注原型。左侧展示POKO官网首页布局（导航栏+营销Banner+底部信息），右侧悬浮登录卡片区域。通过顶部DEMO切换按钮，可在4种场景间切换：①第三方返回邮箱（邮箱不存在→直接注册绑定） ②邮箱绑定（手动输入邮箱+验证码） ③邮箱被占用弹窗 ④邮箱已绑定当前渠道弹窗。所有场景共享同一登录卡片容器，仅内部表单内容不同。',
-            interaction: '顶部DEMO切换器点击后，右侧卡片内容即时切换，其余页面元素（导航、Banner、底部）保持不变。每个DEMO对应一个独立的业务场景，标注中分别说明其交互逻辑和异常处理。'
+            feature: '本页面为POKO用户端网页版邮箱绑定模块的完整标注原型。左侧展示POKO官网首页布局（导航栏+营销Banner+底部信息），右侧悬浮登录卡片区域。包含4种业务场景，通过DEMO切换展示：①第三方返回邮箱（邮箱不存在→直接注册绑定） ②邮箱绑定（手动输入邮箱+验证码） ③邮箱被占用弹窗 ④邮箱已绑定当前渠道弹窗。所有场景共享同一登录卡片容器，仅内部表单内容不同。',
+            interaction: '每个DEMO对应一个独立的业务场景，标注中分别说明其交互逻辑和异常处理。DEMO切换器仅用于原型浏览，不需要开发实现。'
         }
     },
+
+
+
+
     {
         id: 2,
-        title: 'DEMO切换器',
-        summary: '顶部悬浮切换按钮组，用于在4种邮箱绑定业务场景间切换展示',
-        target: '#anno-2',
-        showMarker: true,
-        type: 'interaction',
-        detail: {
-            feature: '悬浮于页面左上角的场景切换控件，包含4个按钮：第三方返回邮箱、邮箱绑定、邮箱被占用、已绑定渠道。点击后右侧登录卡片区域切换为对应DEMO内容，帮助用户/开发快速浏览不同业务场景。',
-            interaction: '点击任一按钮，按钮高亮为激活态，其余按钮恢复默认。右侧卡片区域同步切换为对应DEMO内容，切换无动画过渡。当前激活的按钮背景为橙色，其余为白色描边。',
-            exception: '切换不影响页面其他区域（导航、Banner、底部）。弹窗类DEMO（④⑤）中，弹窗以半透明遮罩覆盖在卡片上方，底层表单仍然可见但不可操作。'
-        }
-    },
-    {
-        id: 3,
-        title: '顶部导航栏',
-        summary: 'POKO官网全局导航，包含Logo、主导航菜单、语言切换、功能入口和登录注册按钮',
-        target: '#anno-3',
-        showMarker: true,
-        type: 'area',
-        detail: {
-            feature: '网站全局导航栏，贯穿所有页面。左侧为品牌Logo和5个主导航入口，右侧为语言/货币切换、购物车、客服、消息入口，以及登录/注册操作按钮。',
-            display: '导航菜单项：首页（当前高亮）、运费预估、专家代购、关于我们、集运助手。右侧功能区：语言切换（中文/CNY）、购物车图标、客服图标、消息图标、"登录"文字按钮、"新用户"橙色圆角按钮。',
-            interaction: '点击导航菜单项跳转对应页面。点击"登录"弹出登录卡片。点击"新用户"跳转到注册页。未登录状态下购物车、消息入口显示数量徽标或引导登录提示。'
-        }
-    },
-    {
-        id: 4,
-        title: '营销Banner区',
-        summary: '首页首屏营销位，展示新会员首购礼活动信息',
-        target: '#anno-4',
-        showMarker: true,
-        type: 'area',
-        detail: {
-            feature: '首页主视觉Banner，用于展示当前营销活动（新会员首购礼88元物流券）。左侧为文案区，右侧为装饰图案。登录卡片悬浮于Banner右侧区域上方，不占用Banner布局空间。',
-            display: '主标题"新会员首购礼"，其中"首购礼"为橙色高亮。下方橙色券面展示"88元物流券"。底部引导文案"注册即领，代购集运更划算"。',
-            interaction: 'Banner为静态展示，无可点击交互。注册成功后自动领取物流券并展示在用户账户中。'
-        }
-    },
-    {
-        id: 5,
-        title: '登录卡片容器',
-        summary: '右侧悬浮的白色卡片，承载所有登录/注册/绑定场景的表单内容',
-        target: '#anno-5',
-        showMarker: true,
-        type: 'area',
-        detail: {
-            feature: '悬浮于Banner右侧的白色圆角卡片，是所有登录、注册、绑定场景的统一容器。卡片顶部居中展示POKO品牌Logo，下方根据DEMO切换展示不同表单内容。卡片带阴影，与背景形成层次感。',
-            display: '卡片宽度380px，圆角12px，白色背景，带投影。内部元素统一左对齐，输入框全宽。所有DEMO共用此容器，通过隐藏/显示内部demo-content区块实现切换。',
-            interaction: '卡片始终悬浮显示，不随页面滚动消失。通过顶部DEMO切换器控制内部内容切换。卡片内不同DEMO的表单结构见各场景标注。'
-        }
-    },
-    {
-        id: 6,
         title: '第三方返回邮箱场景（邮箱不存在→直接注册绑定）',
         summary: '第三方OAuth授权返回邮箱且系统中不存在时，展示邮箱（只读）+验证码，用户确认后直接注册并绑定',
-        target: '#anno-6',
+        target: '#anno-2',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -841,10 +788,10 @@ const annotations = [
         }
     },
     {
-        id: 7,
+        id: 3,
         title: '邮箱被占用提示弹窗（用户手动输入场景）',
         summary: '用户手动输入邮箱被占用时弹出的双选项提示弹窗',
-        target: '#anno-7',
+        target: '#anno-3',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -855,10 +802,10 @@ const annotations = [
         }
     },
     {
-        id: 8,
+        id: 4,
         title: '邮箱已绑定当前渠道提示弹窗',
         summary: '第三方返回的邮箱已绑定当前第三方渠道时，引导用户直接登录',
-        target: '#anno-8',
+        target: '#anno-4',
         showMarker: true,
         type: 'interaction',
         detail: {
@@ -867,20 +814,8 @@ const annotations = [
             copywriting: '弹窗图标为蓝色信息标识。文案：「该邮箱已绑定XX账号，请直接使用该邮箱登录」，其中XX为具体第三方渠道名称（如Google、Facebook、Apple、微信）。按钮文案：「去登录」（橙色主按钮）。',
             exception: '此弹窗仅在第三方返回邮箱且系统检测到该邮箱已绑定同一第三方渠道时触发。与DEMO④的核心区别：不提供"更换邮箱"选项，因为邮箱来源是第三方授权返回，用户不应也不能在此流程中更换。验证码发送失败时（如邮箱地址无效），在输入框下方显示红色错误提示。'
         }
-    },
-    {
-        id: 9,
-        title: '页面底部信息区',
-        summary: '网站底部导航，包含服务支持、关于我们、联系方式和APP下载入口',
-        target: '#anno-9',
-        showMarker: true,
-        type: 'area',
-        detail: {
-            feature: '网站全局底部信息区，分为4列：服务支持、关于我们、联系我们、下载应用程序。提供帮助中心、用户协议、隐私政策等链接，以及客服邮箱、电话和APP下载入口。',
-            display: '四列布局，每列一个标题+若干链接/信息。联系方式列包含邮箱、电话、服务时间。下载列包含二维码和Google Play/App Store按钮。',
-            interaction: '点击各链接跳转到对应页面。APP下载按钮点击后跳转到对应应用商店。此区域在所有页面保持一致。'
-        }
     }
+
 ];
 
 // ===== 标注模块标签映射 =====
