@@ -225,5 +225,29 @@
         ]
       }
     ]
+  },
+  {
+    "id": "sign-record",
+    "name": "无主件快递处理",
+    "desc": "仓库签收快递的识别码匹配机制，含签收记录管理和自动匹配流程",
+    "docs": [
+      {
+        "name": "无主件处理设计文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/CqizdIsQFo5z0AxrLK1clfdAn9A?from=from_copylink",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "后台管理",
+        "pages": [
+          {
+            "name": "签收记录",
+            "file": "docs/sign-record-annotated.html",
+            "icon": "📦"
+          }
+        ]
+      }
+    ]
   }
 ]
