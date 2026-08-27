@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>签收记录</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+.main-body { display: flex; flex-direction: row; flex: 1; min-height: 0; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ===== 以下为页面本身样式 ===== */
+
+/* 页面容器 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1D2129;
+}
+
+/* 快捷筛选Tab */
+.tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #E4E7ED;
+}
+.tab-item {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+}
+.tab-item:hover { color: #165DFF; }
+.tab-item.active {
+    color: #165DFF;
+    font-weight: 600;
+    border-bottom-color: #165DFF;
+}
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #F2F3F5;
+    font-size: 11px;
+    color: #86909C;
+    margin-left: 6px;
+}
+.tab-item.active .tab-badge {
+    background: #E8F3FF;
+    color: #165DFF;
+}
+
+/* 筛选区 */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.filter-select {
+    height: 32px;
+    padding: 0 28px 0 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 8px center;
+    appearance: none;
+    cursor: pointer;
+    min-width: 140px;
+}
+.filter-input {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    width: 200px;
+    outline: none;
+}
+.filter-input:focus { border-color: #165DFF; }
+.filter-date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.filter-date {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    outline: none;
+}
+.filter-date:focus { border-color: #165DFF; }
+.filter-date-sep { color: #999; font-size: 13px; }
+.filter-search-btn {
+    height: 32px;
+    padding: 0 16px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.filter-search-btn:hover { background: #0E42D2; }
+.filter-reset-btn {
+    height: 32px;
+    padding: 0 16px;
+    background: #fff;
+    color: #666;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.filter-reset-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+/* 数据表格 */
+.data-table-wrapper {
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #E4E7ED;
+    overflow: hidden;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data-table th {
+    background: #F7F8FA;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    text-align: left;
+    border-bottom: 1px solid #E4E7ED;
+    white-space: nowrap;
+}
+.data-table td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #F2F3F5;
+    white-space: nowrap;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #F7F8FA; }
+
+/* 状态标签 */
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.status-unmatched {
+    background: #FFF7E8;
+    color: #FF7D00;
+}
+.status-matched {
+    background: #E8FFEA;
+    color: #00B42A;
+}
+.status-ignored {
+    background: #F2F3F5;
+    color: #86909C;
+}
+
+/* 场景标签 */
+.scene-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.scene-transfer { background: #E8F3FF; color: #165DFF; }
+.scene-manual { background: #FFF0E8; color: #FF7D00; }
+.scene-api { background: #F2ECFF; color: #722ED1; }
+
+/* 忽略按钮 */
+.ignore-btn {
+    padding: 4px 12px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ignore-btn:hover { border-color: #F53F3F; color: #F53F3F; }
+.ignore-btn.disabled {
+    color: #C9CDD4;
+    cursor: not-allowed;
+    border-color: #E5E6EB;
+}
+
+/* 分页 */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 16px;
+    gap: 8px;
+}
+.pagination-info { font-size: 13px; color: #666; margin-right: auto; }
+.pagination-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.pagination-btn:hover { border-color: #165DFF; color: #165DFF; }
+.pagination-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+.pagination-btn.disabled { color: #C9CDD4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <!-- 主体区域（左右布局） -->
+    <div class="main-body">
+    <!-- 左侧原型区 -->
+    <div class="preview-area">
+        <div class="page-container" id="anno-1">
+            <!-- ① 页面总说明 -->
+            <div class="page-header">
+                <div class="page-title">签收记录</div>
+            </div>
+
+            <!-- ② 快捷筛选Tab -->
+            <div id="anno-2" style="position:relative; display:inline-block; width:100%;">
+                <div class="anno-marker" data-id="2">2</div>
+                <div class="tab-bar">
+                    <div class="tab-item active" onclick="switchTab(this, 0)">
+                        未匹配<span class="tab-badge">12</span>
+                    </div>
+                    <div class="tab-item" onclick="switchTab(this, 1)">
+                        已匹配<span class="tab-badge">36</span>
+                    </div>
+                    <div class="tab-item" onclick="switchTab(this, 2)">
+                        已忽略<span class="tab-badge">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ③ 筛选条件区 -->
+            <div id="anno-3" style="position:relative; display:inline-block; width:100%;">
+                <div class="anno-marker" data-id="3">3</div>
+                <div class="filter-bar">
+                <select class="filter-select">
+                    <option value="">全部业务场景</option>
+                    <option value="transfer">转运订单</option>
+                    <option value="manual">人工采购</option>
+                    <option value="api">接口采购</option>
+                </select>
+                <input class="filter-input" type="text" placeholder="搜索快递单号">
+                <div class="filter-date-range">
+                    <input class="filter-date" type="date" placeholder="开始日期">
+                    <span class="filter-date-sep">至</span>
+                    <input class="filter-date" type="date" placeholder="结束日期">
+                </div>
+                <button class="filter-search-btn">查询</button>
+                <button class="filter-reset-btn">重置</button>
+                </div>
+            </div>
+
+            <!-- ④ 数据表格 -->
+            <div id="anno-4" style="position:relative; display:inline-block; width:100%;">
+                <div class="anno-marker" data-id="4">4</div>
+                <div class="data-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>快递单号</th>
+                            <th>识别码</th>
+                            <th>业务场景</th>
+                            <th>会员编号</th>
+                            <th>关联订单号</th>
+                            <th>匹配状态</th>
+                            <th>匹配单号</th>
+                            <th>签收时间</th>
+                            <th>匹配时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SF1234567890</td>
+                            <td>086M88US</td>
+                            <td><span class="scene-tag scene-transfer">转运订单</span></td>
+                            <td>M086384721</td>
+                            <td>—</td>
+                            <td><span class="status-tag status-unmatched">未匹配</span></td>
+                            <td>—</td>
+                            <td>2026-08-27 10:23:15</td>
+                            <td>—</td>
+                            <td><button class="ignore-btn">忽略</button></td>
+                        </tr>
+                        <tr>
+                            <td>YT9876543210</td>
+                            <td>086O4B6K6P</td>
+                            <td><span class="scene-tag scene-api">接口采购</span></td>
+                            <td>—</td>
+                            <td>O260812345</td>
+                            <td><span class="status-tag status-matched">已匹配</span></td>
+                            <td>CG26080012</td>
+                            <td>2026-08-27 09:45:30</td>
+                            <td>2026-08-27 11:02:18</td>
+                            <td><button class="ignore-btn disabled" disabled>忽略</button></td>
+                        </tr>
+                        <tr>
+                            <td>ZT5678901234</td>
+                            <td>086P</td>
+                            <td><span class="scene-tag scene-manual">人工采购</span></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><span class="status-tag status-unmatched">未匹配</span></td>
+                            <td>—</td>
+                            <td>2026-08-27 08:12:45</td>
+                            <td>—</td>
+                            <td><button class="ignore-btn">忽略</button></td>
+                        </tr>
+                        <tr>
+                            <td>JD0012345678</td>
+                            <td>086M7AK2</td>
+                            <td><span class="scene-tag scene-transfer">转运订单</span></td>
+                            <td>M086291045</td>
+                            <td>—</td>
+                            <td><span class="status-tag status-ignored">已忽略</span></td>
+                            <td>—</td>
+                            <td>2026-08-26 16:30:00</td>
+                            <td>—</td>
+                            <td><button class="ignore-btn disabled" disabled>忽略</button></td>
+                        </tr>
+                        <tr>
+                            <td>SF9988776655</td>
+                            <td>086O3F2A1B</td>
+                            <td><span class="scene-tag scene-api">接口采购</span></td>
+                            <td>—</td>
+                            <td>O260815678</td>
+                            <td><span class="status-tag status-matched">已匹配</span></td>
+                            <td>CG26080015</td>
+                            <td>2026-08-26 14:20:10</td>
+                            <td>2026-08-26 15:45:33</td>
+                            <td><button class="ignore-btn disabled" disabled>忽略</button></td>
+                        </tr>
+                        <tr>
+                            <td>YD2233445566</td>
+                            <td>086M9X3C</td>
+                            <td><span class="scene-tag scene-transfer">转运订单</span></td>
+                            <td>M086102938</td>
+                            <td>—</td>
+                            <td><span class="status-tag status-unmatched">未匹配</span></td>
+                            <td>—</td>
+                            <td>2026-08-26 11:05:22</td>
+                            <td>—</td>
+                            <td><button class="ignore-btn">忽略</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ⑤ 分页 -->
+                <div class="pagination">
+                    <span class="pagination-info">共 51 条记录</span>
+                    <button class="pagination-btn disabled">‹</button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <button class="pagination-btn">›</button>
+                </div>
+                </div>
+            </div>
+
+            <!-- ⑥ 忽略确认弹窗 -->
+            <div id="anno-6" style="position:relative; display:inline-block; width:100%; margin-top:24px;">
+                <div class="anno-marker" data-id="6">6</div>
+                <div style="background:#fff; border:1px solid #E4E7ED; border-radius:6px; padding:24px;">
+                <div style="font-size:14px; font-weight:600; color:#333; margin-bottom:12px;">忽略确认弹窗（示意）</div>
+                <div style="background:#FAFAFA; border:1px solid #E4E7ED; border-radius:6px; padding:20px; text-align:center;">
+                    <div style="font-size:14px; color:#333; margin-bottom:16px;">确定要忽略该签收记录吗？<br><span style="font-size:12px; color:#999;">忽略后将无法再被自动匹配</span></div>
+                    <div style="display:flex; justify-content:center; gap:12px;">
+                        <button style="padding:6px 20px; border:1px solid #DCDFE6; background:#fff; border-radius:4px; font-size:13px; cursor:pointer;">取消</button>
+                        <button style="padding:6px 20px; border:none; background:#F53F3F; color:#fff; border-radius:4px; font-size:13px; cursor:pointer;">确定忽略</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    </div><!-- /main-body -->
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-sign-record';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '签收记录页面，展示所有签收快递的匹配情况，支持按状态快捷筛选和条件筛选',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '签收记录是仓库签收快递后，由服务平台同步到代购平台的数据记录。所有签收的快递（不论是否有预报）均会生成签收记录。\n\n页面核心功能：\n• 查看所有签收快递的匹配状态\n• 通过快捷Tab切换不同匹配状态的记录\n• 通过筛选条件定位具体记录\n• 对未匹配记录执行"忽略"操作\n\n注意：本页面不做"匹配"操作，匹配是通过代购单/转运单回填快递单号时系统自动完成的。',
+            business: '数据来源：服务平台按批次同步签收数据到代购平台。\n\n创建时机：仓库签收快递后，代购平台解码识别码，自动创建签收记录。\n\n预报匹配的快递直接标记"已匹配"，未匹配的标记"未匹配"进入无主件处理流程。'
+        }
+    },
+    {
+        id: 2,
+        title: '快捷筛选Tab',
+        summary: '顶部Tab按匹配状态切换：未匹配/已匹配/已忽略，带数量角标',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '按匹配状态快捷筛选签收记录，分为三个Tab：\n• 未匹配：仓库已签收但尚未关联到订单的记录\n• 已匹配：已通过代购单/转运单回填快递单号自动匹配成功的记录\n• 已忽略：员工手动标记为忽略的记录',
+            display: '每个Tab右侧显示对应状态的记录数量角标。\n\n默认进入页面展示"未匹配"Tab。\n\nTab切换后，下方表格数据实时刷新，筛选条件保持不变。',
+            interaction: '点击Tab切换状态，下方表格数据联动刷新。\n\nTab选中态用底部蓝色线条标识。\n\n数量角标实时更新，反映当前条件下的记录总数。',
+            business: '三种状态互斥，每条记录只能处于一种状态。\n\n"未匹配"→"已匹配"：系统自动（代购单/转运单回填快递单号时校验）。\n"未匹配"→"已忽略"：员工手动操作。\n"已匹配"和"已忽略"为终态，不可逆转。'
+        }
+    },
+    {
+        id: 3,
+        title: '筛选条件区',
+        summary: '支持按业务场景、快递单号搜索、签收时间范围筛选',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '提供多维度筛选条件，帮助快速定位目标签收记录。\n\n筛选维度：\n• 业务场景：下拉选择（转运订单/人工采购/接口采购）\n• 快递单号：输入框模糊搜索\n• 签收时间：日期范围选择\n\n筛选条件与Tab状态叠加生效。',
+            display: '业务场景为下拉选择框，默认"全部业务场景"。\n快递单号为文本输入框，支持部分匹配。\n签收时间为日期范围，包含开始日期和结束日期。\n\n查询按钮和重置按钮并排展示。',
+            interaction: '点击"查询"按钮，按当前筛选条件刷新表格数据。\n点击"重置"按钮，清空所有筛选条件恢复默认。\n\nTab切换时筛选条件保留不重置。\n\n多个筛选条件之间为"且"关系。',
+            business: '业务场景选项对应识别码解码后的类型：\n• 转运订单：识别码含M标识\n• 人工采购：识别码含P标识\n• 接口采购：识别码含O标识'
+        }
+    },
+    {
+        id: 4,
+        title: '签收记录表格',
+        summary: '展示签收快递的完整信息，含快递单号、识别码、业务场景、匹配状态等',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '以表格形式展示所有签收记录的详细信息，每行对应一条签收记录。\n\n表格字段：\n• 快递单号：国内快递单号\n• 识别码：面单上的短编码（Base36压缩格式）\n• 业务场景：系统解码后判定（转运订单/人工采购/接口采购）\n• 会员编号：解码后显示（人工采购场景为空，显示"—"）\n• 关联订单号：解码后显示（仅接口采购场景自动填充，其他显示"—"）\n• 匹配状态：未匹配/已匹配/已忽略\n• 匹配单号：匹配成功后显示的转运单号或采购单号\n• 签收时间：仓库扫描签收的时间\n• 匹配时间：系统自动匹配成功的时间\n• 操作：根据状态显示不同按钮',
+            display: '业务场景用彩色标签区分：转运订单（蓝色）、人工采购（橙色）、接口采购（紫色）。\n\n匹配状态用彩色标签区分：未匹配（橙色）、已匹配（绿色）、已忽略（灰色）。\n\n无数据的字段统一显示"—"。\n\n表格底部显示分页信息和页码。',
+            interaction: '表格支持分页，默认每页20条。\n\n快递单号列支持点击复制。\n\n匹配单号列在已匹配状态下可点击跳转到对应的转运单或采购单详情。',
+            business: '关联订单号仅在接口采购场景下有值，因为接口采购的识别码编码了订单号信息。\n\n匹配单号：\n• 转运场景匹配后显示转运单号\n• 代购场景匹配后显示采购单号\n• 未匹配和已忽略状态显示"—"\n\n匹配时间仅在已匹配状态下显示具体时间，其他状态显示"—"。'
+        }
+    },
+    {
+        id: 5,
+        title: '匹配状态说明',
+        summary: '三种匹配状态的定义、触发条件和可执行操作',
+        target: '#anno-4',
+        showMarker: false,
+        type: 'state',
+        detail: {
+            feature: '签收记录有三种匹配状态，反映快递从签收到最终处理的流转过程。',
+            state: '未匹配（橙色标签）：\n• 触发条件：代购平台收到识别码，初始化签收记录；或预报匹配失败\n• 可执行操作：忽略\n• 说明：等待后续业务操作（回填快递单号）自动触发匹配\n\n已匹配（绿色标签）：\n• 触发条件：代购单/转运单回填快递单号时，系统自动校验匹配成功\n• 可执行操作：无（终态）\n• 说明：匹配成功后系统自动触发二次预报\n\n已忽略（灰色标签）：\n• 触发条件：员工手动点击"忽略"按钮标记\n• 可执行操作：无（终态）\n• 说明：标记为无法匹配，不再参与自动匹配',
+            business: '状态流转规则：\n• 未匹配 → 已匹配：系统自动，不可逆\n• 未匹配 → 已忽略：人工操作，不可逆\n• 已匹配和已忽略为终态，不可互相转换\n\n注意：匹配不是在本页面操作的，而是通过代购单/转运单填写快递单号时系统自动校验完成。'
+        }
+    },
+    {
+        id: 6,
+        title: '忽略按钮与确认弹窗',
+        summary: '仅未匹配状态可操作，点击后弹出确认弹窗，确认后标记为已忽略',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '用于员工手动标记某条签收记录为"已忽略"，表示该快递无法匹配到任何订单，不再参与后续自动匹配。',
+            interaction: '操作列显示"忽略"按钮：\n• 未匹配状态：按钮可用，点击弹出确认弹窗\n• 已匹配/已忽略状态：按钮置灰不可点击\n\n确认弹窗内容：\n• 提示文案："确定要忽略该签收记录吗？忽略后将无法再被自动匹配"\n• 操作按钮：取消 / 确定忽略\n\n点击"确定忽略"后，签收记录状态变更为"已忽略"，表格实时刷新。',
+            copywriting: '确认弹窗文案：\n• 标题：无标题，直接显示提示内容\n• 正文："确定要忽略该签收记录吗？"\n• 副文案："忽略后将无法再被自动匹配"\n• 取消按钮："取消"\n• 确认按钮："确定忽略"（红色按钮）',
+            business: '忽略操作不可撤销。\n\n忽略后该快递单号不再参与后续的自动匹配校验。\n\n适用场景：快递面单损坏无法识别、商家错发等非系统原因导致的无法匹配情况。'
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+
+// Tab切换
+function switchTab(el, index) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+}
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+</script>
+</body>
+</html>
