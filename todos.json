@@ -1,0 +1,30 @@
+{
+  "todos": [
+    {
+      "id": 1788144846913,
+      "title": "代办测试",
+      "categoryId": "1",
+      "priority": "high",
+      "note": "测试测试",
+      "completed": false,
+      "createdAt": "2026-08-31T02:54:06.913Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "工作",
+      "color": "#7C5CFF"
+    },
+    {
+      "id": 2,
+      "name": "生活",
+      "color": "#62FAD3"
+    },
+    {
+      "id": 3,
+      "name": "学习",
+      "color": "#69E7FF"
+    }
+  ]
+}
