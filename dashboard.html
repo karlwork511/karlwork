@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karl 工作台</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-primary:#070A14;
+--glass-bg:rgba(255,255,255,0.05);
+--glass-border:rgba(255,255,255,0.1);
+--glass-hover:rgba(255,255,255,0.08);
+--accent:#7C5CFF;
+--accent-light:#69E7FF;
+--success:#62FAD3;
+--warning:#FFB86C;
+--danger:#FF6B6B;
+--text-primary:#F7FAFF;
+--text-secondary:#9AA7C7;
+--text-muted:#6B7280;
+--radius:12px;
+--radius-lg:16px;
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth}
+body{
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;
+background:var(--bg-primary);
+color:var(--text-primary);
+line-height:1.6;
+min-height:100vh;
+overflow-x:hidden;
+}
+body::before{
+content:'';
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:
+radial-gradient(ellipse at 20% 20%,rgba(124,92,255,0.15) 0%,transparent 50%),
+radial-gradient(ellipse at 80% 80%,rgba(105,231,255,0.1) 0%,transparent 50%);
+pointer-events:none;
+z-index:0;
+}
+.container{
+position:relative;
+z-index:1;
+max-width:1400px;
+margin:0 auto;
+padding:0 24px;
+}
+/* 导航栏 */
+.navbar{
+position:sticky;
+top:0;
+z-index:100;
+backdrop-filter:blur(20px);
+background:rgba(7,10,20,0.8);
+border-bottom:1px solid var(--glass-border);
+}
+.navbar-content{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:16px 0;
+}
+.logo{
+display:flex;
+align-items:center;
+gap:12px;
+font-size:20px;
+font-weight:600;
+}
+.logo-icon{
+width:36px;height:36px;
+background:linear-gradient(135deg,var(--accent),var(--accent-light));
+border-radius:10px;
+display:flex;align-items:center;justify-content:center;
+font-size:18px;
+}
+.nav-links{
+display:flex;
+gap:8px;
+}
+.nav-links a{
+color:var(--text-secondary);
+text-decoration:none;
+padding:8px 16px;
+border-radius:8px;
+transition:var(--transition);
+font-size:14px;
+cursor:pointer;
+}
+.nav-links a:hover,.nav-links a.active{
+color:var(--text-primary);
+background:var(--glass-bg);
+}
+/* 主内容 */
+main{padding:32px 0 64px}
+/* 欢迎区域 */
+.hero{
+text-align:center;
+padding:32px 0 40px;
+}
+.hero h1{
+font-size:clamp(24px,4vw,36px);
+font-weight:700;
+margin-bottom:8px;
+background:linear-gradient(135deg,var(--text-primary),var(--accent-light));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+background-clip:text;
+}
+.hero p{
+font-size:16px;
+color:var(--text-secondary);
+}
+/* 统计卡片 */
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:16px;
+margin-bottom:32px;
+}
+.stat-card{
+backdrop-filter:blur(10px);
+background:var(--glass-bg);
+border:1px solid var(--glass-border);
+border-radius:var(--radius);
+padding:20px;
+transition:var(--transition);
+}
+.stat-card:hover{
+background:var(--glass-hover);
+transform:translateY(-2px);
+}
+.stat-card .label{
+font-size:12px;
+color:var(--text-secondary);
+margin-bottom:6px;
+}
+.stat-card .value{
+font-size:28px;
+font-weight:700;
+}
+.stat-card .value.accent{color:var(--accent)}
+.stat-card .value.success{color:var(--success)}
+.stat-card .value.warning{color:var(--warning)}
+/* 内容网格 */
+.content-grid{
+display:grid;
+grid-template-columns:1fr 360px;
+gap:24px;
+}
+@media(max-width:1024px){
+.content-grid{grid-template-columns:1fr}
+}
+/* 玻璃卡片 */
+.glass-card{
+backdrop-filter:blur(10px);
+background:var(--glass-bg);
+border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);
+padding:24px;
+margin-bottom:24px;
+}
+.card-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
+.card-title{
+font-size:16px;
+font-weight:600;
+display:flex;
+align-items:center;
+gap:10px;
+}
+.card-title::before{
+content:'';
+width:4px;height:18px;
+background:linear-gradient(180deg,var(--accent),var(--accent-light));
+border-radius:2px;
+}
+/* 待办输入 */
+.todo-form{
+display:flex;
+flex-direction:column;
+gap:12px;
+margin-bottom:20px;
+padding:16px;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--glass-border);
+border-radius:var(--radius);
+}
+.form-row{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+.form-group{
+flex:1;
+min-width:150px;
+}
+.form-group label{
+display:block;
+font-size:12px;
+color:var(--text-secondary);
+margin-bottom:6px;
+}
+.form-input,.form-select{
+width:100%;
+padding:10px 14px;
+background:rgba(255,255,255,0.03);
+border:1px solid var(--glass-border);
+border-radius:8px;
+color:var(--text-primary);
+font-size:14px;
+transition:var(--transition);
+}
+.form-input:focus,.form-select:focus{
+outline:none;
+border-color:var(--accent);
+background:rgba(255,255,255,0.05);
+}
+.form-input::placeholder{color:var(--text-muted)}
+.form-select{
+appearance:none;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239AA7C7' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;
+background-position:right 12px center;
+padding-right:32px;
+}
+.form-select option{
+background:var(--bg-primary);
+color:var(--text-primary);
+}
+.btn{
+padding:10px 20px;
+border:none;
+border-radius:8px;
+font-size:14px;
+font-weight:500;
+cursor:pointer;
+transition:var(--transition);
+display:inline-flex;
+align-items:center;
+gap:6px;
+}
+.btn-primary{
+background:linear-gradient(135deg,var(--accent),#5A3FD9);
+color:white;
+}
+.btn-primary:hover{
+transform:translateY(-1px);
+box-shadow:0 8px 24px rgba(124,92,255,0.3);
+}
+.btn-secondary{
+background:rgba(255,255,255,0.05);
+color:var(--text-primary);
+border:1px solid var(--glass-border);
+}
+.btn-secondary:hover{
+background:rgba(255,255,255,0.1);
+}
+/* 分类筛选 */
+.filter-bar{
+display:flex;
+gap:8px;
+margin-bottom:16px;
+flex-wrap:wrap;
+}
+.filter-tag{
+padding:6px 14px;
+background:rgba(255,255,255,0.03);
+border:1px solid var(--glass-border);
+border-radius:20px;
+font-size:12px;
+color:var(--text-secondary);
+cursor:pointer;
+transition:var(--transition);
+}
+.filter-tag:hover,.filter-tag.active{
+background:rgba(124,92,255,0.2);
+border-color:var(--accent);
+color:var(--accent-light);
+}
+/* 待办列表 */
+.todo-list{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+.todo-item{
+display:flex;
+align-items:flex-start;
+gap:14px;
+padding:14px 18px;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--glass-border);
+border-radius:var(--radius);
+transition:var(--transition);
+}
+.todo-item:hover{
+background:rgba(255,255,255,0.04);
+border-color:rgba(124,92,255,0.3);
+}
+.todo-checkbox{
+width:20px;height:20px;
+border:2px solid var(--glass-border);
+border-radius:6px;
+cursor:pointer;
+transition:var(--transition);
+display:flex;
+align-items:center;
+justify-content:center;
+flex-shrink:0;
+margin-top:2px;
+}
+.todo-checkbox:hover{border-color:var(--accent)}
+.todo-checkbox.checked{
+background:var(--success);
+border-color:var(--success);
+}
+.todo-checkbox.checked::after{
+content:'✓';
+color:var(--bg-primary);
+font-size:12px;
+font-weight:bold;
+}
+.todo-content{
+flex:1;
+min-width:0;
+}
+.todo-title{
+font-size:14px;
+color:var(--text-primary);
+margin-bottom:4px;
+}
+.todo-item.completed .todo-title{
+color:var(--text-muted);
+text-decoration:line-through;
+}
+.todo-meta{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:6px;
+}
+.todo-tag{
+padding:2px 8px;
+background:rgba(124,92,255,0.2);
+border-radius:4px;
+color:var(--accent-light);
+font-size:11px;
+}
+.todo-priority{
+padding:2px 8px;
+border-radius:4px;
+font-size:11px;
+}
+.todo-priority.high{background:rgba(255,107,107,0.2);color:var(--danger)}
+.todo-priority.medium{background:rgba(255,184,108,0.2);color:var(--warning)}
+.todo-priority.low{background:rgba(154,167,199,0.2);color:var(--text-muted)}
+.todo-date{
+font-size:11px;
+color:var(--text-muted);
+}
+.todo-actions{
+display:flex;
+gap:6px;
+opacity:0;
+transition:var(--transition);
+}
+.todo-item:hover .todo-actions{opacity:1}
+.todo-action-btn{
+width:28px;height:28px;
+border:none;
+background:rgba(255,255,255,0.05);
+border-radius:6px;
+color:var(--text-secondary);
+cursor:pointer;
+transition:var(--transition);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+}
+.todo-action-btn:hover{
+background:rgba(255,255,255,0.1);
+color:var(--text-primary);
+}
+.todo-action-btn.delete:hover{
+background:rgba(255,107,107,0.2);
+color:var(--danger);
+}
+/* 空状态 */
+.empty-state{
+text-align:center;
+padding:40px 20px;
+color:var(--text-muted);
+}
+.empty-state-icon{
+font-size:40px;
+margin-bottom:12px;
+opacity:0.5;
+}
+/* 分类管理 */
+.category-list{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+.category-item{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px 14px;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--glass-border);
+border-radius:8px;
+}
+.category-name{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+}
+.category-color{
+width:12px;height:12px;
+border-radius:50%;
+}
+.category-actions{
+display:flex;
+gap:6px;
+}
+.category-count{
+font-size:12px;
+color:var(--text-muted);
+background:rgba(255,255,255,0.05);
+padding:2px 8px;
+border-radius:10px;
+}
+/* 快捷入口 */
+.quick-links{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+.quick-link{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px;
+background:rgba(255,255,255,0.02);
+border:1px solid var(--glass-border);
+border-radius:var(--radius);
+text-decoration:none;
+color:var(--text-primary);
+transition:var(--transition);
+}
+.quick-link:hover{
+background:rgba(255,255,255,0.05);
+border-color:var(--accent);
+transform:translateY(-2px);
+}
+.quick-link-icon{
+width:36px;height:36px;
+background:linear-gradient(135deg,var(--accent),var(--accent-light));
+border-radius:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+flex-shrink:0;
+}
+.quick-link-text{
+font-size:13px;
+font-weight:500;
+}
+/* 模态框 */
+.modal{
+display:none;
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.7);
+backdrop-filter:blur(4px);
+z-index:1000;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+.modal.active{display:flex}
+.modal-content{
+background:var(--bg-primary);
+border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);
+padding:24px;
+width:100%;
+max-width:500px;
+max-height:90vh;
+overflow-y:auto;
+}
+.modal-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
+.modal-title{
+font-size:18px;
+font-weight:600;
+}
+.modal-close{
+width:32px;height:32px;
+border:none;
+background:rgba(255,255,255,0.05);
+border-radius:8px;
+color:var(--text-secondary);
+cursor:pointer;
+font-size:18px;
+transition:var(--transition);
+}
+.modal-close:hover{
+background:rgba(255,255,255,0.1);
+color:var(--text-primary);
+}
+/* 同步状态 */
+.sync-status{
+display:flex;
+align-items:center;
+gap:8px;
+padding:8px 14px;
+background:rgba(255,255,255,0.03);
+border-radius:20px;
+font-size:12px;
+color:var(--text-secondary);
+}
+.sync-dot{
+width:8px;height:8px;
+border-radius:50%;
+background:var(--success);
+}
+.sync-dot.syncing{
+background:var(--warning);
+animation:pulse 1s infinite;
+}
+@keyframes pulse{
+0%,100%{opacity:1}
+50%{opacity:0.5}
+}
+/* 响应式 */
+@media(max-width:768px){
+.container{padding:0 16px}
+.hero{padding:24px 0 32px}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.quick-links{grid-template-columns:1fr}
+.nav-links{display:none}
+.form-row{flex-direction:column}
+.form-group{min-width:100%}
+}
+/* 打印样式 */
+@media print{
+.navbar,.todo-actions,.modal{display:none}
+body{background:white;color:black}
+.glass-card{background:#f5f5f5;border:1px solid #ddd}
+}
+:focus-visible{
+outline:2px solid var(--accent);
+outline-offset:2px;
+}
+</style>
+</head>
+<body>
+<!-- 导航栏 -->
+<nav class="navbar">
+<div class="container navbar-content">
+<div class="logo">
+<div class="logo-icon">⚡</div>
+<span>Karl 工作台</span>
+</div>
+<div class="nav-links">
+<a href="#todos" class="active">待办</a>
+<a href="#quick">快捷</a>
+<a onclick="openSettings()">设置</a>
+</div>
+<div class="sync-status">
+<span class="sync-dot" id="syncDot"></span>
+<span id="syncText">本地</span>
+</div>
+</div>
+</nav>
+
+<main>
+<div class="container">
+<!-- 欢迎区域 -->
+<section class="hero">
+<h1>你好，Karl 👋</h1>
+<p>今天也要高效工作哦</p>
+</section>
+
+<!-- 统计卡片 -->
+<section class="stats-grid">
+<div class="stat-card">
+<div class="label">全部待办</div>
+<div class="value accent" id="stat-total">0</div>
+</div>
+<div class="stat-card">
+<div class="label">已完成</div>
+<div class="value success" id="stat-completed">0</div>
+</div>
+<div class="stat-card">
+<div class="label">进行中</div>
+<div class="value warning" id="stat-progress">0</div>
+</div>
+<div class="stat-card">
+<div class="label">完成率</div>
+<div class="value" id="stat-rate">0%</div>
+</div>
+</section>
+
+<!-- 内容网格 -->
+<div class="content-grid">
+<!-- 左侧：待办事项 -->
+<div>
+<section class="glass-card" id="todos">
+<div class="card-header">
+<h2 class="card-title">待办事项</h2>
+<button class="btn btn-secondary" onclick="openAddModal()">+ 添加</button>
+</div>
+<!-- 分类筛选 -->
+<div class="filter-bar" id="filterBar">
+<span class="filter-tag active" onclick="filterTodos('all')">全部</span>
+</div>
+<!-- 待办列表 -->
+<div class="todo-list" id="todoList"></div>
+</section>
+</div>
+
+<!-- 右侧 -->
+<aside>
+<!-- 快捷入口 -->
+<section class="glass-card" id="quick">
+<div class="card-header">
+<h2 class="card-title">快捷入口</h2>
+</div>
+<div class="quick-links">
+<a href="https://github.com/karlwork511/karlwork" target="_blank" rel="noopener noreferrer" class="quick-link">
+<div class="quick-link-icon">📦</div>
+<div class="quick-link-text">GitHub 仓库</div>
+</a>
+<a href="https://karlwork511.github.io/karlwork/" target="_blank" rel="noopener noreferrer" class="quick-link">
+<div class="quick-link-icon">🎨</div>
+<div class="quick-link-text">POKO 原型</div>
+</a>
+<a href="https://www.coze.cn" target="_blank" rel="noopener noreferrer" class="quick-link">
+<div class="quick-link-icon">🤖</div>
+<div class="quick-link-text">Coze 工作台</div>
+</a>
+<a href="https://github.com/karlwork511/karlwork/issues" target="_blank" rel="noopener noreferrer" class="quick-link">
+<div class="quick-link-icon">📋</div>
+<div class="quick-link-text">Issues</div>
+</a>
+</div>
+</section>
+
+<!-- 分类管理 -->
+<section class="glass-card">
+<div class="card-header">
+<h2 class="card-title">分类管理</h2>
+<button class="btn btn-secondary" onclick="openCategoryModal()" style="padding:6px 12px;font-size:12px;">+ 添加</button>
+</div>
+<div class="category-list" id="categoryList"></div>
+</section>
+</aside>
+</div>
+</div>
+</main>
+
+<!-- 添加待办模态框 -->
+<div class="modal" id="addModal">
+<div class="modal-content">
+<div class="modal-header">
+<h3 class="modal-title">添加待办</h3>
+<button class="modal-close" onclick="closeModal('addModal')">×</button>
+</div>
+<form id="addForm" onsubmit="submitTodo(event)">
+<div class="form-group" style="margin-bottom:16px">
+<label>标题 *</label>
+<input type="text" class="form-input" id="todoTitle" placeholder="输入待办标题" required>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>分类</label>
+<select class="form-select" id="todoCategory"></select>
+</div>
+<div class="form-group">
+<label>优先级</label>
+<select class="form-select" id="todoPriority">
+<option value="">无</option>
+<option value="high">高</option>
+<option value="medium">中</option>
+<option value="low">低</option>
+</select>
+</div>
+</div>
+<div class="form-group" style="margin-top:16px">
+<label>备注</label>
+<input type="text" class="form-input" id="todoNote" placeholder="可选备注">
+</div>
+<div style="display:flex;gap:12px;margin-top:24px">
+<button type="submit" class="btn btn-primary">添加</button>
+<button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">取消</button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- 分类管理模态框 -->
+<div class="modal" id="categoryModal">
+<div class="modal-content">
+<div class="modal-header">
+<h3 class="modal-title">添加分类</h3>
+<button class="modal-close" onclick="closeModal('categoryModal')">×</button>
+</div>
+<form onsubmit="submitCategory(event)">
+<div class="form-group" style="margin-bottom:16px">
+<label>分类名称 *</label>
+<input type="text" class="form-input" id="categoryName" placeholder="如：工作、生活、学习" required>
+</div>
+<div class="form-group">
+<label>颜色</label>
+<input type="color" class="form-input" id="categoryColor" value="#7C5CFF" style="height:44px;padding:4px">
+</div>
+<div style="display:flex;gap:12px;margin-top:24px">
+<button type="submit" class="btn btn-primary">添加</button>
+<button type="button" class="btn btn-secondary" onclick="closeModal('categoryModal')">取消</button>
+</div>
+</form>
+</div>
+</div>
+
+<!-- 设置模态框 -->
+<div class="modal" id="settingsModal">
+<div class="modal-content">
+<div class="modal-header">
+<h3 class="modal-title">数据同步</h3>
+<button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+</div>
+<div style="color:var(--text-secondary);font-size:14px;line-height:1.8;margin-bottom:20px">
+<p>当前数据存储在本地浏览器。</p>
+<p>你可以导出为 JSON 文件，手动上传到 GitHub 仓库进行备份。</p>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="exportData()">导出数据</button>
+<button class="btn btn-secondary" onclick="importData()">导入数据</button>
+<button class="btn btn-secondary" onclick="clearData()" style="color:var(--danger)">清空数据</button>
+</div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+</div>
+</div>
+
+<script>
+// 数据存储
+let todos = JSON.parse(localStorage.getItem('karl-todos') || '[]');
+let categories = JSON.parse(localStorage.getItem('karl-categories') || JSON.stringify([
+{id:1, name:'工作', color:'#7C5CFF'},
+{id:2, name:'生活', color:'#62FAD3'},
+{id:3, name:'学习', color:'#69E7FF'}
+]));
+let currentFilter = 'all';
+
+// 保存数据
+function saveData() {
+localStorage.setItem('karl-todos', JSON.stringify(todos));
+localStorage.setItem('karl-categories', JSON.stringify(categories));
+updateStats();
+renderTodos();
+renderCategories();
+renderFilterBar();
+updateCategorySelect();
+}
+
+// 更新统计
+function updateStats() {
+const total = todos.length;
+const completed = todos.filter(t => t.completed).length;
+const progress = total - completed;
+const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+document.getElementById('stat-total').textContent = total;
+document.getElementById('stat-completed').textContent = completed;
+document.getElementById('stat-progress').textContent = progress;
+document.getElementById('stat-rate').textContent = rate + '%';
+}
+
+// 渲染待办列表
+function renderTodos() {
+const list = document.getElementById('todoList');
+let filtered = currentFilter === 'all' ? todos : todos.filter(t => t.categoryId == currentFilter);
+
+if (filtered.length === 0) {
+list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>暂无待办事项</p></div>`;
+return;
+}
+
+list.innerHTML = filtered.map(todo => {
+const category = categories.find(c => c.id == todo.categoryId);
+return `
+<div class="todo-item ${todo.completed ? 'completed' : ''}">
+<div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${todo.id})"></div>
+<div class="todo-content">
+<div class="todo-title">${escapeHtml(todo.title)}</div>
+<div class="todo-meta">
+${category ? `<span class="todo-tag" style="background:${category.color}30;color:${category.color}">${escapeHtml(category.name)}</span>` : ''}
+${todo.priority ? `<span class="todo-priority ${todo.priority}">${{high:'高',medium:'中',low:'低'}[todo.priority]}</span>` : ''}
+${todo.note ? `<span class="todo-date">${escapeHtml(todo.note)}</span>` : ''}
+<span class="todo-date">${formatDate(todo.createdAt)}</span>
+</div>
+</div>
+<div class="todo-actions">
+<button class="todo-action-btn delete" onclick="deleteTodo(${todo.id})">🗑️</button>
+</div>
+</div>
+`;
+}).join('');
+}
+
+// 渲染分类列表
+function renderCategories() {
+const list = document.getElementById('categoryList');
+list.innerHTML = categories.map(cat => {
+const count = todos.filter(t => t.categoryId == cat.id).length;
+return `
+<div class="category-item">
+<div class="category-name">
+<span class="category-color" style="background:${cat.color}"></span>
+<span>${escapeHtml(cat.name)}</span>
+<span class="category-count">${count}</span>
+</div>
+<div class="category-actions">
+<button class="todo-action-btn delete" onclick="deleteCategory(${cat.id})">🗑️</button>
+</div>
+</div>
+`;
+}).join('');
+}
+
+// 渲染筛选栏
+function renderFilterBar() {
+const bar = document.getElementById('filterBar');
+bar.innerHTML = `
+<span class="filter-tag ${currentFilter === 'all' ? 'active' : ''}" onclick="filterTodos('all')">全部</span>
+${categories.map(cat => `
+<span class="filter-tag ${currentFilter == cat.id ? 'active' : ''}" onclick="filterTodos(${cat.id})">${escapeHtml(cat.name)}</span>
+`).join('')}
+`;
+}
+
+// 更新分类选择框
+function updateCategorySelect() {
+const select = document.getElementById('todoCategory');
+select.innerHTML = `<option value="">未分类</option>` + categories.map(cat => 
+`<option value="${cat.id}">${escapeHtml(cat.name)}</option>`
+).join('');
+}
+
+// 筛选待办
+function filterTodos(filter) {
+currentFilter = filter;
+renderFilterBar();
+renderTodos();
+}
+
+// 切换完成状态
+function toggleTodo(id) {
+const todo = todos.find(t => t.id === id);
+if (todo) {
+todo.completed = !todo.completed;
+saveData();
+}
+}
+
+// 删除待办
+function deleteTodo(id) {
+if (confirm('确定删除这个待办吗？')) {
+todos = todos.filter(t => t.id !== id);
+saveData();
+}
+}
+
+// 添加待办
+function submitTodo(e) {
+e.preventDefault();
+const todo = {
+id: Date.now(),
+title: document.getElementById('todoTitle').value,
+categoryId: document.getElementById('todoCategory').value || null,
+priority: document.getElementById('todoPriority').value || null,
+note: document.getElementById('todoNote').value || null,
+completed: false,
+createdAt: new Date().toISOString()
+};
+todos.unshift(todo);
+saveData();
+closeModal('addModal');
+document.getElementById('addForm').reset();
+}
+
+// 添加分类
+function submitCategory(e) {
+e.preventDefault();
+const category = {
+id: Date.now(),
+name: document.getElementById('categoryName').value,
+color: document.getElementById('categoryColor').value
+};
+categories.push(category);
+saveData();
+closeModal('categoryModal');
+document.getElementById('categoryName').value = '';
+}
+
+// 删除分类
+function deleteCategory(id) {
+if (confirm('确定删除这个分类吗？相关待办将变为未分类。')) {
+categories = categories.filter(c => c.id !== id);
+todos.forEach(t => {
+if (t.categoryId == id) t.categoryId = null;
+});
+saveData();
+}
+}
+
+// 模态框控制
+function openAddModal() {
+updateCategorySelect();
+document.getElementById('addModal').classList.add('active');
+}
+function openCategoryModal() {
+document.getElementById('categoryModal').classList.add('active');
+}
+function openSettings() {
+document.getElementById('settingsModal').classList.add('active');
+}
+function closeModal(id) {
+document.getElementById(id).classList.remove('active');
+}
+
+// 导出导入
+function exportData() {
+const data = { todos, categories, exportedAt: new Date().toISOString() };
+const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `karl-todos-${new Date().toISOString().split('T')[0]}.json`;
+a.click();
+URL.revokeObjectURL(url);
+}
+function importData() {
+document.getElementById('importFile').click();
+}
+function handleImport(e) {
+const file = e.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = (e) => {
+try {
+const data = JSON.parse(e.target.result);
+if (data.todos) todos = data.todos;
+if (data.categories) categories = data.categories;
+saveData();
+alert('导入成功！');
+} catch (err) {
+alert('导入失败：文件格式错误');
+}
+};
+reader.readAsText(file);
+}
+function clearData() {
+if (confirm('确定清空所有数据吗？此操作不可恢复！')) {
+todos = [];
+categories = [
+{id:1, name:'工作', color:'#7C5CFF'},
+{id:2, name:'生活', color:'#62FAD3'},
+{id:3, name:'学习', color:'#69E7FF'}
+];
+saveData();
+}
+}
+
+// 工具函数
+function escapeHtml(text) {
+const div = document.createElement('div');
+div.textContent = text;
+return div.innerHTML;
+}
+function formatDate(dateStr) {
+const date = new Date(dateStr);
+const now = new Date();
+const diff = now - date;
+const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+if (days === 0) return '今天';
+if (days === 1) return '昨天';
+if (days < 7) return days + '天前';
+return date.toLocaleDateString('zh-CN');
+}
+
+// 初始化
+saveData();
+
+// 平滑滚动
+document.querySelectorAll('.nav-links a[href]').forEach(link => {
+link.addEventListener('click', (e) => {
+e.preventDefault();
+const target = document.querySelector(link.getAttribute('href'));
+if (target) {
+target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+link.classList.add('active');
+});
+});
+</script>
+</body>
+</html>
