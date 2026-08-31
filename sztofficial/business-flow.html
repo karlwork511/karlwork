@@ -280,6 +280,8 @@
     border-radius: 16px;
     padding: 20px 24px;
     width: 100%;
+    max-width: 480px;
+    min-width: 0;
     overflow: hidden;
     transition: transform 0.3s ease, background 0.3s ease;
     cursor: default;
@@ -353,10 +355,12 @@
     gap: 10px;
     margin-bottom: 12px;
     width: 100%;
+    min-width: 0;
   }
   .step-icon {
     font-size: 28px;
     margin-bottom: 0;
+    flex-shrink: 0;
   }
   .step-number {
     display: inline-flex;
@@ -377,6 +381,9 @@
     font-weight: 700;
     margin-bottom: 0;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .step-desc {
     font-size: 15px;
@@ -817,6 +824,7 @@
         <div class="step-icon">🤖</div>
       <div class="step-number">07</div>
       <div class="step-title">自动采购</div>
+      </div>
       <div class="step-desc">订单支付成功后，系统自动向淘宝/1688/微店发起采购，全程无需人工干预。采购状态实时同步，异常自动预警。</div>
       <div class="step-tags">
         <span class="step-tag">全自动采购</span>
@@ -834,6 +842,7 @@
         <div class="step-icon">🔍</div>
       <div class="step-number">08</div>
       <div class="step-title">仓库处理</div>
+      </div>
       <div class="step-desc">商品到达 POKO 仓库后，自动完成签收、质检、拍照、贴码、入库全流程。智能验货 QC 拦截问题件，确保商品质量。</div>
       <div class="step-tags">
         <span class="step-tag">自动签收</span>
@@ -851,6 +860,7 @@
         <div class="step-icon">✈️</div>
       <div class="step-number">09</div>
       <div class="step-title">国际发货</div>
+      </div>
       <div class="step-desc">用户提交合包申请后，仓库自动打包称重，通过物流引擎匹配最优国际线路发货。内置 100+ 国家线路，也可对接自有物流渠道。</div>
       <div class="step-tags">
         <span class="step-tag">智能合包</span>
