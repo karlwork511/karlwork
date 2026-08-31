@@ -79,24 +79,37 @@ border-radius:8px;
 display:flex;align-items:center;justify-content:center;
 font-size:16px;
 }
-.sync-status {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-font-size: 11px;
-color: var(--text-muted);
-padding: 4px 8px;
-border-radius: 10px;
-background: var(--glass-bg);
+/* 同步状态指示器 */
+.sync-status{
+display:inline-flex;
+align-items:center;
+gap:6px;
+font-size:12px;
+padding:5px 12px;
+border-radius:20px;
+background:var(--glass-bg);
+border:1px solid var(--glass-border);
+transition:var(--transition);
 }
-.sync-status.syncing { color: var(--warning); }
-.sync-status.synced { color: var(--success); }
-.sync-status.error { color: var(--danger); }
-.sync-status .dot {
-width: 5px; height: 5px;
-border-radius: 50%;
-background: currentColor;
+.sync-status .sync-dot{
+width:7px;height:7px;
+border-radius:50%;
+flex-shrink:0;
+transition:var(--transition);
 }
+.sync-status.syncing{color:var(--warning);border-color:rgba(255,184,108,0.3)}
+.sync-status.syncing .sync-dot{background:var(--warning);animation:syncPulse 1s ease-in-out infinite}
+.sync-status.synced{color:var(--success);border-color:rgba(98,250,211,0.3)}
+.sync-status.synced .sync-dot{background:var(--success)}
+.sync-status.error{color:var(--danger);border-color:rgba(255,107,107,0.3)}
+.sync-status.error .sync-dot{background:var(--danger)}
+.sync-status.local{color:var(--text-muted);border-color:var(--glass-border)}
+.sync-status.local .sync-dot{background:var(--text-muted)}
+@keyframes syncPulse{
+0%,100%{opacity:1;transform:scale(1)}
+50%{opacity:0.4;transform:scale(0.7)}
+}
+
 /* 底部导航 */
 .bottom-nav{
 position:fixed;
@@ -242,12 +255,127 @@ background:var(--glass-bg);
 border:1px solid var(--glass-border);
 border-radius:var(--radius);
 transition:var(--transition);
+position:relative;
 }
 .todo-item:active{
 background:var(--glass-hover);
 }
-.todo-item.completed{opacity:0.5}
-.todo-item.completed .todo-title{text-decoration:line-through;color:var(--text-muted)}
+.todo-item.completed{opacity:0.55}
+/* 拖拽相关样式 */
+.todo-item.dragging{
+opacity:0.4;
+transform:scale(0.98);
+}
+.todo-item.drag-over{
+border-color:var(--accent);
+box-shadow:0 0 0 1px var(--accent), 0 0 12px rgba(124,92,255,0.2);
+}
+.drag-handle{
+width:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:2px;
+cursor:grab;
+flex-shrink:0;
+padding:4px 0;
+opacity:0.3;
+transition:opacity 0.2s;
+touch-action:none;
+}
+.drag-handle:hover,.drag-handle:active{opacity:0.7}
+.drag-handle-line{
+width:12px;
+height:2px;
+background:var(--text-secondary);
+border-radius:1px;
+}
+@media(min-width:768px){
+.drag-handle{opacity:0.2}
+.drag-handle:hover{opacity:0.6}
+}
+
+/* 完成动效 */
+@keyframes checkBounce{
+0%{transform:translate(-50%,-50%) scale(0)}
+50%{transform:translate(-50%,-50%) scale(1.3)}
+70%{transform:translate(-50%,-50%) scale(0.9)}
+100%{transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes strikeThrough{
+0%{width:0}
+100%{width:100%}
+}
+@keyframes completeFlash{
+0%{background:var(--glass-bg)}
+30%{background:rgba(98,250,211,0.12)}
+100%{background:var(--glass-bg)}
+}
+@keyframes uncheckShrink{
+0%{transform:translate(-50%,-50%) scale(1)}
+100%{transform:translate(-50%,-50%) scale(0)}
+}
+.todo-checkbox.animating-check::after{
+animation:checkBounce 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.todo-item.animating-complete{
+animation:completeFlash 0.6s ease;
+}
+.todo-title-wrapper{
+position:relative;
+display:inline-block;
+}
+.todo-title-wrapper .strike-line{
+position:absolute;
+top:50%;
+left:0;
+height:2px;
+background:var(--text-muted);
+border-radius:1px;
+pointer-events:none;
+}
+.todo-title-wrapper .strike-line.animating{
+animation:strikeThrough 0.3s ease forwards;
+}
+
+/* 截止日期样式 */
+.due-date-tag{
+font-size:11px;
+padding:2px 8px;
+border-radius:8px;
+font-weight:500;
+display:inline-flex;
+align-items:center;
+gap:4px;
+}
+.due-date-tag .due-icon{font-size:10px}
+.due-date-tag.due-overdue{
+background:rgba(255,107,107,0.2);
+color:var(--danger);
+animation:overduePulse 2s ease-in-out infinite;
+}
+.due-date-tag.dueurgent{
+background:rgba(255,107,107,0.15);
+color:var(--danger);
+}
+.due-date-tag.duewarning{
+background:rgba(255,184,108,0.15);
+color:var(--warning);
+}
+.due-date-tag.duenormal{
+background:rgba(154,167,199,0.15);
+color:var(--text-secondary);
+}
+.due-date-tag.dudone{
+background:rgba(98,250,211,0.1);
+color:var(--text-muted);
+}
+@keyframes overduePulse{
+0%,100%{opacity:1}
+50%{opacity:0.6}
+}
+
 .todo-checkbox{
 width:24px;height:24px;
 border:2px solid var(--glass-border);
@@ -396,6 +524,15 @@ background:linear-gradient(135deg,var(--accent),#9B7BFF);
 color:white;
 border-color:transparent;
 }
+/* 排序指示 */
+.sort-indicator{
+font-size:11px;
+color:var(--text-muted);
+display:flex;
+align-items:center;
+gap:4px;
+}
+
 /* 模态框 */
 .modal{
 display:none;
@@ -477,6 +614,10 @@ border-color:var(--accent);
 .form-textarea{resize:vertical;min-height:80px;font-family:inherit}
 .form-select{cursor:pointer}
 .form-select option{background:var(--bg-primary)}
+/* 日期输入框特殊样式 */
+input[type="date"].form-input{
+color-scheme:dark;
+}
 .color-picker{
 display:flex;
 gap:10px;
@@ -523,6 +664,7 @@ transform:translate(-50%,-50%);
 border-radius:var(--radius-lg);
 max-width:480px;
 width:90%;
+padding:32px;
 }
 .modal.active .modal-content{
 transform:translate(-50%,-50%);
@@ -538,8 +680,8 @@ transform:translate(-50%,-50%);
 <div class="logo-icon">K</div>
 <span>Karl</span>
 </div>
-<div id="syncStatus" class="sync-status">
-<span class="dot"></span>
+<div id="syncStatus" class="sync-status local">
+<span class="sync-dot"></span>
 <span id="syncStatusText">检查中...</span>
 </div>
 </div>
@@ -573,7 +715,10 @@ transform:translate(-50%,-50%);
 <section id="todos" class="section">
 <div class="section-header">
 <div class="section-title">待办事项</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span class="sort-indicator" id="sortHint">⏰ 紧急优先</span>
 <button class="btn btn-primary" onclick="openAddModal()">+ 新增</button>
+</div>
 </div>
 <div class="filter-bar" id="filterBar"></div>
 <div class="glass-card">
@@ -664,10 +809,55 @@ transform:translate(-50%,-50%);
 </select>
 </div>
 <div class="form-group">
+<label class="form-label">截止日期 <span style="color:var(--text-muted);font-weight:400">（选填）</span></label>
+<input class="form-input" id="todoDueDate" type="date">
+</div>
+<div class="form-group">
 <label class="form-label">备注</label>
 <textarea class="form-textarea" id="todoNote" placeholder="补充说明（可选）"></textarea>
 </div>
 <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">添加待办</button>
+</form>
+</div>
+</div>
+
+<!-- 编辑待办模态框 -->
+<div class="modal" id="editModal">
+<div class="modal-backdrop" onclick="closeModal('editModal')"></div>
+<div class="modal-content">
+<div class="modal-handle"></div>
+<div class="modal-header">
+<div class="modal-title">编辑待办</div>
+<button class="modal-close" onclick="closeModal('editModal')">×</button>
+</div>
+<form id="editForm" onsubmit="submitEditTodo(event)">
+<input type="hidden" id="editTodoId">
+<div class="form-group">
+<label class="form-label">标题 *</label>
+<input class="form-input" id="editTodoTitle" required placeholder="输入待办事项">
+</div>
+<div class="form-group">
+<label class="form-label">分类</label>
+<select class="form-select" id="editTodoCategory"></select>
+</div>
+<div class="form-group">
+<label class="form-label">优先级</label>
+<select class="form-select" id="editTodoPriority">
+<option value="">无</option>
+<option value="high">高</option>
+<option value="medium">中</option>
+<option value="low">低</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">截止日期 <span style="color:var(--text-muted);font-weight:400">（选填）</span></label>
+<input class="form-input" id="editTodoDueDate" type="date">
+</div>
+<div class="form-group">
+<label class="form-label">备注</label>
+<textarea class="form-textarea" id="editTodoNote" placeholder="补充说明（可选）"></textarea>
+</div>
+<button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">保存修改</button>
 </form>
 </div>
 </div>
@@ -755,6 +945,10 @@ let currentFilter = 'all';
 let syncTimer = null;
 let githubFileSha = null;
 
+// 拖拽状态
+let dragSrcIndex = null;
+let touchDragState = null; // { startIndex, currentOverIndex, timer, cloneEl }
+
 const DEFAULT_CATEGORIES = [
 {id:1, name:'工作', color:'#7C5CFF'},
 {id:2, name:'生活', color:'#62FAD3'},
@@ -785,21 +979,21 @@ return await fetch(`${GITHUB_API}${path}`, { ...options, headers });
 async function loadFromGitHub() {
 const token = getGitHubToken();
 if (!token) {
-updateSyncStatus('error', '未配置');
+updateSyncStatus('local', '本地模式');
 return false;
 }
 
 try {
-updateSyncStatus('syncing', '同步中');
+updateSyncStatus('syncing', '同步中...');
 const response = await githubAPI(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`);
 
 if (response.status === 401) {
-updateSyncStatus('error', 'Token无效');
+updateSyncStatus('error', 'Token 无效');
 return false;
 }
 
 if (response.status === 404) {
-updateSyncStatus('synced', '本地');
+updateSyncStatus('synced', '已同步 ✓');
 loadFromLocal();
 return true;
 }
@@ -811,17 +1005,14 @@ githubFileSha = data.sha;
 const content = decodeBase64(data.content);
 const parsed = JSON.parse(content);
 
-localStorage.setItem('karl-todos', JSON.stringify(parsed.todos || []));
-localStorage.setItem('karl-categories', JSON.stringify(parsed.categories || DEFAULT_CATEGORIES));
-
 todos = parsed.todos || [];
 categories = parsed.categories || DEFAULT_CATEGORIES;
 
-updateSyncStatus('synced', `已同步`);
+updateSyncStatus('synced', '已同步 ✓');
 return true;
 } catch (error) {
 console.error('GitHub 同步失败:', error);
-updateSyncStatus('error', '失败');
+updateSyncStatus('error', '同步失败');
 loadFromLocal();
 return false;
 }
@@ -832,9 +1023,9 @@ const token = getGitHubToken();
 if (!token) return;
 
 if (syncTimer) clearTimeout(syncTimer);
+updateSyncStatus('syncing', '保存中...');
 syncTimer = setTimeout(async () => {
 try {
-updateSyncStatus('syncing', '保存中');
 const content = JSON.stringify({ todos, categories }, null, 2);
 const encoded = encodeBase64(content);
 
@@ -865,13 +1056,13 @@ body: JSON.stringify(body),
 if (putResponse.ok) {
 const result = await putResponse.json();
 githubFileSha = result.content.sha;
-updateSyncStatus('synced', `已保存`);
+updateSyncStatus('synced', '已同步 ✓');
 } else {
 throw new Error(`HTTP ${putResponse.status}`);
 }
 } catch (error) {
 console.error('保存到 GitHub 失败:', error);
-updateSyncStatus('error', '失败');
+updateSyncStatus('error', '保存失败');
 }
 }, 3000);
 }
@@ -933,7 +1124,7 @@ resultEl.innerHTML = '<span style="color:var(--success)">✅ 连接成功</span>
 } else if (response.status === 401) {
 resultEl.innerHTML = '<span style="color:var(--danger)">❌ Token 无效</span>';
 } else {
-resultEl.innerHTML = `<span style="color:var(--danger)">❌ 失败</span>`;
+resultEl.innerHTML = `<span style="color:var(--danger)">❌ 连接失败</span>`;
 }
 } catch (error) {
 resultEl.innerHTML = `<span style="color:var(--danger)">❌ ${error.message}</span>`;
@@ -964,7 +1155,7 @@ alert('同步失败');
 async function syncToGitHub() {
 if (syncTimer) clearTimeout(syncTimer);
 try {
-updateSyncStatus('syncing', '推送中');
+updateSyncStatus('syncing', '推送中...');
 const content = JSON.stringify({ todos, categories }, null, 2);
 const encoded = encodeBase64(content);
 const token = getGitHubToken();
@@ -1000,15 +1191,79 @@ body: JSON.stringify(body),
 if (putResponse.ok) {
 const result = await putResponse.json();
 githubFileSha = result.content.sha;
-updateSyncStatus('synced', `已推送`);
+updateSyncStatus('synced', '已同步 ✓');
 alert('已推送');
 } else {
 throw new Error(`HTTP ${putResponse.status}`);
 }
 } catch (error) {
-updateSyncStatus('error', '失败');
+updateSyncStatus('error', '推送失败');
 alert('推送失败：' + error.message);
 }
+}
+
+// ========== 截止日期工具函数 ==========
+function getDueDateStatus(dueDateStr) {
+if (!dueDateStr) return null;
+const now = new Date();
+now.setHours(0,0,0,0);
+const due = new Date(dueDateStr + 'T00:00:00');
+const diffMs = due - now;
+const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+if (diffDays < 0) return 'overdue';   // 已过期
+if (diffDays === 0) return 'urgent';   // 今天到期
+if (diffDays <= 3) return 'warning';   // 3天内
+return 'normal';                       // 正常
+}
+
+function formatDueDate(dueDateStr) {
+if (!dueDateStr) return '';
+const now = new Date();
+now.setHours(0,0,0,0);
+const due = new Date(dueDateStr + 'T00:00:00');
+const diffMs = due - now;
+const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+if (diffDays < 0) return `已过期${Math.abs(diffDays)}天`;
+if (diffDays === 0) return '今天截止';
+if (diffDays === 1) return '明天截止';
+if (diffDays <= 7) return `${diffDays}天后截止`;
+return due.toLocaleDateString('zh-CN', {month:'short', day:'numeric'});
+}
+
+function getDueDateIcon(status) {
+switch(status) {
+case 'overdue': return '🔴';
+case 'urgent': return '🔴';
+case 'warning': return '🟡';
+default: return '📅';
+}
+}
+
+// 按紧急程度排序：过期 > 今天到期 > 3天内 > 有截止日期 > 无截止日期
+// 已完成的排最后
+function sortTodosByUrgency(todoList) {
+return todoList.slice().sort((a, b) => {
+// 已完成的排在最后
+if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
+const statusA = getDueDateStatus(a.dueDate);
+const statusB = getDueDateStatus(b.dueDate);
+
+const urgencyOrder = { overdue: 0, urgent: 1, warning: 2, normal: 3 };
+const orderA = statusA ? urgencyOrder[statusA] : 4;
+const orderB = statusB ? urgencyOrder[statusB] : 4;
+
+if (orderA !== orderB) return orderA - orderB;
+
+// 同为 normal 或都有日期，按日期升序
+if (a.dueDate && b.dueDate) {
+return new Date(a.dueDate) - new Date(b.dueDate);
+}
+// 都没有日期或只有一个有，保持原顺序
+return 0;
+});
 }
 
 // ========== 界面更新 ==========
@@ -1034,27 +1289,55 @@ filtered = todos.filter(t => t.completed);
 filtered = todos.filter(t => !t.completed && String(t.categoryId) === String(currentFilter));
 }
 
+// 按紧急程度排序
+filtered = sortTodosByUrgency(filtered);
+
 if (filtered.length === 0) {
 const emptyText = currentFilter === 'completed' ? '暂无已完成事项' : '暂无待办事项';
 list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>${emptyText}</p></div>`;
 return;
 }
 
-list.innerHTML = filtered.map(todo => {
+list.innerHTML = filtered.map((todo, visualIndex) => {
 const category = categories.find(c => String(c.id) === String(todo.categoryId));
+const dueStatus = todo.completed ? (todo.dueDate ? 'done' : null) : getDueDateStatus(todo.dueDate);
+const dueLabel = formatDueDate(todo.dueDate);
+
+// 找到在原始数组中的真实索引，用于拖拽
+const realIndex = todos.indexOf(todo);
+
 return `
-<div class="todo-item ${todo.completed ? 'completed' : ''}">
-<div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${todo.id})"></div>
+<div class="todo-item ${todo.completed ? 'completed' : ''}"
+     draggable="true"
+     data-real-index="${realIndex}"
+     ondragstart="onDragStart(event)"
+     ondragover="onDragOver(event)"
+     ondragenter="onDragEnter(event)"
+     ondragleave="onDragLeave(event)"
+     ondrop="onDrop(event)"
+     ondragend="onDragEnd(event)"
+     ontouchstart="onTouchStart(event)"
+     ontouchmove="onTouchMove(event)"
+     ontouchend="onTouchEnd(event)">
+<div class="drag-handle" title="拖拽排序">
+<div class="drag-handle-line"></div>
+<div class="drag-handle-line"></div>
+<div class="drag-handle-line"></div>
+</div>
+<div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${todo.id}, this, this.closest('.todo-item'))"></div>
 <div class="todo-content">
+<div class="todo-title-wrapper">
 <div class="todo-title">${escapeHtml(todo.title)}</div>
+</div>
 <div class="todo-meta">
 ${category ? `<span class="todo-tag" style="background:${category.color}30;color:${category.color}">${escapeHtml(category.name)}</span>` : ''}
 ${todo.priority ? `<span class="todo-priority ${todo.priority}">${{high:'高',medium:'中',low:'低'}[todo.priority]}</span>` : ''}
+${todo.dueDate ? `<span class="due-date-tag due${dueStatus}"><span class="due-icon">${getDueDateIcon(dueStatus)}</span>${dueLabel}</span>` : ''}
 ${todo.note ? `<span class="todo-date">${escapeHtml(todo.note)}</span>` : ''}
-<span class="todo-date">${formatDate(todo.createdAt)}</span>
 </div>
 </div>
 <div class="todo-actions">
+<button class="todo-action-btn" onclick="openEditModal(${todo.id})">✏️</button>
 <button class="todo-action-btn delete" onclick="deleteTodo(${todo.id})">🗑️</button>
 </div>
 </div>
@@ -1094,9 +1377,12 @@ ${categories.map(cat => `
 
 function updateCategorySelect() {
 const select = document.getElementById('todoCategory');
-select.innerHTML = `<option value="">未分类</option>` + categories.map(cat => 
+const editSelect = document.getElementById('editTodoCategory');
+const options = `<option value="">未分类</option>` + categories.map(cat =>
 `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`
 ).join('');
+if (select) select.innerHTML = options;
+if (editSelect) editSelect.innerHTML = options;
 }
 
 // ========== 操作 ==========
@@ -1106,36 +1392,95 @@ renderFilterBar();
 renderTodos();
 }
 
-function toggleTodo(id) {
-const todo = todos.find(t => t.id === id);
-if (todo) {
+function toggleTodo(id, checkboxEl, itemEl) {
+const todo = todos.find(t => String(t.id) === String(id));
+if (!todo) return;
+
 todo.completed = !todo.completed;
+
+// 完成动效
+if (todo.completed && checkboxEl && itemEl) {
+checkboxEl.classList.add('checked', 'animating-check');
+itemEl.classList.add('animating-complete');
+
+// 划线动效
+const titleWrapper = itemEl.querySelector('.todo-title-wrapper');
+if (titleWrapper) {
+const titleEl = titleWrapper.querySelector('.todo-title');
+if (titleEl) {
+const strikeLine = document.createElement('div');
+strikeLine.className = 'strike-line animating';
+strikeLine.style.width = '0';
+titleWrapper.appendChild(strikeLine);
+// 触发 reflow 后设置宽度
+requestAnimationFrame(() => {
+strikeLine.style.width = titleEl.offsetWidth + 'px';
+});
+}
+}
+
+setTimeout(() => {
+checkboxEl.classList.remove('animating-check');
+itemEl.classList.remove('animating-complete');
+saveData();
+}, 500);
+} else {
 saveData();
 }
 }
 
 function deleteTodo(id) {
 if (confirm('确定删除？')) {
-todos = todos.filter(t => t.id !== id);
+todos = todos.filter(t => String(t.id) !== String(id));
 saveData();
 }
 }
 
 function submitTodo(e) {
 e.preventDefault();
+const dueDateVal = document.getElementById('todoDueDate').value;
 const todo = {
 id: Date.now(),
 title: document.getElementById('todoTitle').value,
 categoryId: document.getElementById('todoCategory').value || null,
 priority: document.getElementById('todoPriority').value || null,
+dueDate: dueDateVal || null,
 note: document.getElementById('todoNote').value || null,
 completed: false,
-createdAt: new Date().toISOString()
+createdAt: new Date().toISOString(),
+sortOrder: Date.now()
 };
 todos.unshift(todo);
 saveData();
 closeModal('addModal');
 document.getElementById('addForm').reset();
+}
+
+function openEditModal(id) {
+const todo = todos.find(t => String(t.id) === String(id));
+if (!todo) return;
+updateCategorySelect();
+document.getElementById('editTodoId').value = todo.id;
+document.getElementById('editTodoTitle').value = todo.title;
+document.getElementById('editTodoCategory').value = todo.categoryId || '';
+document.getElementById('editTodoPriority').value = todo.priority || '';
+document.getElementById('editTodoDueDate').value = todo.dueDate || '';
+document.getElementById('editTodoNote').value = todo.note || '';
+document.getElementById('editModal').classList.add('active');
+}
+
+function submitEditTodo(e) {
+e.preventDefault();
+const id = document.getElementById('editTodoId').value;
+const todo = todos.find(t => String(t.id) === String(id));
+if (!todo) return;
+todo.title = document.getElementById('editTodoTitle').value;
+todo.categoryId = document.getElementById('editTodoCategory').value || null;
+todo.priority = document.getElementById('editTodoPriority').value || null;
+todo.dueDate = document.getElementById('editTodoDueDate').value || null;
+todo.note = document.getElementById('editTodoNote').value || null;
+saveData();
+closeModal('editModal');
 }
 
 function submitCategory(e) {
@@ -1154,12 +1499,147 @@ document.getElementById('categoryName').value = '';
 
 function deleteCategory(id) {
 if (confirm('确定删除？相关待办将变为未分类。')) {
-categories = categories.filter(c => c.id !== id);
+categories = categories.filter(c => String(c.id) !== String(id));
 todos.forEach(t => {
 if (t.categoryId == id) t.categoryId = null;
 });
 saveData();
 }
+}
+
+// ========== 拖拽排序（桌面端） ==========
+function onDragStart(e) {
+const item = e.target.closest('.todo-item');
+if (!item) return;
+// 如果拖拽的是 drag-handle 区域或整个 item
+dragSrcIndex = parseInt(item.dataset.realIndex);
+item.classList.add('dragging');
+e.dataTransfer.effectAllowed = 'move';
+e.dataTransfer.setData('text/plain', dragSrcIndex);
+}
+
+function onDragOver(e) {
+e.preventDefault();
+e.dataTransfer.dropEffect = 'move';
+}
+
+function onDragEnter(e) {
+e.preventDefault();
+const item = e.target.closest('.todo-item');
+if (item && parseInt(item.dataset.realIndex) !== dragSrcIndex) {
+item.classList.add('drag-over');
+}
+}
+
+function onDragLeave(e) {
+const item = e.target.closest('.todo-item');
+if (item) {
+item.classList.remove('drag-over');
+}
+}
+
+function onDrop(e) {
+e.preventDefault();
+const item = e.target.closest('.todo-item');
+if (!item) return;
+item.classList.remove('drag-over');
+const targetIndex = parseInt(item.dataset.realIndex);
+if (dragSrcIndex !== null && dragSrcIndex !== targetIndex) {
+reorderTodos(dragSrcIndex, targetIndex);
+}
+}
+
+function onDragEnd(e) {
+const item = e.target.closest('.todo-item');
+if (item) item.classList.remove('dragging');
+document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+dragSrcIndex = null;
+}
+
+// ========== 拖拽排序（移动端触摸） ==========
+function onTouchStart(e) {
+const handle = e.target.closest('.drag-handle');
+if (!handle) return; // 只有拖拽手柄触发
+
+const item = handle.closest('.todo-item');
+if (!item) return;
+
+const touch = e.touches[0];
+const startIndex = parseInt(item.dataset.realIndex);
+
+touchDragState = {
+startIndex: startIndex,
+currentOverIndex: null,
+startX: touch.clientX,
+startY: touch.clientY,
+timer: setTimeout(() => {
+// 长按 200ms 后激活拖拽
+if (touchDragState) {
+touchDragState.active = true;
+item.classList.add('dragging');
+if (navigator.vibrate) navigator.vibrate(30);
+}
+}, 200)
+};
+}
+
+function onTouchMove(e) {
+if (!touchDragState) return;
+
+const touch = e.touches[0];
+const dx = Math.abs(touch.clientX - touchDragState.startX);
+const dy = Math.abs(touch.clientY - touchDragState.startY);
+
+// 如果还没激活且移动太多，取消
+if (!touchDragState.active && (dx > 10 || dy > 10)) {
+clearTimeout(touchDragState.timer);
+touchDragState = null;
+return;
+}
+
+if (!touchDragState.active) return;
+e.preventDefault();
+
+// 找到当前触摸位置下的 todo-item
+const touchTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+if (!touchTarget) return;
+const targetItem = touchTarget.closest('.todo-item');
+
+// 清除之前的 drag-over
+document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+if (targetItem) {
+const targetIndex = parseInt(targetItem.dataset.realIndex);
+if (targetIndex !== touchDragState.startIndex) {
+targetItem.classList.add('drag-over');
+touchDragState.currentOverIndex = targetIndex;
+}
+}
+}
+
+function onTouchEnd(e) {
+if (!touchDragState) return;
+
+clearTimeout(touchDragState.timer);
+
+if (touchDragState.active && touchDragState.currentOverIndex !== null) {
+reorderTodos(touchDragState.startIndex, touchDragState.currentOverIndex);
+}
+
+// 清理状态
+const srcItem = document.querySelector(`.todo-item[data-real-index="${touchDragState.startIndex}"]`);
+if (srcItem) srcItem.classList.remove('dragging');
+document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+touchDragState = null;
+}
+
+// ========== 排序执行 ==========
+function reorderTodos(fromIndex, toIndex) {
+if (fromIndex === toIndex) return;
+const item = todos.splice(fromIndex, 1)[0];
+todos.splice(toIndex, 0, item);
+saveData();
 }
 
 // ========== 模态框 ==========
@@ -1248,7 +1728,7 @@ const success = await loadFromGitHub();
 if (!success) loadFromLocal();
 } else {
 loadFromLocal();
-updateSyncStatus('error', '未配置');
+updateSyncStatus('local', '本地模式');
 }
 
 saveData();
