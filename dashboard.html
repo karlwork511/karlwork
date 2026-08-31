@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Karl 工作台</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -31,6 +31,7 @@ color:var(--text-primary);
 line-height:1.6;
 min-height:100vh;
 overflow-x:hidden;
+padding-bottom:80px;
 }
 body::before{
 content:'';
@@ -47,8 +48,9 @@ position:relative;
 z-index:1;
 max-width:1400px;
 margin:0 auto;
-padding:0 24px;
+padding:0 16px;
 }
+/* 顶部导航 */
 .navbar{
 position:sticky;
 top:0;
@@ -56,72 +58,103 @@ z-index:100;
 backdrop-filter:blur(20px);
 background:rgba(7,10,20,0.8);
 border-bottom:1px solid var(--glass-border);
+padding:12px 0;
 }
 .navbar-content{
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:16px 0;
 }
 .logo{
 display:flex;
 align-items:center;
-gap:12px;
-font-size:20px;
+gap:10px;
+font-size:18px;
 font-weight:600;
 }
 .logo-icon{
-width:36px;height:36px;
+width:32px;height:32px;
 background:linear-gradient(135deg,var(--accent),var(--accent-light));
-border-radius:10px;
-display:flex;align-items:center;justify-content:center;
-font-size:18px;
-}
-.nav-links{
-display:flex;
-gap:8px;
-}
-.nav-links a{
-color:var(--text-secondary);
-text-decoration:none;
-padding:8px 16px;
 border-radius:8px;
+display:flex;align-items:center;justify-content:center;
+font-size:16px;
+}
+.sync-status {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+font-size: 11px;
+color: var(--text-muted);
+padding: 4px 8px;
+border-radius: 10px;
+background: var(--glass-bg);
+}
+.sync-status.syncing { color: var(--warning); }
+.sync-status.synced { color: var(--success); }
+.sync-status.error { color: var(--danger); }
+.sync-status .dot {
+width: 5px; height: 5px;
+border-radius: 50%;
+background: currentColor;
+}
+/* 底部导航 */
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+z-index:100;
+backdrop-filter:blur(20px);
+background:rgba(7,10,20,0.9);
+border-top:1px solid var(--glass-border);
+padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.bottom-nav-content{
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+.bottom-nav-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:4px;
+padding:8px 16px;
+border-radius:12px;
+color:var(--text-muted);
+text-decoration:none;
+font-size:11px;
 transition:var(--transition);
-font-size:14px;
 cursor:pointer;
 }
-.nav-links a:hover,.nav-links a.active{
-color:var(--text-primary);
+.bottom-nav-item:hover,.bottom-nav-item.active{
+color:var(--accent);
 background:var(--glass-bg);
 }
-main{padding:32px 0 64px}
-
-.welcome{text-align:center;padding:48px 0 32px}
-.welcome h1{font-size:32px;font-weight:700;margin-bottom:8px}
-.welcome p{color:var(--text-secondary);font-size:16px}
-
+.bottom-nav-icon{
+font-size:22px;
+}
+/* 主内容 */
+main{padding:16px 0 24px}
+.welcome{text-align:center;padding:24px 0 20px}
+.welcome h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.welcome p{color:var(--text-secondary);font-size:13px}
 .stats-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:16px;
-margin-bottom:32px;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-bottom:24px;
 }
 .stat-card{
 background:var(--glass-bg);
 backdrop-filter:blur(20px);
 border:1px solid var(--glass-border);
-border-radius:var(--radius-lg);
-padding:24px;
+border-radius:var(--radius);
+padding:16px 12px;
 text-align:center;
-transition:var(--transition);
-}
-.stat-card:hover{
-background:var(--glass-hover);
-transform:translateY(-2px);
-border-color:var(--accent);
 }
 .stat-number{
-font-size:36px;
+font-size:28px;
 font-weight:700;
 background:linear-gradient(135deg,var(--accent),var(--accent-light));
 -webkit-background-clip:text;
@@ -130,19 +163,19 @@ background-clip:text;
 }
 .stat-label{
 color:var(--text-secondary);
-font-size:14px;
-margin-top:4px;
+font-size:12px;
+margin-top:2px;
 }
-
-.section{margin-bottom:48px}
+.section{margin-bottom:32px}
 .section-header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-bottom:20px;
+margin-bottom:14px;
+padding:0 4px;
 }
 .section-title{
-font-size:20px;
+font-size:17px;
 font-weight:600;
 display:flex;
 align-items:center;
@@ -150,15 +183,14 @@ gap:8px;
 }
 .section-title::before{
 content:'';
-width:4px;
-height:20px;
+width:3px;
+height:16px;
 background:linear-gradient(180deg,var(--accent),var(--accent-light));
 border-radius:2px;
 }
-
 .btn{
-padding:10px 20px;
-border-radius:8px;
+padding:10px 16px;
+border-radius:10px;
 border:none;
 font-size:14px;
 font-weight:500;
@@ -172,59 +204,65 @@ gap:6px;
 background:linear-gradient(135deg,var(--accent),#9B7BFF);
 color:white;
 }
-.btn-primary:hover{
-transform:translateY(-1px);
-box-shadow:0 4px 20px rgba(124,92,255,0.4);
+.btn-primary:active{
+transform:scale(0.96);
 }
 .btn-secondary{
 background:var(--glass-bg);
 color:var(--text-primary);
 border:1px solid var(--glass-border);
 }
-.btn-secondary:hover{
+.btn-secondary:active{
 background:var(--glass-hover);
-border-color:var(--accent);
 }
-
+.btn-icon{
+width:36px;
+height:36px;
+padding:0;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+}
 .glass-card{
 background:var(--glass-bg);
 backdrop-filter:blur(20px);
 border:1px solid var(--glass-border);
-border-radius:var(--radius-lg);
-padding:24px;
+border-radius:var(--radius);
+padding:16px;
 }
-
-.todo-list{display:flex;flex-direction:column;gap:12px}
+.todo-list{display:flex;flex-direction:column;gap:10px}
 .todo-item{
 display:flex;
 align-items:center;
-gap:16px;
-padding:16px 20px;
+gap:12px;
+padding:14px;
 background:var(--glass-bg);
 border:1px solid var(--glass-border);
 border-radius:var(--radius);
 transition:var(--transition);
 }
-.todo-item:hover{
+.todo-item:active{
 background:var(--glass-hover);
-border-color:rgba(124,92,255,0.3);
 }
-.todo-item.completed{opacity:0.6}
+.todo-item.completed{opacity:0.5}
 .todo-item.completed .todo-title{text-decoration:line-through;color:var(--text-muted)}
-
 .todo-checkbox{
-width:22px;height:22px;
+width:24px;height:24px;
 border:2px solid var(--glass-border);
-border-radius:6px;
+border-radius:8px;
 cursor:pointer;
 transition:var(--transition);
 flex-shrink:0;
+position:relative;
 }
-.todo-checkbox:hover{border-color:var(--accent)}
+.todo-checkbox:active{
+transform:scale(0.9);
+}
 .todo-checkbox.checked{
 background:linear-gradient(135deg,var(--accent),var(--accent-light));
 border-color:var(--accent);
-position:relative;
 }
 .todo-checkbox.checked::after{
 content:'✓';
@@ -232,120 +270,111 @@ position:absolute;
 top:50%;left:50%;
 transform:translate(-50%,-50%);
 color:white;
-font-size:12px;
+font-size:14px;
 font-weight:bold;
 }
-
 .todo-content{flex:1;min-width:0}
-.todo-title{font-size:15px;font-weight:500;margin-bottom:6px;word-break:break-word}
-.todo-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.todo-title{font-size:15px;font-weight:500;margin-bottom:4px;word-break:break-word}
+.todo-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .todo-tag{
-font-size:12px;
-padding:3px 10px;
-border-radius:20px;
+font-size:11px;
+padding:2px 8px;
+border-radius:12px;
 font-weight:500;
 }
 .todo-priority{
-font-size:11px;
-padding:2px 8px;
+font-size:10px;
+padding:2px 6px;
 border-radius:4px;
 font-weight:600;
 }
 .todo-priority.high{background:rgba(255,107,107,0.2);color:var(--danger)}
 .todo-priority.medium{background:rgba(255,184,108,0.2);color:var(--warning)}
 .todo-priority.low{background:rgba(98,250,211,0.2);color:var(--success)}
-.todo-date{font-size:12px;color:var(--text-muted)}
-
+.todo-date{font-size:11px;color:var(--text-muted)}
 .todo-actions{display:flex;gap:4px;flex-shrink:0}
 .todo-action-btn{
 width:32px;height:32px;
-border-radius:6px;
+border-radius:8px;
 border:none;
 background:transparent;
 cursor:pointer;
 transition:var(--transition);
 display:flex;align-items:center;justify-content:center;
-font-size:14px;
+font-size:16px;
 }
-.todo-action-btn:hover{background:var(--glass-bg)}
-.todo-action-btn.delete:hover{background:rgba(255,107,107,0.15)}
-
+.todo-action-btn:active{background:var(--glass-bg)}
+.todo-action-btn.delete:active{background:rgba(255,107,107,0.15)}
 .empty-state{
 text-align:center;
-padding:48px 24px;
+padding:32px 16px;
 color:var(--text-muted);
 }
-.empty-state-icon{font-size:48px;margin-bottom:12px;opacity:0.5}
-
+.empty-state-icon{font-size:40px;margin-bottom:8px;opacity:0.5}
 .category-grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-gap:12px;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 .category-item{
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:16px 20px;
+padding:12px 14px;
 background:var(--glass-bg);
 border:1px solid var(--glass-border);
 border-radius:var(--radius);
-transition:var(--transition);
-}
-.category-item:hover{
-background:var(--glass-hover);
-border-color:rgba(124,92,255,0.3);
 }
 .category-name{
 display:flex;
 align-items:center;
-gap:12px;
-font-size:14px;
+gap:8px;
+font-size:13px;
 font-weight:500;
 }
 .category-color{
-width:16px;height:16px;
+width:14px;height:14px;
 border-radius:4px;
 }
 .category-count{
 background:var(--glass-bg);
-padding:2px 10px;
-border-radius:12px;
-font-size:12px;
+padding:2px 8px;
+border-radius:10px;
+font-size:11px;
 color:var(--text-secondary);
 }
-.category-actions{display:flex;gap:4px}
-
+.category-actions{display:flex;gap:2px}
 .shortcuts-grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-gap:12px;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 .shortcut-card{
-padding:20px;
+padding:16px 12px;
 background:var(--glass-bg);
 border:1px solid var(--glass-border);
 border-radius:var(--radius);
 text-align:center;
-transition:var(--transition);
 cursor:pointer;
 text-decoration:none;
 color:inherit;
 }
-.shortcut-card:hover{
+.shortcut-card:active{
 background:var(--glass-hover);
-transform:translateY(-2px);
-border-color:var(--accent);
 }
-.shortcut-icon{font-size:28px;margin-bottom:8px}
-.shortcut-label{font-size:14px;font-weight:500}
-
+.shortcut-icon{font-size:24px;margin-bottom:6px}
+.shortcut-label{font-size:13px;font-weight:500}
 .filter-bar{
 display:flex;
-flex-wrap:wrap;
+flex-wrap:nowrap;
 gap:8px;
-margin-bottom:20px;
+margin-bottom:14px;
+overflow-x:auto;
+padding-bottom:4px;
+-webkit-overflow-scrolling:touch;
+scrollbar-width:none;
 }
+.filter-bar::-webkit-scrollbar{display:none}
 .filter-tag{
 padding:6px 14px;
 border-radius:20px;
@@ -356,17 +385,18 @@ background:var(--glass-bg);
 border:1px solid var(--glass-border);
 color:var(--text-secondary);
 transition:var(--transition);
+white-space:nowrap;
+flex-shrink:0;
 }
-.filter-tag:hover{
+.filter-tag:active{
 background:var(--glass-hover);
-color:var(--text-primary);
 }
 .filter-tag.active{
 background:linear-gradient(135deg,var(--accent),#9B7BFF);
 color:white;
 border-color:transparent;
 }
-
+/* 模态框 */
 .modal{
 display:none;
 position:fixed;
@@ -374,106 +404,130 @@ top:0;left:0;right:0;bottom:0;
 background:rgba(0,0,0,0.6);
 backdrop-filter:blur(4px);
 z-index:200;
-align-items:center;
-justify-content:center;
 }
-.modal.active{display:flex}
+.modal.active{display:block}
+.modal-backdrop{
+position:absolute;
+top:0;left:0;right:0;bottom:0;
+}
+/* 底部弹出式模态框（移动端） */
 .modal-content{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
 background:var(--bg-primary);
 border:1px solid var(--glass-border);
-border-radius:var(--radius-lg);
-padding:32px;
-width:90%;
-max-width:480px;
-max-height:90vh;
+border-radius:20px 20px 0 0;
+padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+max-height:85vh;
 overflow-y:auto;
+transform:translateY(100%);
+transition:transform 0.3s ease;
+}
+.modal.active .modal-content{
+transform:translateY(0);
+}
+.modal-handle{
+width:40px;
+height:4px;
+background:var(--glass-border);
+border-radius:2px;
+margin:0 auto 20px;
 }
 .modal-header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-bottom:24px;
+margin-bottom:20px;
 }
-.modal-title{font-size:20px;font-weight:600}
+.modal-title{font-size:18px;font-weight:600}
 .modal-close{
 width:32px;height:32px;
-border-radius:6px;
+border-radius:8px;
 border:none;
 background:var(--glass-bg);
 color:var(--text-secondary);
 cursor:pointer;
-font-size:18px;
-transition:var(--transition);
+font-size:20px;
+display:flex;align-items:center;justify-content:center;
 }
-.modal-close:hover{background:var(--glass-hover);color:var(--text-primary)}
-
-.form-group{margin-bottom:20px}
+.form-group{margin-bottom:18px}
 .form-label{
 display:block;
-font-size:14px;
+font-size:13px;
 font-weight:500;
 margin-bottom:8px;
 color:var(--text-secondary);
 }
 .form-input,.form-select,.form-textarea{
 width:100%;
-padding:12px 16px;
+padding:12px 14px;
 background:var(--glass-bg);
 border:1px solid var(--glass-border);
-border-radius:8px;
+border-radius:10px;
 color:var(--text-primary);
-font-size:14px;
+font-size:15px;
 transition:var(--transition);
 }
 .form-input:focus,.form-select:focus,.form-textarea:focus{
 outline:none;
 border-color:var(--accent);
-background:var(--glass-hover);
 }
 .form-textarea{resize:vertical;min-height:80px;font-family:inherit}
 .form-select{cursor:pointer}
 .form-select option{background:var(--bg-primary)}
-
 .color-picker{
 display:flex;
-gap:8px;
+gap:10px;
 flex-wrap:wrap;
 }
 .color-option{
-width:32px;height:32px;
-border-radius:8px;
+width:36px;height:36px;
+border-radius:10px;
 cursor:pointer;
 border:2px solid transparent;
 transition:var(--transition);
 }
-.color-option:hover{transform:scale(1.1)}
+.color-option:active{transform:scale(0.9)}
 .color-option.selected{border-color:white}
-
-.sync-status {
-display: inline-flex;
-align-items: center;
-gap: 6px;
-font-size: 12px;
-color: var(--text-muted);
-padding: 4px 10px;
-border-radius: 12px;
-background: var(--glass-bg);
+/* 桌面端样式 */
+@media (min-width: 768px) {
+body{padding-bottom:0}
+.bottom-nav{display:none}
+.container{padding:0 24px}
+.welcome{padding:48px 0 32px}
+.welcome h1{font-size:32px}
+.welcome p{font-size:16px}
+.stats-grid{
+grid-template-columns:repeat(4,1fr);
+gap:16px;
+margin-bottom:32px;
 }
-.sync-status.syncing { color: var(--warning); }
-.sync-status.synced { color: var(--success); }
-.sync-status.error { color: var(--danger); }
-.sync-status .dot {
-width: 6px; height: 6px;
-border-radius: 50%;
-background: currentColor;
+.stat-card{padding:24px}
+.stat-number{font-size:36px}
+.stat-label{font-size:14px}
+.section{margin-bottom:48px}
+.section-title{font-size:20px}
+.glass-card{padding:24px}
+.todo-list{gap:12px}
+.todo-item{padding:16px 20px}
+.category-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.shortcuts-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.modal-content{
+position:relative;
+bottom:auto;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+border-radius:var(--radius-lg);
+max-width:480px;
+width:90%;
 }
-
-@media (max-width:768px){
-.navbar-content{flex-direction:column;gap:12px}
-.nav-links{flex-wrap:wrap;justify-content:center}
-.welcome h1{font-size:24px}
-.stats-grid{grid-template-columns:repeat(2,1fr)}
-.modal-content{padding:24px}
+.modal.active .modal-content{
+transform:translate(-50%,-50%);
+}
+.modal-handle{display:none}
 }
 </style>
 </head>
@@ -482,25 +536,19 @@ background: currentColor;
 <div class="container navbar-content">
 <div class="logo">
 <div class="logo-icon">K</div>
-<span>Karl 工作台</span>
+<span>Karl</span>
 </div>
-<div class="nav-links">
-<a href="#todos" class="active">待办</a>
-<a href="#categories">分类</a>
-<a href="#shortcuts">快捷入口</a>
-<a onclick="openSettings()">设置</a>
+<div id="syncStatus" class="sync-status">
+<span class="dot"></span>
+<span id="syncStatusText">检查中...</span>
 </div>
 </div>
 </nav>
 
 <main class="container">
 <div class="welcome">
-<h1>早上好，Karl 👋</h1>
+<h1 id="greeting">你好，Karl 👋</h1>
 <p id="welcomeDate"></p>
-<div id="syncStatus" class="sync-status" style="margin-top:12px">
-<span class="dot"></span>
-<span id="syncStatusText">检查连接...</span>
-</div>
 </div>
 
 <div class="stats-grid">
@@ -525,7 +573,7 @@ background: currentColor;
 <section id="todos" class="section">
 <div class="section-header">
 <div class="section-title">待办事项</div>
-<button class="btn btn-primary" onclick="openAddModal()">+ 新增待办</button>
+<button class="btn btn-primary" onclick="openAddModal()">+ 新增</button>
 </div>
 <div class="filter-bar" id="filterBar"></div>
 <div class="glass-card">
@@ -536,7 +584,7 @@ background: currentColor;
 <section id="categories" class="section">
 <div class="section-header">
 <div class="section-title">分类管理</div>
-<button class="btn btn-secondary" onclick="openCategoryModal()">+ 新增分类</button>
+<button class="btn btn-secondary" onclick="openCategoryModal()">+ 新增</button>
 </div>
 <div class="category-grid" id="categoryList"></div>
 </section>
@@ -548,23 +596,51 @@ background: currentColor;
 <div class="shortcuts-grid">
 <a class="shortcut-card" href="https://github.com/karlwork511/karlwork" target="_blank">
 <div class="shortcut-icon">📦</div>
-<div class="shortcut-label">GitHub 仓库</div>
+<div class="shortcut-label">GitHub</div>
 </a>
-<a class="shortcut-card" href="https://karlwork511.github.io/karlwork/" target="_blank">
-<div class="shortcut-icon">🌐</div>
-<div class="shortcut-label">GitHub Pages</div>
+<a class="shortcut-card" onclick="openSettings()">
+<div class="shortcut-icon">⚙️</div>
+<div class="shortcut-label">设置</div>
 </a>
-<a class="shortcut-card" href="mailto:kage@coze.email">
-<div class="shortcut-icon">📧</div>
-<div class="shortcut-label">发送邮件</div>
+<a class="shortcut-card" onclick="exportData()">
+<div class="shortcut-icon">📥</div>
+<div class="shortcut-label">导出数据</div>
+</a>
+<a class="shortcut-card" onclick="importData()">
+<div class="shortcut-icon">📤</div>
+<div class="shortcut-label">导入数据</div>
 </a>
 </div>
 </section>
 </main>
 
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+<div class="bottom-nav-content">
+<a class="bottom-nav-item active" href="#todos">
+<span class="bottom-nav-icon">📝</span>
+<span>待办</span>
+</a>
+<a class="bottom-nav-item" href="#categories">
+<span class="bottom-nav-icon">🏷️</span>
+<span>分类</span>
+</a>
+<a class="bottom-nav-item" onclick="openAddModal()">
+<span class="bottom-nav-icon">➕</span>
+<span>新增</span>
+</a>
+<a class="bottom-nav-item" onclick="openSettings()">
+<span class="bottom-nav-icon">⚙️</span>
+<span>设置</span>
+</a>
+</div>
+</nav>
+
 <!-- 新增待办模态框 -->
 <div class="modal" id="addModal">
+<div class="modal-backdrop" onclick="closeModal('addModal')"></div>
 <div class="modal-content">
+<div class="modal-handle"></div>
 <div class="modal-header">
 <div class="modal-title">新增待办</div>
 <button class="modal-close" onclick="closeModal('addModal')">×</button>
@@ -591,17 +667,16 @@ background: currentColor;
 <label class="form-label">备注</label>
 <textarea class="form-textarea" id="todoNote" placeholder="补充说明（可选）"></textarea>
 </div>
-<div style="display:flex;gap:12px;justify-content:flex-end">
-<button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">取消</button>
-<button type="submit" class="btn btn-primary">添加</button>
-</div>
+<button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">添加待办</button>
 </form>
 </div>
 </div>
 
 <!-- 新增分类模态框 -->
 <div class="modal" id="categoryModal">
+<div class="modal-backdrop" onclick="closeModal('categoryModal')"></div>
 <div class="modal-content">
+<div class="modal-handle"></div>
 <div class="modal-header">
 <div class="modal-title">新增分类</div>
 <button class="modal-close" onclick="closeModal('categoryModal')">×</button>
@@ -624,51 +699,41 @@ background: currentColor;
 <div class="color-option" style="background:#FBBF24" data-color="#FBBF24"></div>
 </div>
 </div>
-<div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px">
-<button type="button" class="btn btn-secondary" onclick="closeModal('categoryModal')">取消</button>
-<button type="submit" class="btn btn-primary">添加</button>
-</div>
+<button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">添加分类</button>
 </form>
 </div>
 </div>
 
 <!-- 设置模态框 -->
 <div class="modal" id="settingsModal">
+<div class="modal-backdrop" onclick="closeModal('settingsModal')"></div>
 <div class="modal-content">
+<div class="modal-handle"></div>
 <div class="modal-header">
 <div class="modal-title">设置</div>
 <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
 </div>
 <div style="margin-bottom:24px">
-<h3 style="font-size:16px;margin-bottom:12px">GitHub 同步</h3>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
-配置 GitHub Token 后，待办数据会自动同步到 GitHub 仓库，多设备可用。
+<h3 style="font-size:15px;margin-bottom:12px">GitHub 同步</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">
+配置 Token 后，数据自动同步到 GitHub。
 </p>
 <div class="form-group">
 <label class="form-label">GitHub Token</label>
 <input class="form-input" id="githubToken" type="password" placeholder="ghp_xxxx">
 </div>
-<div class="form-group">
-<label class="form-label">仓库地址</label>
-<input class="form-input" id="githubRepo" value="karlwork511/karlwork" readonly style="opacity:0.6">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="testGitHubConnection()">测试</button>
+<button class="btn btn-secondary" onclick="saveGitHubSettings()">保存</button>
+<button class="btn btn-secondary" onclick="syncFromGitHub()" style="color:var(--accent-light)">拉取</button>
+<button class="btn btn-secondary" onclick="syncToGitHub()" style="color:var(--success)">推送</button>
 </div>
-<div style="display:flex;gap:12px;flex-wrap:wrap">
-<button class="btn btn-primary" onclick="testGitHubConnection()">测试连接</button>
-<button class="btn btn-secondary" onclick="saveGitHubSettings()">保存设置</button>
-<button class="btn btn-secondary" onclick="syncFromGitHub()" style="color:var(--accent-light)">从 GitHub 拉取</button>
-<button class="btn btn-secondary" onclick="syncToGitHub()" style="color:var(--success)">推送到 GitHub</button>
+<div id="githubTestResult" style="margin-top:10px;font-size:12px"></div>
 </div>
-<div id="githubTestResult" style="margin-top:12px;font-size:13px"></div>
-</div>
-<hr style="border:none;border-top:1px solid var(--glass-border);margin:24px 0">
+<hr style="border:none;border-top:1px solid var(--glass-border);margin:20px 0">
 <div>
-<h3 style="font-size:16px;margin-bottom:12px">本地数据</h3>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
-数据会同时保存在本地浏览器和 GitHub。导出可下载 JSON 文件备份。
-</p>
-<div style="display:flex;gap:12px;flex-wrap:wrap">
-<button class="btn btn-primary" onclick="exportData()">导出数据</button>
-<button class="btn btn-secondary" onclick="importData()">导入数据</button>
+<h3 style="font-size:15px;margin-bottom:12px">数据管理</h3>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
 <button class="btn btn-secondary" onclick="clearData()" style="color:var(--danger)">清空数据</button>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
@@ -688,556 +753,522 @@ let todos = [];
 let categories = [];
 let currentFilter = 'all';
 let syncTimer = null;
-let githubFileSha = null; // 用于 GitHub 更新
+let githubFileSha = null;
 
-// 默认分类
 const DEFAULT_CATEGORIES = [
-  {id:1, name:'工作', color:'#7C5CFF'},
-  {id:2, name:'生活', color:'#62FAD3'},
-  {id:3, name:'学习', color:'#69E7FF'}
+{id:1, name:'工作', color:'#7C5CFF'},
+{id:2, name:'生活', color:'#62FAD3'},
+{id:3, name:'学习', color:'#69E7FF'}
 ];
 
 // ========== GitHub 同步 ==========
 function getGitHubToken() {
-  return localStorage.getItem('github-token') || '';
+return localStorage.getItem('github-token') || '';
 }
 
 function setGitHubToken(token) {
-  localStorage.setItem('github-token', token);
+localStorage.setItem('github-token', token);
 }
 
 async function githubAPI(path, options = {}) {
-  const token = getGitHubToken();
-  const headers = {
-    'Accept': 'application/vnd.github.v3+json',
-    ...options.headers,
-  };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  const response = await fetch(`${GITHUB_API}${path}`, { ...options, headers });
-  return response;
+const token = getGitHubToken();
+const headers = {
+'Accept': 'application/vnd.github.v3+json',
+...options.headers,
+};
+if (token) {
+headers['Authorization'] = `Bearer ${token}`;
+}
+return await fetch(`${GITHUB_API}${path}`, { ...options, headers });
 }
 
 async function loadFromGitHub() {
-  const token = getGitHubToken();
-  if (!token) {
-    updateSyncStatus('error', '未配置 Token');
-    return false;
-  }
-  
-  try {
-    updateSyncStatus('syncing', '同步中...');
-    
-    const response = await githubAPI(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`);
-    
-    if (response.status === 401) {
-      updateSyncStatus('error', 'Token 无效');
-      return false;
-    }
-    
-    if (response.status === 404) {
-      // 文件不存在，使用本地数据
-      updateSyncStatus('synced', '本地模式');
-      loadFromLocal();
-      return true;
-    }
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    githubFileSha = data.sha;
-    
-    // 解码 base64 内容
-    const content = decodeBase64(data.content);
-    const parsed = JSON.parse(content);
-    
-    // 保存到本地缓存
-    localStorage.setItem('karl-todos', JSON.stringify(parsed.todos || []));
-    localStorage.setItem('karl-categories', JSON.stringify(parsed.categories || DEFAULT_CATEGORIES));
-    
-    todos = parsed.todos || [];
-    categories = parsed.categories || DEFAULT_CATEGORIES;
-    
-    updateSyncStatus('synced', `已同步 ${formatTime(new Date())}`);
-    return true;
-    
-  } catch (error) {
-    console.error('GitHub 同步失败:', error);
-    updateSyncStatus('error', '同步失败');
-    // 降级到本地数据
-    loadFromLocal();
-    return false;
-  }
+const token = getGitHubToken();
+if (!token) {
+updateSyncStatus('error', '未配置');
+return false;
+}
+
+try {
+updateSyncStatus('syncing', '同步中');
+const response = await githubAPI(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`);
+
+if (response.status === 401) {
+updateSyncStatus('error', 'Token无效');
+return false;
+}
+
+if (response.status === 404) {
+updateSyncStatus('synced', '本地');
+loadFromLocal();
+return true;
+}
+
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+const data = await response.json();
+githubFileSha = data.sha;
+const content = decodeBase64(data.content);
+const parsed = JSON.parse(content);
+
+localStorage.setItem('karl-todos', JSON.stringify(parsed.todos || []));
+localStorage.setItem('karl-categories', JSON.stringify(parsed.categories || DEFAULT_CATEGORIES));
+
+todos = parsed.todos || [];
+categories = parsed.categories || DEFAULT_CATEGORIES;
+
+updateSyncStatus('synced', `已同步`);
+return true;
+} catch (error) {
+console.error('GitHub 同步失败:', error);
+updateSyncStatus('error', '失败');
+loadFromLocal();
+return false;
+}
 }
 
 async function saveToGitHub() {
-  const token = getGitHubToken();
-  if (!token) return;
-  
-  // 防抖：3秒内只同步一次
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(async () => {
-    try {
-      updateSyncStatus('syncing', '保存中...');
-      
-      const content = JSON.stringify({ todos, categories }, null, 2);
-      const encoded = encodeBase64(content);
-      
-      // 获取最新的 SHA（避免冲突）
-      const getResponse = await githubAPI(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`);
-      let sha = null;
-      if (getResponse.ok) {
-        const currentData = await getResponse.json();
-        sha = currentData.sha;
-        githubFileSha = sha;
-      }
-      
-      const body = {
-        message: `Update todos - ${new Date().toISOString()}`,
-        content: encoded,
-      };
-      if (sha) body.sha = sha;
-      
-      const putResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      
-      if (putResponse.ok) {
-        const result = await putResponse.json();
-        githubFileSha = result.content.sha;
-        updateSyncStatus('synced', `已保存 ${formatTime(new Date())}`);
-      } else {
-        const errData = await putResponse.json();
-        throw new Error(errData.message || `HTTP ${putResponse.status}`);
-      }
-    } catch (error) {
-      console.error('保存到 GitHub 失败:', error);
-      updateSyncStatus('error', '保存失败');
-    }
-  }, 3000);
+const token = getGitHubToken();
+if (!token) return;
+
+if (syncTimer) clearTimeout(syncTimer);
+syncTimer = setTimeout(async () => {
+try {
+updateSyncStatus('syncing', '保存中');
+const content = JSON.stringify({ todos, categories }, null, 2);
+const encoded = encodeBase64(content);
+
+const getResponse = await githubAPI(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`);
+let sha = null;
+if (getResponse.ok) {
+const currentData = await getResponse.json();
+sha = currentData.sha;
+githubFileSha = sha;
+}
+
+const body = {
+message: `Update todos - ${new Date().toISOString()}`,
+content: encoded,
+};
+if (sha) body.sha = sha;
+
+const putResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+method: 'PUT',
+headers: {
+'Authorization': `Bearer ${token}`,
+'Accept': 'application/vnd.github.v3+json',
+'Content-Type': 'application/json',
+},
+body: JSON.stringify(body),
+});
+
+if (putResponse.ok) {
+const result = await putResponse.json();
+githubFileSha = result.content.sha;
+updateSyncStatus('synced', `已保存`);
+} else {
+throw new Error(`HTTP ${putResponse.status}`);
+}
+} catch (error) {
+console.error('保存到 GitHub 失败:', error);
+updateSyncStatus('error', '失败');
+}
+}, 3000);
 }
 
 function loadFromLocal() {
-  todos = JSON.parse(localStorage.getItem('karl-todos') || '[]');
-  categories = JSON.parse(localStorage.getItem('karl-categories') || JSON.stringify(DEFAULT_CATEGORIES));
+todos = JSON.parse(localStorage.getItem('karl-todos') || '[]');
+categories = JSON.parse(localStorage.getItem('karl-categories') || JSON.stringify(DEFAULT_CATEGORIES));
 }
 
-// Base64 编码/解码（支持中文）
 function encodeBase64(str) {
-  return btoa(unescape(encodeURIComponent(str)));
+return btoa(unescape(encodeURIComponent(str)));
 }
 function decodeBase64(str) {
-  // GitHub API 返回的内容可能包含换行符
-  str = str.replace(/\n/g, '');
-  return decodeURIComponent(escape(atob(str)));
+str = str.replace(/\n/g, '');
+return decodeURIComponent(escape(atob(str)));
 }
 
-// 同步状态
 function updateSyncStatus(status, text) {
-  const el = document.getElementById('syncStatus');
-  const textEl = document.getElementById('syncStatusText');
-  el.className = 'sync-status ' + status;
-  textEl.textContent = text;
-}
-
-function formatTime(date) {
-  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+const el = document.getElementById('syncStatus');
+const textEl = document.getElementById('syncStatusText');
+el.className = 'sync-status ' + status;
+textEl.textContent = text;
 }
 
 // ========== 数据保存 ==========
 function saveData() {
-  // 保存到本地
-  localStorage.setItem('karl-todos', JSON.stringify(todos));
-  localStorage.setItem('karl-categories', JSON.stringify(categories));
-  
-  // 保存到 GitHub
-  saveToGitHub();
-  
-  // 更新界面
-  updateStats();
-  renderTodos();
-  renderCategories();
-  renderFilterBar();
-  updateCategorySelect();
+localStorage.setItem('karl-todos', JSON.stringify(todos));
+localStorage.setItem('karl-categories', JSON.stringify(categories));
+saveToGitHub();
+updateStats();
+renderTodos();
+renderCategories();
+renderFilterBar();
+updateCategorySelect();
 }
 
 // ========== GitHub 设置 ==========
 async function testGitHubConnection() {
-  const token = document.getElementById('githubToken').value.trim();
-  const resultEl = document.getElementById('githubTestResult');
-  
-  if (!token) {
-    resultEl.innerHTML = '<span style="color:var(--danger)">请输入 Token</span>';
-    return;
-  }
-  
-  resultEl.innerHTML = '<span style="color:var(--warning)">测试中...</span>';
-  
-  try {
-    const response = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-      }
-    });
-    
-    if (response.ok) {
-      const repo = await response.json();
-      resultEl.innerHTML = `<span style="color:var(--success)">✅ 连接成功！仓库：${repo.full_name}</span>`;
-    } else if (response.status === 401) {
-      resultEl.innerHTML = '<span style="color:var(--danger)">❌ Token 无效</span>';
-    } else {
-      resultEl.innerHTML = `<span style="color:var(--danger)">❌ 连接失败：HTTP ${response.status}</span>`;
-    }
-  } catch (error) {
-    resultEl.innerHTML = `<span style="color:var(--danger)">❌ 连接失败：${error.message}</span>`;
-  }
+const token = document.getElementById('githubToken').value.trim();
+const resultEl = document.getElementById('githubTestResult');
+
+if (!token) {
+resultEl.innerHTML = '<span style="color:var(--danger)">请输入 Token</span>';
+return;
+}
+
+resultEl.innerHTML = '<span style="color:var(--warning)">测试中...</span>';
+
+try {
+const response = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+headers: {
+'Authorization': `Bearer ${token}`,
+'Accept': 'application/vnd.github.v3+json',
+}
+});
+
+if (response.ok) {
+resultEl.innerHTML = '<span style="color:var(--success)">✅ 连接成功</span>';
+} else if (response.status === 401) {
+resultEl.innerHTML = '<span style="color:var(--danger)">❌ Token 无效</span>';
+} else {
+resultEl.innerHTML = `<span style="color:var(--danger)">❌ 失败</span>`;
+}
+} catch (error) {
+resultEl.innerHTML = `<span style="color:var(--danger)">❌ ${error.message}</span>`;
+}
 }
 
 function saveGitHubSettings() {
-  const token = document.getElementById('githubToken').value.trim();
-  if (token) {
-    setGitHubToken(token);
-    updateSyncStatus('synced', 'Token 已保存');
-    alert('设置已保存！');
-  } else {
-    alert('请输入 Token');
-  }
+const token = document.getElementById('githubToken').value.trim();
+if (token) {
+setGitHubToken(token);
+updateSyncStatus('synced', '已保存');
+alert('已保存');
+} else {
+alert('请输入 Token');
+}
 }
 
 async function syncFromGitHub() {
-  const success = await loadFromGitHub();
-  if (success) {
-    saveData();
-    alert('已从 GitHub 同步最新数据！');
-  } else {
-    alert('同步失败，请检查 Token 或网络连接');
-  }
+const success = await loadFromGitHub();
+if (success) {
+saveData();
+alert('已同步');
+} else {
+alert('同步失败');
+}
 }
 
 async function syncToGitHub() {
-  if (syncTimer) clearTimeout(syncTimer);
-  // 立即同步
-  try {
-    updateSyncStatus('syncing', '推送中...');
-    const content = JSON.stringify({ todos, categories }, null, 2);
-    const encoded = encodeBase64(content);
-    const token = getGitHubToken();
-    
-    if (!token) {
-      updateSyncStatus('error', '未配置 Token');
-      alert('请先在设置中配置 GitHub Token');
-      return;
-    }
-    
-    const getResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    let sha = null;
-    if (getResponse.ok) {
-      const data = await getResponse.json();
-      sha = data.sha;
-    }
-    
-    const body = { message: `Update todos - ${new Date().toISOString()}`, content: encoded };
-    if (sha) body.sha = sha;
-    
-    const putResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    
-    if (putResponse.ok) {
-      const result = await putResponse.json();
-      githubFileSha = result.content.sha;
-      updateSyncStatus('synced', `已推送 ${formatTime(new Date())}`);
-      alert('推送成功！数据已同步到 GitHub');
-    } else {
-      throw new Error(`HTTP ${putResponse.status}`);
-    }
-  } catch (error) {
-    updateSyncStatus('error', '推送失败');
-    alert('推送失败：' + error.message);
-  }
+if (syncTimer) clearTimeout(syncTimer);
+try {
+updateSyncStatus('syncing', '推送中');
+const content = JSON.stringify({ todos, categories }, null, 2);
+const encoded = encodeBase64(content);
+const token = getGitHubToken();
+
+if (!token) {
+updateSyncStatus('error', '未配置');
+alert('请先配置 Token');
+return;
+}
+
+const getResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+});
+let sha = null;
+if (getResponse.ok) {
+const data = await getResponse.json();
+sha = data.sha;
+}
+
+const body = { message: `Update todos - ${new Date().toISOString()}`, content: encoded };
+if (sha) body.sha = sha;
+
+const putResponse = await fetch(`${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+method: 'PUT',
+headers: {
+'Authorization': `Bearer ${token}`,
+'Accept': 'application/vnd.github.v3+json',
+'Content-Type': 'application/json',
+},
+body: JSON.stringify(body),
+});
+
+if (putResponse.ok) {
+const result = await putResponse.json();
+githubFileSha = result.content.sha;
+updateSyncStatus('synced', `已推送`);
+alert('已推送');
+} else {
+throw new Error(`HTTP ${putResponse.status}`);
+}
+} catch (error) {
+updateSyncStatus('error', '失败');
+alert('推送失败：' + error.message);
+}
 }
 
 // ========== 界面更新 ==========
 function updateStats() {
-  const total = todos.length;
-  const completed = todos.filter(t => t.completed).length;
-  const progress = total - completed;
-  const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-completed').textContent = completed;
-  document.getElementById('stat-progress').textContent = progress;
-  document.getElementById('stat-rate').textContent = rate + '%';
+const total = todos.length;
+const completed = todos.filter(t => t.completed).length;
+const progress = total - completed;
+const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+document.getElementById('stat-total').textContent = total;
+document.getElementById('stat-completed').textContent = completed;
+document.getElementById('stat-progress').textContent = progress;
+document.getElementById('stat-rate').textContent = rate + '%';
 }
 
 function renderTodos() {
-  const list = document.getElementById('todoList');
-  let filtered = currentFilter === 'all' ? todos : todos.filter(t => t.categoryId == currentFilter);
+const list = document.getElementById('todoList');
+let filtered;
+if (currentFilter === 'all') {
+filtered = todos.filter(t => !t.completed);
+} else if (currentFilter === 'completed') {
+filtered = todos.filter(t => t.completed);
+} else {
+filtered = todos.filter(t => !t.completed && String(t.categoryId) === String(currentFilter));
+}
 
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>暂无待办事项</p></div>`;
-    return;
-  }
+if (filtered.length === 0) {
+const emptyText = currentFilter === 'completed' ? '暂无已完成事项' : '暂无待办事项';
+list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📝</div><p>${emptyText}</p></div>`;
+return;
+}
 
-  list.innerHTML = filtered.map(todo => {
-    const category = categories.find(c => c.id == todo.categoryId);
-    return `
-    <div class="todo-item ${todo.completed ? 'completed' : ''}">
-      <div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${todo.id})"></div>
-      <div class="todo-content">
-        <div class="todo-title">${escapeHtml(todo.title)}</div>
-        <div class="todo-meta">
-          ${category ? `<span class="todo-tag" style="background:${category.color}30;color:${category.color}">${escapeHtml(category.name)}</span>` : ''}
-          ${todo.priority ? `<span class="todo-priority ${todo.priority}">${{high:'高',medium:'中',low:'低'}[todo.priority]}</span>` : ''}
-          ${todo.note ? `<span class="todo-date">${escapeHtml(todo.note)}</span>` : ''}
-          <span class="todo-date">${formatDate(todo.createdAt)}</span>
-        </div>
-      </div>
-      <div class="todo-actions">
-        <button class="todo-action-btn delete" onclick="deleteTodo(${todo.id})">🗑️</button>
-      </div>
-    </div>
-    `;
-  }).join('');
+list.innerHTML = filtered.map(todo => {
+const category = categories.find(c => String(c.id) === String(todo.categoryId));
+return `
+<div class="todo-item ${todo.completed ? 'completed' : ''}">
+<div class="todo-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodo(${todo.id})"></div>
+<div class="todo-content">
+<div class="todo-title">${escapeHtml(todo.title)}</div>
+<div class="todo-meta">
+${category ? `<span class="todo-tag" style="background:${category.color}30;color:${category.color}">${escapeHtml(category.name)}</span>` : ''}
+${todo.priority ? `<span class="todo-priority ${todo.priority}">${{high:'高',medium:'中',low:'低'}[todo.priority]}</span>` : ''}
+${todo.note ? `<span class="todo-date">${escapeHtml(todo.note)}</span>` : ''}
+<span class="todo-date">${formatDate(todo.createdAt)}</span>
+</div>
+</div>
+<div class="todo-actions">
+<button class="todo-action-btn delete" onclick="deleteTodo(${todo.id})">🗑️</button>
+</div>
+</div>
+`;
+}).join('');
 }
 
 function renderCategories() {
-  const list = document.getElementById('categoryList');
-  list.innerHTML = categories.map(cat => {
-    const count = todos.filter(t => t.categoryId == cat.id).length;
-    return `
-    <div class="category-item">
-      <div class="category-name">
-        <span class="category-color" style="background:${cat.color}"></span>
-        <span>${escapeHtml(cat.name)}</span>
-        <span class="category-count">${count}</span>
-      </div>
-      <div class="category-actions">
-        <button class="todo-action-btn delete" onclick="deleteCategory(${cat.id})">🗑️</button>
-      </div>
-    </div>
-    `;
-  }).join('');
+const list = document.getElementById('categoryList');
+list.innerHTML = categories.map(cat => {
+const count = todos.filter(t => String(t.categoryId) === String(cat.id)).length;
+return `
+<div class="category-item">
+<div class="category-name">
+<span class="category-color" style="background:${cat.color}"></span>
+<span>${escapeHtml(cat.name)}</span>
+<span class="category-count">${count}</span>
+</div>
+<div class="category-actions">
+<button class="todo-action-btn delete" onclick="deleteCategory(${cat.id})">🗑️</button>
+</div>
+</div>
+`;
+}).join('');
 }
 
 function renderFilterBar() {
-  const bar = document.getElementById('filterBar');
-  bar.innerHTML = `
-    <span class="filter-tag ${currentFilter === 'all' ? 'active' : ''}" onclick="filterTodos('all')">全部</span>
-    ${categories.map(cat => `
-      <span class="filter-tag ${currentFilter == cat.id ? 'active' : ''}" onclick="filterTodos(${cat.id})">${escapeHtml(cat.name)}</span>
-    `).join('')}
-  `;
+const bar = document.getElementById('filterBar');
+bar.innerHTML = `
+<span class="filter-tag ${currentFilter === 'all' ? 'active' : ''}" onclick="filterTodos('all')">待办项</span>
+${categories.map(cat => `
+<span class="filter-tag ${String(currentFilter) === String(cat.id) ? 'active' : ''}" onclick="filterTodos(${cat.id})">${escapeHtml(cat.name)}</span>
+`).join('')}
+<span class="filter-tag ${currentFilter === 'completed' ? 'active' : ''}" onclick="filterTodos('completed')">已完成</span>
+`;
 }
 
 function updateCategorySelect() {
-  const select = document.getElementById('todoCategory');
-  select.innerHTML = `<option value="">未分类</option>` + categories.map(cat => 
-    `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`
-  ).join('');
+const select = document.getElementById('todoCategory');
+select.innerHTML = `<option value="">未分类</option>` + categories.map(cat => 
+`<option value="${cat.id}">${escapeHtml(cat.name)}</option>`
+).join('');
 }
 
 // ========== 操作 ==========
 function filterTodos(filter) {
-  currentFilter = filter;
-  renderFilterBar();
-  renderTodos();
+currentFilter = String(filter);
+renderFilterBar();
+renderTodos();
 }
 
 function toggleTodo(id) {
-  const todo = todos.find(t => t.id === id);
-  if (todo) {
-    todo.completed = !todo.completed;
-    saveData();
-  }
+const todo = todos.find(t => t.id === id);
+if (todo) {
+todo.completed = !todo.completed;
+saveData();
+}
 }
 
 function deleteTodo(id) {
-  if (confirm('确定删除这个待办吗？')) {
-    todos = todos.filter(t => t.id !== id);
-    saveData();
-  }
+if (confirm('确定删除？')) {
+todos = todos.filter(t => t.id !== id);
+saveData();
+}
 }
 
 function submitTodo(e) {
-  e.preventDefault();
-  const todo = {
-    id: Date.now(),
-    title: document.getElementById('todoTitle').value,
-    categoryId: document.getElementById('todoCategory').value || null,
-    priority: document.getElementById('todoPriority').value || null,
-    note: document.getElementById('todoNote').value || null,
-    completed: false,
-    createdAt: new Date().toISOString()
-  };
-  todos.unshift(todo);
-  saveData();
-  closeModal('addModal');
-  document.getElementById('addForm').reset();
+e.preventDefault();
+const todo = {
+id: Date.now(),
+title: document.getElementById('todoTitle').value,
+categoryId: document.getElementById('todoCategory').value || null,
+priority: document.getElementById('todoPriority').value || null,
+note: document.getElementById('todoNote').value || null,
+completed: false,
+createdAt: new Date().toISOString()
+};
+todos.unshift(todo);
+saveData();
+closeModal('addModal');
+document.getElementById('addForm').reset();
 }
 
 function submitCategory(e) {
-  e.preventDefault();
-  const selectedColor = document.querySelector('.color-option.selected');
-  const category = {
-    id: Date.now(),
-    name: document.getElementById('categoryName').value,
-    color: selectedColor ? selectedColor.dataset.color : '#7C5CFF'
-  };
-  categories.push(category);
-  saveData();
-  closeModal('categoryModal');
-  document.getElementById('categoryName').value = '';
+e.preventDefault();
+const selectedColor = document.querySelector('.color-option.selected');
+const category = {
+id: Date.now(),
+name: document.getElementById('categoryName').value,
+color: selectedColor ? selectedColor.dataset.color : '#7C5CFF'
+};
+categories.push(category);
+saveData();
+closeModal('categoryModal');
+document.getElementById('categoryName').value = '';
 }
 
 function deleteCategory(id) {
-  if (confirm('确定删除这个分类吗？相关待办将变为未分类。')) {
-    categories = categories.filter(c => c.id !== id);
-    todos.forEach(t => {
-      if (t.categoryId == id) t.categoryId = null;
-    });
-    saveData();
-  }
+if (confirm('确定删除？相关待办将变为未分类。')) {
+categories = categories.filter(c => c.id !== id);
+todos.forEach(t => {
+if (t.categoryId == id) t.categoryId = null;
+});
+saveData();
+}
 }
 
 // ========== 模态框 ==========
 function openAddModal() {
-  updateCategorySelect();
-  document.getElementById('addModal').classList.add('active');
+updateCategorySelect();
+document.getElementById('addModal').classList.add('active');
 }
 function openCategoryModal() {
-  document.getElementById('categoryModal').classList.add('active');
+document.getElementById('categoryModal').classList.add('active');
 }
 function openSettings() {
-  document.getElementById('githubToken').value = getGitHubToken();
-  document.getElementById('settingsModal').classList.add('active');
+document.getElementById('githubToken').value = getGitHubToken();
+document.getElementById('settingsModal').classList.add('active');
 }
 function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
+document.getElementById(id).classList.remove('active');
 }
 
 // ========== 导出导入 ==========
 function exportData() {
-  const data = { todos, categories, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `karl-todos-${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+const data = { todos, categories, exportedAt: new Date().toISOString() };
+const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `karl-todos-${new Date().toISOString().split('T')[0]}.json`;
+a.click();
+URL.revokeObjectURL(url);
 }
 function importData() {
-  document.getElementById('importFile').click();
+document.getElementById('importFile').click();
 }
 function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.todos) todos = data.todos;
-      if (data.categories) categories = data.categories;
-      saveData();
-      alert('导入成功！');
-    } catch (err) {
-      alert('导入失败：文件格式错误');
-    }
-  };
-  reader.readAsText(file);
+const file = e.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = (e) => {
+try {
+const data = JSON.parse(e.target.result);
+if (data.todos) todos = data.todos;
+if (data.categories) categories = data.categories;
+saveData();
+alert('导入成功');
+} catch (err) {
+alert('导入失败');
+}
+};
+reader.readAsText(file);
 }
 function clearData() {
-  if (confirm('确定清空所有数据吗？此操作不可恢复！')) {
-    todos = [];
-    categories = [...DEFAULT_CATEGORIES];
-    saveData();
-  }
+if (confirm('确定清空？')) {
+todos = [];
+categories = [...DEFAULT_CATEGORIES];
+saveData();
+}
 }
 
 // ========== 工具函数 ==========
 function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+const div = document.createElement('div');
+div.textContent = text;
+return div.innerHTML;
 }
 function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diff = now - date;
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days === 0) return '今天';
-  if (days === 1) return '昨天';
-  if (days < 7) return days + '天前';
-  return date.toLocaleDateString('zh-CN');
+const date = new Date(dateStr);
+const now = new Date();
+const diff = now - date;
+const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+if (days === 0) return '今天';
+if (days === 1) return '昨天';
+if (days < 7) return days + '天前';
+return date.toLocaleDateString('zh-CN');
 }
 
 // ========== 初始化 ==========
 async function init() {
-  // 设置日期
-  const now = new Date();
-  const hour = now.getHours();
-  const greeting = hour < 6 ? '凌晨好' : hour < 12 ? '早上好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
-  document.querySelector('.welcome h1').textContent = `${greeting}，Karl 👋`;
-  document.getElementById('welcomeDate').textContent = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-  
-  // 尝试从 GitHub 加载数据
-  const token = getGitHubToken();
-  if (token) {
-    const success = await loadFromGitHub();
-    if (!success) {
-      loadFromLocal();
-    }
-  } else {
-    loadFromLocal();
-    updateSyncStatus('error', '未配置 Token');
-  }
-  
-  // 初始化界面
-  saveData();
+const now = new Date();
+const hour = now.getHours();
+const greeting = hour < 6 ? '凌晨好' : hour < 12 ? '早上好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
+document.getElementById('greeting').textContent = `${greeting}，Karl 👋`;
+document.getElementById('welcomeDate').textContent = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+
+const token = getGitHubToken();
+if (token) {
+const success = await loadFromGitHub();
+if (!success) loadFromLocal();
+} else {
+loadFromLocal();
+updateSyncStatus('error', '未配置');
 }
 
-// 颜色选择器
+saveData();
+}
+
 document.getElementById('colorPicker').addEventListener('click', (e) => {
-  const option = e.target.closest('.color-option');
-  if (option) {
-    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-    option.classList.add('selected');
-  }
+const option = e.target.closest('.color-option');
+if (option) {
+document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+option.classList.add('selected');
+}
 });
 
-// 平滑滚动
-document.querySelectorAll('.nav-links a[href]').forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-  });
+document.querySelectorAll('.bottom-nav-item[href]').forEach(link => {
+link.addEventListener('click', (e) => {
+document.querySelectorAll('.bottom-nav-item').forEach(l => l.classList.remove('active'));
+link.classList.add('active');
+});
 });
 
-// 启动
 init();
 </script>
 </body>
