@@ -1,42 +1,5 @@
 {
-  "todos": [
-    {
-      "id": 1788145092749,
-      "title": "测试侧测试3",
-      "categoryId": "3",
-      "priority": null,
-      "note": null,
-      "completed": false,
-      "createdAt": "2026-08-31T02:58:12.749Z"
-    },
-    {
-      "id": 1788145070950,
-      "title": "测试 222",
-      "categoryId": null,
-      "priority": null,
-      "note": null,
-      "completed": false,
-      "createdAt": "2026-08-31T02:57:50.950Z"
-    },
-    {
-      "id": 1788144858120,
-      "title": "测测",
-      "categoryId": "2",
-      "priority": null,
-      "note": "测测",
-      "completed": false,
-      "createdAt": "2026-08-31T02:54:18.120Z"
-    },
-    {
-      "id": 1788144846913,
-      "title": "代办测试",
-      "categoryId": "1",
-      "priority": "high",
-      "note": "测试测试",
-      "completed": false,
-      "createdAt": "2026-08-31T02:54:06.913Z"
-    }
-  ],
+  "todos": [],
   "categories": [
     {
       "id": 1,
