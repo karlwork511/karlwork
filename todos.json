@@ -1,15 +1,5 @@
 {
-  "todos": [
-    {
-      "id": 1788146651152,
-      "title": "厕所厕所",
-      "categoryId": null,
-      "priority": null,
-      "note": "1111",
-      "completed": true,
-      "createdAt": "2026-08-31T03:24:11.152Z"
-    }
-  ],
+  "todos": [],
   "categories": [
     {
       "id": 1,
