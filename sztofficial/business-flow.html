@@ -23,7 +23,7 @@
     --glow-speed: 4s;
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; overflow-x: hidden; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -621,9 +621,11 @@
 
   /* ========== Responsive ========== */
   @media (max-width: 768px) {
-    .page-hero h1 { font-size: 32px; }
-    .hero-stats { gap: 24px; }
-    .hero-stat .num { font-size: 28px; }
+    .page-hero h1 { font-size: 28px; }
+    .page-hero .subtitle { font-size: 15px; }
+    .hero-stats { gap: 16px; flex-wrap: wrap; }
+    .hero-stat .num { font-size: 24px; }
+    .hero-stat .label { font-size: 12px; }
 
     .timeline-line, .timeline-line-progress { display: none; }
     .step-dot, .step-connector { display: none; }
@@ -631,14 +633,32 @@
     .step-node:nth-child(odd),
     .step-node:nth-child(even) {
       flex-direction: column;
-      padding: 0;
+      padding: 0 12px;
       text-align: left;
+      width: 100%;
+      max-width: 100%;
     }
     .step-node:nth-child(odd) .step-tags {
       justify-content: flex-start;
     }
-    .glow-card { padding: 20px; }
-    .step-title { font-size: 18px; }
+    .glow-card { padding: 16px; }
+    .step-header { flex-wrap: nowrap; gap: 8px; }
+    .step-icon { font-size: 24px; }
+    .step-number { width: 24px; height: 24px; font-size: 11px; }
+    .step-title { font-size: 16px; overflow: hidden; text-overflow: ellipsis; }
+    .step-desc { font-size: 14px; }
+    .step-tag { font-size: 11px; padding: 3px 10px; }
+
+    .bottom-cta h2 { font-size: 24px; }
+    .cta-buttons { flex-direction: column; gap: 12px; }
+    .cta-buttons .btn-primary,
+    .cta-buttons .btn-secondary { width: 100%; text-align: center; }
+
+    .template-modal-box { padding: 32px 20px 24px; width: 92%; }
+    .template-modal-title { font-size: 18px; }
+    .template-feature-item { padding: 12px 14px; gap: 10px; }
+    .template-feature-name { font-size: 14px; }
+    .template-feature-detail { font-size: 12px; }
   }
 </style>
 </head>
