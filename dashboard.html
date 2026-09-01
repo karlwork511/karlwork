@@ -671,10 +671,83 @@ transform:translate(-50%,-50%);
 }
 .modal-handle{display:none}
 }
+
+/* ===== Karl快记 - 密码弹窗 ===== */
+.pw-overlay{
+display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+z-index:300;align-items:center;justify-content:center;
+}
+.pw-overlay.active{display:flex}
+.pw-box{
+background:var(--bg-primary);border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);padding:32px 24px;
+width:300px;max-width:90vw;text-align:center;
+}
+.pw-box h3{font-size:18px;font-weight:600;margin-bottom:4px}
+.pw-box p{font-size:13px;color:var(--text-secondary);margin-bottom:20px}
+.pw-input-wrap{position:relative;margin-bottom:12px}
+.pw-dots{display:flex;justify-content:center;gap:16px}
+.pw-dot{
+width:14px;height:14px;border-radius:50%;
+border:2px solid var(--glass-border);
+transition:var(--transition);
+}
+.pw-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pw-hidden-input{
+position:absolute;top:0;left:0;width:100%;height:100%;
+opacity:0;cursor:pointer;font-size:24px;
+}
+.pw-error{
+font-size:12px;color:var(--danger);
+min-height:18px;margin-bottom:8px;
+}
+.pw-close-btn{
+width:100%;padding:10px;border-radius:10px;border:none;
+background:var(--glass-bg);color:var(--text-secondary);
+font-size:14px;cursor:pointer;
+}
+.pw-close-btn:active{background:var(--glass-hover)}
+
+/* ===== Karl快记 - 账单页 ===== */
+.billing-page{display:none}
+.billing-page.active{display:block}
+.billing-header{
+display:flex;align-items:center;gap:12px;
+padding:16px 0;margin-bottom:8px;
+}
+.billing-back{
+width:36px;height:36px;border-radius:10px;
+border:1px solid var(--glass-border);background:var(--glass-bg);
+color:var(--text-primary);font-size:20px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+transition:var(--transition);flex-shrink:0;
+}
+.billing-back:active{background:var(--glass-hover)}
+.billing-title{font-size:20px;font-weight:600}
+.billing-subtitle{font-size:13px;color:var(--text-secondary);margin-left:auto}
+.main-content.hidden{display:none}
+
+/* 密码错误摇晃 */
+@keyframes pwShake{
+0%,100%{transform:translateX(0)}
+20%{transform:translateX(-8px)}
+40%{transform:translateX(8px)}
+60%{transform:translateX(-4px)}
+80%{transform:translateX(4px)}
+}
+
+/* 橘猫头像样式 */
+.cat-shortcut-card{cursor:pointer;position:relative;overflow:hidden}
+.cat-shortcut-card::after{
+content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+background:linear-gradient(135deg,rgba(255,152,0,0.08),rgba(255,87,34,0.05));
+pointer-events:none;
+}
 </style>
 </head>
 <body>
-<nav class="navbar">
+<nav class="navbar main-content-el">
 <div class="container navbar-content">
 <div class="logo">
 <div class="logo-icon">K</div>
@@ -687,7 +760,7 @@ transform:translate(-50%,-50%);
 </div>
 </nav>
 
-<main class="container">
+<main class="container main-content-el">
 <div class="welcome">
 <h1 id="greeting">你好，Karl 👋</h1>
 <p id="welcomeDate"></p>
@@ -747,14 +820,28 @@ transform:translate(-50%,-50%);
 <div class="shortcut-icon">⚙️</div>
 <div class="shortcut-label">设置</div>
 </a>
-<a class="shortcut-card" onclick="exportData()">
-<div class="shortcut-icon">📥</div>
-<div class="shortcut-label">导出数据</div>
-</a>
-<a class="shortcut-card" onclick="importData()">
-<div class="shortcut-icon">📤</div>
-<div class="shortcut-label">导入数据</div>
-</a>
+<div class="shortcut-card cat-shortcut-card" onclick="showPasswordModal()">
+<div class="shortcut-icon">
+<svg viewBox="0 0 48 48" width="36" height="36">
+<ellipse cx="24" cy="28" rx="14" ry="12" fill="#FF9800"/>
+<polygon points="10,20 7,7 18,16" fill="#FF9800"/>
+<polygon points="38,20 41,7 30,16" fill="#FF9800"/>
+<polygon points="11,18 9,9 17,15" fill="#FFAB40"/>
+<polygon points="37,18 39,9 31,15" fill="#FFAB40"/>
+<ellipse cx="18" cy="26" rx="2.5" ry="3" fill="#4E342E"/>
+<ellipse cx="30" cy="26" rx="2.5" ry="3" fill="#4E342E"/>
+<circle cx="17" cy="25" r="1" fill="white" opacity="0.8"/>
+<circle cx="29" cy="25" r="1" fill="white" opacity="0.8"/>
+<ellipse cx="24" cy="31" rx="2" ry="1.5" fill="#E91E63"/>
+<path d="M22 32.5Q24 34.5 26 32.5" fill="none" stroke="#5D4037" stroke-width="0.8" stroke-linecap="round"/>
+<line x1="6" y1="27" x2="15" y2="28.5" stroke="#FFB74D" stroke-width="0.7" opacity="0.5"/>
+<line x1="6" y1="30" x2="15" y2="30" stroke="#FFB74D" stroke-width="0.7" opacity="0.5"/>
+<line x1="33" y1="28.5" x2="42" y2="27" stroke="#FFB74D" stroke-width="0.7" opacity="0.5"/>
+<line x1="33" y1="30" x2="42" y2="30" stroke="#FFB74D" stroke-width="0.7" opacity="0.5"/>
+</svg>
+</div>
+<div class="shortcut-label">Karl快记</div>
+</div>
 </div>
 </section>
 </main>
@@ -927,6 +1014,41 @@ transform:translate(-50%,-50%);
 <button class="btn btn-secondary" onclick="clearData()" style="color:var(--danger)">清空数据</button>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+</div>
+</div>
+</div>
+
+<!-- Karl快记 - 密码弹窗 -->
+<div class="pw-overlay" id="passwordOverlay">
+<div class="pw-box">
+<h3>🔒 Karl快记</h3>
+<p>输入密码访问账单</p>
+<div class="pw-input-wrap">
+<div class="pw-dots">
+<div class="pw-dot" id="dot0"></div>
+<div class="pw-dot" id="dot1"></div>
+<div class="pw-dot" id="dot2"></div>
+<div class="pw-dot" id="dot3"></div>
+</div>
+<input type="password" class="pw-hidden-input" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+</div>
+<div class="pw-error" id="pwError"></div>
+<button class="pw-close-btn" onclick="closePasswordModal()">取消</button>
+</div>
+</div>
+
+<!-- Karl快记 - 账单页 -->
+<div class="billing-page" id="billingPage">
+<div class="container">
+<div class="billing-header">
+<button class="billing-back" onclick="goBackFromBilling()">←</button>
+<div class="billing-title">Karl快记</div>
+<div class="billing-subtitle">消费账单</div>
+</div>
+<div class="welcome" style="padding:60px 0 20px">
+<div style="font-size:56px;margin-bottom:16px">🐱</div>
+<h1 style="font-size:20px;font-weight:600;margin-bottom:8px">账单页面设计中</h1>
+<p style="color:var(--text-secondary);font-size:14px">消费分析功能即将上线</p>
 </div>
 </div>
 </div>
@@ -1714,6 +1836,76 @@ if (days < 7) return days + '天前';
 return date.toLocaleDateString('zh-CN');
 }
 
+// ========== Karl快记 - 账单功能 ==========
+const BILLING_PASSWORD = '0913';
+
+function isBillingUnlocked() {
+  return sessionStorage.getItem('billing-unlocked') === 'true';
+}
+
+function showPasswordModal() {
+  if (isBillingUnlocked()) {
+    enterBillingPage();
+    return;
+  }
+  document.getElementById('passwordOverlay').classList.add('active');
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  updatePwDots('');
+  setTimeout(() => document.getElementById('pinInput').focus(), 100);
+}
+
+function closePasswordModal() {
+  document.getElementById('passwordOverlay').classList.remove('active');
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  updatePwDots('');
+}
+
+function updatePwDots(value) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.toggle('filled', i < value.length);
+  }
+}
+
+function checkPassword() {
+  const pin = document.getElementById('pinInput').value;
+  if (pin === BILLING_PASSWORD) {
+    sessionStorage.setItem('billing-unlocked', 'true');
+    closePasswordModal();
+    enterBillingPage();
+  } else {
+    document.getElementById('pwError').textContent = '密码错误，请重试';
+    document.getElementById('pinInput').value = '';
+    updatePwDots('');
+    // 短暂震动反馈
+    const box = document.querySelector('.pw-box');
+    box.style.animation = 'none';
+    box.offsetHeight; // trigger reflow
+    box.style.animation = 'pwShake 0.4s ease';
+    setTimeout(() => {
+      document.getElementById('pwError').textContent = '';
+    }, 2000);
+  }
+}
+
+function enterBillingPage() {
+  // 隐藏主内容
+  document.querySelectorAll('.main-content-el').forEach(el => el.classList.add('hidden'));
+  // 隐藏底部导航
+  document.querySelector('.bottom-nav').style.display = 'none';
+  // 显示账单页
+  document.getElementById('billingPage').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goBackFromBilling() {
+  document.getElementById('billingPage').classList.remove('active');
+  document.querySelectorAll('.main-content-el').forEach(el => el.classList.remove('hidden'));
+  document.querySelector('.bottom-nav').style.display = '';
+}
+
 // ========== 初始化 ==========
 async function init() {
 const now = new Date();
@@ -1747,6 +1939,21 @@ link.addEventListener('click', (e) => {
 document.querySelectorAll('.bottom-nav-item').forEach(l => l.classList.remove('active'));
 link.classList.add('active');
 });
+});
+
+// Karl快记 - 密码输入监听
+document.getElementById('pinInput').addEventListener('input', function(e) {
+  const val = e.target.value.replace(/[^0-9]/g, '');
+  e.target.value = val;
+  updatePwDots(val);
+  if (val.length === 4) {
+    setTimeout(() => checkPassword(), 150);
+  }
+});
+
+// 点击密码弹窗背景关闭
+document.getElementById('passwordOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModal();
 });
 
 init();
