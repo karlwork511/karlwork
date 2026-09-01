@@ -153,6 +153,8 @@ img{max-width:100%;display:block}
 .product-features{list-style:none;display:flex;flex-direction:column;gap:12px}
 .product-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--gray-1)}
 .product-features li::before{content:'✓';color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px}
+.product-detail-btn{display:inline-flex;align-items:center;gap:6px;margin-top:24px;padding:10px 24px;font-size:14px;font-weight:500;color:#fff;background:var(--blue);border-radius:8px;text-decoration:none;transition:all 0.2s}
+.product-detail-btn:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(22,93,255,0.3)}
 .product-mockup{height:380px;border-radius:var(--radius);background:linear-gradient(135deg,var(--blue-light),#fff5eb);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.04);overflow:hidden;position:relative;transition:all 0.3s}
 .product-mockup:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
 .product-mockup img{width:100%;height:100%;object-fit:cover}
@@ -1132,6 +1134,20 @@ function switchProduct(idx) {
   document.getElementById('product-' + idx).classList.add('active');
   document.querySelectorAll('.products-nav-btn')[idx].classList.add('active');
 }
+
+// ===== Handle URL hash for product anchor =====
+(function() {
+  var hash = window.location.hash;
+  var match = hash.match(/^#product-(\d+)$/);
+  if (match) {
+    var idx = parseInt(match[1]);
+    switchProduct(idx);
+    setTimeout(function() {
+      var el = document.getElementById('products');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+})();
 
 // ===== Feature Tabs =====
 document.querySelectorAll('.feature-tab').forEach((tab, idx) => {
