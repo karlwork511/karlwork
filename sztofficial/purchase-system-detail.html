@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代购系统 - SZT 一站式代购平台解决方案</title>
+<style>
+/* ===== Reset & Base ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#1a1a2e;background:#fff;line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+
+/* ===== CSS Variables ===== */
+:root{
+  --blue:#165DFF;
+  --blue-dark:#0E42D2;
+  --blue-light:#E8F3FF;
+  --orange:#FF7D00;
+  --orange-light:#FFF7E8;
+  --dark:#1a1a2e;
+  --gray-1:#4E5969;
+  --gray-2:#86909C;
+  --gray-3:#C9CDD4;
+  --gray-4:#F2F3F5;
+  --green:#00B42A;
+  --radius:12px;
+  --shadow:0 4px 20px rgba(0,0,0,0.06);
+  --shadow-hover:0 8px 32px rgba(0,0,0,0.12);
+}
+
+/* ===== Navigation ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06);transition:all 0.3s}
+.nav.scrolled{background:rgba(255,255,255,0.98);box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.nav-logo{font-size:22px;font-weight:700;color:var(--blue);letter-spacing:-0.5px}
+.nav-logo span{color:var(--orange)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:14px;color:var(--gray-1);transition:color 0.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--blue)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-ghost{padding:8px 16px;font-size:13px;color:var(--blue);border:1px solid var(--blue);border-radius:6px;cursor:pointer;background:transparent;transition:all 0.2s}
+.btn-ghost:hover{background:var(--blue);color:#fff}
+.btn-primary{padding:8px 20px;font-size:13px;color:#fff;background:var(--blue);border:none;border-radius:6px;cursor:pointer;transition:all 0.2s}
+.btn-primary:hover{background:var(--blue-dark)}
+
+/* ===== Page Hero ===== */
+.page-hero{padding:120px 48px 60px;background:linear-gradient(170deg,#f8fbff 0%,#eef4ff 40%,#fff 100%);position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;width:500px;height:500px;background:rgba(22,93,255,0.08);border-radius:50%;filter:blur(80px);top:-100px;right:-100px}
+.page-hero::after{content:'';position:absolute;width:400px;height:400px;background:rgba(255,125,0,0.06);border-radius:50%;filter:blur(80px);bottom:-50px;left:-50px}
+.page-hero .container{position:relative;z-index:1;max-width:1200px;margin:0 auto}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-2);margin-bottom:24px}
+.breadcrumb a{color:var(--blue);transition:opacity 0.2s}
+.breadcrumb a:hover{opacity:0.7}
+.breadcrumb .sep{color:var(--gray-3)}
+.hero-content{max-width:680px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:600;border-radius:20px;margin-bottom:20px}
+.hero-content h1{font-size:42px;font-weight:700;line-height:1.3;margin-bottom:16px;color:var(--dark)}
+.hero-content h1 span{color:var(--blue)}
+.hero-content p{font-size:17px;color:var(--gray-1);line-height:1.8;margin-bottom:32px}
+.hero-stats{display:flex;gap:48px}
+.hero-stat .num{font-size:32px;font-weight:700;color:var(--blue)}
+.hero-stat .num small{font-size:16px;color:var(--orange)}
+.hero-stat .label{font-size:13px;color:var(--gray-2);margin-top:4px}
+
+/* ===== Section Common ===== */
+.section{padding:100px 48px}
+.section-header{text-align:center;margin-bottom:60px}
+.section-num{display:inline-block;font-size:13px;font-weight:600;color:var(--blue);background:var(--blue-light);padding:4px 12px;border-radius:12px;margin-bottom:12px}
+.section-header h2{font-size:36px;font-weight:700;margin-bottom:12px;color:var(--dark)}
+.section-header p{font-size:16px;color:var(--gray-2)}
+.container{max-width:1200px;margin:0 auto}
+
+/* ===== Scroll Reveal ===== */
+.reveal{opacity:1;transform:none;transition:opacity 0.7s ease,transform 0.7s ease}
+.reveal.animated{opacity:0;transform:translateY(30px)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+.reveal-delay-5{transition-delay:0.5s}
+
+/* ===== 功能概览（6大模块）===== */
+.overview-section{background:#fff}
+.overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.overview-card{padding:36px 28px;border-radius:var(--radius);border:1px solid var(--gray-3);transition:all 0.3s;position:relative;overflow:hidden;cursor:default}
+.overview-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--blue)}
+.overview-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));opacity:0;transition:opacity 0.3s}
+.overview-card:hover::after{opacity:1}
+.overview-card-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px}
+.overview-card:nth-child(1) .overview-card-icon{background:var(--blue-light)}
+.overview-card:nth-child(2) .overview-card-icon{background:var(--orange-light)}
+.overview-card:nth-child(3) .overview-card-icon{background:#E8FFEA}
+.overview-card:nth-child(4) .overview-card-icon{background:#F2E8FF}
+.overview-card:nth-child(5) .overview-card-icon{background:#FFF3E0}
+.overview-card:nth-child(6) .overview-card-icon{background:#E0F7FA}
+.overview-card h3{font-size:18px;font-weight:600;margin-bottom:10px;color:var(--dark)}
+.overview-card p{font-size:14px;color:var(--gray-1);line-height:1.7;margin-bottom:16px}
+.overview-card .card-features{list-style:none;display:flex;flex-direction:column;gap:6px}
+.overview-card .card-features li{font-size:13px;color:var(--gray-2);display:flex;align-items:center;gap:6px}
+.overview-card .card-features li::before{content:'✓';color:var(--green);font-weight:700;font-size:12px}
+
+/* ===== 功能详解（左右交替）===== */
+.detail-section{background:var(--gray-4)}
+.detail-block{margin-bottom:80px}
+.detail-block:last-child{margin-bottom:0}
+.detail-row{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.detail-row.reverse{direction:rtl}
+.detail-row.reverse > *{direction:ltr}
+.detail-text h3{font-size:26px;font-weight:700;margin-bottom:12px;color:var(--dark)}
+.detail-text h3 .emoji{margin-right:10px}
+.detail-text > p{font-size:15px;color:var(--gray-1);line-height:1.8;margin-bottom:24px}
+.detail-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.detail-list li{display:flex;gap:12px;align-items:flex-start}
+.detail-list li .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:8px}
+.detail-list li .text h4{font-size:15px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.detail-list li .text p{font-size:13px;color:var(--gray-2);line-height:1.6}
+.detail-visual{height:380px;border-radius:var(--radius);background:linear-gradient(135deg,var(--blue-light),#fff5eb);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,0.04);overflow:hidden;position:relative}
+.detail-visual .placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--gray-2)}
+.detail-visual .placeholder-icon{font-size:56px;opacity:0.5}
+.detail-visual .placeholder-text{font-size:14px;opacity:0.6}
+.detail-visual .placeholder-text-sm{font-size:11px;opacity:0.4}
+/* mockup UI 元素 */
+.detail-visual .mock-ui{position:absolute;inset:20px;display:flex;flex-direction:column;gap:12px}
+.mock-topbar{height:32px;background:rgba(255,255,255,0.9);border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.mock-dot{width:8px;height:8px;border-radius:50%}
+.mock-dot.r{background:#FF5F57}.mock-dot.y{background:#FFBD2E}.mock-dot.g{background:#28C840}
+.mock-url{flex:1;height:18px;background:var(--gray-4);border-radius:4px;margin-left:8px}
+.mock-body{flex:1;display:grid;grid-template-columns:200px 1fr;gap:12px}
+.mock-sidebar{background:rgba(255,255,255,0.8);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mock-nav-item{height:14px;background:var(--gray-4);border-radius:3px}
+.mock-nav-item.active{background:var(--blue);opacity:0.6}
+.mock-content{background:rgba(255,255,255,0.8);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.mock-card-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mock-card{height:60px;background:var(--gray-4);border-radius:6px;position:relative;overflow:hidden}
+.mock-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:30%;background:rgba(22,93,255,0.08)}
+.mock-table{display:flex;flex-direction:column;gap:6px}
+.mock-table-row{height:12px;background:var(--gray-4);border-radius:2px}
+.mock-table-row:nth-child(odd){width:100%}
+.mock-table-row:nth-child(even){width:85%}
+
+/* ===== 数据亮点 ===== */
+.data-section{background:var(--dark);color:#fff;text-align:center;padding:80px 48px}
+.data-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:1200px;margin:0 auto}
+.data-item .data-num{font-size:48px;font-weight:700;color:var(--blue);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.data-item .data-num small{font-size:inherit;color:inherit;font-weight:400}
+.data-item .data-label{font-size:14px;color:rgba(255,255,255,0.7)}
+
+/* ===== 技术架构 ===== */
+.arch-section{background:#fff}
+.arch-flow{display:flex;align-items:center;justify-content:center;gap:0;margin-top:48px;flex-wrap:wrap}
+.arch-node{padding:24px 28px;border-radius:var(--radius);border:2px solid var(--gray-3);text-align:center;min-width:160px;transition:all 0.3s;background:#fff}
+.arch-node:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.arch-node .node-icon{font-size:32px;margin-bottom:8px}
+.arch-node h4{font-size:14px;font-weight:600;color:var(--dark);margin-bottom:4px}
+.arch-node p{font-size:12px;color:var(--gray-2)}
+.arch-arrow{font-size:24px;color:var(--blue);padding:0 8px;flex-shrink:0}
+
+/* ===== 对比优势 ===== */
+.compare-section{background:var(--gray-4)}
+.compare-table{width:100%;max-width:800px;margin:0 auto;border-collapse:collapse;background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.compare-table th{padding:16px 20px;font-size:14px;font-weight:600;text-align:left}
+.compare-table th:first-child{background:var(--gray-4);color:var(--gray-1)}
+.compare-table th:nth-child(2){background:var(--blue);color:#fff}
+.compare-table th:nth-child(3){background:var(--gray-4);color:var(--gray-1)}
+.compare-table td{padding:14px 20px;font-size:14px;color:var(--gray-1);border-bottom:1px solid var(--gray-4)}
+.compare-table td:nth-child(2){background:var(--blue-light);color:var(--blue);font-weight:500}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table .check{color:var(--green);font-weight:700}
+.compare-table .cross{color:var(--gray-3)}
+
+/* ===== 底部CTA ===== */
+.cta-section{background:var(--dark);padding:80px 48px;text-align:center}
+.cta-section h2{font-size:32px;font-weight:700;color:#fff;margin-bottom:12px}
+.cta-section p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:32px}
+.cta-actions{display:flex;justify-content:center;gap:16px}
+.cta-actions .btn-primary{padding:14px 40px;font-size:16px;border-radius:8px}
+.cta-actions .btn-ghost{padding:14px 40px;font-size:16px;border-radius:8px;border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8)}
+.cta-actions .btn-ghost:hover{background:rgba(255,255,255,0.1);color:#fff;border-color:var(--blue)}
+
+/* ===== Footer ===== */
+.footer{background:#111;padding:48px;color:rgba(255,255,255,0.5)}
+.footer .container{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.footer-brand{font-size:18px;font-weight:700;color:#fff;margin-bottom:12px}
+.footer-brand span{color:var(--orange)}
+.footer-desc{font-size:13px;line-height:1.7;margin-bottom:16px}
+.footer h4{font-size:14px;color:#fff;margin-bottom:16px}
+.footer-links{list-style:none}
+.footer-links li{margin-bottom:8px}
+.footer-links a{font-size:13px;color:rgba(255,255,255,0.5);transition:color 0.2s}
+.footer-links a:hover{color:var(--blue)}
+.footer-bottom{margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);text-align:center;font-size:12px}
+
+/* ===== 预约演示弹窗 ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s}
+.modal-overlay.show{display:flex;opacity:1}
+.demo-modal{background:#fff;border-radius:16px;max-width:720px;width:90%;position:relative;transform:scale(0.95);transition:transform 0.3s;overflow:hidden}
+.modal-overlay.show .demo-modal{transform:scale(1)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:rgba(0,0,0,0.05);border-radius:50%;cursor:pointer;font-size:16px;color:var(--gray-2);display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:1}
+.modal-close:hover{background:rgba(0,0,0,0.1)}
+.demo-modal-body{display:grid;grid-template-columns:1fr 1fr;min-height:400px}
+.demo-left{padding:40px;background:linear-gradient(160deg,var(--blue-light),#fff);display:flex;flex-direction:column;justify-content:center}
+.demo-left .tag{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:2px;margin-bottom:12px}
+.demo-left h3{font-size:22px;font-weight:700;color:var(--dark);margin-bottom:8px}
+.demo-left > p{font-size:14px;color:var(--gray-2);margin-bottom:24px;line-height:1.7}
+.demo-features{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.demo-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-1)}
+.demo-feat-icon{font-size:16px}
+.demo-left .contact{margin-top:auto;padding-top:24px;font-size:13px;color:var(--gray-2);display:flex;align-items:center;gap:6px}
+.demo-right{padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff}
+.qr-box{width:180px;height:180px;background:var(--gray-4);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:2px dashed var(--gray-3)}
+.qr-box .qr-ph{font-size:48px;opacity:0.3}
+.demo-right h4{font-size:18px;font-weight:600;color:var(--dark);margin-bottom:6px}
+.demo-right p{font-size:13px;color:var(--gray-2);text-align:center}
+
+/* ===== Responsive ===== */
+@media(max-width:1024px){
+  .overview-grid{grid-template-columns:repeat(2,1fr)}
+  .detail-row,.detail-row.reverse{grid-template-columns:1fr;gap:32px}
+  .detail-row.reverse{direction:ltr}
+  .arch-flow{flex-direction:column}
+  .arch-arrow{transform:rotate(90deg)}
+  .data-grid{grid-template-columns:repeat(2,1fr);gap:24px}
+  .footer .container{grid-template-columns:1fr 1fr}
+  .demo-modal-body{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .nav{padding:0 20px}
+  .nav-links{display:none}
+  .section{padding:60px 20px}
+  .page-hero{padding:100px 20px 40px}
+  .hero-content h1{font-size:28px}
+  .section-header h2{font-size:26px}
+  .overview-grid{grid-template-columns:1fr}
+  .data-grid{grid-template-columns:1fr 1fr}
+  .footer .container{grid-template-columns:1fr}
+  .hero-stats{flex-direction:column;gap:16px}
+  .cta-actions{flex-direction:column;align-items:center}
+  .compare-table{font-size:12px}
+}
+</style>
+</head>
+<body id="top">
+
+<!-- ===== Navigation ===== -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">SZT<span>.</span></div>
+  <div class="nav-links">
+    <a href="https://karlwork.top/sztofficial/index.html#product-0">首页</a>
+    <a href="#overview">代购系统</a>
+    <a href="#detail">功能详解</a>
+    <a href="#arch">数据流转</a>
+    <a href="#compare">为什么选SZT</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="openModal()">预约演示</button>
+  </div>
+</nav>
+
+<!-- ===== Page Hero ===== -->
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#">首页</a>
+      <span class="sep">/</span>
+      <span>代购系统</span>
+    </div>
+    <div class="hero-content reveal">
+      <div class="hero-badge">🛒 核心产品</div>
+      <h1>代购系统<br><span>一键搭建你的品牌代购商城</span></h1>
+      <p>淘宝/1688/微店官方API直连，10亿+商品自动同步，支持手动推荐选品。多语言多汇率，开通即用——你只需要专注选品和获客，技术的事交给我们。</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="num" data-target="10" data-suffix="亿+">0<small>亿+</small></div>
+          <div class="label">在线商品数量</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num" data-target="10" data-suffix="+">0<small>+</small></div>
+          <div class="label">支持语言</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num" data-target="30" data-suffix="+">0<small>+</small></div>
+          <div class="label">支付网关</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num" data-target="3" data-suffix="大">0<small>大</small></div>
+          <div class="label">官方API对接</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 功能概览（6大模块）===== -->
+<section class="section overview-section" id="overview">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-num">功能概览</div>
+      <h2>六大核心模块，覆盖代购全链路</h2>
+      <p>从商品采集到订单履约，代购系统为你提供完整的业务闭环</p>
+    </div>
+    <div class="overview-grid">
+      <div class="overview-card reveal reveal-delay-1">
+        <div class="overview-card-icon">🔌</div>
+        <h3>官方API商品同步</h3>
+        <p>淘宝/1688/微店官方API授权接入，商品数据实时同步，零爬虫风险。</p>
+        <ul class="card-features">
+          <li>10亿+ 商品自动同步</li>
+          <li>商品信息/价格/库存实时更新</li>
+          <li>多平台商品一键采集</li>
+          <li>合规稳定，账号零风险</li>
+        </ul>
+      </div>
+      <div class="overview-card reveal reveal-delay-2">
+        <div class="overview-card-icon">🤖</div>
+        <h3>智能商品运营</h3>
+        <p>自动翻译、智能推荐选品、批量SKU管理，让商品运营效率翻倍。</p>
+        <ul class="card-features">
+          <li>AI 自动翻译商品信息</li>
+          <li>智能推荐热门选品</li>
+          <li>批量管理 SKU & 库存</li>
+          <li>手动配置推荐商品</li>
+        </ul>
+      </div>
+      <div class="overview-card reveal reveal-delay-3">
+        <div class="overview-card-icon">💱</div>
+        <h3>多语言多汇率</h3>
+        <p>支持10+语言自动翻译，30+实时汇率结算，覆盖全球主流市场。</p>
+        <ul class="card-features">
+          <li>10+ 语言自动翻译</li>
+          <li>30+ 实时汇率结算</li>
+          <li>用户端自动切换</li>
+          <li>自定义汇率加价策略</li>
+        </ul>
+      </div>
+      <div class="overview-card reveal reveal-delay-4">
+        <div class="overview-card-icon">💳</div>
+        <h3>多支付网关集成</h3>
+        <p>内置30+国际支付方式，覆盖信用卡、电子钱包、本地支付等主流渠道。</p>
+        <ul class="card-features">
+          <li>Stripe / PayPal 等国际支付</li>
+          <li>本地支付方式自动匹配</li>
+          <li>多币种自动结算</li>
+          <li>安全支付加密 & 风控</li>
+        </ul>
+      </div>
+      <div class="overview-card reveal reveal-delay-5">
+        <div class="overview-card-icon">🌐</div>
+        <h3>独立品牌商城</h3>
+        <p>开通即拥有独立品牌域名和定制化商城界面，内置SEO优化，快速获客。</p>
+        <ul class="card-features">
+          <li>独立品牌域名绑定</li>
+          <li>商城界面品牌定制</li>
+          <li>内置SEO优化工具</li>
+          <li>Google Analytics 集成</li>
+        </ul>
+      </div>
+      <div class="overview-card reveal reveal-delay-5">
+        <div class="overview-card-icon">📊</div>
+        <h3>全链路数据看板</h3>
+        <p>订单、财务、商品、客户数据一目了然，实时掌握业务动态。</p>
+        <ul class="card-features">
+          <li>实时订单数据监控</li>
+          <li>营收 / 利润自动核算</li>
+          <li>商品热销排行分析</li>
+          <li>客户行为数据追踪</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 功能详解（左右交替）===== -->
+<section class="section detail-section" id="detail">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-num">功能详解</div>
+      <h2>深入了解每个功能模块</h2>
+      <p>我们逐一拆解代购系统的核心能力，看看它是如何帮你提升效率的</p>
+    </div>
+
+    <!-- 模块1: API商品同步 -->
+    <div class="detail-block reveal">
+      <div class="detail-row">
+        <div class="detail-text">
+          <h3><span class="emoji">🔌</span>官方API商品同步</h3>
+          <p>通过淘宝国际、1688、微店官方API授权接入，商品数据实时同步到你的独立商城。无需手动搬运，告别爬虫风险，合规稳定运营。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>10亿+ 商品池</h4><p>接入淘宝/1688/微店全量商品，覆盖服装、电子、家居、美妆等全品类，选品范围无限制。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>实时数据同步</h4><p>商品价格、库存、规格自动更新，用户端展示始终与供应商一致，避免超卖和信息滞后。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>合规零风险</h4><p>官方API授权接入，非爬虫采集。账号安全有保障，平台运营合规稳定。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url"></div>
+            </div>
+            <div class="mock-body">
+              <div class="mock-sidebar">
+                <div class="mock-nav-item active" style="width:80%"></div>
+                <div class="mock-nav-item" style="width:60%"></div>
+                <div class="mock-nav-item" style="width:70%"></div>
+                <div class="mock-nav-item" style="width:50%"></div>
+                <div class="mock-nav-item" style="width:65%"></div>
+              </div>
+              <div class="mock-content">
+                <div class="mock-card-row">
+                  <div class="mock-card"></div>
+                  <div class="mock-card"></div>
+                  <div class="mock-card"></div>
+                </div>
+                <div class="mock-card-row">
+                  <div class="mock-card"></div>
+                  <div class="mock-card"></div>
+                  <div class="mock-card"></div>
+                </div>
+                <div class="mock-table">
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块2: 智能商品运营 -->
+    <div class="detail-block reveal">
+      <div class="detail-row reverse">
+        <div class="detail-text">
+          <h3><span class="emoji">🤖</span>智能商品运营</h3>
+          <p>AI驱动的商品运营工具，自动翻译、智能选品推荐、批量管理，让你一个人管理上万个SKU。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>AI 自动翻译</h4><p>商品标题、描述、属性自动翻译为目标语言，翻译质量达到人工水准，支持10+语种。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>智能选品推荐</h4><p>基于市场热度和利润空间，AI推荐高转化商品。也支持手动配置推荐商品到首页。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>批量SKU管理</h4><p>批量修改价格、库存、分类，一键操作。支持Excel导入导出，运营效率提升10倍。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url"></div>
+            </div>
+            <div class="mock-body" style="grid-template-columns:1fr">
+              <div class="mock-content">
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                  <div style="height:28px;width:100px;background:var(--blue);border-radius:4px;opacity:0.3"></div>
+                  <div style="height:28px;width:80px;background:var(--gray-4);border-radius:4px"></div>
+                  <div style="height:28px;width:80px;background:var(--gray-4);border-radius:4px"></div>
+                </div>
+                <div class="mock-card-row">
+                  <div class="mock-card" style="height:80px"></div>
+                  <div class="mock-card" style="height:80px"></div>
+                  <div class="mock-card" style="height:80px"></div>
+                </div>
+                <div class="mock-table" style="margin-top:8px">
+                  <div class="mock-table-row" style="height:16px;background:var(--blue);opacity:0.15;border-radius:4px"></div>
+                  <div class="mock-table-row" style="height:14px"></div>
+                  <div class="mock-table-row" style="height:14px"></div>
+                  <div class="mock-table-row" style="height:14px"></div>
+                  <div class="mock-table-row" style="height:14px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块3: 多语言多汇率 -->
+    <div class="detail-block reveal">
+      <div class="detail-row">
+        <div class="detail-text">
+          <h3><span class="emoji">💱</span>多语言多汇率</h3>
+          <p>内置10+语言翻译和30+实时汇率结算，让你的商城无缝触达全球用户。用户看到的永远是他们的语言和货币。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>语言自动切换</h4><p>根据用户浏览器语言或手动选择，自动切换商城界面语言。支持中/英/日/韩/俄/西/法/阿拉伯/泰/越。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>实时汇率结算</h4><p>接入国际汇率数据源，支持30+币种实时换算。汇率自动更新，价格始终准确。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>自定义汇率策略</h4><p>支持在实时汇率基础上自定义加价比例或固定加价，灵活控制利润空间。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url"></div>
+            </div>
+            <div class="mock-body" style="grid-template-columns:1fr">
+              <div class="mock-content" style="align-items:center;justify-content:center">
+                <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+                  <div style="padding:12px 16px;background:#fff;border-radius:8px;border:1px solid #e5e6eb;text-align:center">
+                    <div style="font-size:20px;margin-bottom:4px">🇨🇳</div>
+                    <div style="font-size:11px;color:#86909C">CNY ¥</div>
+                  </div>
+                  <div style="padding:12px 16px;background:#fff;border-radius:8px;border:2px solid var(--blue);text-align:center">
+                    <div style="font-size:20px;margin-bottom:4px">🇺🇸</div>
+                    <div style="font-size:11px;color:var(--blue)">USD $</div>
+                  </div>
+                  <div style="padding:12px 16px;background:#fff;border-radius:8px;border:1px solid #e5e6eb;text-align:center">
+                    <div style="font-size:20px;margin-bottom:4px">🇯🇵</div>
+                    <div style="font-size:11px;color:#86909C">JPY ¥</div>
+                  </div>
+                  <div style="padding:12px 16px;background:#fff;border-radius:8px;border:1px solid #e5e6eb;text-align:center">
+                    <div style="font-size:20px;margin-bottom:4px">🇹🇭</div>
+                    <div style="font-size:11px;color:#86909C">THB ฿</div>
+                  </div>
+                  <div style="padding:12px 16px;background:#fff;border-radius:8px;border:1px solid #e5e6eb;text-align:center">
+                    <div style="font-size:20px;margin-bottom:4px">🇲🇾</div>
+                    <div style="font-size:11px;color:#86909C">MYR RM</div>
+                  </div>
+                </div>
+                <div class="mock-table" style="width:80%;margin-top:16px">
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块4: 多支付网关 -->
+    <div class="detail-block reveal">
+      <div class="detail-row reverse">
+        <div class="detail-text">
+          <h3><span class="emoji">💳</span>多支付网关集成</h3>
+          <p>内置30+国际支付渠道，自动匹配用户所在地区的最佳支付方式。安全加密、实时风控，每一笔交易都稳妥。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>全球主流支付</h4><p>集成 Stripe、PayPal、信用卡/借记卡等国际支付通道，覆盖全球用户支付习惯。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>本地支付匹配</h4><p>根据用户IP自动推荐当地主流支付方式（如泰国PromptPay、马来西亚FPX等），提升支付转化率。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>安全与风控</h4><p>PCI DSS合规、3D Secure验证、实时交易风控，保障每笔交易安全。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url"></div>
+            </div>
+            <div class="mock-body" style="grid-template-columns:1fr">
+              <div class="mock-content" style="align-items:center;justify-content:center">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:90%">
+                  <div style="padding:10px;background:#fff;border-radius:8px;text-align:center;border:1px solid #e5e6eb">
+                    <div style="font-size:20px">💳</div><div style="font-size:10px;color:#86909C;margin-top:4px">Visa</div>
+                  </div>
+                  <div style="padding:10px;background:#fff;border-radius:8px;text-align:center;border:1px solid #e5e6eb">
+                    <div style="font-size:20px">🅿️</div><div style="font-size:10px;color:#86909C;margin-top:4px">PayPal</div>
+                  </div>
+                  <div style="padding:10px;background:#fff;border-radius:8px;text-align:center;border:1px solid #e5e6eb">
+                    <div style="font-size:20px">📱</div><div style="font-size:10px;color:#86909C;margin-top:4px">Apple Pay</div>
+                  </div>
+                  <div style="padding:10px;background:#fff;border-radius:8px;text-align:center;border:2px solid var(--blue)">
+                    <div style="font-size:20px">🔗</div><div style="font-size:10px;color:var(--blue);margin-top:4px">Stripe</div>
+                  </div>
+                </div>
+                <div style="margin-top:16px;padding:12px 20px;background:var(--green);border-radius:8px;color:#fff;font-size:12px;text-align:center;width:60%">✓ 支付成功</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块5: 独立品牌商城 -->
+    <div class="detail-block reveal">
+      <div class="detail-row">
+        <div class="detail-text">
+          <h3><span class="emoji">🌐</span>独立品牌商城</h3>
+          <p>开通即拥有完全独立的品牌商城。自定义域名、Logo、品牌色，让用户只看到你的品牌。内置SEO工具，助你从Google获取自然流量。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>品牌域名绑定</h4><p>支持绑定自有域名（.com/.net/.shop等），SSL证书自动配置，安全可信。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>界面深度定制</h4><p>Logo、品牌色、导航、Banner、页脚——所有视觉元素均可自定义，打造独一无二的品牌形象。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>SEO & 营销工具</h4><p>内置SEO元数据编辑、站点地图生成、Google Analytics集成、社交媒体分享优化。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url" style="background:var(--blue-light)"></div>
+            </div>
+            <div class="mock-body" style="grid-template-columns:1fr">
+              <div class="mock-content">
+                <div style="height:40px;background:linear-gradient(135deg,var(--blue),var(--blue-dark));border-radius:6px;display:flex;align-items:center;padding:0 12px">
+                  <div style="width:50px;height:12px;background:rgba(255,255,255,0.5);border-radius:2px"></div>
+                  <div style="margin-left:auto;display:flex;gap:8px">
+                    <div style="width:30px;height:8px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
+                    <div style="width:30px;height:8px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
+                    <div style="width:30px;height:8px;background:rgba(255,255,255,0.3);border-radius:2px"></div>
+                  </div>
+                </div>
+                <div style="height:80px;background:linear-gradient(135deg,var(--blue-light),#fff5eb);border-radius:6px;display:flex;align-items:center;justify-content:center">
+                  <div style="width:100px;height:10px;background:var(--blue);border-radius:2px;opacity:0.4"></div>
+                </div>
+                <div class="mock-card-row">
+                  <div class="mock-card" style="height:70px"></div>
+                  <div class="mock-card" style="height:70px"></div>
+                  <div class="mock-card" style="height:70px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模块6: 全链路数据看板 -->
+    <div class="detail-block reveal">
+      <div class="detail-row reverse">
+        <div class="detail-text">
+          <h3><span class="emoji">📊</span>全链路数据看板</h3>
+          <p>订单、营收、利润、商品、客户——所有关键数据实时可视化。不需要Excel手动核算，系统自动帮你算清楚每一笔账。</p>
+          <ul class="detail-list">
+            <li><div class="dot"></div><div class="text"><h4>实时订单监控</h4><p>订单状态实时追踪：待支付、已支付、采购中、已发货、已完成。异常订单自动预警。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>利润自动核算</h4><p>商品售价 - 采购成本 - 物流费用 - 平台佣金 = 净利润。全链路自动计算，一目了然。</p></div></li>
+            <li><div class="dot"></div><div class="text"><h4>经营分析报表</h4><p>热销商品排行、客户复购率、地区销售分布、月度营收趋势——数据驱动经营决策。</p></div></li>
+          </ul>
+        </div>
+        <div class="detail-visual">
+          <div class="mock-ui">
+            <div class="mock-topbar">
+              <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+              <div class="mock-url"></div>
+            </div>
+            <div class="mock-body" style="grid-template-columns:1fr">
+              <div class="mock-content">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+                  <div style="padding:8px;background:var(--blue-light);border-radius:6px;text-align:center">
+                    <div style="width:100%;height:6px;background:var(--blue);border-radius:2px;opacity:0.5;margin-bottom:4px"></div>
+                    <div style="height:4px;background:var(--gray-4);border-radius:2px;width:60%;margin:0 auto"></div>
+                  </div>
+                  <div style="padding:8px;background:var(--orange-light);border-radius:6px;text-align:center">
+                    <div style="width:100%;height:6px;background:var(--orange);border-radius:2px;opacity:0.5;margin-bottom:4px"></div>
+                    <div style="height:4px;background:var(--gray-4);border-radius:2px;width:60%;margin:0 auto"></div>
+                  </div>
+                  <div style="padding:8px;background:#E8FFEA;border-radius:6px;text-align:center">
+                    <div style="width:100%;height:6px;background:var(--green);border-radius:2px;opacity:0.5;margin-bottom:4px"></div>
+                    <div style="height:4px;background:var(--gray-4);border-radius:2px;width:60%;margin:0 auto"></div>
+                  </div>
+                  <div style="padding:8px;background:#F2E8FF;border-radius:6px;text-align:center">
+                    <div style="width:100%;height:6px;background:#7C3AED;border-radius:2px;opacity:0.5;margin-bottom:4px"></div>
+                    <div style="height:4px;background:var(--gray-4);border-radius:2px;width:60%;margin:0 auto"></div>
+                  </div>
+                </div>
+                <div style="height:80px;background:var(--gray-4);border-radius:6px;position:relative;overflow:hidden;margin-top:8px">
+                  <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 200 60" preserveAspectRatio="none">
+                    <path d="M0,50 Q30,40 60,30 T120,15 T180,20 L200,25 L200,60 L0,60 Z" fill="rgba(22,93,255,0.1)"/>
+                    <path d="M0,50 Q30,40 60,30 T120,15 T180,20 L200,25" stroke="var(--blue)" stroke-width="2" fill="none"/>
+                  </svg>
+                </div>
+                <div class="mock-table" style="margin-top:8px">
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                  <div class="mock-table-row"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 数据亮点 ===== -->
+<section class="data-section">
+  <div class="data-grid">
+    <div class="data-item reveal">
+      <div class="data-num" data-target="10" data-suffix="亿+">0<small>亿+</small></div>
+      <div class="data-label">在线商品数量</div>
+    </div>
+    <div class="data-item reveal reveal-delay-1">
+      <div class="data-num" data-target="10" data-suffix="+">0<small>+</small></div>
+      <div class="data-label">支持语言</div>
+    </div>
+    <div class="data-item reveal reveal-delay-2">
+      <div class="data-num" data-target="30" data-suffix="+">0<small>+</small></div>
+      <div class="data-label">支付网关对接</div>
+    </div>
+    <div class="data-item reveal reveal-delay-3">
+      <div class="data-num" data-target="100" data-suffix="+">0<small>+</small></div>
+      <div class="data-label">覆盖国家和地区</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 技术架构 ===== -->
+<section class="section arch-section" id="arch">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-num">数据流转</div>
+      <h2>从用户下单到国际发货，全自动流转</h2>
+      <p>代购系统串联商品、订单、支付、仓储、物流全链路</p>
+    </div>
+    <div class="arch-flow reveal">
+      <div class="arch-node">
+        <div class="node-icon">👤</div>
+        <h4>海外用户</h4>
+        <p>浏览商城 & 下单</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-icon">🛒</div>
+        <h4>代购系统</h4>
+        <p>接收订单 & 收款</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-icon">🔌</div>
+        <h4>官方API</h4>
+        <p>自动采购 & 同步</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-icon">🏭</div>
+        <h4>WMS仓库</h4>
+        <p>签收 & 质检 & 打包</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="node-icon">🚚</div>
+        <h4>物流引擎</h4>
+        <p>国际发货 & 追踪</p>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:24px;font-size:14px;color:var(--gray-2)" class="reveal">全链路自动化，你只需要关注选品和获客</p>
+  </div>
+</section>
+
+<!-- ===== 为什么选SZT ===== -->
+<section class="section compare-section" id="compare">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-num">为什么选SZT</div>
+      <h2>SZT vs 自建系统</h2>
+      <p>对比自建代购系统，SZT 帮你节省 90% 的开发成本和运维时间</p>
+    </div>
+    <table class="compare-table reveal">
+      <tr>
+        <th>对比维度</th>
+        <th>SZT 代购系统</th>
+        <th>自建系统</th>
+      </tr>
+      <tr>
+        <td>上线时间</td>
+        <td>✅ 最快 7 天</td>
+        <td>❌ 3-6 个月</td>
+      </tr>
+      <tr>
+        <td>开发成本</td>
+        <td>✅ 零开发，开通即用</td>
+        <td>❌ 需技术团队，50万+</td>
+      </tr>
+      <tr>
+        <td>商品数据</td>
+        <td>✅ 10亿+ 商品实时同步</td>
+        <td>❌ 需自行对接API</td>
+      </tr>
+      <tr>
+        <td>多语言</td>
+        <td>✅ 10+ 语言内置</td>
+        <td>❌ 需逐语言开发</td>
+      </tr>
+      <tr>
+        <td>支付集成</td>
+        <td>✅ 30+ 支付网关预集成</td>
+        <td>❌ 需逐个对接</td>
+      </tr>
+      <tr>
+        <td>物流对接</td>
+        <td>✅ 100+ 国家线路内置</td>
+        <td>❌ 需自行谈合作</td>
+      </tr>
+      <tr>
+        <td>仓储管理</td>
+        <td>✅ WMS 系统内置</td>
+        <td>❌ 需另购或开发</td>
+      </tr>
+      <tr>
+        <td>运维维护</td>
+        <td>✅ SZT 团队维护升级</td>
+        <td>❌ 需专人运维</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 底部CTA ===== -->
+<section class="cta-section">
+  <h2>准备好开启你的全球代购生意了吗？</h2>
+  <p>加入 SZT，最快 7 天完成从注册到首单发货</p>
+  <div class="cta-actions">
+    <button class="btn-primary" onclick="openModal()">预约演示</button>
+    <button class="btn-ghost" onclick="openTemplateModal()">模板预览</button>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="container">
+    <div>
+      <div class="footer-brand">SZT<span>.</span></div>
+      <p class="footer-desc">一站式代购平台解决方案<br>让全球代购生意更简单</p>
+      <p style="font-size:13px">📧 contact@szt.com</p>
+    </div>
+    <div>
+      <h4>产品</h4>
+      <ul class="footer-links">
+        <li><a href="#">代购系统</a></li>
+        <li><a href="#">物流引擎</a></li>
+        <li><a href="#">WMS仓库</a></li>
+        <li><a href="#">定价方案</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>资源</h4>
+      <ul class="footer-links">
+        <li><a href="#">帮助中心</a></li>
+        <li><a href="#">开发文档</a></li>
+        <li><a href="#">API文档</a></li>
+        <li><a href="#">更新日志</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>公司</h4>
+      <ul class="footer-links">
+        <li><a href="#">关于我们</a></li>
+        <li><a href="#">联系我们</a></li>
+        <li><a href="#">合作伙伴</a></li>
+        <li><a href="#">隐私政策</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 SZT. All rights reserved.</div>
+</footer>
+
+<!-- ===== 预约演示弹窗 ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="demo-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="demo-modal-body">
+      <div class="demo-left">
+        <div class="tag">SZT SAAS PLATFORM</div>
+        <h3>代购平台 SaaS 解决方案</h3>
+        <p>一站式反向代购基础设施，从商品同步到仓储物流全覆盖</p>
+        <div class="demo-features">
+          <div class="demo-feat"><span class="demo-feat-icon">🔗</span>官方API合作伙伴</div>
+          <div class="demo-feat"><span class="demo-feat-icon">⚡</span>零门槛7天启动</div>
+          <div class="demo-feat"><span class="demo-feat-icon">📦</span>仓储+物流+WMS</div>
+          <div class="demo-feat"><span class="demo-feat-icon">🌍</span>100+国家/10+语种</div>
+          <div class="demo-feat"><span class="demo-feat-icon">🛡️</span>合规稳定零爬虫</div>
+          <div class="demo-feat"><span class="demo-feat-icon">💰</span>灵活计费与结算</div>
+        </div>
+        <div class="contact">📧 contact@szt.com</div>
+      </div>
+      <div class="demo-right">
+        <div class="qr-box"><div class="qr-ph">📱</div></div>
+        <h4>招商咨询</h4>
+        <p>微信扫码添加顾问<br>1个工作日内回复</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+const nav=document.getElementById('nav');
+const navLinks=document.querySelectorAll('.nav-links a');
+const sections=['overview','detail','arch','compare'].map(id=>document.getElementById(id));
+// 导航锚点点击平滑滚动
+navLinks.forEach(function(link){link.addEventListener('click',function(e){const href=this.getAttribute('href');if(href&&href.startsWith('#')){e.preventDefault();const target=document.querySelector(href);if(target){window.scrollTo({top:target.offsetTop-80,behavior:'smooth'})}}})});
+window.addEventListener('scroll',function(){
+  nav.classList.toggle('scrolled',window.scrollY>50);
+  const y=window.scrollY+120;
+  let idx=sections.length-1;
+  for(let i=sections.length-1;i>=0;i--){if(sections[i]&&sections[i].offsetTop<=y){idx=i;break}}
+  navLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+});
+document.querySelectorAll('.reveal').forEach(el=>el.classList.add('animated'));
+const observer=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.remove('animated');x.target.classList.add('visible')}})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// 数字递增动画（整数+小数通用，保留suffix标签样式）
+function runCountUp(el){
+  const target=parseFloat(el.dataset.target);
+  const suffix=el.dataset.suffix||'';
+  const decimal=parseInt(el.dataset.decimal||'0');
+  const duration=1500;
+  const start=performance.now();
+  function tick(now){
+    const progress=Math.min((now-start)/duration,1);
+    const eased=1-Math.pow(1-progress,3);
+    const current=eased*target;
+    const val=decimal?current.toFixed(decimal):Math.floor(current);
+    el.innerHTML=val+'<small>'+suffix+'</small>';
+    if(progress<1)requestAnimationFrame(tick);
+    else el.innerHTML=(decimal?target.toFixed(decimal):target)+'<small>'+suffix+'</small>';
+  }
+  requestAnimationFrame(tick);
+}
+const heroObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){runCountUp(x.target);heroObs.unobserve(x.target)}})},{threshold:0.3});
+document.querySelectorAll('.hero-stat .num[data-target]').forEach(el=>heroObs.observe(el));
+const numObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){runCountUp(x.target);numObs.unobserve(x.target)}})},{threshold:0.5});
+document.querySelectorAll('[data-target]').forEach(el=>{if(!el.closest('.hero-stat'))numObs.observe(el)});
+
+// 预约演示弹窗
+function openModal(){document.getElementById('modalOverlay').classList.add('show');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');document.body.style.overflow=''}
+// 模板预览弹窗
+function openTemplateModal(){document.getElementById('templateModal').classList.add('show');document.body.style.overflow='hidden'}
+function closeTemplateModal(){document.getElementById('templateModal').classList.remove('show');document.body.style.overflow=''}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeTemplateModal()}});
+});
+</script>
+
+<!-- 模板预览弹窗 -->
+<div class="modal-overlay" id="templateModal" onclick="if(event.target===this)closeTemplateModal()">
+  <div class="demo-modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeTemplateModal()">✕</button>
+    <div style="padding:48px 40px 36px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🧪</div>
+      <h3 style="font-size:22px;font-weight:700;color:var(--dark);margin-bottom:8px">反向代购商城模板预览</h3>
+      <p style="font-size:14px;color:var(--gray-2);line-height:1.7;margin-bottom:28px">以下为真实商城用户端界面演示，支持品牌定制预览，仅供功能展示，不支持真实运营使用。</p>
+      <div style="text-align:left;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--gray-4);border-radius:10px">
+          <div style="font-size:24px;flex-shrink:0">✨</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:4px">完整商城界面预览</div><div style="font-size:13px;color:var(--gray-2);line-height:1.6">商品列表、商品详情、购物车、下单结算、物流追踪等完整用户端购物流程体验。</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;background:var(--gray-4);border-radius:10px">
+          <div style="font-size:24px;flex-shrink:0">🎨</div>
+          <div><div style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:4px">品牌定制效果查看</div><div style="font-size:13px;color:var(--gray-2);line-height:1.6">可预览不同 Logo、品牌色、币种、语言配置下的商城展示效果，感受你的专属品牌风格。</div></div>
+        </div>
+      </div>
+      <button style="margin-top:28px;width:100%;padding:16px;font-size:16px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:10px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--blue-dark)'" onmouseout="this.style.background='var(--blue)'">进入模板预览 →</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
