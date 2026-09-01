@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Karl快记 - 账单</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-primary:#070A14;
+--glass-bg:rgba(255,255,255,0.05);
+--glass-border:rgba(255,255,255,0.1);
+--glass-hover:rgba(255,255,255,0.08);
+--accent:#7C5CFF;
+--accent-light:#69E7FF;
+--success:#62FAD3;
+--warning:#FFB86C;
+--danger:#FF6B6B;
+--text-primary:#F7FAFF;
+--text-secondary:#9AA7C7;
+--text-muted:#6B7280;
+--radius:12px;
+--radius-lg:16px;
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth}
+body{
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;
+background:var(--bg-primary);
+color:var(--text-primary);
+line-height:1.6;
+min-height:100vh;
+overflow-x:hidden;
+padding-bottom:24px;
+}
+body::before{
+content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+background:
+radial-gradient(ellipse at 20% 20%,rgba(124,92,255,0.15) 0%,transparent 50%),
+radial-gradient(ellipse at 80% 80%,rgba(105,231,255,0.1) 0%,transparent 50%);
+pointer-events:none;z-index:0;
+}
+.container{
+position:relative;z-index:1;
+max-width:1400px;margin:0 auto;padding:0 16px;
+}
+
+/* 顶部导航 */
+.billing-navbar{
+position:sticky;top:0;z-index:100;
+backdrop-filter:blur(20px);
+background:rgba(7,10,20,0.8);
+border-bottom:1px solid var(--glass-border);
+padding:12px 0;
+}
+.billing-navbar .container{
+display:flex;align-items:center;justify-content:space-between;
+}
+.nav-brand{
+display:flex;align-items:center;gap:10px;
+}
+.nav-logo{
+width:32px;height:32px;
+background:linear-gradient(135deg,#FF9800,#FF5722);
+border-radius:8px;
+display:flex;align-items:center;justify-content:center;
+font-size:16px;
+}
+.nav-title{font-size:18px;font-weight:600}
+.nav-back{
+padding:6px 14px;border-radius:10px;
+border:1px solid var(--glass-border);
+background:var(--glass-bg);
+color:var(--text-primary);font-size:13px;font-weight:500;
+cursor:pointer;transition:var(--transition);
+display:inline-flex;align-items:center;gap:6px;
+}
+.nav-back:active{background:var(--glass-hover)}
+
+/* 页面头部 */
+.page-header{
+padding:24px 0 20px;
+}
+.page-header h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.page-header p{color:var(--text-secondary);font-size:13px}
+
+/* 操作栏 */
+.action-bar{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:16px;padding:0 4px;
+}
+.section-title{
+font-size:17px;font-weight:600;
+display:flex;align-items:center;gap:8px;
+}
+.section-title::before{
+content:'';width:3px;height:16px;
+background:linear-gradient(180deg,var(--accent),var(--accent-light));
+border-radius:2px;
+}
+.btn{
+padding:10px 16px;border-radius:10px;border:none;
+font-size:14px;font-weight:500;cursor:pointer;
+transition:var(--transition);
+display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{
+background:linear-gradient(135deg,var(--accent),#9B7BFF);
+color:white;
+}
+.btn-primary:active{transform:scale(0.96)}
+.bill-file-input{display:none}
+
+/* 账单列表卡片 */
+.bills-list{display:flex;flex-direction:column;gap:12px}
+.bill-card{
+background:var(--glass-bg);border:1px solid var(--glass-border);
+border-radius:var(--radius);padding:16px;
+transition:var(--transition);
+}
+.bill-card:hover{border-color:rgba(255,255,255,0.15)}
+.bill-card-header{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:12px;
+}
+.bill-month{font-size:16px;font-weight:600}
+.bill-amounts{display:flex;gap:20px;margin-bottom:10px}
+.bill-amount-item{display:flex;flex-direction:column;gap:2px}
+.bill-amount-label{font-size:11px;color:var(--text-muted)}
+.bill-amount-value{font-size:20px;font-weight:700}
+.bill-amount-value.expense{color:var(--danger)}
+.bill-amount-value.income{color:var(--success)}
+.bill-footer{
+display:flex;align-items:center;justify-content:space-between;
+padding-top:10px;border-top:1px solid var(--glass-border);
+}
+.bill-count{font-size:12px;color:var(--text-muted)}
+.bill-actions{display:flex;gap:8px}
+.bill-btn{
+padding:6px 12px;border-radius:8px;border:1px solid var(--glass-border);
+background:var(--glass-bg);color:var(--text-primary);
+font-size:12px;cursor:pointer;transition:var(--transition);
+}
+.bill-btn:active{background:var(--glass-hover)}
+.bill-btn.report{
+background:linear-gradient(135deg,var(--accent),#9B7BFF);
+border-color:transparent;color:white;
+}
+.bill-btn.danger{color:var(--danger);border-color:rgba(255,107,107,0.3)}
+
+/* 空状态 */
+.empty-state{
+text-align:center;padding:60px 20px;color:var(--text-muted);
+}
+.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:0.5}
+.empty-state h3{font-size:16px;margin-bottom:8px;color:var(--text-primary)}
+.empty-state p{font-size:13px;margin-bottom:20px}
+
+/* 报告弹窗 */
+.modal-overlay{
+display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+z-index:200;align-items:center;justify-content:center;
+}
+.modal-overlay.active{display:flex}
+.modal-box{
+background:var(--bg-primary);
+border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);
+width:90%;max-width:680px;max-height:85vh;
+overflow-y:auto;padding:24px 20px;
+position:relative;
+}
+.modal-box-header{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:20px;
+}
+.modal-box-title{font-size:18px;font-weight:600}
+.modal-box-close{
+width:32px;height:32px;border-radius:8px;
+border:none;background:var(--glass-bg);
+color:var(--text-secondary);cursor:pointer;
+font-size:20px;display:flex;align-items:center;justify-content:center;
+}
+
+/* 报告内容 */
+.report-summary{
+display:grid;grid-template-columns:repeat(2,1fr);
+gap:10px;margin-bottom:20px;
+}
+.report-stat{
+background:var(--glass-bg);border:1px solid var(--glass-border);
+border-radius:10px;padding:14px;text-align:center;
+}
+.report-stat-value{font-size:22px;font-weight:700}
+.report-stat-label{font-size:11px;color:var(--text-muted);margin-top:4px}
+.report-stat-value.expense{color:var(--danger)}
+.report-stat-value.income{color:var(--success)}
+.report-section{margin-bottom:20px}
+.report-section-title{
+font-size:15px;font-weight:600;margin-bottom:12px;
+display:flex;align-items:center;gap:8px;
+}
+.report-section-title::before{
+content:'';width:3px;height:14px;
+background:linear-gradient(180deg,var(--accent),var(--accent-light));
+border-radius:2px;
+}
+.report-category-list{display:flex;flex-direction:column;gap:8px}
+.report-category-item{
+display:flex;align-items:center;gap:10px;
+padding:10px 12px;background:var(--glass-bg);
+border:1px solid var(--glass-border);border-radius:8px;
+}
+.report-cat-name{font-size:13px;font-weight:500;min-width:60px}
+.report-cat-bar-wrap{
+flex:1;height:6px;background:rgba(255,255,255,0.06);
+border-radius:3px;overflow:hidden;
+}
+.report-cat-bar{height:100%;border-radius:3px;transition:width 0.5s ease}
+.report-cat-amount{
+font-size:13px;font-weight:600;color:var(--danger);
+min-width:70px;text-align:right;
+}
+.report-cat-pct{font-size:11px;color:var(--text-muted);min-width:36px;text-align:right}
+.report-table-wrap{overflow-x:auto;margin-top:8px}
+.report-table{width:100%;border-collapse:collapse;font-size:13px}
+.report-table th{
+text-align:left;padding:8px 10px;font-weight:500;
+color:var(--text-muted);font-size:11px;
+border-bottom:1px solid var(--glass-border);white-space:nowrap;
+}
+.report-table td{
+padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);
+white-space:nowrap;
+}
+.report-table tr:hover td{background:rgba(255,255,255,0.02)}
+.report-table .amt-out{color:var(--danger);font-weight:500}
+.report-table .amt-in{color:var(--success);font-weight:500}
+.channel-tag{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
+.channel-tag.wechat{background:rgba(7,193,96,0.15);color:#07C160}
+.channel-tag.alipay{background:rgba(0,128,255,0.15);color:#1677FF}
+.channel-tag.other{background:rgba(154,167,199,0.15);color:var(--text-secondary)}
+.report-compare{
+display:inline-flex;align-items:center;gap:4px;
+font-size:12px;padding:2px 8px;border-radius:10px;
+}
+.report-compare.up{background:rgba(255,107,107,0.12);color:var(--danger)}
+.report-compare.down{background:rgba(98,250,211,0.12);color:var(--success)}
+
+/* 桌面端 */
+@media (min-width: 768px) {
+.container{padding:0 24px}
+.page-header{padding:48px 0 32px}
+.page-header h1{font-size:28px}
+.page-header p{font-size:16px}
+.bills-list{gap:14px}
+.bill-card{padding:20px}
+.modal-box{padding:32px}
+.report-stat-value{font-size:26px}
+}
+@media(max-width:480px){
+.bill-amounts{gap:12px}
+.bill-amount-value{font-size:17px}
+.report-stat-value{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<nav class="billing-navbar">
+<div class="container">
+<div class="nav-brand">
+<div class="nav-logo">
+<svg viewBox="0 0 48 48" width="20" height="20">
+<ellipse cx="24" cy="28" rx="14" ry="12" fill="#FF9800"/>
+<polygon points="10,20 7,7 18,16" fill="#FF9800"/>
+<polygon points="38,20 41,7 30,16" fill="#FF9800"/>
+<ellipse cx="18" cy="26" rx="2.5" ry="3" fill="#4E342E"/>
+<ellipse cx="30" cy="26" rx="2.5" ry="3" fill="#4E342E"/>
+<ellipse cx="24" cy="31" rx="2" ry="1.5" fill="#E91E63"/>
+</svg>
+</div>
+<span class="nav-title">Karl快记</span>
+</div>
+<button class="nav-back" onclick="goBack()">← 返回工作台</button>
+</div>
+</nav>
+
+<div class="container">
+<div class="page-header">
+<h1>消费账单</h1>
+<p>上传微信/支付宝导出的 Excel 账单，自动生成月度分析报告</p>
+</div>
+
+<div class="action-bar">
+<div class="section-title">月度账单</div>
+<button class="btn btn-primary" onclick="document.getElementById('billFileInput').click()">+ 上传账单</button>
+<input type="file" id="billFileInput" class="bill-file-input" accept=".xlsx,.xls" onchange="handleBillUpload(event)">
+</div>
+
+<div id="billsList" class="bills-list"></div>
+</div>
+
+<!-- 报告弹窗 -->
+<div class="modal-overlay" id="reportModal">
+<div class="modal-box">
+<div class="modal-box-header">
+<div class="modal-box-title" id="reportTitle">账单报告</div>
+<button class="modal-box-close" onclick="closeReport()">×</button>
+</div>
+<div id="reportContent"></div>
+</div>
+</div>
+
+<script>
+// ========== 数据管理 ==========
+const BILL_STORAGE_KEY = 'karl-bills';
+
+function getBills() {
+  try { return JSON.parse(localStorage.getItem(BILL_STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveBills(bills) {
+  localStorage.setItem(BILL_STORAGE_KEY, JSON.stringify(bills));
+}
+function fmtMoney(v) {
+  return parseFloat(v).toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function escHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+// ========== 分类引擎 ==========
+function categorize(party, product) {
+  const s = party + ' ' + product;
+  if (/房租|租金|物业/.test(s)) return '房租';
+  if (/停车|顺易通|路边停车/.test(s)) return '停车';
+  if (/车险|保险|太平洋|人寿/.test(s)) return '保险';
+  if (/加油|中石化|中石油|充电桩/.test(s)) return '养车';
+  if (/医院|药|诊所|门诊|挂号/.test(s)) return '医疗';
+  if (/餐饮|美食|饭店|餐|饿了么|美团外卖/.test(s)) return '餐饮';
+  if (/超市|便利|杂货|日用品/.test(s)) return '日用';
+  if (/话费|流量|中国移动|联通|电信/.test(s)) return '通讯';
+  if (/烟草|烟酒/.test(s)) return '烟酒';
+  if (/转账|红包|收款/.test(s)) return '转账';
+  return '其他';
+}
+
+const CAT_COLORS = {'房租':'#7C5CFF','停车':'#FFB86C','保险':'#69E7FF','养车':'#62FAD3','医疗':'#FF6B6B','餐饮':'#F472B6','日用':'#34D399','通讯':'#FBBF24','烟酒':'#FF9800','转账':'#9B7BFF','其他':'#9AA7C7'};
+
+// ========== Excel 解析 ==========
+async function handleBillUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx','xls'].includes(ext)) { alert('请上传 .xlsx 或 .xls 文件'); return; }
+  try {
+    const buf = await file.arrayBuffer();
+    if (typeof XLSX === 'undefined') { alert('Excel 解析库加载中，请稍后重试'); return; }
+    const wb = XLSX.read(buf, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    const ch = file.name.includes('微信') ? 'wechat' : file.name.includes('支付宝') ? 'alipay' : 'other';
+    processBillRows(rows, ch, file.name);
+  } catch(err) {
+    console.error(err);
+    alert('解析失败：' + err.message);
+  }
+  e.target.value = '';
+}
+
+function processBillRows(rows, channel, fileName) {
+  // 找列头行
+  let hdrIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 30); i++) {
+    const r = (rows[i]||[]).map(c => String(c).trim());
+    const ti = r.findIndex(c => c.includes('交易时间'));
+    if (ti >= 0) { hdrIdx = i; break; }
+  }
+  if (hdrIdx < 0) { alert('无法识别账单格式'); return; }
+  const txns = [];
+  for (let i = hdrIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || !r[0] || !String(r[0]).trim()) continue;
+    const time = String(r[0]).trim();
+    if (!/^\d{4}[-\/]/.test(time)) continue;
+    const dateStr = time.replace(/\//g,'-').substring(0,10);
+    const type = String(r[1]||'').trim();
+    const party = String(r[2]||'').trim();
+    const product = String(r[3]||'').trim();
+    const dirRaw = String(r[4]||'').trim();
+    const amount = parseFloat(String(r[6]||'0').replace(/[^\d.]/g,'')) || 0;
+    if (!amount) continue;
+    let dir = 'out';
+    if (/收入/.test(dirRaw)) dir = 'in';
+    else if (/支出|付出/.test(dirRaw)) dir = 'out';
+    else if (/不计收支/.test(dirRaw)) continue;
+    const method = String(r[7]||'').trim();
+    const status = String(r[8]||'').trim();
+    if (/退款|退款到账/.test(type) || /退款/.test(product)) dir = 'in';
+    txns.push({date:dateStr, type, party, product, direction:dir, amount, method, status, channel});
+  }
+  if (!txns.length) { alert('未找到有效交易记录'); return; }
+  // 按月份分组
+  const groups = {};
+  txns.forEach(t => {
+    const m = t.date.substring(0,7);
+    if (!groups[m]) groups[m] = [];
+    groups[m].push(t);
+  });
+  let bills = getBills();
+  Object.keys(groups).forEach(month => {
+    const summary = buildSummary(month, groups[month]);
+    const ei = bills.findIndex(b => b.month === month);
+    if (ei >= 0) {
+      const src = bills[ei].source || '';
+      if (!src.includes(fileName)) bills[ei].source = (src + '|' + fileName).replace(/^\|/,'');
+      const existSet = new Set(bills[ei].transactions.map(t => t.date+t.party+t.amount+t.type));
+      groups[month].forEach(t => {
+        const k = t.date+t.party+t.amount+t.type;
+        if (!existSet.has(k)) bills[ei].transactions.push(t);
+      });
+      bills[ei] = rebuildSummary(bills[ei]);
+    } else {
+      bills.push(summary);
+    }
+  });
+  saveBills(bills);
+  renderBills();
+  alert('✅ 导入成功！' + Object.keys(groups).length + ' 个月数据已更新');
+}
+
+function buildSummary(month, txns) {
+  const enriched = txns.map(t => ({...t, category: categorize(t.party, t.product)}));
+  const incTxns = enriched.filter(t => t.direction === 'in');
+  const expTxns = enriched.filter(t => t.direction === 'out');
+  const totalIn = incTxns.reduce((s,t) => s+t.amount, 0);
+  const totalOut = expTxns.reduce((s,t) => s+t.amount, 0);
+  const catMap = {};
+  expTxns.forEach(t => { catMap[t.category] = (catMap[t.category]||0) + t.amount; });
+  const cats = Object.entries(catMap).map(([n,a]) => ({name:n, amount:a, pct: totalOut>0 ? (a/totalOut*100).toFixed(1) : '0'})).sort((a,b) => b.amount-a.amount);
+  const top = enriched.filter(t => t.direction==='out').sort((a,b) => b.amount-a.amount).slice(0,20);
+  return { month, totalIncome:totalIn, totalExpense:totalOut, incomeCount:incTxns.length, expenseCount:expTxns.length, totalCount:enriched.length, categories:cats, topExpenses:top, transactions:enriched, source:'' };
+}
+
+function rebuildSummary(bill) {
+  const txns = bill.transactions;
+  const incTxns = txns.filter(t => t.direction === 'in');
+  const expTxns = txns.filter(t => t.direction === 'out');
+  const totalIn = incTxns.reduce((s,t) => s+t.amount, 0);
+  const totalOut = expTxns.reduce((s,t) => s+t.amount, 0);
+  const catMap = {};
+  expTxns.forEach(t => { catMap[t.category] = (catMap[t.category]||0) + t.amount; });
+  const cats = Object.entries(catMap).map(([n,a]) => ({name:n, amount:a, pct: totalOut>0 ? (a/totalOut*100).toFixed(1) : '0'})).sort((a,b) => b.amount-a.amount);
+  const top = txns.filter(t => t.direction==='out').sort((a,b) => b.amount-a.amount).slice(0,20);
+  return {...bill, totalIncome:totalIn, totalExpense:totalOut, incomeCount:incTxns.length, expenseCount:expTxns.length, totalCount:txns.length, categories:cats, topExpenses:top};
+}
+
+// ========== 列表渲染 ==========
+function renderBills() {
+  const bills = getBills().sort((a,b) => b.month.localeCompare(a.month));
+  const el = document.getElementById('billsList');
+  if (!bills.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><h3>暂无账单数据</h3><p>上传微信或支付宝导出的 Excel 账单<br>自动解析生成月度汇总</p><button class="btn btn-primary" onclick="document.getElementById(\'billFileInput\').click()">+ 上传第一份账单</button></div>';
+    return;
+  }
+  el.innerHTML = bills.map(bill => {
+    const [y,m] = bill.month.split('-');
+    const now = new Date();
+    const isCurrent = bill.month === now.toISOString().substring(0,7);
+    const d = now.getDate();
+    const daysInMonth = new Date(parseInt(y), parseInt(m), 0).getDate();
+    const elapsed = isCurrent ? d : daysInMonth;
+    const dailyAvg = (bill.totalExpense / elapsed).toFixed(0);
+    return '<div class="bill-card">'
+      +'<div class="bill-card-header">'
+      +'<div class="bill-month">'+bill.month+(isCurrent?' <span style="font-size:11px;color:var(--accent-light);font-weight:400">(本月)</span>':'')+'</div>'
+      +'</div>'
+      +'<div class="bill-amounts">'
+      +'<div class="bill-amount-item"><div class="bill-amount-label">支出</div><div class="bill-amount-value expense">¥'+fmtMoney(bill.totalExpense)+'</div></div>'
+      +'<div class="bill-amount-item"><div class="bill-amount-label">收入</div><div class="bill-amount-value income">¥'+fmtMoney(bill.totalIncome)+'</div></div>'
+      +'</div>'
+      +'<div class="bill-footer">'
+      +'<div class="bill-count">'+bill.totalCount+'笔 · 支出'+bill.expenseCount+'笔 · 收入'+bill.incomeCount+'笔 · 日均¥'+dailyAvg+'</div>'
+      +'<div class="bill-actions">'
+      +'<button class="bill-btn report" onclick="viewReport(\''+bill.month+'\')">📊 报告</button>'
+      +'<button class="bill-btn danger" onclick="deleteBill(\''+bill.month+'\')">删除</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+// ========== 报告生成 ==========
+function viewReport(month) {
+  const bills = getBills();
+  const bill = bills.find(b => b.month === month);
+  if (!bill) return;
+  document.getElementById('reportTitle').textContent = month + ' 账单报告';
+  const sorted = bills.slice().sort((a,b) => a.month.localeCompare(b.month));
+  const idx = sorted.findIndex(b => b.month === month);
+  const prev = idx > 0 ? sorted[idx-1] : null;
+  let html = '<div class="report-summary">';
+  html += '<div class="report-stat"><div class="report-stat-value expense">¥'+fmtMoney(bill.totalExpense)+'</div><div class="report-stat-label">总支出</div></div>';
+  html += '<div class="report-stat"><div class="report-stat-value income">¥'+fmtMoney(bill.totalIncome)+'</div><div class="report-stat-label">总收入</div></div>';
+  html += '<div class="report-stat"><div class="report-stat-value">'+bill.expenseCount+'</div><div class="report-stat-label">支出笔数</div></div>';
+  html += '<div class="report-stat"><div class="report-stat-value">'+bill.incomeCount+'</div><div class="report-stat-label">收入笔数</div></div>';
+  html += '</div>';
+  if (prev) {
+    const diff = bill.totalExpense - prev.totalExpense;
+    const pct = prev.totalExpense > 0 ? ((diff/prev.totalExpense)*100).toFixed(1) : '0';
+    const up = diff > 0;
+    html += '<div style="text-align:center;margin-bottom:20px"><span style="font-size:12px;color:var(--text-muted)">环比上月 '+prev.month+'</span> <span class="report-compare '+(up?'up':'down')+'">'+(up?'↑':'↓')+' ¥'+fmtMoney(Math.abs(diff))+' ('+(up?'+':'')+pct+'%)</span></div>';
+  }
+  if (bill.categories && bill.categories.length) {
+    const max = bill.categories[0].amount;
+    html += '<div class="report-section"><div class="report-section-title">支出分类</div><div class="report-category-list">';
+    bill.categories.forEach(cat => {
+      const color = CAT_COLORS[cat.name] || '#7C5CFF';
+      const barW = max > 0 ? (cat.amount/max*100) : 0;
+      html += '<div class="report-category-item"><div class="report-cat-name">'+cat.name+'</div><div class="report-cat-bar-wrap"><div class="report-cat-bar" style="width:'+barW+'%;background:'+color+'"></div></div><div class="report-cat-amount">¥'+fmtMoney(cat.amount)+'</div><div class="report-cat-pct">'+cat.pct+'%</div></div>';
+    });
+    html += '</div></div>';
+  }
+  if (bill.topExpenses && bill.topExpenses.length) {
+    html += '<div class="report-section"><div class="report-section-title">TOP20 大额消费</div><div class="report-table-wrap"><table class="report-table"><thead><tr><th>#</th><th>日期</th><th>对方</th><th>商品</th><th>金额</th><th>渠道</th></tr></thead><tbody>';
+    bill.topExpenses.forEach((t,i) => {
+      const chCls = t.channel==='wechat'?'wechat':t.channel==='alipay'?'alipay':'other';
+      const chTxt = t.channel==='wechat'?'微信':t.channel==='alipay'?'支付宝':'其他';
+      html += '<tr><td>'+(i+1)+'</td><td>'+t.date.substring(5)+'</td><td>'+escHtml(t.party.length>12?t.party.substring(0,12)+'…':t.party)+'</td><td>'+escHtml(t.product.length>15?t.product.substring(0,15)+'…':t.product)+'</td><td class="amt-out">¥'+fmtMoney(t.amount)+'</td><td><span class="channel-tag '+chCls+'">'+chTxt+'</span></td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+  document.getElementById('reportContent').innerHTML = html;
+  document.getElementById('reportModal').classList.add('active');
+}
+
+function closeReport() {
+  document.getElementById('reportModal').classList.remove('active');
+}
+
+function deleteBill(month) {
+  if (!confirm('确定删除 '+month+' 的账单数据？')) return;
+  const bills = getBills().filter(b => b.month !== month);
+  saveBills(bills);
+  renderBills();
+}
+
+// ========== 返回工作台 ==========
+function goBack() {
+  window.location.href = 'dashboard.html';
+}
+
+// ========== 点击弹窗背景关闭 ==========
+document.getElementById('reportModal').addEventListener('click', function(e) {
+  if (e.target === this) closeReport();
+});
+
+// ========== 初始化 ==========
+renderBills();
+</script>
+</body>
+</html>
