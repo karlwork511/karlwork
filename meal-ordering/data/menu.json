@@ -2,21 +2,27 @@
   {
     "id": 1,
     "name": "套餐A - 罗宋汤鸡柳通粉",
+    "name_en": "Chicken Fillet w/ Macaroni in Borsch",
     "description": "配：水煮鸡蛋、菠萝包、时令水果、柠檬薏米水",
+    "desc_en": "Boiled Egg, Pineapple Bun, Seasonal Fruits, Lemon Barley Water",
     "icon": "🍜",
     "status": "上架"
   },
   {
     "id": 2,
     "name": "套餐B - 火腿丝鸡汤通粉",
+    "name_en": "Ham w/ Macaroni in Chicken Soup",
     "description": "配：水煮鸡蛋、火腿芝士三文治、时令水果、香滑奶茶",
+    "desc_en": "Boiled Egg, Ham & Cheese Sandwich, Seasonal Fruits, HK Milk Tea",
     "icon": "🥪",
     "status": "上架"
   },
   {
     "id": 3,
     "name": "套餐C - 鲜奶燕麦",
+    "name_en": "Oatmeal with Fresh Milk",
     "description": "配：水煮鸡蛋、火腿芝士三文治、时令水果、咖啡",
+    "desc_en": "Boiled Egg, Ham & Cheese Sandwich, Seasonal Fruits, Coffee",
     "icon": "🥣",
     "status": "上架"
   }
