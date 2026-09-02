@@ -77,8 +77,10 @@ body{
 /* ========== 游戏场景 ========== */
 .game-view{
   display:none;position:fixed;inset:0;z-index:50;
-  background:radial-gradient(ellipse at 35% 40%,#1e1240,var(--bg));
   flex-direction:column;max-width:500px;margin:0 auto;
+  background:
+    linear-gradient(rgba(40,20,5,.3),rgba(20,10,2,.1) 40%,rgba(30,15,5,.4)),
+    url('saloon_bg.jpg') center/cover no-repeat;
 }
 .game-view.active{display:flex}
 .game-top{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;flex-shrink:0;padding-top:calc(var(--safe-top) + 10px)}
@@ -110,7 +112,7 @@ body{
   width:100%;max-width:220px;
   object-fit:contain;
   transition:transform .3s ease;
-  filter:drop-shadow(0 8px 16px rgba(0,0,0,.4));
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.6)) brightness(1.05);
 }
 .cat-img.throwing{
   animation:catThrow .6s ease-out forwards;
@@ -178,7 +180,7 @@ body{
 .board{
   width:100%;height:100%;border-radius:50%;
   position:relative;overflow:hidden;
-  box-shadow:0 0 0 6px #8B4513,0 0 0 10px rgba(139,69,19,.3),0 10px 40px rgba(0,0,0,.5);
+  box-shadow:0 0 0 6px #6B3A1F,0 0 0 10px rgba(80,40,10,.5),0 8px 30px rgba(0,0,0,.6);
   transition:transform .4s;
 }
 .board.hit{animation:boardHit .4s ease-out}
