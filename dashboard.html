@@ -722,6 +722,57 @@ font-size:14px;cursor:pointer;
 
 
 
+/* ===== 生活要点弹窗 ===== */
+.life-tips-overlay{
+display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+z-index:300;align-items:center;justify-content:center;
+}
+.life-tips-overlay.active{display:flex}
+.life-tips-box{
+background:var(--bg-primary);border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);padding:0;
+width:380px;max-width:92vw;max-height:80vh;
+display:flex;flex-direction:column;overflow:hidden;
+}
+.life-tips-header{
+padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;
+border-bottom:1px solid var(--glass-border);flex-shrink:0;
+}
+.life-tips-header h3{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px}
+.life-tips-close{
+width:28px;height:28px;border-radius:50%;border:none;
+background:var(--glass-bg);color:var(--text-secondary);
+font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.life-tips-close:active{background:var(--glass-hover)}
+.life-tips-content{
+padding:16px 20px;overflow-y:auto;flex:1;
+}
+.life-tips-section{margin-bottom:16px}
+.life-tips-section:last-child{margin-bottom:0}
+.life-tips-section-title{
+font-size:13px;font-weight:600;color:var(--text-secondary);
+margin-bottom:10px;display:flex;align-items:center;gap:6px;
+text-transform:uppercase;letter-spacing:0.5px;
+}
+.life-tips-item{
+display:flex;align-items:center;justify-content:space-between;
+padding:10px 14px;border-radius:10px;
+background:var(--glass-bg);border:1px solid var(--glass-border);
+margin-bottom:8px;
+}
+.life-tips-item:last-child{margin-bottom:0}
+.life-tips-item-label{font-size:14px;font-weight:500;color:var(--text-primary)}
+.life-tips-item-value{font-size:14px;color:var(--accent-light);font-weight:500;text-align:right}
+.life-tips-item-note{font-size:11px;color:var(--text-muted);margin-top:2px}
+.life-tips-countdown{
+display:inline-flex;align-items:center;gap:4px;
+font-size:11px;padding:2px 8px;border-radius:10px;
+background:rgba(124,92,255,0.15);color:var(--accent);
+margin-left:8px;
+}
+
 /* 橘猫头像样式 */
 .cat-shortcut-card{cursor:pointer;position:relative;overflow:hidden}
 .cat-shortcut-card::after{
@@ -826,6 +877,10 @@ pointer-events:none;
 </svg>
 </div>
 <div class="shortcut-label">Karl快记</div>
+</div>
+<div class="shortcut-card" onclick="showLifeTipsModal()">
+<div class="shortcut-icon">📌</div>
+<div class="shortcut-label">生活要点</div>
 </div>
 </div>
 </section>
@@ -1019,6 +1074,19 @@ pointer-events:none;
 </div>
 <div class="pw-error" id="pwError"></div>
 <button class="pw-close-btn" onclick="closePasswordModal()">取消</button>
+</div>
+</div>
+
+<!-- 生活要点弹窗 -->
+<div class="life-tips-overlay" id="lifeTipsOverlay" onclick="if(event.target===this)closeLifeTipsModal()">
+<div class="life-tips-box">
+<div class="life-tips-header">
+<h3>📌 生活要点</h3>
+<button class="life-tips-close" onclick="closeLifeTipsModal()">✕</button>
+</div>
+<div class="life-tips-content" id="lifeTipsContent">
+<!-- JS动态渲染 -->
+</div>
 </div>
 </div>
 
@@ -1913,6 +1981,111 @@ document.getElementById('pinInput').addEventListener('input', function(e) {
 document.getElementById('passwordOverlay').addEventListener('click', function(e) {
   if (e.target === this) closePasswordModal();
 });
+
+// ========== 生活要点功能 ==========
+const LIFE_TIPS_DATA = {
+  birthdays: [
+    {
+      name: '妈妈',
+      lunar: '农历九月初五',
+      solar: {
+        2026: '2026-10-14',
+        2027: '2027-10-04',
+        2028: '2028-10-22',
+        2029: '2029-10-11',
+        2030: '2030-09-30'
+      }
+    },
+    {
+      name: '女朋友',
+      lunar: '农历九月十三',
+      solar: {
+        2026: '2026-10-22',
+        2027: '2027-10-12',
+        2028: '2028-10-30',
+        2029: '2029-10-19',
+        2030: '2030-10-08'
+      }
+    }
+  ]
+};
+
+function showLifeTipsModal() {
+  const overlay = document.getElementById('lifeTipsOverlay');
+  const content = document.getElementById('lifeTipsContent');
+  
+  // 计算当前年份和倒计时
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  
+  // 渲染内容
+  let html = '';
+  
+  // 家人生日部分
+  html += '<div class="life-tips-section">';
+  html += '<div class="life-tips-section-title">🎂 家人生日</div>';
+  
+  LIFE_TIPS_DATA.birthdays.forEach(person => {
+    const yearData = person.solar[currentYear];
+    const nextYearData = person.solar[currentYear + 1];
+    
+    if (!yearData) return;
+    
+    const birthdayThisYear = new Date(yearData);
+    let nextBirthday = birthdayThisYear;
+    let targetYear = currentYear;
+    
+    // 如果今年生日已过，计算明年的
+    if (now > birthdayThisYear) {
+      if (nextYearData) {
+        nextBirthday = new Date(nextYearData);
+        targetYear = currentYear + 1;
+      }
+    }
+    
+    // 计算倒计时
+    const diffTime = nextBirthday - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // 格式化日期
+    const month = nextBirthday.getMonth() + 1;
+    const day = nextBirthday.getDate();
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const weekDay = weekDays[nextBirthday.getDay()];
+    
+    html += '<div class="life-tips-item">';
+    html += '<div>';
+    html += `<div class="life-tips-item-label">${person.name}</div>`;
+    html += `<div class="life-tips-item-note">${person.lunar} · ${targetYear}年${month}月${day}日 ${weekDay}</div>`;
+    html += '</div>';
+    html += '<div style="text-align:right">';
+    if (diffDays === 0) {
+      html += '<div class="life-tips-item-value" style="color:var(--danger)">今天！</div>';
+    } else if (diffDays > 0) {
+      html += `<div class="life-tips-item-value">${month}月${day}日</div>`;
+      html += `<div class="life-tips-countdown">还有${diffDays}天</div>`;
+    } else {
+      html += '<div class="life-tips-item-value" style="color:var(--text-muted)">已过</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  
+  // 后续可以添加更多分类，如密码、证件号等
+  // html += '<div class="life-tips-section">';
+  // html += '<div class="life-tips-section-title">🔐 重要密码</div>';
+  // html += '<div class="life-tips-item">...</div>';
+  // html += '</div>';
+  
+  content.innerHTML = html;
+  overlay.classList.add('active');
+}
+
+function closeLifeTipsModal() {
+  document.getElementById('lifeTipsOverlay').classList.remove('active');
+}
 
 init();
 </script>
