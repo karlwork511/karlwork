@@ -100,29 +100,72 @@ body{
 }
 .scene.centered{transform:scale(1);filter:brightness(1)}
 
-/* 猫咪贴图 */
-.cat-area{
-  position:absolute;left:3%;bottom:8%;width:44%;
-  display:flex;flex-direction:column;align-items:center;
+/* ========== 交互式猫咪贴图 ========== */
+.cat-interactive{
+  position:absolute;left:6%;bottom:6%;width:38%;
+  z-index:20;touch-action:none;
+  cursor:pointer;-webkit-user-select:none;user-select:none;
+}
+.cat-img-wrap{
+  position:relative;
   animation:catIdle 3s ease-in-out infinite;
-}
-@keyframes catIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
-.cat-img{
-  width:100%;max-width:220px;
-  object-fit:contain;
   transition:transform .3s ease;
-  filter:drop-shadow(0 10px 20px rgba(0,0,0,.6)) brightness(1.05);
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.5));
 }
-.cat-img.throwing{
-  animation:catThrow .6s ease-out forwards;
+@keyframes catIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.cat-img-wrap img{
+  width:100%;max-width:200px;display:block;
+  object-fit:contain;
+  -webkit-user-drag:none;
 }
+
+/* 点击动画 */
+.cat-img-wrap.anim-jump{animation:catJump .5s ease!important}
+@keyframes catJump{0%{transform:translateY(0)}40%{transform:translateY(-40px)}60%{transform:translateY(-35px)}100%{transform:translateY(0)}}
+
+.cat-img-wrap.anim-squash{animation:catSquash .6s ease!important}
+@keyframes catSquash{0%{transform:scaleY(1) scaleX(1)}25%{transform:scaleY(.65) scaleX(1.2)}50%{transform:scaleY(1.15) scaleX(.9)}70%{transform:scaleY(.95) scaleX(1.05)}100%{transform:scaleY(1) scaleX(1)}}
+
+.cat-img-wrap.anim-shake{animation:catShake .5s ease!important}
+@keyframes catShake{0%,100%{transform:translateX(0) rotate(0)}15%{transform:translateX(-10px) rotate(-4deg)}30%{transform:translateX(10px) rotate(4deg)}45%{transform:translateX(-8px) rotate(-3deg)}60%{transform:translateX(8px) rotate(3deg)}80%{transform:translateX(-3px) rotate(-1deg)}}
+
+/* 拖动跑动 */
+.cat-img-wrap.dragging{animation:catRun .25s ease-in-out infinite!important}
+@keyframes catRun{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(3deg) translateY(-4px)}}
+
+/* 投飞镖动作 */
+.cat-img-wrap.throwing{animation:catThrow .6s ease-out forwards!important}
 @keyframes catThrow{
   0%{transform:rotate(0) scale(1)}
-  25%{transform:rotate(-8deg) scale(.96)}
-  50%{transform:rotate(5deg) scale(1.04)}
+  20%{transform:rotate(-6deg) scale(.96)}
+  45%{transform:rotate(8deg) scale(1.06)}
+  70%{transform:rotate(-3deg) scale(1.02)}
   100%{transform:rotate(0) scale(1)}
 }
+
+/* 语音气泡 */
+.speech-bubble{
+  position:absolute;
+  background:#fff;color:#333;
+  border-radius:16px;
+  padding:8px 14px;
+  font-size:13px;font-weight:600;
+  white-space:nowrap;
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+  opacity:0;transform:scale(.3);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+  z-index:25;
+}
+.speech-bubble::after{
+  content:'';position:absolute;
+  bottom:-8px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:8px solid transparent;border-right:8px solid transparent;
+  border-top:10px solid #fff;
+}
+.speech-bubble.show{opacity:1;transform:scale(1)}
 
 /* 飞镖(飞行中) */
 .dart{
@@ -380,9 +423,14 @@ body{
   </div>
   <div class="scene-wrap">
     <div class="scene" id="scene">
-      <!-- 猫咪贴图 -->
-      <div class="cat-area" id="catArea">
-        <img class="cat-img" id="catImg" src="cowboy_cat.png" alt="牛仔猫">
+
+      <!-- 交互式猫咪贴图 -->
+      <div class="cat-interactive" id="catInteractive">
+        <div class="cat-img-wrap" id="catImgWrap">
+          <img id="catImg" src="cat_character.png" alt="喵" draggable="false">
+        </div>
+        <!-- 语音气泡 -->
+        <div class="speech-bubble" id="speechBubble"></div>
       </div>
 
       <!-- 飞镖(飞行中) -->
@@ -397,7 +445,7 @@ body{
           <div class="board" id="dartBoard">
             <img class="board-img" id="boardImg" src="dartboard.png" alt="飞镖靶">
             <div class="board-labels" id="boardLabels"></div>
-            <div class="board-center">🐱</div>
+            <div class="board-center">🎯</div>
             <div class="board-dart" id="boardDart"></div>
           </div>
         </div>
@@ -424,7 +472,7 @@ body{
   <div class="sheet">
     <div class="sheet-header">
       <div class="sheet-title" id="actSheetTitle">新建活动</div>
-      <button class="sheet-close" onclick="closeSheet('activityOverlay')">✕</button>
+      <button class="sheet-close" onclick="closeSheet('activityOverlay')"></button>
     </div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">活动名称</label><input class="form-input" id="actName" placeholder="比如：周六吃啥" maxlength="20"></div>
@@ -450,7 +498,7 @@ body{
 <!-- 同步设置 -->
 <div class="overlay" id="syncOverlay">
   <div class="sheet">
-    <div class="sheet-header"><div class="sheet-title">☁️ 数据同步</div><button class="sheet-close" onclick="closeSheet('syncOverlay')">✕</button></div>
+    <div class="sheet-header"><div class="sheet-title">️ 数据同步</div><button class="sheet-close" onclick="closeSheet('syncOverlay')">✕</button></div>
     <div class="sheet-body">
       <div class="settings-section">
         <div class="settings-title">GitHub 配置</div>
@@ -496,6 +544,148 @@ function ldH(){try{return JSON.parse(localStorage.getItem(HK))}catch(e){return[]
 function svH(aid,result){const h=ldH();const a=getA(aid);h.unshift({activityId:aid,activityName:a?.name||'',result,time:Date.now()});if(h.length>200)h.length=200;localStorage.setItem(HK,JSON.stringify(h))}
 function getA(id){return data.activities.find(a=>String(a.id)===String(id))}
 
+// ========== 猫咪互动系统 ==========
+const BUBBLE_QUOTES=[
+  '喵～','本喵在此！','有啥事？','快投镖呀！',
+  '今天选啥？','别摸我耳朵！','我是裁判猫！','你决定不了？',
+  '喵星人帮你选！','快让我投镖！','别犹豫啦～','交给我吧！',
+  '这题我会！','选我就对了！','喵生就是玩！','你瞅啥？',
+  '投啊投啊！','本喵看好了！','命运之镖！','再来一发！'
+];
+let clickAnimIdx=0;
+const CLICK_ANIMS=['anim-jump','anim-squash','anim-shake'];
+
+// 点击互动（轮流触发跳跃/压扁/抖动）
+function triggerClickAnim(){
+  const wrap=document.getElementById('catImgWrap');
+  wrap.classList.remove(...CLICK_ANIMS);
+  void wrap.offsetWidth; // reflow
+  wrap.classList.add(CLICK_ANIMS[clickAnimIdx]);
+  clickAnimIdx=(clickAnimIdx+1)%CLICK_ANIMS.length;
+  showBubble();
+  wrap.addEventListener('animationend',function handler(){
+    wrap.classList.remove(CLICK_ANIMS[clickAnimIdx===0?CLICK_ANIMS.length-1:clickAnimIdx-1]||CLICK_ANIMS[(clickAnimIdx-1+CLICK_ANIMS.length)%CLICK_ANIMS.length]);
+    wrap.removeEventListener('animationend',handler);
+  });
+}
+
+// 显示气泡（随机位置，不遮挡角色）
+let bubbleTimer=null;
+function showBubble(){
+  const bubble=document.getElementById('speechBubble');
+  const quote=BUBBLE_QUOTES[Math.floor(Math.random()*BUBBLE_QUOTES.length)];
+  bubble.textContent=quote;
+  bubble.classList.remove('show');
+  void bubble.offsetWidth;
+  bubble.classList.add('show');
+  if(bubbleTimer)clearTimeout(bubbleTimer);
+  bubbleTimer=setTimeout(()=>bubble.classList.remove('show'),1800);
+}
+
+// 拖动交互
+const catEl=document.getElementById('catInteractive');
+let isDragging=false,longPressTimer=null;
+let dragStartX=0,dragStartY=0,catX=0,catY=0;
+let hasMoved=false,lastTap=0;
+
+// 用 touch/mouse 事件实现长按+拖动
+catEl.addEventListener('touchstart',onPointerDown,{passive:false});
+catEl.addEventListener('mousedown',onPointerDown);
+document.addEventListener('touchmove',onPointerMove,{passive:false});
+document.addEventListener('mousemove',onPointerMove);
+document.addEventListener('touchend',onPointerUp);
+document.addEventListener('mouseup',onPointerUp);
+
+function getPos(e){
+  const t=e.touches?e.touches[0]:e;
+  return{x:t.clientX,y:t.clientY};
+}
+
+function onPointerDown(e){
+  if(isBusy)return;
+  const pos=getPos(e);
+  dragStartX=pos.x-catX;
+  dragStartY=pos.y-catY;
+  hasMoved=false;
+  longPressTimer=setTimeout(()=>{
+    isDragging=true;
+    const wrap=document.getElementById('catImgWrap');
+    wrap.classList.add('dragging');
+    showBubble();
+  },400);
+}
+
+function onPointerMove(e){
+  if(longPressTimer&&!isDragging){
+    const pos=getPos(e);
+    const dx=pos.x-dragStartX-catX;
+    const dy=pos.y-dragStartY-catY;
+    if(Math.abs(dx)>8||Math.abs(dy)>8){
+      hasMoved=true;
+      clearTimeout(longPressTimer);
+      longPressTimer=null;
+      isDragging=true;
+      const wrap=document.getElementById('catImgWrap');
+      wrap.classList.add('dragging');
+    }
+  }
+  if(!isDragging)return;
+  e.preventDefault();
+  const pos=getPos(e);
+  const sceneWrap=document.querySelector('.scene-wrap');
+  const rect=sceneWrap.getBoundingClientRect();
+  catX=pos.x-dragStartX;
+  catY=pos.y-dragStartY;
+  // 限制在场景内
+  const maxW=rect.width*0.35;
+  const maxH=rect.height*0.4;
+  catX=Math.max(0,Math.min(catX,rect.width-maxW));
+  catY=Math.max(rect.height*0.2,Math.min(catY,rect.height-maxH-20));
+  const el=document.getElementById('catInteractive');
+  el.style.left=catX+'px';
+  el.style.bottom='auto';
+  el.style.top=catY+'px';
+}
+
+function onPointerUp(e){
+  clearTimeout(longPressTimer);
+  longPressTimer=null;
+  const wrap=document.getElementById('catImgWrap');
+  if(isDragging){
+    isDragging=false;
+    wrap.classList.remove('dragging');
+    // 松手后回弹到默认位置
+    setTimeout(()=>{
+      const el=document.getElementById('catInteractive');
+      el.style.left='6%';
+      el.style.top='';
+      el.style.bottom='6%';
+      catX=0;catY=0;
+    },200);
+  }else if(!hasMoved){
+    // 短按 = 点击互动
+    const now=Date.now();
+    if(now-lastTap<350){
+      // 双击：显示特别气泡
+      showSpecialBubble();
+    }else{
+      triggerClickAnim();
+    }
+    lastTap=now;
+  }
+}
+
+function showSpecialBubble(){
+  const specials=['双杀！😹','你手好快！','别戳了喵！','两连击！','喵喵喵！','好家伙！','再来！','嘿嘿～'];
+  const bubble=document.getElementById('speechBubble');
+  bubble.textContent=specials[Math.floor(Math.random()*specials.length)];
+  bubble.classList.remove('show');
+  void bubble.offsetWidth;
+  bubble.classList.add('show');
+  if(bubbleTimer)clearTimeout(bubbleTimer);
+  bubbleTimer=setTimeout(()=>bubble.classList.remove('show'),2000);
+}
+
 // ========== 渲染 ==========
 function renderList(){
   const el=document.getElementById('activityList'),em=document.getElementById('emptyState');
@@ -507,7 +697,7 @@ function renderList(){
     return `<div class="activity-card" onclick="openGame('${a.id}')">
       <div class="card-header"><div class="card-title"><span>${esc(a.name)}</span><span class="card-count">${items.length}项</span></div>
       <div class="card-actions">
-        <button class="card-btn" onclick="event.stopPropagation();openEdit('${a.id}')">✏️</button>
+        <button class="card-btn" onclick="event.stopPropagation();openEdit('${a.id}')">️</button>
         <button class="card-btn" onclick="event.stopPropagation();openManage('${a.id}')">📝</button>
         <button class="card-btn" onclick="event.stopPropagation();delAct('${a.id}')">🗑️</button>
       </div></div><div class="card-preview">${esc(p)}</div></div>`;
@@ -556,9 +746,13 @@ function openGame(id){
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('boardDart').classList.remove('stuck');
   document.getElementById('flyingDart').classList.remove('flying');
-  document.getElementById('catImg').classList.remove('throwing');
+  document.getElementById('catImgWrap').classList.remove('throwing');
   document.getElementById('throwBtn').disabled=false;
   document.getElementById('throwBtn').innerHTML='🎯 投飞镖！';
+  // 重置猫位置
+  const catEl2=document.getElementById('catInteractive');
+  catEl2.style.left='6%';catEl2.style.top='';catEl2.style.bottom='6%';
+  catX=0;catY=0;
   // 渲染靶子选项文字
   renderBoard(a.items);
   document.getElementById('gameView').classList.add('active');
@@ -578,10 +772,9 @@ function renderBoard(items){
   const deg=360/n;
   let html='';
   for(let i=0;i<n;i++){
-    const angle=i*deg-90; // 从12点方向开始
+    const angle=i*deg-90;
     const rad=angle*Math.PI/180;
-    // 计算文字位置：在圆环中间一圈（距中心约38%半径处）
-    const r=38; // 百分比
+    const r=38;
     const x=50+r*Math.cos(rad);
     const y=50+r*Math.sin(rad);
     const color=LABEL_COLORS[i%LABEL_COLORS.length];
@@ -604,19 +797,20 @@ async function throwDart(){
   btn.disabled=true;btn.innerHTML='✨ 飞行中...';
 
   const result=a.items[Math.floor(Math.random()*a.items.length)];
-  const catImg=document.getElementById('catImg');
+  const catImgWrap=document.getElementById('catImgWrap');
   const dart=document.getElementById('flyingDart');
   const scene=document.getElementById('scene');
   const target=document.getElementById('targetArea');
   const board=document.getElementById('dartBoard');
   const boardDart=document.getElementById('boardDart');
 
-  // 清理上次的居中状态
   scene.classList.remove('centered');
   document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('speechBubble').classList.remove('show');
 
-  // 1. 猫投掷动画
-  catImg.classList.add('throwing');
+  // 1. 猫投飞镖动作
+  catImgWrap.classList.add('throwing');
+  showBubble();
 
   await sleep(300);
 
@@ -639,16 +833,12 @@ async function throwDart(){
   // 5. 命中效果
   board.classList.add('hit');
   boardDart.classList.add('stuck');
-  // 随机偏移
   const dx=(Math.random()-0.5)*30;
   const dy=(Math.random()-0.5)*30;
   boardDart.style.setProperty('--dx',dx+'px');
   boardDart.style.setProperty('--dy',dy+'px');
 
-  // 粒子
   spawnParticles();
-
-  // 清理
   document.getElementById('speedLines').classList.remove('active');
   dart.classList.remove('flying');
 
@@ -668,13 +858,12 @@ async function throwDart(){
   const emojis=['😺 喵说就这个！','🐱 命中注定！','✨ 猫神指引！','🎯 一镖即中！','😸 就决定是你了！'];
   document.getElementById('resultEmoji').textContent=emojis[Math.floor(Math.random()*emojis.length)];
 
-  // 保存历史
   svH(curActId,result);
 
   btn.innerHTML='🎯 再投一次';
   btn.disabled=false;
   isBusy=false;
-  catImg.classList.remove('throwing');
+  catImgWrap.classList.remove('throwing');
 }
 
 function spawnParticles(){
