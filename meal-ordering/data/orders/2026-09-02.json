@@ -1,0 +1,22 @@
+[
+  {
+    "id": "001",
+    "customer_no": "一",
+    "meal_name": "套餐A",
+    "meal_desc": "米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤",
+    "remark": "",
+    "status": "待出餐",
+    "submit_time": "2026-09-02 12:30:15",
+    "deliver_time": null
+  },
+  {
+    "id": "002",
+    "customer_no": "二",
+    "meal_name": "无糖套餐",
+    "meal_desc": "糙米饭 + 清蒸鲈鱼 + 白灼菜心 + 无糖豆浆",
+    "remark": "不加糖",
+    "status": "已送达",
+    "submit_time": "2026-09-02 12:35:20",
+    "deliver_time": "2026-09-02 12:50:00"
+  }
+]
