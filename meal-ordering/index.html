@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>医院点餐系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
@@ -21,419 +17,185 @@
             padding-top: 8vh;
         }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            padding: 20px;
-        }
+        .container { max-width: 800px; width: 100%; padding: 20px; }
 
-        /* 头部 */
-        .header {
-            text-align: center;
-            padding: 20px 0;
-        }
+        .header { text-align: center; padding: 20px 0; }
+        .header h1 { font-size: 28px; color: #2c3e50; font-weight: 600; }
+        .header .subtitle { font-size: 14px; color: #95a5a6; margin-top: 8px; }
 
-        .header h1 {
-            font-size: 28px;
-            color: #2c3e50;
-            font-weight: 600;
-        }
+        /* 密码输入条 */
+        .pwd-bar { background: #fff3cd; border-radius: 12px; padding: 14px 16px; margin-top: 12px; display: flex; align-items: center; gap: 10px; transition: all 0.3s; }
+        .pwd-bar input { flex: 1; padding: 10px 14px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; letter-spacing: 4px; text-align: center; }
+        .pwd-bar input:focus { border-color: #856404; }
+        .pwd-bar button { padding: 10px 18px; font-size: 14px; font-weight: 600; background: #856404; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .pwd-bar button:active { transform: scale(0.95); }
+        .pwd-bar.connected { background: #d4edda; }
+        .pwd-bar.connected span { color: #155724; font-size: 14px; font-weight: 500; }
+        .pwd-error { color: #e74c3c; font-size: 12px; display: none; margin-top: 6px; text-align: center; }
+        .pwd-error.show { display: block; }
+        .pwd-bar-wrap { margin-bottom: 8px; }
 
-        .header .subtitle {
-            font-size: 14px;
-            color: #95a5a6;
-            margin-top: 8px;
-        }
-
-        /* 页面切换 */
-        .page {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 输入框 */
-        .input-group {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            margin-top: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 16px;
-            color: #34495e;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 20px;
-            border: 2px solid #e0e6ed;
-            border-radius: 12px;
-            outline: none;
-            transition: border-color 0.3s;
-            text-align: center;
-            letter-spacing: 4px;
-        }
-
-        .input-group input:focus {
-            border-color: #3498db;
-        }
-
-        .input-group .hint {
-            font-size: 13px;
-            color: #95a5a6;
-            margin-top: 12px;
-            text-align: center;
-        }
-
-        /* 套餐卡片 */
-        .meal-list {
-            display: grid;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .meal-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .meal-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-        }
-
-        .meal-card.selected {
-            border-color: #3498db;
-            background: #f0f8ff;
-        }
-
-        .meal-card .meal-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 12px;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            flex-shrink: 0;
-        }
-
-        .meal-card .meal-info {
-            flex: 1;
-        }
-
-        .meal-card .meal-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 6px;
-        }
-
-        .meal-card .meal-desc {
-            font-size: 13px;
-            color: #7f8c8d;
-            line-height: 1.4;
-        }
-
-        .meal-card .check-mark {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.3s;
-            font-size: 14px;
-            color: white;
-        }
-
-        .meal-card.selected .check-mark {
-            background: #3498db;
-            border-color: #3498db;
-        }
-
-        /* 确认页 */
-        .confirm-box {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            margin-top: 20px;
-        }
-
-        .confirm-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .confirm-row:last-child {
-            border-bottom: none;
-        }
-
-        .confirm-row .label {
-            font-size: 15px;
-            color: #7f8c8d;
-        }
-
-        .confirm-row .value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        /* 按钮 */
-        .btn-group {
-            display: flex;
-            gap: 16px;
-            margin-top: 30px;
-            padding: 0 10px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 18px;
-            font-size: 17px;
-            font-weight: 600;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            background: #ecf0f1;
-            color: #7f8c8d;
-        }
-
-        .btn-secondary:hover {
-            background: #d5dbdb;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* 猫咪吉祥物 */
-        .mascot {
+        /* 右上角按钮 */
+        .top-right-btns {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 110px;
-            height: 110px;
-            cursor: grab;
-            z-index: 100;
-            transition: transform 0.3s;
-            touch-action: none;
-            user-select: none;
-        }
-
-        .mascot:hover {
-            transform: scale(1.08);
-        }
-
-        .mascot.dragging {
-            cursor: grabbing;
-            transition: none;
-        }
-
-        .mascot.hidden {
-            display: none;
-        }
-
-        /* 关闭按钮 */
-        .mascot-close {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 28px;
-            height: 28px;
-            background: #ff6b6b;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 101;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .mascot-close.show {
+            top: 16px;
+            right: 16px;
             display: flex;
+            gap: 10px;
+            z-index: 50;
         }
-
-        /* 快捷标签 */
-        .quick-tag {
-            display: inline-block;
-            padding: 8px 16px;
+        .top-btn {
+            padding: 10px 16px;
             font-size: 14px;
-            color: #3498db;
-            background: #f0f8ff;
-            border: 1px solid #3498db;
-            border-radius: 20px;
+            font-weight: 500;
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            user-select: none;
         }
+        .top-btn.primary { background: #3498db; color: white; }
+        .top-btn.secondary { background: #ecf0f1; color: #7f8c8d; }
+        .top-btn:active { transform: scale(0.95); }
 
-        .quick-tag:hover {
-            background: #3498db;
-            color: white;
-        }
+        /* 页面切换 */
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .quick-tag:active {
-            transform: scale(0.95);
-        }
+        /* 输入框 */
+        .input-group { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-top: 20px; }
+        .input-group label { display: block; font-size: 16px; color: #34495e; margin-bottom: 12px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 16px 20px; font-size: 20px; border: 2px solid #e0e6ed; border-radius: 12px; outline: none; transition: border-color 0.3s; text-align: center; letter-spacing: 4px; }
+        .input-group input:focus { border-color: #3498db; }
+        .input-group .hint { font-size: 13px; color: #95a5a6; margin-top: 12px; text-align: center; }
 
-        .mascot img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+        /* 套餐卡片 */
+        .meal-list { display: grid; gap: 16px; margin-top: 20px; }
+        .meal-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.3s; border: 3px solid transparent; display: flex; align-items: center; gap: 16px; }
+        .meal-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .meal-card.selected { border-color: #3498db; background: #f0f8ff; }
+        .meal-card .meal-img { width: 80px; height: 80px; border-radius: 12px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .meal-card .meal-info { flex: 1; }
+        .meal-card .meal-name { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; }
+        .meal-card .meal-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
+        .meal-card .check-mark { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 14px; color: white; }
+        .meal-card.selected .check-mark { background: #3498db; border-color: #3498db; }
 
-        /* 对话气泡 - 跟随猫咪位置 */
-        .bubble {
-            position: absolute;
-            bottom: 120px;
-            right: 0;
-            background: white;
-            border-radius: 16px;
-            padding: 16px 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            max-width: 260px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #34495e;
-            z-index: 99;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s;
-            pointer-events: none;
-        }
+        /* 确认页 */
+        .confirm-box { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-top: 20px; }
+        .confirm-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #f0f0f0; }
+        .confirm-row:last-child { border-bottom: none; }
+        .confirm-row .label { font-size: 15px; color: #7f8c8d; }
+        .confirm-row .value { font-size: 18px; font-weight: 600; color: #2c3e50; }
 
-        .bubble.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        /* 备注 */
+        .quick-tag { display: inline-block; padding: 8px 16px; font-size: 14px; color: #3498db; background: #f0f8ff; border: 1px solid #3498db; border-radius: 20px; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .quick-tag:hover { background: #3498db; color: white; }
+        .quick-tag:active { transform: scale(0.95); }
 
-        .bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            right: 30px;
-            width: 16px;
-            height: 16px;
-            background: white;
-            transform: rotate(45deg);
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
+        /* 按钮 */
+        .btn-group { display: flex; gap: 16px; margin-top: 30px; padding: 0 10px; }
+        .btn { flex: 1; padding: 18px; font-size: 17px; font-weight: 600; border: none; border-radius: 14px; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary { background: #ecf0f1; color: #7f8c8d; }
+        .btn-secondary:hover { background: #d5dbdb; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:active { transform: scale(0.98); }
 
-        .bubble .bubble-name {
-            font-weight: 600;
-            color: #3498db;
-            margin-bottom: 4px;
-        }
+        /* 订单管理页 */
+        .stats-bar { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-top: 20px; display: flex; justify-content: space-around; }
+        .stat-item { text-align: center; }
+        .stat-item .num { font-size: 28px; font-weight: 700; color: #3498db; }
+        .stat-item .lbl { font-size: 13px; color: #95a5a6; margin-top: 4px; }
+
+        .order-actions { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+        .order-actions .btn { flex: none; padding: 12px 20px; font-size: 14px; }
+
+        .order-list { display: grid; gap: 12px; margin-top: 12px; }
+        .order-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; border-left: 4px solid #3498db; }
+        .order-card.delivered { border-left-color: #27ae60; opacity: 0.7; }
+        .order-card .checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; font-size: 12px; color: white; }
+        .order-card .checkbox.checked { background: #3498db; border-color: #3498db; }
+        .order-card.delivered .checkbox { display: none; }
+        .order-card .order-info { flex: 1; }
+        .order-card .order-no { font-size: 16px; font-weight: 600; color: #2c3e50; }
+        .order-card .order-meal { font-size: 13px; color: #7f8c8d; margin-top: 4px; }
+        .order-card .order-remark { font-size: 12px; color: #e67e22; margin-top: 2px; }
+        .order-card .order-time { font-size: 12px; color: #95a5a6; margin-top: 4px; }
+        .order-card .status-tag { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+        .status-tag.pending { background: #fff3cd; color: #856404; }
+        .status-tag.done { background: #d4edda; color: #155724; }
+
+        /* 餐品管理 */
+        .menu-item { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+        .menu-item .menu-icon { width: 50px; height: 50px; border-radius: 10px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .menu-item .menu-info { flex: 1; }
+        .menu-item .menu-name { font-size: 16px; font-weight: 600; color: #2c3e50; }
+        .menu-item .menu-desc { font-size: 12px; color: #7f8c8d; margin-top: 2px; }
+        .menu-item .menu-actions { display: flex; gap: 8px; }
+        .menu-item .menu-actions button { padding: 6px 12px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-edit { background: #3498db; color: white; }
+        .btn-del { background: #e74c3c; color: white; }
+        .btn-add { width: 100%; padding: 14px; font-size: 15px; font-weight: 500; border: 2px dashed #3498db; background: #f0f8ff; color: #3498db; border-radius: 14px; cursor: pointer; margin-top: 12px; }
+
+        /* 弹窗 */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-box { background: white; border-radius: 20px; padding: 30px; max-width: 360px; width: 90%; }
+        .modal-box .modal-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 16px; text-align: center; }
+        .modal-box .modal-input { width: 100%; padding: 14px; font-size: 16px; border: 2px solid #e0e6ed; border-radius: 10px; outline: none; text-align: center; margin-bottom: 16px; }
+        .modal-box .modal-input:focus { border-color: #3498db; }
+        .modal-box .modal-btns { display: flex; gap: 12px; }
+        .modal-box .modal-btns .btn { padding: 14px; font-size: 15px; }
 
         /* 成功提示 */
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
+        .success-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .success-overlay.show { opacity: 1; pointer-events: auto; }
+        .success-box { background: white; border-radius: 20px; padding: 40px; text-align: center; max-width: 300px; }
+        .success-box .icon { font-size: 48px; margin-bottom: 16px; }
+        .success-box .title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 8px; }
+        .success-box .desc { font-size: 14px; color: #7f8c8d; }
 
-        .success-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        /* 猫咪吉祥物 */
+        .mascot { position: fixed; bottom: 24px; right: 24px; width: 110px; height: 110px; cursor: grab; z-index: 100; transition: transform 0.3s; touch-action: none; user-select: none; }
+        .mascot:hover { transform: scale(1.08); }
+        .mascot.dragging { cursor: grabbing; transition: none; }
+        .mascot.hidden { display: none; }
+        .mascot-close { position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; background: #ff6b6b; border-radius: 50%; display: none; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 101; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .mascot-close.show { display: flex; }
+        .mascot img { width: 100%; height: 100%; object-fit: contain; }
 
-        .success-box {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 300px;
-        }
-
-        .success-box .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .success-box .title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-
-        .success-box .desc {
-            font-size: 14px;
-            color: #7f8c8d;
-        }
+        /* 对话气泡 */
+        .bubble { position: absolute; bottom: 120px; right: 0; background: white; border-radius: 16px; padding: 16px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-width: 260px; font-size: 14px; line-height: 1.6; color: #34495e; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+        .bubble.show { opacity: 1; transform: translateY(0); }
+        .bubble::after { content: ''; position: absolute; bottom: -8px; right: 30px; width: 16px; height: 16px; background: white; transform: rotate(45deg); box-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .bubble .bubble-name { font-weight: 600; color: #3498db; margin-bottom: 4px; }
     </style>
 </head>
 <body>
+    <!-- 右上角按钮 -->
+    <div class="top-right-btns" id="topBtns" style="display:none;">
+        <button class="top-btn secondary" id="btnBackToOrder" style="display:none;" onclick="showPage(4)">返回订单</button>
+        <button class="top-btn primary" id="btnViewOrders" style="display:none;" onclick="showPage(4)">查看订单</button>
+        <button class="top-btn secondary" id="btnMenuMgmt" style="display:none;" onclick="showPage(5)">餐品管理</button>
+    </div>
+
     <div class="container">
-        <!-- 头部 -->
         <div class="header">
             <h1>🏥 医院点餐系统</h1>
             <div class="subtitle">健康体检 · 营养配餐</div>
+        </div>
+
+        <!-- 密码输入条 -->
+        <div class="pwd-bar-wrap" id="pwdBarWrap">
+            <div class="pwd-bar" id="pwdBar">
+                <input type="password" id="pwdInput" placeholder="输入密码连接系统" maxlength="10" onkeypress="if(event.key==='Enter')doUnlock()">
+                <button onclick="doUnlock()">连接</button>
+            </div>
+            <div class="pwd-error" id="pwdError">密码错误</div>
         </div>
 
         <!-- 页面1：点餐入口 -->
@@ -453,40 +215,7 @@
             <div style="margin-bottom: 16px;">
                 <div style="font-size: 15px; color: #7f8c8d;">客户序号：<span id="displayCustomerNo" style="font-weight: 600; color: #3498db;"></span></div>
             </div>
-            <div class="meal-list" id="mealList">
-                <div class="meal-card" onclick="selectMeal(this, '套餐A', '米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤')">
-                    <div class="meal-img"></div>
-                    <div class="meal-info">
-                        <div class="meal-name">套餐A</div>
-                        <div class="meal-desc">米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤</div>
-                    </div>
-                    <div class="check-mark">✓</div>
-                </div>
-                <div class="meal-card" onclick="selectMeal(this, '套餐B', '米饭 + 番茄牛腩 + 凉拌木耳 + 玉米排骨汤')">
-                    <div class="meal-img">🥩</div>
-                    <div class="meal-info">
-                        <div class="meal-name">套餐B</div>
-                        <div class="meal-desc">米饭 + 番茄牛腩 + 凉拌木耳 + 玉米排骨汤</div>
-                    </div>
-                    <div class="check-mark">✓</div>
-                </div>
-                <div class="meal-card" onclick="selectMeal(this, '套餐C', '米饭 + 宫保鸡丁 + 清炒西兰花 + 冬瓜汤')">
-                    <div class="meal-img">🍗</div>
-                    <div class="meal-info">
-                        <div class="meal-name">套餐C</div>
-                        <div class="meal-desc">米饭 + 宫保鸡丁 + 清炒西兰花 + 冬瓜汤</div>
-                    </div>
-                    <div class="check-mark">✓</div>
-                </div>
-                <div class="meal-card" onclick="selectMeal(this, '无糖套餐', '糙米饭 + 清蒸鲈鱼 + 白灼菜心 + 无糖豆浆')">
-                    <div class="meal-img">🥗</div>
-                    <div class="meal-info">
-                        <div class="meal-name">无糖套餐</div>
-                        <div class="meal-desc">糙米饭 + 清蒸鱼 + 白灼菜心 + 无糖豆浆</div>
-                    </div>
-                    <div class="check-mark">✓</div>
-                </div>
-            </div>
+            <div class="meal-list" id="mealList"></div>
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="goToPage1()">返回</button>
                 <button class="btn btn-primary" id="btnNext" onclick="goToPage3()" disabled>下一步</button>
@@ -496,28 +225,16 @@
         <!-- 页面3：确认提交页 -->
         <div class="page" id="page3">
             <div class="confirm-box">
-                <div class="confirm-row">
-                    <div class="label">客户序号</div>
-                    <div class="value" id="confirmCustomerNo">-</div>
-                </div>
-                <div class="confirm-row">
-                    <div class="label">所选套餐</div>
-                    <div class="value" id="confirmMeal">-</div>
-                </div>
-                <div class="confirm-row">
-                    <div class="label">套餐内容</div>
-                    <div class="value" id="confirmMealDesc" style="font-size: 14px;">-</div>
-                </div>
+                <div class="confirm-row"><div class="label">客户序号</div><div class="value" id="confirmCustomerNo">-</div></div>
+                <div class="confirm-row"><div class="label">所选套餐</div><div class="value" id="confirmMeal">-</div></div>
+                <div class="confirm-row"><div class="label">套餐内容</div><div class="value" id="confirmMealDesc" style="font-size: 14px;">-</div></div>
             </div>
-            
-            <!-- 备注输入框 -->
-            <div class="remark-box" style="background: white; border-radius: 16px; padding: 20px; margin-top: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <div style="background: white; border-radius: 16px; padding: 20px; margin-top: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
                 <div style="font-size: 15px; color: #34495e; font-weight: 500; margin-bottom: 12px;">备注</div>
                 <div style="position: relative;">
                     <textarea id="remarkInput" placeholder="输入备注信息..." maxlength="100" oninput="updateCharCount()" style="width: 100%; min-height: 80px; padding: 12px 60px 12px 14px; font-size: 15px; border: 2px solid #e0e6ed; border-radius: 12px; outline: none; resize: none; font-family: inherit; line-height: 1.5;"></textarea>
                     <div id="charCount" style="position: absolute; bottom: 8px; right: 12px; font-size: 13px; color: #95a5a6;">0/100</div>
                 </div>
-                <!-- 快捷选项 -->
                 <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
                     <span class="quick-tag" onclick="addRemark('不加奶')">不加奶</span>
                     <span class="quick-tag" onclick="addRemark('不加糖')">不加糖</span>
@@ -526,22 +243,57 @@
                     <span class="quick-tag" onclick="addRemark('常温')">常温</span>
                 </div>
             </div>
-            
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="goToPage2()">返回修改</button>
                 <button class="btn btn-primary" onclick="submitOrder()">确认提交</button>
             </div>
         </div>
+
+        <!-- 页面4：订单管理 -->
+        <div class="page" id="page4">
+            <div class="stats-bar">
+                <div class="stat-item"><div class="num" id="statTotal">0</div><div class="lbl">今日下单</div></div>
+                <div class="stat-item"><div class="num" id="statPending">0</div><div class="lbl">待出餐</div></div>
+                <div class="stat-item"><div class="num" id="statDelivered">0</div><div class="lbl">已送达</div></div>
+            </div>
+            <div class="order-actions">
+                <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
+                <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
+                <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
+            </div>
+            <div class="order-list" id="orderList"></div>
+        </div>
+
+        <!-- 页面5：餐品管理 -->
+        <div class="page" id="page5">
+            <div id="menuList"></div>
+            <button class="btn-add" onclick="showAddMenuModal()">+ 添加新套餐</button>
+        </div>
     </div>
 
-    <!-- 猫咪吉祥物（包含气泡） -->
-    <div class="mascot" id="mascot" onclick="handleMascotClick(event)">
-        <div class="mascot-close" id="mascotClose" onclick="hideMascot(event)">×</div>
-        <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'" draggable="false">
-        <!-- 对话气泡 -->
-        <div class="bubble" id="bubble">
-            <div class="bubble-name"> 小助手</div>
-            <div id="bubbleText">嗨～请先输入客户序号哦～</div>
+    <!-- 删除确认弹窗 -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <div class="modal-title">确认删除</div>
+            <p style="font-size: 14px; color: #7f8c8d; text-align: center; margin-bottom: 16px;">请输入密码确认删除操作</p>
+            <input type="password" class="modal-input" id="deletePwdInput" placeholder="输入密码" oninput="checkDeletePwd()">
+            <div class="modal-btns">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" id="btnConfirmDelete" onclick="confirmDelete()" disabled>确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑餐品弹窗 -->
+    <div class="modal-overlay" id="menuModal">
+        <div class="modal-box">
+            <div class="modal-title" id="menuModalTitle">添加套餐</div>
+            <input type="text" class="modal-input" id="menuNameInput" placeholder="套餐名称">
+            <input type="text" class="modal-input" id="menuDescInput" placeholder="套餐描述">
+            <div class="modal-btns">
+                <button class="btn btn-secondary" onclick="closeMenuModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveMenu()">保存</button>
+            </div>
         </div>
     </div>
 
@@ -554,269 +306,399 @@
         </div>
     </div>
 
-    <script>
-        // 页面状态
-        let currentPage = 1;
-        let customerNo = '';
-        let selectedMeal = null;
-        let selectedMealDesc = null;
-        let bubbleVisible = false;
+    <!-- 猫咪 -->
+    <div class="mascot" id="mascot" onclick="handleMascotClick(event)">
+        <div class="mascot-close" id="mascotClose" onclick="hideMascot(event)">×</div>
+        <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'" draggable="false">
+        <div class="bubble" id="bubble">
+            <div class="bubble-name"> 小助手</div>
+            <div id="bubbleText">嗨～请先输入客户序号哦～</div>
+        </div>
+    </div>
 
-        // 各页面的对话文案
+    <script>
+        // ===== 系统配置（加密存储）=====
+        // 数据连接密钥（Base64反转编码）
+        const _ec = '==QUZxWeGBjVxRWbhBDZNlnWJZVMlJVdGJkWiBnMDNTM5NjdNt0Xwh2Z';
+        // 解锁密钥
+        const _uk = '0913';
+        function _dk(p) {
+            if (p !== _uk) return null;
+            try { return atob(_ec.split('').reverse().join('')); } catch(e) { return null; }
+        }
+
+        // ===== 全局状态 =====
+        let currentPage = 1;
+        let customerNo = '', selectedMeal = null, selectedMealDesc = null, bubbleVisible = false;
+        let selectMode = false, selectedOrders = [];
+        let editingMenuId = null;
+        let githubToken = localStorage.getItem('meal_token') || '';
+        const REPO = 'karlwork511/karlwork';
+        const BRANCH = 'main';
+        const DELETE_PWD = '0913';
+
         const bubbleTexts = {
             1: '嗨～请先输入客户序号哦，比如"一"、"二"、"秦"都可以～',
             2: '选一个喜欢的套餐吧～点一下卡片就能选中哦～',
-            3: '再检查一下信息对不对～没错的话就点"确认提交"啦～'
+            3: '再检查一下信息对不对～没错的话就点"确认提交"啦～',
+            4: '这里是订单列表哦～可以查看今天的订单状态～',
+            5: '这里可以管理餐品～添加或修改套餐信息～'
         };
 
-        // 自动显示气泡（进入页面时）
-        function autoShowBubble() {
-            const bubble = document.getElementById('bubble');
-            bubbleVisible = true;
-            bubble.classList.add('show');
-            setTimeout(() => {
-                bubbleVisible = false;
-                bubble.classList.remove('show');
-            }, 3000);
+        // ===== GitHub API =====
+        async function fetchJSON(path) {
+            const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, {
+                headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (!resp.ok) throw new Error('Fetch failed');
+            const data = await resp.json();
+            return JSON.parse(atob(data.content));
         }
 
-        // 页面切换
-        function showPage(pageNum) {
+        async function saveJSON(path, content, sha, msg) {
+            const body = { message: msg, content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), branch: BRANCH };
+            if (sha) body.sha = sha;
+            const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            return resp.ok;
+        }
+
+        async function getSHA(path) {
+            const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, {
+                headers: { 'Authorization': `token ${githubToken}` }
+            });
+            return resp.ok ? (await resp.json()).sha : null;
+        }
+
+        // ===== 密码解锁逻辑 =====
+        function doUnlock() {
+            const pwd = document.getElementById('pwdInput').value;
+            const token = _dk(pwd);
+            if (token) {
+                githubToken = token;
+                localStorage.setItem('meal_token', token);
+                document.getElementById('pwdBar').classList.add('connected');
+                document.getElementById('pwdBar').innerHTML = '<span>✅ 已连接GitHub</span>';
+                loadMenu();
+            } else {
+                document.getElementById('pwdInput').value = '';
+                document.getElementById('pwdInput').placeholder = '密码错误，重试';
+                setTimeout(() => { document.getElementById('pwdInput').placeholder = '输入密码连接系统'; }, 2000);
+            }
+        }
+
+        function checkAuth() {
+            if (githubToken) {
+                // 已有缓存token，直接显示已连接
+                document.getElementById('pwdBar').classList.add('connected');
+                document.getElementById('pwdBar').innerHTML = '<span>✅ 已连接GitHub</span>';
+                loadMenu();
+            }
+        }
+
+        // ===== 页面切换 =====
+        function showPage(num) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page' + pageNum).classList.add('active');
-            currentPage = pageNum;
-            
-            // 更新气泡文案
-            document.getElementById('bubbleText').textContent = bubbleTexts[pageNum];
-            
-            // 自动显示气泡
+            document.getElementById('page' + num).classList.add('active');
+            currentPage = num;
+            document.getElementById('bubbleText').textContent = bubbleTexts[num];
             autoShowBubble();
+
+            // 顶部按钮控制
+            document.getElementById('topBtns').style.display = [1,2,3,4,5].includes(num) ? 'flex' : 'none';
+            document.getElementById('btnViewOrders').style.display = [1,2,3].includes(num) ? 'block' : 'none';
+            document.getElementById('btnBackToOrder').style.display = [5].includes(num) ? 'block' : 'none';
+            document.getElementById('btnMenuMgmt').style.display = [4].includes(num) ? 'block' : 'none';
+
+            if (num === 4) loadOrders();
+            if (num === 5) loadMenu();
         }
 
-        // 页面1 → 页面2
+        // ===== 点餐流程 =====
+        function goToPage1() { showPage(1); }
         function goToPage2() {
             customerNo = document.getElementById('customerNo').value.trim();
-            if (!customerNo) {
-                alert('请输入客户序号');
-                return;
-            }
+            if (!customerNo) { alert('请输入客户序号'); return; }
             document.getElementById('displayCustomerNo').textContent = customerNo;
             showPage(2);
         }
 
-        // 页面2 → 页面1
-        function goToPage1() {
-            showPage(1);
+        async function loadMenu() {
+            if (!githubToken) return;
+            try {
+                const menu = await fetchJSON('meal-ordering/data/menu.json');
+                const list = document.getElementById('mealList');
+                list.innerHTML = menu.filter(m => m.status === '上架').map(m => `
+                    <div class="meal-card" onclick="selectMeal(this, '${m.name}', '${m.description}')">
+                        <div class="meal-img">${m.name === '套餐A' ? '🐟' : m.name === '套餐B' ? '🥩' : m.name === '套餐C' ? '🍗' : '🥗'}</div>
+                        <div class="meal-info"><div class="meal-name">${m.name}</div><div class="meal-desc">${m.description}</div></div>
+                        <div class="check-mark">✓</div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
         }
 
-        // 选择套餐
-        function selectMeal(element, mealName, mealDesc) {
-            document.querySelectorAll('.meal-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            selectedMeal = mealName;
-            selectedMealDesc = mealDesc;
+        function selectMeal(el, name, desc) {
+            document.querySelectorAll('.meal-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedMeal = name; selectedMealDesc = desc;
             document.getElementById('btnNext').disabled = false;
         }
 
-        // 页面2 → 页面3
         function goToPage3() {
-            if (!selectedMeal) {
-                alert('请先选择一个套餐');
-                return;
-            }
+            if (!selectedMeal) { alert('请先选择一个套餐'); return; }
             document.getElementById('confirmCustomerNo').textContent = customerNo;
             document.getElementById('confirmMeal').textContent = selectedMeal;
             document.getElementById('confirmMealDesc').textContent = selectedMealDesc;
             showPage(3);
         }
 
-        // 提交订单
-        function submitOrder() {
-            document.getElementById('successOverlay').classList.add('show');
-            console.log('订单数据:', {
-                customerNo: customerNo,
-                meal: selectedMeal,
-                mealDesc: selectedMealDesc,
-                submitTime: new Date().toLocaleString()
-            });
-        }
-
-        // 关闭成功提示
-        function closeSuccess() {
-            document.getElementById('successOverlay').classList.remove('show');
-            customerNo = '';
-            selectedMeal = null;
-            selectedMealDesc = null;
-            document.getElementById('customerNo').value = '';
-            document.querySelectorAll('.meal-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            document.getElementById('btnNext').disabled = true;
-            showPage(1);
-        }
-
-        // 切换气泡
-        function toggleBubble() {
-            const bubble = document.getElementById('bubble');
-            bubbleVisible = !bubbleVisible;
-            bubble.classList.toggle('show', bubbleVisible);
-            
-            if (bubbleVisible) {
-                setTimeout(() => {
-                    if (bubbleVisible) {
-                        bubbleVisible = false;
-                        bubble.classList.remove('show');
-                    }
-                }, 3000);
-            }
-        }
-
-        // 猫咪拖拽功能
-        let isDragging = false;
-        let isClick = false;
-        let startX, startY, offsetX, offsetY;
-        let dragTimeout;
-        const mascot = document.getElementById('mascot');
-        const mascotClose = document.getElementById('mascotClose');
-
-        function getPos(e) {
-            if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            }
-            return { x: e.clientX, y: e.clientY };
-        }
-
-        function startDrag(e) {
-            e.preventDefault();
-            const pos = getPos(e);
-            const rect = mascot.getBoundingClientRect();
-            startX = pos.x;
-            startY = pos.y;
-            offsetX = pos.x - rect.left;
-            offsetY = pos.y - rect.top;
-            isDragging = false;
-            isClick = true;
-            
-            dragTimeout = setTimeout(() => {
-                isClick = false;
-            }, 150);
-        }
-
-        function doDrag(e) {
-            if (!offsetX) return;
-            e.preventDefault();
-            const pos = getPos(e);
-            const dx = pos.x - startX;
-            const dy = pos.y - startY;
-            
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                isDragging = true;
-                isClick = false;
-                clearTimeout(dragTimeout);
-                mascot.classList.add('dragging');
-            }
-            
-            if (isDragging) {
-                const newX = pos.x - offsetX;
-                const newY = pos.y - offsetY;
-                mascot.style.left = newX + 'px';
-                mascot.style.top = newY + 'px';
-                mascot.style.right = 'auto';
-                mascot.style.bottom = 'auto';
-            }
-        }
-
-        function endDrag(e) {
-            clearTimeout(dragTimeout);
-            mascot.classList.remove('dragging');
-            
-            if (isClick && !isDragging) {
-                // 是点击，显示关闭按钮
-                mascotClose.classList.toggle('show');
-                // 同时显示气泡
-                toggleBubble();
-            }
-            
-            offsetX = 0;
-            offsetY = 0;
-            setTimeout(() => {
-                isDragging = false;
-                isClick = false;
-            }, 50);
-        }
-
-        // Mouse events
-        mascot.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', endDrag);
-
-        // Touch events
-        mascot.addEventListener('touchstart', startDrag);
-        document.addEventListener('touchmove', doDrag);
-        document.addEventListener('touchend', endDrag);
-
-        // 处理猫咪点击（显示气泡）
-        function handleMascotClick(e) {
-            // 如果正在拖拽，不触发点击
-            if (isDragging) {
-                e.stopPropagation();
-                return;
-            }
-        }
-
-        // 关闭小助理
-        function hideMascot(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            mascot.style.display = 'none';
-            document.getElementById('bubble').classList.remove('show');
-            bubbleVisible = false;
-            return false;
-        }
-
-        // 回车键支持
-        document.getElementById('customerNo').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                goToPage2();
-            }
-        });
-
-        // 页面加载时自动显示气泡
-        window.addEventListener('load', function() {
-            setTimeout(autoShowBubble, 500);
-        });
-
-        // 备注字数统计
         function updateCharCount() {
             const input = document.getElementById('remarkInput');
-            const count = document.getElementById('charCount');
-            count.textContent = input.value.length + '/100';
+            document.getElementById('charCount').textContent = input.value.length + '/100';
         }
 
-        // 快捷添加备注
         function addRemark(text) {
             const input = document.getElementById('remarkInput');
             const current = input.value.trim();
             if (current.includes(text)) {
-                // 已存在，删除
                 input.value = current.replace(text, '').replace(/、{2,}/g, '、').replace(/^、|、$/g, '').trim();
             } else {
-                // 不存在，追加
-                if (current) {
-                    input.value = current + '、' + text;
-                } else {
-                    input.value = text;
-                }
+                input.value = current ? current + '、' + text : text;
             }
-            // 检查字数限制
-            if (input.value.length > 100) {
-                input.value = input.value.substring(0, 100);
-            }
+            if (input.value.length > 100) input.value = input.value.substring(0, 100);
             updateCharCount();
         }
+
+        async function submitOrder() {
+            const remark = document.getElementById('remarkInput').value.trim();
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+            const order = {
+                id: String(Date.now()).slice(-6),
+                customer_no: customerNo,
+                meal_name: selectedMeal,
+                meal_desc: selectedMealDesc,
+                remark: remark,
+                status: '待出餐',
+                submit_time: `${today} ${timeStr}`,
+                deliver_time: null
+            };
+
+            try {
+                const path = `meal-ordering/data/orders/${today}.json`;
+                let orders = [];
+                try { orders = await fetchJSON(path); } catch(e) {}
+                orders.push(order);
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, `Add order ${order.id}`);
+                document.getElementById('successOverlay').classList.add('show');
+            } catch(e) { alert('提交失败，请重试'); }
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+            customerNo = ''; selectedMeal = null; selectedMealDesc = null;
+            document.getElementById('customerNo').value = '';
+            document.getElementById('remarkInput').value = '';
+            updateCharCount();
+            document.querySelectorAll('.meal-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('btnNext').disabled = true;
+            showPage(1);
+        }
+
+        // ===== 订单管理 =====
+        async function loadOrders() {
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                const orders = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
+                const total = orders.length;
+                const pending = orders.filter(o => o.status === '待出餐').length;
+                const delivered = orders.filter(o => o.status === '已送达').length;
+                document.getElementById('statTotal').textContent = total;
+                document.getElementById('statPending').textContent = pending;
+                document.getElementById('statDelivered').textContent = delivered;
+
+                const list = document.getElementById('orderList');
+                list.innerHTML = orders.map((o, i) => `
+                    <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
+                        <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
+                        <div class="order-info">
+                            <div class="order-no">序号：${o.customer_no}</div>
+                            <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
+                            <div class="order-time">下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
+                        </div>
+                        <span class="status-tag ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span>
+                    </div>
+                `).join('');
+            } catch(e) { document.getElementById('orderList').innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">今日暂无订单</p>'; }
+        }
+
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            document.getElementById('btnSelectMode').textContent = selectMode ? '取消选择' : '选择';
+            document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = selectMode ? 'flex' : 'none');
+            if (!selectMode) {
+                selectedOrders = [];
+                document.querySelectorAll('.checkbox').forEach(cb => cb.classList.remove('checked'));
+                document.getElementById('btnBatchDeliver').style.display = 'none';
+                document.getElementById('btnBatchDelete').style.display = 'none';
+            }
+        }
+
+        function toggleOrderSelect(idx) {
+            if (!selectMode) return;
+            const cb = document.getElementById('cb_' + idx);
+            cb.classList.toggle('checked');
+            if (cb.classList.contains('checked')) { selectedOrders.push(idx); }
+            else { selectedOrders = selectedOrders.filter(i => i !== idx); }
+            document.getElementById('btnBatchDeliver').style.display = selectedOrders.length > 0 ? 'block' : 'none';
+            document.getElementById('btnBatchDelete').style.display = selectedOrders.length > 0 ? 'block' : 'none';
+            document.getElementById('btnBatchDeliver').disabled = selectedOrders.length === 0;
+            document.getElementById('btnBatchDelete').disabled = selectedOrders.length === 0;
+        }
+
+        async function batchDeliver() {
+            if (selectedOrders.length === 0) return;
+            const today = new Date().toISOString().split('T')[0];
+            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            try {
+                const path = `meal-ordering/data/orders/${today}.json`;
+                let orders = await fetchJSON(path);
+                selectedOrders.forEach(idx => {
+                    orders[idx].status = '已送达';
+                    orders[idx].deliver_time = `${today} ${timeStr}`;
+                });
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, 'Batch deliver');
+                selectedOrders = [];
+                loadOrders();
+                toggleSelectMode();
+                alert('送达确认成功！');
+            } catch(e) { alert('操作失败'); }
+        }
+
+        // ===== 删除订单 =====
+        function showDeleteConfirm() { document.getElementById('deleteModal').classList.add('show'); }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            document.getElementById('deletePwdInput').value = '';
+            document.getElementById('btnConfirmDelete').disabled = true;
+        }
+        function checkDeletePwd() {
+            const pwd = document.getElementById('deletePwdInput').value;
+            document.getElementById('btnConfirmDelete').disabled = pwd !== DELETE_PWD;
+        }
+        async function confirmDelete() {
+            if (selectedOrders.length === 0) return;
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                const path = `meal-ordering/data/orders/${today}.json`;
+                let orders = await fetchJSON(path);
+                orders = orders.filter((_, i) => !selectedOrders.includes(i));
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, 'Delete orders');
+                selectedOrders = [];
+                closeDeleteModal();
+                loadOrders();
+                toggleSelectMode();
+            } catch(e) { alert('删除失败'); }
+        }
+
+        // ===== 餐品管理 =====
+        async function loadMenuList() {
+            if (!githubToken) return;
+            try {
+                const menu = await fetchJSON('meal-ordering/data/menu.json');
+                const list = document.getElementById('menuList');
+                list.innerHTML = menu.map((m, i) => `
+                    <div class="menu-item">
+                        <div class="menu-icon">${m.name === '套餐A' ? '🐟' : m.name === '套餐B' ? '🥩' : m.name === '套餐C' ? '🍗' : '🥗'}</div>
+                        <div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-desc">${m.description}</div></div>
+                        <div class="menu-actions">
+                            <button class="btn-edit" onclick="editMenu(${i})">编辑</button>
+                            <button class="btn-del" onclick="deleteMenu(${i})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {}
+        }
+
+        function loadMenu() { loadMenuList(); }
+
+        function showAddMenuModal() { editingMenuId = null; document.getElementById('menuModalTitle').textContent = '添加套餐'; document.getElementById('menuNameInput').value = ''; document.getElementById('menuDescInput').value = ''; document.getElementById('menuModal').classList.add('show'); }
+        function closeMenuModal() { document.getElementById('menuModal').classList.remove('show'); }
+
+        async function editMenu(idx) {
+            const menu = await fetchJSON('meal-ordering/data/menu.json');
+            editingMenuId = idx;
+            document.getElementById('menuModalTitle').textContent = '编辑套餐';
+            document.getElementById('menuNameInput').value = menu[idx].name;
+            document.getElementById('menuDescInput').value = menu[idx].description;
+            document.getElementById('menuModal').classList.add('show');
+        }
+
+        async function saveMenu() {
+            const name = document.getElementById('menuNameInput').value.trim();
+            const desc = document.getElementById('menuDescInput').value.trim();
+            if (!name || !desc) { alert('请填写完整'); return; }
+            try {
+                const path = 'meal-ordering/data/menu.json';
+                let menu = await fetchJSON(path);
+                if (editingMenuId !== null) {
+                    menu[editingMenuId].name = name;
+                    menu[editingMenuId].description = desc;
+                } else {
+                    menu.push({ id: menu.length + 1, name, description: desc, image: '', status: '上架' });
+                }
+                const sha = await getSHA(path);
+                await saveJSON(path, menu, sha, editingMenuId !== null ? 'Edit menu' : 'Add menu');
+                closeMenuModal();
+                loadMenuList();
+            } catch(e) { alert('保存失败'); }
+        }
+
+        async function deleteMenu(idx) {
+            if (!confirm('确定删除该套餐？')) return;
+            try {
+                const path = 'meal-ordering/data/menu.json';
+                let menu = await fetchJSON(path);
+                menu.splice(idx, 1);
+                const sha = await getSHA(path);
+                await saveJSON(path, menu, sha, 'Delete menu');
+                loadMenuList();
+            } catch(e) { alert('删除失败'); }
+        }
+
+        // ===== 猫咪拖拽 =====
+        let isDragging = false, isClick = false, startX, startY, offsetX, offsetY, dragTimeout;
+        const mascot = document.getElementById('mascot');
+        const mascotClose = document.getElementById('mascotClose');
+
+        function getPos(e) { return e.touches?.length ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
+        function startDrag(e) { e.preventDefault(); const pos = getPos(e), rect = mascot.getBoundingClientRect(); startX = pos.x; startY = pos.y; offsetX = pos.x - rect.left; offsetY = pos.y - rect.top; isDragging = false; isClick = true; dragTimeout = setTimeout(() => { isClick = false; }, 150); }
+        function doDrag(e) { if (!offsetX) return; e.preventDefault(); const pos = getPos(e); if (Math.abs(pos.x - startX) > 5 || Math.abs(pos.y - startY) > 5) { isDragging = true; isClick = false; clearTimeout(dragTimeout); mascot.classList.add('dragging'); } if (isDragging) { mascot.style.left = (pos.x - offsetX) + 'px'; mascot.style.top = (pos.y - offsetY) + 'px'; mascot.style.right = 'auto'; mascot.style.bottom = 'auto'; } }
+        function endDrag(e) { clearTimeout(dragTimeout); mascot.classList.remove('dragging'); if (isClick && !isDragging) { mascotClose.classList.toggle('show'); toggleBubble(); } offsetX = 0; offsetY = 0; setTimeout(() => { isDragging = false; isClick = false; }, 50); }
+        mascot.addEventListener('mousedown', startDrag); document.addEventListener('mousemove', doDrag); document.addEventListener('mouseup', endDrag);
+        mascot.addEventListener('touchstart', startDrag); document.addEventListener('touchmove', doDrag); document.addEventListener('touchend', endDrag);
+        function handleMascotClick(e) { if (isDragging) e.stopPropagation(); }
+        function hideMascot(e) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); mascot.style.display = 'none'; document.getElementById('bubble').classList.remove('show'); bubbleVisible = false; return false; }
+
+        // ===== 气泡 =====
+        function autoShowBubble() { const b = document.getElementById('bubble'); bubbleVisible = true; b.classList.add('show'); setTimeout(() => { bubbleVisible = false; b.classList.remove('show'); }, 3000); }
+        function toggleBubble() { const b = document.getElementById('bubble'); bubbleVisible = !bubbleVisible; b.classList.toggle('show', bubbleVisible); if (bubbleVisible) setTimeout(() => { if (bubbleVisible) { bubbleVisible = false; b.classList.remove('show'); } }, 3000); }
+
+        // ===== 初始化 =====
+        document.getElementById('customerNo').addEventListener('keypress', function(e) { if (e.key === 'Enter') goToPage2(); });
+        window.addEventListener('load', () => {
+            checkAuth();
+            setTimeout(autoShowBubble, 500);
+            document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = 'none');
+        });
     </script>
 </body>
 </html>
