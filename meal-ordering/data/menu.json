@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "套餐A",
+    "description": "米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤",
+    "image": "",
+    "status": "上架"
+  },
+  {
+    "id": 2,
+    "name": "套餐B",
+    "description": "米饭 + 番茄牛腩 + 凉拌木耳 + 玉米排骨汤",
+    "image": "",
+    "status": "上架"
+  },
+  {
+    "id": 3,
+    "name": "套餐C",
+    "description": "米饭 + 宫保鸡丁 + 清炒西兰花 + 冬瓜汤",
+    "image": "",
+    "status": "上架"
+  },
+  {
+    "id": 4,
+    "name": "无糖套餐",
+    "description": "糙米饭 + 清蒸鲈鱼 + 白灼菜心 + 无糖豆浆",
+    "image": "",
+    "status": "上架"
+  }
+]
