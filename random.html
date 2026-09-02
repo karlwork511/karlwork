@@ -12,8 +12,6 @@
   --text:#fff;--text2:#b8b0d0;--text3:#706888;
   --orange:#ff9f43;--orange-dark:#e67e22;
   --cream:#ffeaa7;--pink:#ff6b81;
-  --hat:#8B6914;--hat-band:#C0392B;
-  --board:#DEB887;--board-ring:#8B4513;
   --red:#ff4757;--green:#2ed573;--blue:#5352ed;
   --safe-top:env(safe-area-inset-top,20px);
   --safe-bottom:env(safe-area-inset-bottom,20px);
@@ -95,32 +93,36 @@ body{
 .scene.centered .target-area{
   right:auto!important;left:50%!important;top:45%!important;
   transform:translate(-50%,-50%)!important;
-  width:70%!important;
+  width:72%!important;
   transition:all .8s cubic-bezier(.22,.61,.36,1);
 }
 .scene.centered{transform:scale(1);filter:brightness(1)}
 
-/* 猫 */
+/* 猫咪贴图 */
 .cat-area{
-  position:absolute;left:5%;bottom:10%;width:42%;
+  position:absolute;left:3%;bottom:8%;width:44%;
   display:flex;flex-direction:column;align-items:center;
   animation:catIdle 3s ease-in-out infinite;
 }
-@keyframes catIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes catIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-.cat-svg{width:100%;max-width:200px}
-.cat-svg .arm-group{transform-origin:120px 140px;transition:transform .1s}
-.cat-svg.throwing .arm-group{animation:armThrow .6s ease-out forwards}
-@keyframes armThrow{
-  0%{transform:rotate(0)}
-  30%{transform:rotate(-40deg)}
-  60%{transform:rotate(20deg)}
-  100%{transform:rotate(0)}
+.cat-img{
+  width:100%;max-width:220px;
+  object-fit:contain;
+  transition:transform .3s ease;
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.4));
 }
-.cat-svg .tail-path{animation:tailWag 2s ease-in-out infinite}
-@keyframes tailWag{0%,100%{d:path('M125,180 Q155,160 150,125')}50%{d:path('M125,180 Q165,155 155,120')}}
+.cat-img.throwing{
+  animation:catThrow .6s ease-out forwards;
+}
+@keyframes catThrow{
+  0%{transform:rotate(0) scale(1)}
+  25%{transform:rotate(-8deg) scale(.96)}
+  50%{transform:rotate(5deg) scale(1.04)}
+  100%{transform:rotate(0) scale(1)}
+}
 
-/* 飞镖 */
+/* 飞镖(飞行中) */
 .dart{
   position:absolute;left:38%;bottom:38%;
   width:28px;height:28px;
@@ -165,50 +167,49 @@ body{
   border-radius:2px;
 }
 
-/* 靶子 */
+/* 靶子(贴图) */
 .target-area{
   position:absolute;right:2%;top:50%;transform:translateY(-50%);
   width:46%;display:flex;flex-direction:column;align-items:center;
   opacity:0;transition:opacity .4s;
 }
 .target-area.visible{opacity:1}
-.board-wrap{position:relative;width:100%;aspect-ratio:1;max-width:240px}
+.board-wrap{position:relative;width:100%;aspect-ratio:1;max-width:260px}
 .board{
   width:100%;height:100%;border-radius:50%;
-  position:relative;
-  box-shadow:0 0 0 6px var(--board-ring),0 0 0 10px rgba(139,69,19,.3),0 10px 40px rgba(0,0,0,.5);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 0 6px #8B4513,0 0 0 10px rgba(139,69,19,.3),0 10px 40px rgba(0,0,0,.5);
   transition:transform .4s;
 }
 .board.hit{animation:boardHit .4s ease-out}
 @keyframes boardHit{0%{transform:scale(1)}30%{transform:scale(.93)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
-.board-seg{
+
+.board-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;border-radius:50%;
+}
+
+/* 靶子上的选项文字叠加 */
+.board-labels{position:absolute;inset:0;z-index:5}
+.board-label{
   position:absolute;top:50%;left:50%;
-  width:50%;height:50%;
-  transform-origin:0 0;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
-}
-.board-seg-bg{
-  position:absolute;inset:0;
-  clip-path:polygon(0 0,100% 0,100% 100%);
-}
-.board-seg-text{
-  position:relative;z-index:2;
-  font-size:11px;font-weight:600;
-  transform:rotate(var(--rot));
-  margin-left:30%;
+  font-size:11px;font-weight:700;
   white-space:nowrap;
-  text-shadow:0 1px 2px rgba(0,0,0,.3);
-  max-width:60px;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 6px rgba(0,0,0,.4);
+  transform-origin:0 0;
+  pointer-events:none;
 }
+
+/* 靶心 */
 .board-center{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:36px;height:36px;border-radius:50%;
-  background:radial-gradient(circle,#fff 30%,var(--cream) 100%);
+  background:radial-gradient(circle,rgba(255,255,255,.9) 30%,rgba(255,234,167,.7) 100%);
   box-shadow:0 2px 8px rgba(0,0,0,.3);
   z-index:10;display:flex;align-items:center;justify-content:center;
   font-size:16px;
 }
+
 /* 飞镖钉在靶上 */
 .board-dart{
   position:absolute;top:50%;left:50%;z-index:11;
@@ -343,9 +344,6 @@ body{
 /* Toast */
 .toast{position:fixed;top:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 18px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-
-/* 猫爪印装饰 */
-.paw-deco{position:absolute;opacity:.04;font-size:20px;pointer-events:none}
 </style>
 </head>
 <body>
@@ -380,70 +378,9 @@ body{
   </div>
   <div class="scene-wrap">
     <div class="scene" id="scene">
-      <!-- 猫 -->
+      <!-- 猫咪贴图 -->
       <div class="cat-area" id="catArea">
-        <svg class="cat-svg" id="catSvg" viewBox="0 0 200 260">
-          <!-- 尾巴 -->
-          <path class="tail-path" d="M125,180 Q155,160 150,125" stroke="var(--orange)" stroke-width="10" fill="none" stroke-linecap="round"/>
-          <!-- 身体 -->
-          <ellipse cx="100" cy="172" rx="34" ry="48" fill="var(--orange)"/>
-          <ellipse cx="100" cy="178" rx="22" ry="32" fill="var(--cream)"/>
-          <!-- 条纹 -->
-          <path d="M74,155 Q80,150 74,145" stroke="var(--orange-dark)" stroke-width="2" fill="none"/>
-          <path d="M126,155 Q120,150 126,145" stroke="var(--orange-dark)" stroke-width="2" fill="none"/>
-          <path d="M78,170 Q83,166 78,162" stroke="var(--orange-dark)" stroke-width="2" fill="none"/>
-          <!-- 左脚 -->
-          <ellipse cx="82" cy="218" rx="14" ry="8" fill="var(--orange)"/>
-          <ellipse cx="82" cy="220" rx="9" ry="4" fill="var(--cream)"/>
-          <!-- 右脚 -->
-          <ellipse cx="118" cy="218" rx="14" ry="8" fill="var(--orange)"/>
-          <ellipse cx="118" cy="220" rx="9" ry="4" fill="var(--cream)"/>
-          <!-- 左手 -->
-          <ellipse cx="60" cy="162" rx="8" ry="14" fill="var(--orange)" transform="rotate(12,60,162)"/>
-          <!-- 右手+飞镖 -->
-          <g class="arm-group">
-            <ellipse cx="140" cy="148" rx="8" ry="16" fill="var(--orange)" transform="rotate(-25,140,148)"/>
-            <g id="dartInPaw">
-              <line x1="145" y1="132" x2="152" y2="108" stroke="#8B4513" stroke-width="3" stroke-linecap="round"/>
-              <polygon points="152,108 148,114 156,114" fill="var(--red)"/>
-              <polygon points="145,132 142,137 148,137" fill="var(--cream)" opacity=".8"/>
-            </g>
-          </g>
-          <!-- 头 -->
-          <circle cx="100" cy="82" r="38" fill="var(--orange)"/>
-          <!-- 耳朵 -->
-          <polygon points="68,58 54,18 88,46" fill="var(--orange)"/>
-          <polygon points="71,53 60,26 85,47" fill="var(--pink)" opacity=".4"/>
-          <polygon points="132,58 146,18 112,46" fill="var(--orange)"/>
-          <polygon points="129,53 140,26 115,47" fill="var(--pink)" opacity=".4"/>
-          <!-- 脸 -->
-          <ellipse cx="100" cy="90" rx="24" ry="18" fill="var(--cream)" opacity=".5"/>
-          <!-- 眼睛 -->
-          <g id="catEyes">
-            <ellipse cx="84" cy="78" rx="7" ry="8" fill="white"/>
-            <ellipse cx="116" cy="78" rx="7" ry="8" fill="white"/>
-            <ellipse cx="86" cy="77" rx="4" ry="5" fill="#2d3436"/>
-            <ellipse cx="118" cy="77" rx="4" ry="5" fill="#2d3436"/>
-            <circle cx="88" cy="74" r="2" fill="white"/>
-            <circle cx="120" cy="74" r="2" fill="white"/>
-          </g>
-          <!-- 鼻子 -->
-          <path d="M97,90 L100,94 L103,90" fill="var(--pink)"/>
-          <!-- 嘴 -->
-          <path d="M100,94 Q94,101 88,97" stroke="#555" stroke-width="1.5" fill="none"/>
-          <path d="M100,94 Q106,101 112,97" stroke="#555" stroke-width="1.5" fill="none"/>
-          <!-- 胡须 -->
-          <line x1="62" y1="84" x2="83" y2="88" stroke="#ccc" stroke-width="1"/>
-          <line x1="60" y1="92" x2="82" y2="92" stroke="#ccc" stroke-width="1"/>
-          <line x1="138" y1="84" x2="117" y2="88" stroke="#ccc" stroke-width="1"/>
-          <line x1="140" y1="92" x2="118" y2="92" stroke="#ccc" stroke-width="1"/>
-          <!-- 牛仔帽 -->
-          <ellipse cx="100" cy="48" rx="54" ry="11" fill="var(--hat)"/>
-          <path d="M60,48 Q60,14 100,18 Q140,14 140,48" fill="var(--hat)"/>
-          <rect x="62" y="40" width="76" height="7" rx="3" fill="var(--hat-band)"/>
-          <!-- 帽上星星 -->
-          <text x="100" y="47" text-anchor="middle" font-size="8" fill="var(--cream)">★</text>
-        </svg>
+        <img class="cat-img" id="catImg" src="cowboy_cat.png" alt="牛仔猫">
       </div>
 
       <!-- 飞镖(飞行中) -->
@@ -452,11 +389,12 @@ body{
       <!-- 速度线 -->
       <div class="speed-lines" id="speedLines"></div>
 
-      <!-- 靶子 -->
+      <!-- 靶子(贴图) -->
       <div class="target-area" id="targetArea">
         <div class="board-wrap">
           <div class="board" id="dartBoard">
-            <div id="boardSegs"></div>
+            <img class="board-img" id="boardImg" src="dartboard.png" alt="飞镖靶">
+            <div class="board-labels" id="boardLabels"></div>
             <div class="board-center">🐱</div>
             <div class="board-dart" id="boardDart"></div>
           </div>
@@ -556,9 +494,6 @@ function ldH(){try{return JSON.parse(localStorage.getItem(HK))}catch(e){return[]
 function svH(aid,result){const h=ldH();const a=getA(aid);h.unshift({activityId:aid,activityName:a?.name||'',result,time:Date.now()});if(h.length>200)h.length=200;localStorage.setItem(HK,JSON.stringify(h))}
 function getA(id){return data.activities.find(a=>String(a.id)===String(id))}
 
-// ========== 颜色 ==========
-const COLORS=['#ff6b6b','#ffa502','#2ed573','#5352ed','#a55eea','#ff6b81','#00d2d3','#ff9ff3','#54a0ff','#f368e0'];
-
 // ========== 渲染 ==========
 function renderList(){
   const el=document.getElementById('activityList'),em=document.getElementById('emptyState');
@@ -605,6 +540,8 @@ function quickAdd(){const inp=document.getElementById('quickInput');const v=inp.
 function delItem(i){const a=getA(mgmtId);if(!a)return;a.items.splice(i,1);sv();renderItems();renderList()}
 
 // ========== 游戏 ==========
+const LABEL_COLORS=['#ff6b6b','#ffa502','#2ed573','#5352ed','#a55eea','#ff6b81','#00d2d3','#ff9ff3','#54a0ff','#f368e0'];
+
 function openGame(id){
   const a=getA(id);if(!a)return;
   if(!a.items||!a.items.length){toast('先添加选项吧');openManage(id);return}
@@ -617,11 +554,10 @@ function openGame(id){
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('boardDart').classList.remove('stuck');
   document.getElementById('flyingDart').classList.remove('flying');
-  document.getElementById('catSvg').classList.remove('throwing');
-  document.getElementById('dartInPaw').style.opacity='1';
+  document.getElementById('catImg').classList.remove('throwing');
   document.getElementById('throwBtn').disabled=false;
   document.getElementById('throwBtn').innerHTML='🎯 投飞镖！';
-  // 渲染靶子
+  // 渲染靶子选项文字
   renderBoard(a.items);
   document.getElementById('gameView').classList.add('active');
   document.getElementById('bottomArea').style.display='none';
@@ -635,25 +571,27 @@ function closeGame(){
 }
 
 function renderBoard(items){
-  const el=document.getElementById('boardSegs');
+  const el=document.getElementById('boardLabels');
   const n=Math.min(items.length,10);
   const deg=360/n;
   let html='';
   for(let i=0;i<n;i++){
-    const rot=i*deg-90;
-    const color=COLORS[i%COLORS.length];
-    // 每个扇形：旋转 + skew
-    html+=`<div class="board-seg" style="transform:rotate(${rot}deg) skewY(${deg-90}deg)">
-      <div class="board-seg-bg" style="background:${color};opacity:${.15+i*.05}"></div>
-    </div>`;
-    // 文字需要单独放，不skew
-    const textRot=rot+deg/2;
-    html+=`<div class="board-seg" style="transform:rotate(${textRot}deg);pointer-events:none">
-      <div class="board-seg-text" style="--rot:${0}deg;color:${color};transform:rotate(0deg);margin-left:35%;font-size:${n>6?'9':'11'}px">${esc(items[i])}</div>
-    </div>`;
+    const angle=i*deg-90; // 从12点方向开始
+    const rad=angle*Math.PI/180;
+    // 计算文字位置：在圆环中间一圈（距中心约38%半径处）
+    const r=38; // 百分比
+    const x=50+r*Math.cos(rad);
+    const y=50+r*Math.sin(rad);
+    const color=LABEL_COLORS[i%LABEL_COLORS.length];
+    const fontSize=n>7?'9px':'11px';
+    html+=`<div class="board-label" style="
+      left:${x}%;top:${y}%;
+      transform:translate(-50%,-50%) rotate(${angle+90}deg);
+      color:${color};
+      font-size:${fontSize};
+    ">${esc(items[i])}</div>`;
   }
-  // 底色
-  el.innerHTML=`<div style="position:absolute;inset:0;border-radius:50%;background:var(--board);opacity:.15"></div>`+html;
+  el.innerHTML=html;
 }
 
 async function throwDart(){
@@ -664,7 +602,7 @@ async function throwDart(){
   btn.disabled=true;btn.innerHTML='✨ 飞行中...';
 
   const result=a.items[Math.floor(Math.random()*a.items.length)];
-  const catSvg=document.getElementById('catSvg');
+  const catImg=document.getElementById('catImg');
   const dart=document.getElementById('flyingDart');
   const scene=document.getElementById('scene');
   const target=document.getElementById('targetArea');
@@ -675,9 +613,8 @@ async function throwDart(){
   scene.classList.remove('centered');
   document.getElementById('resultPanel').classList.remove('show');
 
-  // 1. 猫投掷
-  catSvg.classList.add('throwing');
-  document.getElementById('dartInPaw').style.opacity='0';
+  // 1. 猫投掷动画
+  catImg.classList.add('throwing');
 
   await sleep(300);
 
@@ -709,20 +646,21 @@ async function throwDart(){
   // 粒子
   spawnParticles();
 
-  // 速度线清理
+  // 清理
   document.getElementById('speedLines').classList.remove('active');
   dart.classList.remove('flying');
 
   await sleep(400);
 
-  // 6. 镜头回到居中，靶子+结果居中展示
+  // 6. 镜头回正
   scene.classList.remove('zoom');
   await sleep(300);
-  scene.classList.add('centered');
 
+  // 7. 靶子居中展示
+  scene.classList.add('centered');
   await sleep(400);
 
-  // 7. 显示结果
+  // 8. 显示结果
   document.getElementById('resultValue').textContent=result;
   document.getElementById('resultPanel').classList.add('show');
   const emojis=['😺 喵说就这个！','🐱 命中注定！','✨ 猫神指引！','🎯 一镖即中！','😸 就决定是你了！'];
@@ -734,13 +672,12 @@ async function throwDart(){
   btn.innerHTML='🎯 再投一次';
   btn.disabled=false;
   isBusy=false;
-  catSvg.classList.remove('throwing');
+  catImg.classList.remove('throwing');
 }
 
 function spawnParticles(){
   const el=document.getElementById('particles');
   const colors=['#ff6b6b','#ffa502','#2ed573','#5352ed','#ff9ff3','#fff'];
-  // 靶子中心位置（相对于scene）
   const targetEl=document.getElementById('targetArea');
   const rect=targetEl.getBoundingClientRect();
   const sceneRect=document.getElementById('scene').getBoundingClientRect();
