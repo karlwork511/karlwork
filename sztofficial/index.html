@@ -1255,8 +1255,6 @@ function openModal() {
   const overlay = document.getElementById('modalOverlay');
   overlay.style.display = 'flex';
   requestAnimationFrame(() => overlay.classList.add('show'));
-  document.getElementById('formArea').style.display = 'block';
-  document.getElementById('formSuccess').style.display = 'none';
 }
 function closeModal() {
   const overlay = document.getElementById('modalOverlay');
