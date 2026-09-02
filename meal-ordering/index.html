@@ -23,19 +23,7 @@
         .header h1 { font-size: 28px; color: #2c3e50; font-weight: 600; }
         .header .subtitle { font-size: 14px; color: #95a5a6; margin-top: 8px; }
 
-        /* 密码输入条 */
-        .pwd-bar { background: #fff3cd; border-radius: 12px; padding: 14px 16px; margin-top: 12px; display: flex; align-items: center; gap: 10px; transition: all 0.3s; }
-        .pwd-bar input { flex: 1; padding: 10px 14px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; letter-spacing: 4px; text-align: center; }
-        .pwd-bar input:focus { border-color: #856404; }
-        .pwd-bar button { padding: 10px 18px; font-size: 14px; font-weight: 600; background: #856404; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .pwd-bar button:active { transform: scale(0.95); }
-        .pwd-bar.connected { background: #d4edda; }
-        .pwd-bar.connected span { color: #155724; font-size: 14px; font-weight: 500; }
-        .pwd-error { color: #e74c3c; font-size: 12px; display: none; margin-top: 6px; text-align: center; }
-        .pwd-error.show { display: block; }
-        .pwd-bar-wrap { margin-bottom: 8px; }
-
-        /* 右上角按钮 */
+        /* 右上角按钮组 */
         .top-right-btns {
             position: fixed;
             top: 16px;
@@ -56,6 +44,35 @@
         .top-btn.primary { background: #3498db; color: white; }
         .top-btn.secondary { background: #ecf0f1; color: #7f8c8d; }
         .top-btn:active { transform: scale(0.95); }
+
+        .settings-btn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        .settings-btn:active { transform: scale(0.95); }
+        .settings-dot {
+            width: 8px;
+            height: 8px;
+            background: #e74c3c;
+            border-radius: 50%;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
 
         /* 页面切换 */
         .page { display: none; animation: fadeIn 0.3s ease; }
@@ -78,6 +95,7 @@
         .meal-card .meal-info { flex: 1; }
         .meal-card .meal-name { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; }
         .meal-card .meal-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
+        .meal-card .meal-tag { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 600; border-radius: 6px; margin-right: 6px; }
         .meal-card .check-mark { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 14px; color: white; }
         .meal-card.selected .check-mark { background: #3498db; border-color: #3498db; }
 
@@ -151,6 +169,12 @@
         .modal-box .modal-btns { display: flex; gap: 12px; }
         .modal-box .modal-btns .btn { padding: 14px; font-size: 15px; }
 
+        /* 设置弹窗特殊样式 */
+        .settings-status { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+        .settings-status.connected { background: #d4edda; color: #155724; }
+        .settings-status.disconnected { background: #fff3cd; color: #856404; }
+        .settings-status .status-icon { font-size: 18px; }
+
         /* 成功提示 */
         .success-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .success-overlay.show { opacity: 1; pointer-events: auto; }
@@ -176,9 +200,16 @@
     </style>
 </head>
 <body>
+    <!-- 设置按钮 -->
+    <button class="settings-btn" id="settingsBtn" onclick="openSettings()">
+        ⚙
+        <div class="settings-dot" id="settingsDot"></div>
+    </button>
+
     <!-- 右上角按钮 -->
     <div class="top-right-btns" id="topBtns" style="display:none;">
         <button class="top-btn secondary" id="btnBackToOrder" style="display:none;" onclick="showPage(4)">返回订单</button>
+        <button class="top-btn secondary" id="btnBackToMeal" style="display:none;" onclick="showPage(1)">返回点餐</button>
         <button class="top-btn primary" id="btnViewOrders" style="display:none;" onclick="showPage(4)">查看订单</button>
         <button class="top-btn secondary" id="btnMenuMgmt" style="display:none;" onclick="showPage(5)">餐品管理</button>
     </div>
@@ -187,15 +218,6 @@
         <div class="header">
             <h1>🏥 医院点餐系统</h1>
             <div class="subtitle">健康体检 · 营养配餐</div>
-        </div>
-
-        <!-- 密码输入条 -->
-        <div class="pwd-bar-wrap" id="pwdBarWrap">
-            <div class="pwd-bar" id="pwdBar">
-                <input type="password" id="pwdInput" placeholder="输入密码连接系统" maxlength="10" onkeypress="if(event.key==='Enter')doUnlock()">
-                <button onclick="doUnlock()">连接</button>
-            </div>
-            <div class="pwd-error" id="pwdError">密码错误</div>
         </div>
 
         <!-- 页面1：点餐入口 -->
@@ -215,7 +237,9 @@
             <div style="margin-bottom: 16px;">
                 <div style="font-size: 15px; color: #7f8c8d;">客户序号：<span id="displayCustomerNo" style="font-weight: 600; color: #3498db;"></span></div>
             </div>
-            <div class="meal-list" id="mealList"></div>
+            <div class="meal-list" id="mealList">
+                <p style="text-align:center;color:#95a5a6;padding:40px;">请先在左上角⚙设置中连接系统</p>
+            </div>
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="goToPage1()">返回</button>
                 <button class="btn btn-primary" id="btnNext" onclick="goToPage3()" disabled>下一步</button>
@@ -271,6 +295,23 @@
         </div>
     </div>
 
+    <!-- 设置弹窗 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <div class="modal-title">⚙ 系统设置</div>
+            <div class="settings-status disconnected" id="settingsStatus">
+                <span class="status-icon">🔴</span>
+                <span>未连接</span>
+            </div>
+            <input type="password" class="modal-input" id="settingsPwdInput" placeholder="输入密码连接系统" onkeypress="if(event.key==='Enter')doSettingsConnect()">
+            <div id="settingsPwdError" style="color:#e74c3c;font-size:13px;text-align:center;margin-bottom:12px;display:none;">密码错误</div>
+            <div class="modal-btns">
+                <button class="btn btn-secondary" onclick="closeSettings()">关闭</button>
+                <button class="btn btn-primary" id="btnConnect" onclick="doSettingsConnect()">连接</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 删除确认弹窗 -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
@@ -318,9 +359,7 @@
 
     <script>
         // ===== 系统配置（加密存储）=====
-        // 数据连接密钥（Base64反转编码）
         const _ec = '==QUZxWeGBjVxRWbhBDZNlnWJZVMlJVdGJkWiBnMDNTM5NjdNt0Xwh2Z';
-        // 解锁密钥
         const _uk = '0913';
         function _dk(p) {
             if (p !== _uk) return null;
@@ -373,28 +412,54 @@
             return resp.ok ? (await resp.json()).sha : null;
         }
 
-        // ===== 密码解锁逻辑 =====
-        function doUnlock() {
-            const pwd = document.getElementById('pwdInput').value;
+        // ===== 设置弹窗 =====
+        function openSettings() {
+            updateSettingsStatus();
+            document.getElementById('settingsPwdInput').value = '';
+            document.getElementById('settingsPwdError').style.display = 'none';
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function updateSettingsStatus() {
+            const statusEl = document.getElementById('settingsStatus');
+            const dotEl = document.getElementById('settingsDot');
+            if (githubToken) {
+                statusEl.className = 'settings-status connected';
+                statusEl.innerHTML = '<span class="status-icon">🟢</span><span>已连接GitHub</span>';
+                dotEl.style.display = 'none';
+            } else {
+                statusEl.className = 'settings-status disconnected';
+                statusEl.innerHTML = '<span class="status-icon">🔴</span><span>未连接</span>';
+                dotEl.style.display = 'block';
+            }
+        }
+
+        function doSettingsConnect() {
+            const pwd = document.getElementById('settingsPwdInput').value;
             const token = _dk(pwd);
             if (token) {
                 githubToken = token;
                 localStorage.setItem('meal_token', token);
-                document.getElementById('pwdBar').classList.add('connected');
-                document.getElementById('pwdBar').innerHTML = '<span>✅ 已连接GitHub</span>';
-                loadMenu();
+                updateSettingsStatus();
+                document.getElementById('settingsPwdInput').value = '';
+                document.getElementById('settingsPwdError').style.display = 'none';
+                closeSettings();
+                // 已连接后刷新当前页面数据
+                if (currentPage === 2) loadMenu();
+                if (currentPage === 4) loadOrders();
+                if (currentPage === 5) loadMenuList();
             } else {
-                document.getElementById('pwdInput').value = '';
-                document.getElementById('pwdInput').placeholder = '密码错误，重试';
-                setTimeout(() => { document.getElementById('pwdInput').placeholder = '输入密码连接系统'; }, 2000);
+                document.getElementById('settingsPwdInput').value = '';
+                document.getElementById('settingsPwdError').style.display = 'block';
             }
         }
 
         function checkAuth() {
             if (githubToken) {
-                // 已有缓存token，直接显示已连接
-                document.getElementById('pwdBar').classList.add('connected');
-                document.getElementById('pwdBar').innerHTML = '<span>✅ 已连接GitHub</span>';
                 loadMenu();
             }
         }
@@ -411,19 +476,22 @@
             document.getElementById('topBtns').style.display = [1,2,3,4,5].includes(num) ? 'flex' : 'none';
             document.getElementById('btnViewOrders').style.display = [1,2,3].includes(num) ? 'block' : 'none';
             document.getElementById('btnBackToOrder').style.display = [5].includes(num) ? 'block' : 'none';
+            document.getElementById('btnBackToMeal').style.display = [4].includes(num) ? 'block' : 'none';
             document.getElementById('btnMenuMgmt').style.display = [4].includes(num) ? 'block' : 'none';
 
             if (num === 4) loadOrders();
-            if (num === 5) loadMenu();
+            if (num === 5) loadMenuList();
         }
 
         // ===== 点餐流程 =====
         function goToPage1() { showPage(1); }
         function goToPage2() {
+            if (!githubToken) { alert('请先在左上角设置中连接系统'); return; }
             customerNo = document.getElementById('customerNo').value.trim();
             if (!customerNo) { alert('请输入客户序号'); return; }
             document.getElementById('displayCustomerNo').textContent = customerNo;
             showPage(2);
+            loadMenu();
         }
 
         async function loadMenu() {
@@ -433,8 +501,11 @@
                 const list = document.getElementById('mealList');
                 list.innerHTML = menu.filter(m => m.status === '上架').map(m => `
                     <div class="meal-card" onclick="selectMeal(this, '${m.name}', '${m.description}')">
-                        <div class="meal-img">${m.name === '套餐A' ? '🐟' : m.name === '套餐B' ? '🥩' : m.name === '套餐C' ? '🍗' : '🥗'}</div>
-                        <div class="meal-info"><div class="meal-name">${m.name}</div><div class="meal-desc">${m.description}</div></div>
+                        <div class="meal-img">${m.icon || ''}</div>
+                        <div class="meal-info">
+                            <div class="meal-name">${m.name}</div>
+                            <div class="meal-desc">${m.description}</div>
+                        </div>
                         <div class="check-mark">✓</div>
                     </div>
                 `).join('');
@@ -617,7 +688,7 @@
                 const list = document.getElementById('menuList');
                 list.innerHTML = menu.map((m, i) => `
                     <div class="menu-item">
-                        <div class="menu-icon">${m.name === '套餐A' ? '🐟' : m.name === '套餐B' ? '🥩' : m.name === '套餐C' ? '🍗' : '🥗'}</div>
+                        <div class="menu-icon">${m.icon || '🥗'}</div>
                         <div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-desc">${m.description}</div></div>
                         <div class="menu-actions">
                             <button class="btn-edit" onclick="editMenu(${i})">编辑</button>
@@ -653,7 +724,7 @@
                     menu[editingMenuId].name = name;
                     menu[editingMenuId].description = desc;
                 } else {
-                    menu.push({ id: menu.length + 1, name, description: desc, image: '', status: '上架' });
+                    menu.push({ id: menu.length + 1, name, description: desc, icon: '🥗', status: '上架' });
                 }
                 const sha = await getSHA(path);
                 await saveJSON(path, menu, sha, editingMenuId !== null ? 'Edit menu' : 'Add menu');
@@ -696,6 +767,7 @@
         document.getElementById('customerNo').addEventListener('keypress', function(e) { if (e.key === 'Enter') goToPage2(); });
         window.addEventListener('load', () => {
             checkAuth();
+            updateSettingsStatus();
             setTimeout(autoShowBubble, 500);
             document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = 'none');
         });
