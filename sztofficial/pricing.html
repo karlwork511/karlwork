@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SZT SaaS 版本功能对比</title>
+  <style>
+    :root {
+      --blue-900: #1e3a5f;
+      --blue-700: #2563a8;
+      --blue-600: #2d6fc4;
+      --blue-500: #3b82f6;
+      --blue-100: #dbeafe;
+      --blue-50: #eff6ff;
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --gray-500: #6b7280;
+      --gray-300: #d1d5db;
+      --gray-100: #f3f4f6;
+      --green-500: #22c55e;
+      --red-400: #f87171;
+      --amber-500: #f59e0b;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--blue-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-header {
+      text-align: center;
+      padding: 48px 24px 24px;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--blue-900);
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 15px;
+      color: var(--gray-500);
+    }
+    .pricing-section {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+    }
+    .pricing-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 28px 24px 24px;
+      box-shadow: var(--shadow);
+      border: 2px solid transparent;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .pricing-card.recommended {
+      border-color: var(--blue-500);
+    }
+    .pricing-card.recommended .badge {
+      display: inline-block;
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--blue-500);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .pricing-card .card-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--blue-900);
+      margin-bottom: 4px;
+    }
+    .pricing-card .card-terminals {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 16px;
+    }
+    .pricing-card .card-price {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--blue-600);
+      margin-bottom: 2px;
+    }
+    .pricing-card .card-price span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+    .pricing-card .card-custom {
+      font-size: 13px;
+      color: var(--blue-600);
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .pricing-card .card-highlights {
+      list-style: none;
+      flex: 1;
+    }
+    .pricing-card .card-highlights li {
+      font-size: 13px;
+      color: var(--gray-700);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pricing-card .card-highlights li:last-child { border-bottom: none; }
+    .pricing-card .card-highlights .val {
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--blue-700);
+    }
+    .table-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+    }
+    .table-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--blue-900);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .comparison-table thead th {
+      background: var(--blue-700);
+      color: #fff;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .comparison-table thead th:first-child {
+      text-align: left;
+      width: 40%;
+    }
+    .comparison-table tbody td {
+      padding: 10px 16px;
+      font-size: 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+    }
+    .comparison-table tbody td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+    .comparison-table tbody tr:hover { background: var(--blue-50); }
+    .comparison-table .group-row td {
+      background: var(--gray-100);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--blue-700);
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: none;
+    }
+    .check { color: var(--green-500); font-size: 18px; font-weight: 700; }
+    .cross { color: var(--red-400); font-size: 16px; }
+    .highlight-cell { font-weight: 700; color: var(--blue-700); }
+    .value-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+    .value-section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--blue-900);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .value-section .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .value-item {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .value-item .v-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    .value-item .v-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue-600);
+      white-space: nowrap;
+    }
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--gray-500);
+      border-top: 1px solid var(--gray-300);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    @media (max-width: 768px) {
+      .pricing-section { grid-template-columns: 1fr; }
+      .value-grid { grid-template-columns: 1fr; }
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .comparison-table { min-width: 520px; }
+      .page-header h1 { font-size: 22px; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .value-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media print {
+      body { background: #fff; }
+      .pricing-card, .comparison-table, .value-item { box-shadow: none; border: 1px solid #ddd; }
+    }
+  
+    .top-nav {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 24px 0;
+      display: flex;
+      justify-content: flex-start;
+    }
+    .top-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--blue-700);
+      background: #fff;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+    }
+    .top-nav a:hover {
+      background: var(--blue-50);
+      border-color: var(--blue-500);
+      color: var(--blue-900);
+    }
+    .top-nav a svg {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+
+<nav class="top-nav">
+  <a href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    返回首页
+  </a>
+</nav>
+
+<header class="page-header">
+  <h1>SZT SaaS 版本功能对比</h1>
+  <p>代购集运平台三档版本，按需选型，灵活扩展</p>
+</header>
+
+<!-- ===== 定价卡片 ===== -->
+<section class="pricing-section">
+  <!-- 基础版 -->
+  <div class="pricing-card">
+    <div class="card-name">基础版</div>
+    <div class="card-terminals">PC 网页端</div>
+    <div class="card-price">¥29,800 <span>/ 年</span></div>
+    <div class="card-custom">✅ 支持界面定制设计</div>
+    <ul class="card-highlights">
+      <li>前台页面 <span class="val">PC端</span></li>
+      <li>多语言 <span class="val">3种</span></li>
+      <li>多货币 <span class="val">3种</span></li>
+      <li>海外仓库 <span class="val">1个</span></li>
+      <li>支付网关 <span class="val">3种</span></li>
+      <li>员工账号 <span class="val">5个</span></li>
+    </ul>
+  </div>
+
+  <!-- 标准版 -->
+  <div class="pricing-card recommended">
+    <div class="badge">🔥 推荐</div>
+    <div class="card-name">标准版</div>
+    <div class="card-terminals">PC + H5 手机端</div>
+    <div class="card-price">¥59,800 <span>/ 年</span></div>
+    <div class="card-custom">✅ 支持界面定制设计</div>
+    <ul class="card-highlights">
+      <li>前台页面 <span class="val">PC + H5</span></li>
+      <li>多语言 <span class="val">5种</span></li>
+      <li>多货币 <span class="val">5种</span></li>
+      <li>海外仓库 <span class="val">2个</span></li>
+      <li>支付网关 <span class="val">5种</span></li>
+      <li>员工账号 <span class="val">10个</span></li>
+      <li>数据大屏 <span class="val">✅</span></li>
+    </ul>
+  </div>
+
+  <!-- 专业版 -->
+  <div class="pricing-card">
+    <div class="card-name">专业版</div>
+    <div class="card-terminals">PC + H5 + APP</div>
+    <div class="card-price">¥99,800 <span>/ 年</span></div>
+    <div class="card-custom">✅ 支持界面定制设计</div>
+    <ul class="card-highlights">
+      <li>前台页面 <span class="val">PC + H5 + APP</span></li>
+      <li>多语言 <span class="val">10种</span></li>
+      <li>多货币 <span class="val">10种</span></li>
+      <li>海外仓库 <span class="val">5个</span></li>
+      <li>支付网关 <span class="val">10种</span></li>
+      <li>员工账号 <span class="val">不限</span></li>
+      <li>数据大屏 <span class="val">✅</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 核心功能对比 ===== -->
+<section class="table-section">
+  <h2>核心功能对比</h2>
+  <div class="table-wrap">
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th scope="col">功能</th>
+        <th scope="col">基础版</th>
+        <th scope="col">标准版</th>
+        <th scope="col">专业版</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 平台基础 -->
+      <tr class="group-row"><td colspan="4">🖥️ 平台基础</td></tr>
+      <tr><td>界面定制设计</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>多语言支持</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
+      <tr><td>多货币切换</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
+      <tr><td>员工账号数</td><td class="highlight-cell">5个</td><td class="highlight-cell">10个</td><td class="highlight-cell">不限</td></tr>
+
+      <!-- 商品与采购 -->
+      <tr class="group-row"><td colspan="4">🛒 商品与采购</td></tr>
+      <tr><td>商品搜索（关键词/链接/淘口令）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>猜您喜欢 / 智能推荐</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>商品收藏 / 浏览记录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>自动采购</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>代购手工填单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>手动推荐商品</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+
+      <!-- 订单与物流 -->
+      <tr class="group-row"><td colspan="4">📦 订单与物流</td></tr>
+      <tr><td>代购订单管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>国际转运订单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>运费估算</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>包裹管理（入库/出库）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>提包合包</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>物流轨迹追踪</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>多仓库管理</td><td class="highlight-cell">1个</td><td class="highlight-cell">2个</td><td class="highlight-cell">5个</td></tr>
+      <tr><td>集运功能</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>PDA扫码仓储</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>海外自提点</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✅</span></td></tr>
+
+      <!-- 用户与支付 -->
+      <tr class="group-row"><td colspan="4">👤 用户与支付</td></tr>
+      <tr><td>会员注册 / 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>Facebook / Google / Line 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>短信 / 邮箱验证码</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>账户余额管理 / 在线充值</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>余额提现</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>支付网关</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
+
+      <!-- 营销与运营 -->
+      <tr class="group-row"><td colspan="4">📣 营销与运营</td></tr>
+      <tr><td>运费优惠券</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>公告管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>帮助中心</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>推广联盟</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>敏感词及品牌风控</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>数据大屏</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+
+      <!-- 增值服务 -->
+      <tr class="group-row"><td colspan="4">📦 增值服务（按需加购）</td></tr>
+      <tr><td>H5 手机端</td><td>+10,000/年</td><td>已含</td><td>已含</td></tr>
+      <tr><td>微信小程序端</td><td>+15,000/年</td><td>+15,000/年</td><td>+15,000/年</td></tr>
+      <tr><td>安卓 APP</td><td>+10,000/年</td><td>+10,000/年</td><td>已含</td></tr>
+      <tr><td>iOS APP</td><td>+10,000/年</td><td>+10,000/年</td><td>已含</td></tr>
+      <tr><td>定制开发</td><td colspan="3" style="text-align:center;">1,500元/人/天</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ===== 增值服务 ===== -->
+<section class="value-section">
+  <h2>增值服务</h2>
+  <p class="subtitle">按需选配，灵活扩展平台能力</p>
+  <div class="value-grid">
+    <div class="value-item"><span class="v-name">H5 手机端</span><span class="v-price">10,000元/年</span></div>
+    <div class="value-item"><span class="v-name">额外仓库</span><span class="v-price">5,000元/仓/年</span></div>
+    <div class="value-item"><span class="v-name">额外语言包</span><span class="v-price">3,000元/语种/年</span></div>
+    <div class="value-item"><span class="v-name">小程序端</span><span class="v-price">15,000元/年</span></div>
+    <div class="value-item"><span class="v-name">PDA扫码仓储</span><span class="v-price">8,000元/年</span></div>
+    <div class="value-item"><span class="v-name">定制化开发</span><span class="v-price">1,500元/人/天</span></div>
+    <div class="value-item"><span class="v-name">现场实施培训</span><span class="v-price">5,000元/次</span></div>
+    <div class="value-item"><span class="v-name">专属客户成功经理</span><span class="v-price">20,000元/年</span></div>
+  </div>
+</section>
+
+<footer class="footer">
+  SZT SaaS · 代购集运平台 · 版本功能对比 · 2026年9月
+</footer>
+
+</body>
+</html>
