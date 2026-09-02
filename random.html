@@ -91,7 +91,14 @@ body{
 /* 场景容器 */
 .scene-wrap{flex:1;position:relative;overflow:hidden}
 .scene{position:absolute;inset:0;transition:transform 1s cubic-bezier(.22,.61,.36,1),filter .8s}
-.scene.zoom{transform:scale(2.2) translate(-8%,-2%);filter:brightness(1.1)}
+.scene.zoom{transform:scale(2.2) translate(12%,2%);filter:brightness(1.1)}
+.scene.centered .target-area{
+  right:auto!important;left:50%!important;top:45%!important;
+  transform:translate(-50%,-50%)!important;
+  width:70%!important;
+  transition:all .8s cubic-bezier(.22,.61,.36,1);
+}
+.scene.centered{transform:scale(1);filter:brightness(1)}
 
 /* 猫 */
 .cat-area{
@@ -605,7 +612,7 @@ function openGame(id){
   document.getElementById('gameActName').textContent=a.name;
   // 重置状态
   const scene=document.getElementById('scene');
-  scene.classList.remove('zoom');
+  scene.classList.remove('zoom','centered');
   document.getElementById('targetArea').classList.remove('visible');
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('boardDart').classList.remove('stuck');
@@ -664,6 +671,10 @@ async function throwDart(){
   const board=document.getElementById('dartBoard');
   const boardDart=document.getElementById('boardDart');
 
+  // 清理上次的居中状态
+  scene.classList.remove('centered');
+  document.getElementById('resultPanel').classList.remove('show');
+
   // 1. 猫投掷
   catSvg.classList.add('throwing');
   document.getElementById('dartInPaw').style.opacity='0';
@@ -704,7 +715,14 @@ async function throwDart(){
 
   await sleep(400);
 
-  // 6. 显示结果
+  // 6. 镜头回到居中，靶子+结果居中展示
+  scene.classList.remove('zoom');
+  await sleep(300);
+  scene.classList.add('centered');
+
+  await sleep(400);
+
+  // 7. 显示结果
   document.getElementById('resultValue').textContent=result;
   document.getElementById('resultPanel').classList.add('show');
   const emojis=['😺 喵说就这个！','🐱 命中注定！','✨ 猫神指引！','🎯 一镖即中！','😸 就决定是你了！'];
