@@ -30,5 +30,17 @@
     "submit_time": "2026-09-02 20:07:29",
     "deliver_time": null,
     "sync_status": ""
+  },
+  {
+    "id": "865337",
+    "host_name": "肖",
+    "customer_no": "一",
+    "meal_name": "套餐A - 罗宋汤鸡柳通粉",
+    "meal_desc": "配：水煮鸡蛋、菠萝包、时令水果、柠檬薏米水",
+    "remark": "",
+    "status": "待出餐",
+    "submit_time": "2026-09-02 20:07:45",
+    "deliver_time": null,
+    "sync_status": ""
   }
 ]
