@@ -37,6 +37,12 @@ body{
   color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
 .icon-btn:active{background:rgba(255,255,255,.12)}
+.icon-btn{position:relative}
+.sync-badge{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2);z-index:2;transition:background .3s}
+.sync-badge.disconnected{background:#888}
+.sync-badge.connected{background:var(--green)}
+.sync-badge.syncing{background:var(--orange);animation:blink 1s infinite}
+.sync-badge.error{background:var(--red)}
 
 /* ========== 内容区 ========== */
 .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 14px 100px;-webkit-overflow-scrolling:touch}
@@ -458,7 +464,7 @@ select.form-input{appearance:none;-webkit-appearance:none;cursor:pointer;backgro
   <div class="top-bar">
     <div class="top-title">🐱 <span>今天啥子？</span></div>
     <div class="top-actions">
-      <button class="icon-btn" onclick="openSyncSettings()">☁️</button>
+      <button class="icon-btn" onclick="openSyncSettings()" id="syncBtn" title="数据同步">☁️<span class="sync-badge disconnected" id="syncBadge"></span></button>
       <button class="icon-btn" onclick="openConfigManage()">⚙️</button>
       <button class="icon-btn" onclick="openHistory()">📜</button>
     </div>
@@ -1326,8 +1332,19 @@ function renderHistory(){
 // ========== 同步 ==========
 function openSyncSettings(){const c=loadSC();document.getElementById('syncToken').value=c.token||'';document.getElementById('syncOwner').value=c.owner||'';document.getElementById('syncRepo').value=c.repo||'';updSync('idle');document.getElementById('syncOverlay').classList.add('active')}
 function loadSC(){try{return JSON.parse(localStorage.getItem(SYK))||{}}catch(e){return{}}}
-function saveSyncCfg(){const c={token:document.getElementById('syncToken').value.trim(),owner:document.getElementById('syncOwner').value.trim(),repo:document.getElementById('syncRepo').value.trim()};if(!c.token||!c.owner||!c.repo)return toast('请填写完整');localStorage.setItem(SYK,JSON.stringify(c));toast('已保存')}
-function updSync(s,msg){const d=document.getElementById('syncDot'),t=document.getElementById('syncText');d.className='sync-dot';if(s==='syncing'){d.classList.add('syncing');t.textContent='同步中...'}else if(s==='ok'){d.classList.add('ok');t.textContent=msg||'同步成功'}else if(s==='fail'){d.classList.add('fail');t.textContent=msg||'同步失败'}else{t.textContent='未同步'}}
+function saveSyncCfg(){const c={token:document.getElementById('syncToken').value.trim(),owner:document.getElementById('syncOwner').value.trim(),repo:document.getElementById('syncRepo').value.trim()};if(!c.token||!c.owner||!c.repo)return toast('请填写完整');localStorage.setItem(SYK,JSON.stringify(c));toast('已保存');checkGitHubConnection()}
+function updBadge(s){const b=document.getElementById('syncBadge');if(!b)return;b.className='sync-badge';if(s==='connected')b.classList.add('connected');else if(s==='syncing')b.classList.add('syncing');else if(s==='error')b.classList.add('error');else b.classList.add('disconnected')}
+function updSync(s,msg){const d=document.getElementById('syncDot'),t=document.getElementById('syncText');d.className='sync-dot';if(s==='syncing'){d.classList.add('syncing');t.textContent='同步中...';updBadge('syncing')}else if(s==='ok'){d.classList.add('ok');t.textContent=msg||'同步成功';updBadge('connected')}else if(s==='fail'){d.classList.add('fail');t.textContent=msg||'同步失败';updBadge('error')}else{t.textContent='未同步'}}
+async function checkGitHubConnection(){
+  const c=loadSC();
+  if(!c.token||!c.owner||!c.repo){updBadge('disconnected');return}
+  updBadge('syncing');
+  try{
+    const url=`https://api.github.com/repos/${c.owner}/${c.repo}`;
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${c.token}`,Accept:'application/vnd.github.v3+json'}});
+    if(r.ok){updBadge('connected')}else{updBadge('error')}
+  }catch(e){updBadge('error')}
+}
 
 async function gitHubPut(c,path,data){
   const url=`https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`;
@@ -1380,7 +1397,7 @@ function closeSheet(id){document.getElementById(id).classList.remove('active')}
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
 
 // ========== 初始化 ==========
-ld();loadCfg();renderList();
+ld();loadCfg();renderList();checkGitHubConnection();
 
 // 生成速度线
 (function(){
