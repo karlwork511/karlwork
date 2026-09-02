@@ -70,5 +70,17 @@
     "submit_time": "2026-09-02 07:09:28",
     "deliver_time": "2026-09-02 07:10:57",
     "sync_status": ""
+  },
+  {
+    "id": "756262",
+    "host_name": "邱",
+    "customer_no": "一",
+    "meal_name": "套餐C - 鲜奶燕麦",
+    "meal_desc": "配：水煮鸡蛋、火腿芝士三文治、时令水果、咖啡",
+    "remark": "不加糖",
+    "status": "待出餐",
+    "submit_time": "2026-09-02 07:12:36",
+    "deliver_time": null,
+    "sync_status": ""
   }
 ]
