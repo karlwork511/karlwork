@@ -391,7 +391,7 @@
             });
             if (!resp.ok) throw new Error('Fetch failed');
             const data = await resp.json();
-            return JSON.parse(atob(data.content));
+            return JSON.parse(decodeURIComponent(escape(atob(data.content))));
         }
 
         async function saveJSON(path, content, sha, msg) {
@@ -427,28 +427,51 @@
         function updateSettingsStatus() {
             const statusEl = document.getElementById('settingsStatus');
             const dotEl = document.getElementById('settingsDot');
+            const pwdInput = document.getElementById('settingsPwdInput');
+            const pwdError = document.getElementById('settingsPwdError');
+            const btnConnect = document.getElementById('btnConnect');
             if (githubToken) {
                 statusEl.className = 'settings-status connected';
                 statusEl.innerHTML = '<span class="status-icon">🟢</span><span>已连接GitHub</span>';
                 dotEl.style.display = 'none';
+                pwdInput.style.display = 'none';
+                pwdError.style.display = 'none';
+                btnConnect.textContent = '退出连接';
+                btnConnect.className = 'btn btn-danger';
             } else {
                 statusEl.className = 'settings-status disconnected';
                 statusEl.innerHTML = '<span class="status-icon">🔴</span><span>未连接</span>';
                 dotEl.style.display = 'block';
+                pwdInput.style.display = 'block';
+                btnConnect.textContent = '连接';
+                btnConnect.className = 'btn btn-primary';
             }
         }
 
         function doSettingsConnect() {
+            const btnConnect = document.getElementById('btnConnect');
+            // 如果已连接，点击退出
+            if (githubToken && btnConnect.textContent === '退出连接') {
+                githubToken = '';
+                localStorage.removeItem('meal_token');
+                updateSettingsStatus();
+                // 回到首页并提示重新连接
+                document.getElementById('customerNo').value = '';
+                if (currentPage === 2) {
+                    document.getElementById('mealList').innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">请先在左上角⚙设置中连接系统</p>';
+                }
+                return;
+            }
+            // 未连接，输入密码连接
             const pwd = document.getElementById('settingsPwdInput').value;
             const token = _dk(pwd);
             if (token) {
                 githubToken = token;
                 localStorage.setItem('meal_token', token);
                 updateSettingsStatus();
-                document.getElementById('settingsPwdInput').value = '';
-                document.getElementById('settingsPwdError').style.display = 'none';
                 closeSettings();
                 // 已连接后刷新当前页面数据
+                if (currentPage === 1) { /* 已在首页 */ }
                 if (currentPage === 2) loadMenu();
                 if (currentPage === 4) loadOrders();
                 if (currentPage === 5) loadMenuList();
