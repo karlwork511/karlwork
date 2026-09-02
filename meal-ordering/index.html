@@ -137,7 +137,7 @@
         .order-list { display: grid; gap: 12px; margin-top: 12px; }
         .order-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; border-left: 4px solid #3498db; }
         .order-card.delivered { border-left-color: #27ae60; opacity: 0.7; }
-        .order-card .checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; font-size: 12px; color: white; }
+        .order-card .checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #ddd; display: none; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; font-size: 12px; color: white; }
         .order-card .checkbox.checked { background: #3498db; border-color: #3498db; }
         .order-card.delivered .checkbox { display: none; }
         .order-card .order-info { flex: 1; }
@@ -223,6 +223,13 @@
         .sync-tag.unsynced { background: #f0f0f0; color: #95a5a6; }
         .btn-sync { background: #27ae60; color: white; }
         .btn-sync:disabled { opacity: 0.5; }
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+        .filter-row .time-filters { display: flex; gap: 6px; }
+        .filter-row .status-filters { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; border: 1.5px solid #ddd; background: white; color: #555; cursor: pointer; white-space: nowrap; }
+        .filter-btn.active { background: #3498db; color: white; border-color: #3498db; }
+        .order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .order-actions .download-btn { margin-left: auto; }
     </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -323,15 +330,28 @@
         <!-- 页面4：订单管理 -->
         <div class="page" id="page4">
             <div class="stats-bar">
-                <div class="stat-item"><div class="num" id="statTotal">0</div><div class="lbl">今日下单</div></div>
+                <div class="stat-item"><div class="num" id="statTotal">0</div><div class="lbl">下单</div></div>
                 <div class="stat-item"><div class="num" id="statPending">0</div><div class="lbl">待出餐</div></div>
                 <div class="stat-item"><div class="num" id="statDelivered">0</div><div class="lbl">已送达</div></div>
+            </div>
+            <div class="filter-row">
+                <div class="time-filters">
+                    <button class="filter-btn active" onclick="setTimeFilter('today')" id="tfToday">今天</button>
+                    <button class="filter-btn" onclick="setTimeFilter('month')" id="tfMonth">本月</button>
+                </div>
+                <div class="status-filters">
+                    <button class="filter-btn active" onclick="setStatusFilter('all')" id="sfAll">全部</button>
+                    <button class="filter-btn" onclick="setStatusFilter('pending')" id="sfPending">待出餐</button>
+                    <button class="filter-btn" onclick="setStatusFilter('delivered')" id="sfDelivered">已送达</button>
+                    <button class="filter-btn" onclick="setStatusFilter('downloaded')" id="sfDownloaded">已下载</button>
+                    <button class="filter-btn" onclick="setStatusFilter('undownloaded')" id="sfUndownloaded">未下载</button>
+                </div>
             </div>
             <div class="order-actions">
                 <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
                 <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
                 <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
-                <button class="btn btn-sync" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
+                <button class="btn btn-sync download-btn" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
             </div>
             <div class="order-list" id="orderList"></div>
         </div>
@@ -426,6 +446,8 @@
         let currentPage = 1;
         let hostName = '', customerNo = '', selectedMeal = null, selectedMealDesc = null, bubbleVisible = false;
         let selectMode = false, selectedOrders = [];
+        let timeFilter = 'today', statusFilter = 'all';
+        let allOrders = []; // 当前加载的所有订单（含日期信息）
         let editingMenuId = null;
         let githubToken = localStorage.getItem('meal_token') || '';
         const REPO = 'karlwork511/karlwork';
@@ -682,9 +704,31 @@
 
         // ===== 订单管理 =====
         async function loadOrders() {
-            const today = new Date().toISOString().split('T')[0];
             try {
-                const orders = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
+                let orders = [];
+                if (timeFilter === 'today') {
+                    const today = new Date().toISOString().split('T')[0];
+                    try {
+                        const data = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
+                        orders = data.map(o => ({ ...o, _date: today }));
+                    } catch(e) { /* no orders today */ }
+                } else {
+                    // 本月：需要遍历当月的日期文件
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = now.getMonth() + 1;
+                    const daysInMonth = new Date(year, month, 0).getDate();
+                    for (let d = 1; d <= daysInMonth; d++) {
+                        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                        try {
+                            const data = await fetchJSON(`meal-ordering/data/orders/${dateStr}.json`);
+                            orders.push(...data.map(o => ({ ...o, _date: dateStr })));
+                        } catch(e) { /* no file for this date */ }
+                    }
+                }
+                allOrders = orders;
+
+                // 统计（不受状态筛选影响）
                 const total = orders.length;
                 const pending = orders.filter(o => o.status === '待出餐').length;
                 const delivered = orders.filter(o => o.status === '已送达').length;
@@ -692,19 +736,63 @@
                 document.getElementById('statPending').textContent = pending;
                 document.getElementById('statDelivered').textContent = delivered;
 
-                const list = document.getElementById('orderList');
-                list.innerHTML = orders.map((o, i) => `
-                    <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
-                        <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
-                        <div class="order-info">
-                            <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></div>
-                            <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
-                            <div class="order-time">下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
-                        </div>
-                        <span class="status-tag ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span>
+                // 状态筛选
+                let filtered = orders;
+                if (statusFilter === 'pending') filtered = orders.filter(o => o.status === '待出餐');
+                else if (statusFilter === 'delivered') filtered = orders.filter(o => o.status === '已送达');
+                else if (statusFilter === 'downloaded') filtered = orders.filter(o => o.sync_status === 'synced');
+                else if (statusFilter === 'undownloaded') filtered = orders.filter(o => o.sync_status !== 'synced');
+
+                renderOrderList(filtered);
+            } catch(e) {
+                document.getElementById('orderList').innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">暂无订单</p>';
+            }
+        }
+
+        function renderOrderList(orders) {
+            const list = document.getElementById('orderList');
+            if (!orders || orders.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">暂无订单</p>';
+                return;
+            }
+            list.innerHTML = orders.map((o, i) => `
+                <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
+                    <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
+                    <div class="order-info">
+                        <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></div>
+                        <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
+                        <div class="order-time">${o._date ? o._date + ' ' : ''}下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
                     </div>
-                `).join('');
-            } catch(e) { document.getElementById('orderList').innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">今日暂无订单</p>'; }
+                    <span class="status-tag ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span>
+                </div>
+            `).join('');
+            // 恢复选择模式状态
+            if (selectMode) {
+                document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = 'flex');
+            }
+        }
+
+        function setTimeFilter(f) {
+            timeFilter = f;
+            document.getElementById('tfToday').className = 'filter-btn' + (f === 'today' ? ' active' : '');
+            document.getElementById('tfMonth').className = 'filter-btn' + (f === 'month' ? ' active' : '');
+            loadOrders();
+        }
+
+        function setStatusFilter(f) {
+            statusFilter = f;
+            document.querySelectorAll('.status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+            const map = { all: 'sfAll', pending: 'sfPending', delivered: 'sfDelivered', downloaded: 'sfDownloaded', undownloaded: 'sfUndownloaded' };
+            document.getElementById(map[f]).classList.add('active');
+            renderOrderList(getFilteredOrders());
+        }
+
+        function getFilteredOrders() {
+            if (statusFilter === 'pending') return allOrders.filter(o => o.status === '待出餐');
+            if (statusFilter === 'delivered') return allOrders.filter(o => o.status === '已送达');
+            if (statusFilter === 'downloaded') return allOrders.filter(o => o.sync_status === 'synced');
+            if (statusFilter === 'undownloaded') return allOrders.filter(o => o.sync_status !== 'synced');
+            return allOrders;
         }
 
         function toggleSelectMode() {
@@ -793,16 +881,15 @@
 
         // ===== 下载 Excel =====
         async function downloadExcel() {
-            const today = new Date().toISOString().split('T')[0];
             try {
-                const orders = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
-                const unsyncedOrders = orders.filter(o => o.sync_status !== 'synced');
+                const unsyncedOrders = allOrders.filter(o => o.sync_status !== 'synced');
                 if (unsyncedOrders.length === 0) {
-                    alert('今日所有订单已下载，无需重复操作');
+                    alert('当前范围内所有订单已下载，无需重复操作');
                     return;
                 }
                 // 构造 Excel 数据
                 const data = unsyncedOrders.map(o => ({
+                    '日期': o._date || '',
                     '接待人': o.host_name || '',
                     '客户序号': o.customer_no,
                     '套餐': o.meal_name,
@@ -813,19 +900,30 @@
                 }));
                 // 生成 Excel
                 const ws = XLSX.utils.json_to_sheet(data);
-                // 设置列宽
                 ws['!cols'] = [
-                    {wch: 8}, {wch: 10}, {wch: 24}, {wch: 12}, {wch: 20}, {wch: 10}, {wch: 20}
+                    {wch: 12}, {wch: 8}, {wch: 10}, {wch: 24}, {wch: 12}, {wch: 20}, {wch: 10}, {wch: 20}
                 ];
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, '订单');
-                const fileName = `翠华订餐_${today}.xlsx`;
+                const now = new Date();
+                const dateLabel = timeFilter === 'today' ? now.toISOString().split('T')[0] : `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                const fileName = `翠华订餐_${dateLabel}.xlsx`;
                 XLSX.writeFile(wb, fileName);
-                // 标记已下载
-                orders.forEach(o => { if (o.sync_status !== 'synced') o.sync_status = 'synced'; });
-                const path = `meal-ordering/data/orders/${today}.json`;
-                const sha = await getSHA(path);
-                await saveJSON(path, orders, sha, 'Download Excel');
+                // 标记已下载 - 按日期文件分别保存
+                const dateGroups = {};
+                allOrders.forEach(o => {
+                    if (o.sync_status !== 'synced') {
+                        if (!dateGroups[o._date]) dateGroups[o._date] = [];
+                        o.sync_status = 'synced';
+                        dateGroups[o._date].push(o);
+                    }
+                });
+                for (const [date, orders] of Object.entries(dateGroups)) {
+                    const path = `meal-ordering/data/orders/${date}.json`;
+                    const sha = await getSHA(path);
+                    const cleanOrders = orders.map(o => { const c = {...o}; delete c._date; return c; });
+                    await saveJSON(path, cleanOrders, sha, 'Download Excel');
+                }
                 await loadOrders();
                 alert(`✅ 已下载 ${unsyncedOrders.length} 条订单为 ${fileName}`);
             } catch(e) {
