@@ -55,6 +55,9 @@ body{
 }
 .activity-card:active{transform:scale(.97)}
 .activity-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),var(--pink));opacity:.5}
+.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.cat-tag{font-size:11px;background:rgba(255,255,255,.06);color:var(--text3);padding:2px 8px;border-radius:6px}
+.scene-tag{font-size:11px;background:rgba(124,92,255,.15);color:#a78bfa;padding:2px 8px;border-radius:6px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .card-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:6px}
 .card-count{font-size:11px;color:var(--text3);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:8px}
@@ -142,6 +145,14 @@ body{
   45%{transform:rotate(8deg) scale(1.06)}
   70%{transform:rotate(-3deg) scale(1.02)}
   100%{transform:rotate(0) scale(1)}
+}
+
+/* 猫脚下阴影 */
+.cat-shadow{
+  position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:80%;height:8px;
+  background:rgba(0,0,0,.3);border-radius:50%;
+  filter:blur(4px);
 }
 
 /* 语音气泡 */
@@ -327,19 +338,20 @@ body{
 .overlay.active{display:flex}
 .sheet{
   background:#1e1535;border-radius:20px 20px 0 0;
-  width:100%;max-width:500px;max-height:85vh;
+  width:100%;max-width:500px;max-height:90vh;
   display:flex;flex-direction:column;
   animation:slideUp .3s ease;
   padding-bottom:var(--safe-bottom);
 }
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
-.sheet-title{font-size:16px;font-weight:600}
+.sheet-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sheet-back{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:var(--text2);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .sheet-close{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:var(--text2);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.sheet-body{flex:1;overflow-y:auto;padding:14px 18px;-webkit-overflow-scrolling:touch}
+.sheet-body{flex:1;overflow-y:auto;padding:14px 18px;-webkit-overflow-scrolling:touch;min-height:0}
 .sheet-body::-webkit-scrollbar{display:none}
 
-.form-group{margin-bottom:14px}
+.form-group{margin-bottom:12px}
 .form-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500}
 .form-input{
   width:100%;height:44px;border-radius:11px;border:1px solid rgba(255,255,255,.1);
@@ -347,6 +359,7 @@ body{
 }
 .form-input:focus{border-color:var(--orange)}
 .form-input::placeholder{color:var(--text3)}
+select.form-input{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23706888' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
 .form-textarea{
   width:100%;min-height:100px;border-radius:11px;border:1px solid rgba(255,255,255,.1);
   background:rgba(255,255,255,.04);color:var(--text);padding:10px 12px;font-size:14px;
@@ -358,15 +371,63 @@ body{
 .btn:active{transform:scale(.97)}
 .btn-primary{background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff}
 .btn-ghost{background:rgba(255,255,255,.06);color:var(--text2)}
+.btn-danger{background:rgba(255,75,87,.15);color:var(--red)}
+.btn-sm{height:34px;font-size:12px;border-radius:8px}
 
-/* 管理弹窗 */
+/* 配置管理 */
+.config-nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.config-nav-btn{
+  padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:var(--text2);font-size:12px;cursor:pointer;
+}
+.config-nav-btn.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+.config-category-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;padding:12px;margin-bottom:10px;
+}
+.config-cat-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.config-cat-icon{font-size:20px}
+.config-cat-name{font-size:14px;font-weight:600;flex:1}
+.config-cat-meta{font-size:11px;color:var(--text3)}
+.config-cat-actions{display:flex;gap:4px}
+.config-scene-list{margin-left:12px;border-left:2px solid rgba(255,255,255,.06);padding-left:10px}
+.config-scene-item{
+  background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px;
+  margin-bottom:6px;display:flex;align-items:center;gap:6px;
+}
+.config-scene-name{flex:1;font-size:13px;color:var(--text2)}
+.config-scene-count{font-size:11px;color:var(--text3)}
+.config-item-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;background:rgba(255,255,255,.06);
+  border-radius:6px;font-size:11px;color:var(--text3);
+  margin:2px;
+}
+.config-item-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:2px}
+
+.config-add-row{display:flex;gap:6px;align-items:center}
+.config-add-row .form-input{height:38px;font-size:13px}
+.config-add-btn{width:38px;height:38px;border-radius:9px;border:none;background:var(--green);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.config-add-btn:active{opacity:.8}
+.config-add-btn.gray{background:rgba(255,255,255,.1);color:var(--text2)}
+
+.config-inline-edit{
+  flex:1;height:32px;border-radius:8px;border:1px solid var(--orange);
+  background:rgba(255,255,255,.04);color:var(--text);padding:0 8px;font-size:13px;outline:none;
+}
+
+/* 快速添加项 */
+.quick-add{display:flex;gap:6px;margin-bottom:12px}
+.quick-add .form-input{flex:1}
+
+/* 管理选项（活动内） */
 .item-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .item-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06)}
 .item-text{flex:1;font-size:13px;word-break:break-all}
 .item-del{width:24px;height:24px;border-radius:6px;border:none;background:rgba(255,75,87,.12);color:var(--red);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.quick-add{display:flex;gap:6px;margin-bottom:12px}
-.quick-add .form-input{flex:1}
-.quick-add-btn{width:44px;height:44px;border-radius:11px;border:none;background:var(--green);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 
 /* 同步 */
 .settings-section{margin-bottom:20px}
@@ -398,6 +459,7 @@ body{
     <div class="top-title">🐱 <span>今天啥子？</span></div>
     <div class="top-actions">
       <button class="icon-btn" onclick="openSyncSettings()">☁️</button>
+      <button class="icon-btn" onclick="openConfigManage()">⚙️</button>
       <button class="icon-btn" onclick="openHistory()">📜</button>
     </div>
   </div>
@@ -427,9 +489,9 @@ body{
       <!-- 交互式猫咪贴图 -->
       <div class="cat-interactive" id="catInteractive">
         <div class="cat-img-wrap" id="catImgWrap">
-          <img id="catImg" src="cat_character.png" alt="喵" draggable="false">
+          <div class="cat-shadow"></div>
+          <img id="catImg" src="cowboy_cat_new.png" alt="喵" draggable="false">
         </div>
-        <!-- 语音气泡 -->
         <div class="speech-bubble" id="speechBubble"></div>
       </div>
 
@@ -467,21 +529,35 @@ body{
 </div>
 
 <!-- ========== 弹窗们 ========== -->
+
 <!-- 新建/编辑活动 -->
 <div class="overlay" id="activityOverlay">
   <div class="sheet">
     <div class="sheet-header">
       <div class="sheet-title" id="actSheetTitle">新建活动</div>
-      <button class="sheet-close" onclick="closeSheet('activityOverlay')"></button>
+      <button class="sheet-close" onclick="closeSheet('activityOverlay')">✕</button>
     </div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">活动名称</label><input class="form-input" id="actName" placeholder="比如：周六吃啥" maxlength="20"></div>
-      <div class="form-group"><label class="form-label">随机选项</label><textarea class="form-textarea" id="actItems" placeholder="每行一个选项&#10;火锅&#10;烤肉&#10;日料"></textarea><div class="form-hint">每行一个，保存后也能逐条添加</div></div>
+      <div class="form-group">
+        <label class="form-label">分类</label>
+        <select class="form-input" id="actCatSelect" onchange="onCatChange()">
+          <option value="">— 选择分类 —</option>
+        </select>
+      </div>
+      <div class="form-group" id="sceneSelectGroup" style="display:none">
+        <label class="form-label">场景</label>
+        <select class="form-input" id="actSceneSelect" onchange="onSceneChange()">
+          <option value="">— 直接选分类全部项 —</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">随机选项 <span style="color:var(--text3);font-weight:400">（选完分类后自动回填，可修改）</span></label><textarea class="form-textarea" id="actItems" placeholder="每行一个选项&#10;火锅&#10;烤肉&#10;日料"></textarea><div class="form-hint">每行一个，保存后也能逐条添加</div></div>
       <div class="form-group"><button class="btn btn-primary" onclick="saveActivity()">保存</button></div>
     </div>
   </div>
 </div>
-<!-- 管理选项 -->
+
+<!-- 管理选项（活动内） -->
 <div class="overlay" id="manageOverlay">
   <div class="sheet">
     <div class="sheet-header">
@@ -495,6 +571,47 @@ body{
     </div>
   </div>
 </div>
+
+<!-- 配置管理（分类/场景/活动项） -->
+<div class="overlay" id="configOverlay">
+  <div class="sheet">
+    <div class="sheet-header">
+      <button class="sheet-back" id="cfgBackBtn" style="visibility:hidden" onclick="cfgGoBack()">←</button>
+      <div class="sheet-title" id="cfgSheetTitle">⚙️ 配置管理</div>
+      <button class="sheet-close" onclick="closeSheet('configOverlay')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <!-- 分类视图 -->
+      <div id="cfgCatView">
+        <div class="config-nav">
+          <button class="config-nav-btn active" onclick="switchCfgNav('cat')">📂 分类</button>
+          <button class="config-nav-btn" onclick="switchCfgNav('scene')">🏷️ 场景</button>
+        </div>
+        <div id="cfgCatList"></div>
+        <div class="config-add-row" style="margin-top:10px">
+          <input class="form-input" id="cfgNewCat" placeholder="新分类名，如：生日礼物" style="height:38px">
+          <button class="config-add-btn" onclick="addCategory()">＋</button>
+        </div>
+      </div>
+      <!-- 场景视图 -->
+      <div id="cfgSceneView" style="display:none">
+        <div class="config-nav">
+          <button class="config-nav-btn" onclick="switchCfgNav('cat')">📂 分类</button>
+          <button class="config-nav-btn active" onclick="switchCfgNav('scene')">🏷️ 场景</button>
+        </div>
+        <div id="cfgSceneList"></div>
+        <div class="config-add-row" style="margin-top:10px">
+          <select class="form-input" id="cfgSceneCatSelect" style="height:38px;flex:1">
+            <option value="">— 选分类 —</option>
+          </select>
+          <input class="form-input" id="cfgNewScene" placeholder="新场景名" style="height:38px;flex:1">
+          <button class="config-add-btn" onclick="addScene()">＋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 同步设置 -->
 <div class="overlay" id="syncOverlay">
   <div class="sheet">
@@ -513,12 +630,19 @@ body{
         <div class="settings-title">同步操作</div>
         <div class="settings-row">
           <div class="settings-row-left"><span class="sync-dot" id="syncDot"></span><span id="syncText">未同步</span></div>
-          <div style="display:flex;gap:6px"><button class="mini-btn" onclick="syncPush()">⬆️ 上传</button><button class="mini-btn" onclick="syncPull()">⬇️ 下载</button></div>
+          <div style="display:flex;gap:6px">
+            <button class="mini-btn" onclick="syncPush()">⬆️ 上传</button>
+            <button class="mini-btn" onclick="syncPull()">⬇️ 下载</button>
+          </div>
+        </div>
+        <div class="settings-row" style="margin-top:4px">
+          <div class="settings-row-left"><span style="font-size:11px;color:var(--text3)">包含：活动数据 + 分类配置</span></div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <!-- 历史 -->
 <div class="overlay" id="historyOverlay">
   <div class="sheet">
@@ -535,14 +659,23 @@ body{
 
 <script>
 // ========== 数据 ==========
-const SK='random-tool-data',SYK='random-tool-sync',HK='random-tool-history';
-let data={activities:[]},editingId=null,curActId=null,isBusy=false;
+const SK='random-tool-data',SYK='random-tool-sync',HK='random-tool-history',CK='activity-config';
+let data={activities:[]}, cfgData={categories:[]};
+let editingId=null,curActId=null,isBusy=false;
+let cfgNav='cat'; // 'cat' | 'scene'
 
 function ld(){try{const r=localStorage.getItem(SK);if(r)data=JSON.parse(r)}catch(e){}if(!data.activities)data.activities=[]}
 function sv(){localStorage.setItem(SK,JSON.stringify(data))}
+function loadCfg(){try{const r=localStorage.getItem(CK);if(r)cfgData=JSON.parse(r)}catch(e){}if(!cfgData.categories)cfgData.categories=[]}
+function saveCfg(){localStorage.setItem(CK,JSON.stringify(cfgData))}
 function ldH(){try{return JSON.parse(localStorage.getItem(HK))}catch(e){return[]}}
 function svH(aid,result){const h=ldH();const a=getA(aid);h.unshift({activityId:aid,activityName:a?.name||'',result,time:Date.now()});if(h.length>200)h.length=200;localStorage.setItem(HK,JSON.stringify(h))}
 function getA(id){return data.activities.find(a=>String(a.id)===String(id))}
+function getCat(id){return cfgData.categories.find(c=>String(c.id)===String(id))}
+function getScene(catId,sceneId){
+  const cat=getCat(catId);if(!cat)return null;
+  return (cat.scenes||[]).find(s=>String(s.id)===String(sceneId));
+}
 
 // ========== 猫咪互动系统 ==========
 const BUBBLE_QUOTES=[
@@ -555,21 +688,15 @@ const BUBBLE_QUOTES=[
 let clickAnimIdx=0;
 const CLICK_ANIMS=['anim-jump','anim-squash','anim-shake'];
 
-// 点击互动（轮流触发跳跃/压扁/抖动）
 function triggerClickAnim(){
   const wrap=document.getElementById('catImgWrap');
   wrap.classList.remove(...CLICK_ANIMS);
-  void wrap.offsetWidth; // reflow
+  void wrap.offsetWidth;
   wrap.classList.add(CLICK_ANIMS[clickAnimIdx]);
   clickAnimIdx=(clickAnimIdx+1)%CLICK_ANIMS.length;
   showBubble();
-  wrap.addEventListener('animationend',function handler(){
-    wrap.classList.remove(CLICK_ANIMS[clickAnimIdx===0?CLICK_ANIMS.length-1:clickAnimIdx-1]||CLICK_ANIMS[(clickAnimIdx-1+CLICK_ANIMS.length)%CLICK_ANIMS.length]);
-    wrap.removeEventListener('animationend',handler);
-  });
 }
 
-// 显示气泡（随机位置，不遮挡角色）
 let bubbleTimer=null;
 function showBubble(){
   const bubble=document.getElementById('speechBubble');
@@ -588,7 +715,6 @@ let isDragging=false,longPressTimer=null;
 let dragStartX=0,dragStartY=0,catX=0,catY=0;
 let hasMoved=false,lastTap=0;
 
-// 用 touch/mouse 事件实现长按+拖动
 catEl.addEventListener('touchstart',onPointerDown,{passive:false});
 catEl.addEventListener('mousedown',onPointerDown);
 document.addEventListener('touchmove',onPointerMove,{passive:false});
@@ -636,7 +762,6 @@ function onPointerMove(e){
   const rect=sceneWrap.getBoundingClientRect();
   catX=pos.x-dragStartX;
   catY=pos.y-dragStartY;
-  // 限制在场景内
   const maxW=rect.width*0.35;
   const maxH=rect.height*0.4;
   catX=Math.max(0,Math.min(catX,rect.width-maxW));
@@ -647,14 +772,13 @@ function onPointerMove(e){
   el.style.top=catY+'px';
 }
 
-function onPointerUp(e){
+function onPointerUp(){
   clearTimeout(longPressTimer);
   longPressTimer=null;
   const wrap=document.getElementById('catImgWrap');
   if(isDragging){
     isDragging=false;
     wrap.classList.remove('dragging');
-    // 松手后回弹到默认位置
     setTimeout(()=>{
       const el=document.getElementById('catInteractive');
       el.style.left='6%';
@@ -663,10 +787,8 @@ function onPointerUp(e){
       catX=0;catY=0;
     },200);
   }else if(!hasMoved){
-    // 短按 = 点击互动
     const now=Date.now();
     if(now-lastTap<350){
-      // 双击：显示特别气泡
       showSpecialBubble();
     }else{
       triggerClickAnim();
@@ -694,33 +816,129 @@ function renderList(){
   el.innerHTML=data.activities.map(a=>{
     const items=a.items||[];
     const p=items.length?items.slice(0,3).join('、')+(items.length>3?` 等${items.length}项`:''):'还没有选项';
+    let catTag='',sceneTag='';
+    if(a.categoryId){
+      const cat=getCat(a.categoryId);
+      if(cat)catTag=`<span class="cat-tag">${cat.icon} ${esc(cat.name)}</span>`;
+      if(a.sceneId){
+        const scene=getScene(a.categoryId,a.sceneId);
+        if(scene)sceneTag=`<span class="scene-tag">${esc(scene.name)}</span>`;
+      }
+    }
     return `<div class="activity-card" onclick="openGame('${a.id}')">
+      <div class="card-meta">${catTag}${sceneTag}</div>
       <div class="card-header"><div class="card-title"><span>${esc(a.name)}</span><span class="card-count">${items.length}项</span></div>
       <div class="card-actions">
-        <button class="card-btn" onclick="event.stopPropagation();openEdit('${a.id}')">️</button>
+        <button class="card-btn" onclick="event.stopPropagation();openEdit('${a.id}')">✏️</button>
         <button class="card-btn" onclick="event.stopPropagation();openManage('${a.id}')">📝</button>
         <button class="card-btn" onclick="event.stopPropagation();delAct('${a.id}')">🗑️</button>
       </div></div><div class="card-preview">${esc(p)}</div></div>`;
   }).join('');
 }
 
-// ========== 活动CRUD ==========
-function openCreateActivity(){editingId=null;document.getElementById('actSheetTitle').textContent='新建活动';document.getElementById('actName').value='';document.getElementById('actItems').value='';document.getElementById('activityOverlay').classList.add('active')}
-function openEdit(id){const a=getA(id);if(!a)return;editingId=id;document.getElementById('actSheetTitle').textContent='编辑活动';document.getElementById('actName').value=a.name;document.getElementById('actItems').value=(a.items||[]).join('\n');document.getElementById('activityOverlay').classList.add('active')}
+// ========== 活动 CRUD ==========
+function openCreateActivity(){
+  editingId=null;
+  document.getElementById('actSheetTitle').textContent='新建活动';
+  document.getElementById('actName').value='';
+  document.getElementById('actItems').value='';
+  document.getElementById('actCatSelect').value='';
+  document.getElementById('actSceneSelect').value='';
+  document.getElementById('sceneSelectGroup').style.display='none';
+  populateCatSelect();
+  document.getElementById('activityOverlay').classList.add('active');
+}
+
+function openEdit(id){
+  const a=getA(id);if(!a)return;
+  editingId=id;
+  document.getElementById('actSheetTitle').textContent='编辑活动';
+  document.getElementById('actName').value=a.name;
+  document.getElementById('actItems').value=(a.items||[]).join('\n');
+  populateCatSelect();
+  document.getElementById('actCatSelect').value=a.categoryId||'';
+  onCatChange();
+  document.getElementById('actSceneSelect').value=a.sceneId||'';
+  document.getElementById('activityOverlay').classList.add('active');
+}
+
+function populateCatSelect(){
+  const sel=document.getElementById('actCatSelect');
+  let html='<option value="">— 选择分类 —</option>';
+  cfgData.categories.sort((a,b)=>a.order-b.order).forEach(c=>{
+    html+=`<option value="${esc(c.id)}">${c.icon} ${esc(c.name)}</option>`;
+  });
+  sel.innerHTML=html;
+}
+
+function onCatChange(){
+  const catId=document.getElementById('actCatSelect').value;
+  const cat=getCat(catId);
+  const sceneSel=document.getElementById('actSceneSelect');
+  const sceneGroup=document.getElementById('sceneSelectGroup');
+  const itemsTa=document.getElementById('actItems');
+
+  if(!catId||!cat){
+    sceneGroup.style.display='none';
+    return;
+  }
+
+  // 如果有场景，显示场景选择
+  const scenes=cat.scenes||[];
+  if(scenes.length>0){
+    sceneGroup.style.display='block';
+    let shtml='<option value="">— 直接选分类全部项 —</option>';
+    scenes.sort((a,b)=>a.order-b.order).forEach(s=>{
+      shtml+=`<option value="${esc(s.id)}">${esc(s.name)} (${s.items.length}项)</option>`;
+    });
+    sceneSel.innerHTML=shtml;
+  } else {
+    sceneGroup.style.display='none';
+    // 无场景，直接回填分类的 items
+    itemsTa.value=(cat.items||[]).join('\n');
+  }
+}
+
+function onSceneChange(){
+  const catId=document.getElementById('actCatSelect').value;
+  const sceneId=document.getElementById('actSceneSelect').value;
+  const itemsTa=document.getElementById('actItems');
+
+  if(sceneId){
+    const scene=getScene(catId,sceneId);
+    if(scene)itemsTa.value=scene.items.join('\n');
+  } else {
+    // 回填分类全部 items
+    const cat=getCat(catId);
+    if(cat)itemsTa.value=(cat.items||[]).join('\n');
+  }
+}
+
 function saveActivity(){
   const name=document.getElementById('actName').value.trim();
   if(!name)return toast('请输入活动名称');
   const t=document.getElementById('actItems').value.trim();
   const items=t?t.split('\n').map(s=>s.trim()).filter(Boolean):[];
-  if(editingId){const a=getA(editingId);if(a){a.name=name;a.items=items}}
-  else{data.activities.push({id:'act_'+Date.now(),name,items,createdAt:Date.now()})}
+  const catId=document.getElementById('actCatSelect').value;
+  const sceneId=document.getElementById('actSceneSelect').value;
+
+  if(editingId){
+    const a=getA(editingId);if(a){a.name=name;a.items=items;a.categoryId=catId;a.sceneId=sceneId||null;}}
+  else{
+    data.activities.push({id:'act_'+Date.now(),name,items,categoryId:catId,sceneId:sceneId||null,createdAt:Date.now()})}
   sv();renderList();closeSheet('activityOverlay');toast(editingId?'已更新':'已创建')
 }
-function delAct(id){const a=getA(id);if(!a)return;if(!confirm(`确定删除「${a.name}」？`))return;data.activities=data.activities.filter(x=>String(x.id)!==String(id));sv();renderList();toast('已删除')}
+
+function delAct(id){
+  const a=getA(id);if(!a)return;
+  if(!confirm(`确定删除「${a.name}」？`))return;
+  data.activities=data.activities.filter(x=>String(x.id)!==String(id));
+  sv();renderList();toast('已删除')
+}
 
 // ========== 管理选项 ==========
 let mgmtId=null;
-function openManage(id){mgmtId=id;const a=getA(id);if(!a)return;document.getElementById('mgmtTitle').textContent=a.name+' · 选项';renderItems();document.getElementById('manageOverlay').classList.add('active');setTimeout(()=>document.getElementById('quickInput')?.focus(),300)}
+function openManage(id){mgmtId=id;const a=getA(id);if(!a)return;document.getElementById('mgmtTitle').textContent=esc(a.name)+' · 选项';renderItems();document.getElementById('manageOverlay').classList.add('active');setTimeout(()=>document.getElementById('quickInput')?.focus(),300)}
 function openManageFromGame(){if(curActId){closeGame();setTimeout(()=>openManage(curActId),250)}}
 function renderItems(){
   const a=getA(mgmtId);if(!a)return;
@@ -728,8 +946,207 @@ function renderItems(){
   if(!items.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">还没有选项 👆</div>';return}
   el.innerHTML=items.map((it,i)=>`<div class="item-row"><span class="item-text">${esc(it)}</span><button class="item-del" onclick="delItem(${i})">✕</button></div>`).join('');
 }
-function quickAdd(){const inp=document.getElementById('quickInput');const v=inp.value.trim();if(!v)return;const a=getA(mgmtId);if(!a)return;if(!a.items)a.items=[];if(a.items.includes(v))return toast('已存在');a.items.push(v);sv();renderItems();renderList();inp.value='';inp.focus()}
+function quickAdd(){
+  const inp=document.getElementById('quickInput');
+  const v=inp.value.trim();if(!v)return;
+  const a=getA(mgmtId);if(!a)return;
+  if(!a.items)a.items=[];
+  if(a.items.includes(v))return toast('已存在');
+  a.items.push(v);sv();renderItems();renderList();inp.value='';inp.focus()
+}
 function delItem(i){const a=getA(mgmtId);if(!a)return;a.items.splice(i,1);sv();renderItems();renderList()}
+
+// ========== 配置管理 ==========
+function openConfigManage(){
+  cfgNav='cat';
+  switchCfgNav('cat');
+  renderCatList();
+  renderSceneList();
+  populateSceneCatSelect();
+  document.getElementById('cfgSheetTitle').textContent='⚙️ 配置管理';
+  document.getElementById('cfgBackBtn').style.visibility='hidden';
+  document.getElementById('configOverlay').classList.add('active');
+}
+
+function switchCfgNav(nav){
+  cfgNav=nav;
+  document.getElementById('cfgCatView').style.display=nav==='cat'?'block':'none';
+  document.getElementById('cfgSceneView').style.display=nav==='scene'?'block':'none';
+  document.querySelectorAll('.config-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.config-nav-btn:nth-child(${nav==='cat'?1:2})`).classList.add('active');
+}
+
+function renderCatList(){
+  const el=document.getElementById('cfgCatList');
+  const cats=cfgData.categories.sort((a,b)=>a.order-b.order);
+  if(!cats.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">还没有分类 👆 添加一个吧</div>';
+    return;
+  }
+  el.innerHTML=cats.map(c=>{
+    const scenes=(c.scenes||[]).sort((a,b)=>a.order-b.order);
+    const totalItems=(c.items||[]).length+scenes.reduce((s,sc)=>s+(sc.items||[]).length,0);
+    let inner='';
+    if(scenes.length>0){
+      inner+=`<div class="config-scene-list">`;
+      scenes.forEach(s=>{
+        inner+=`<div class="config-scene-item">
+          <span class="config-scene-name">${esc(s.name)}</span>
+          <span class="config-scene-count">${s.items.length}项</span>
+          <button class="card-btn" style="width:24px;height:24px;font-size:11px" onclick="cfgEditScene('${esc(c.id)}','${esc(s.id)}')">✏️</button>
+          <button class="card-btn" style="width:24px;height:24px;font-size:11px" onclick="cfgDelScene('${esc(c.id)}','${esc(s.id)}')">🗑️</button>
+        </div>
+        <div class="config-item-tags" style="margin-left:12px;margin-bottom:8px">
+          ${(s.items||[]).slice(0,12).map(it=>`<span class="config-item-tag" title="${esc(it)}">${esc(it.length>6?it.slice(0,6)+'…':it)}</span>`).join('')}
+          ${(s.items||[]).length>12?`<span class="config-item-tag">…等${s.items.length}项</span>`:''}
+        </div>`;
+      });
+      inner+=`</div>`;
+    } else if(c.items&&c.items.length>0){
+      inner+=`<div class="config-item-tags" style="margin-top:6px">
+        ${(c.items||[]).slice(0,12).map(it=>`<span class="config-item-tag">${esc(it.length>6?it.slice(0,6)+'…':it)}</span>`).join('')}
+        ${(c.items||[]).length>12?`<span class="config-item-tag">…等${c.items.length}项</span>`:''}
+      </div>`;
+    }
+    return `<div class="config-category-card">
+      <div class="config-cat-header">
+        <span class="config-cat-icon">${c.icon}</span>
+        <span class="config-cat-name">${esc(c.name)}</span>
+        <span class="config-cat-meta">${totalItems}项 · ${scenes.length}场景</span>
+        <div class="config-cat-actions">
+          <button class="card-btn" onclick="cfgEditCat('${esc(c.id)}')">✏️</button>
+          <button class="card-btn" onclick="cfgDelCat('${esc(c.id)}')">🗑️</button>
+        </div>
+      </div>
+      ${inner}
+      <div style="margin-top:8px">
+        <button class="mini-btn" onclick="cfgAddItemToCat('${esc(c.id)}')">＋ 添加项</button>
+        ${scenes.length>0?`<button class="mini-btn" style="margin-left:4px" onclick="cfgAddSceneItem('${esc(c.id)}')">＋ 添加场景</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSceneList(){
+  const el=document.getElementById('cfgSceneList');
+  const cats=cfgData.categories.sort((a,b)=>a.order-b.order);
+  if(!cats.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">还没有分类 👆</div>';
+    return;
+  }
+  el.innerHTML=cats.map(c=>{
+    const scenes=(c.scenes||[]).sort((a,b)=>a.order-b.order);
+    if(!scenes.length)return `<div style="margin-bottom:10px"><span style="font-size:12px;color:var(--text3)">${c.icon} ${esc(c.name)}</span> <span style="color:var(--text3);font-size:11px">（无场景）</span></div>`;
+    return scenes.map(s=>`
+      <div class="config-scene-item">
+        <span class="config-scene-name">${esc(s.name)}</span>
+        <span class="config-scene-count">${s.items.length}项</span>
+        <button class="card-btn" style="width:24px;height:24px;font-size:11px" onclick="cfgEditScene('${esc(c.id)}','${esc(s.id)}')">✏️</button>
+        <button class="card-btn" style="width:24px;height:24px;font-size:11px" onclick="cfgDelScene('${esc(c.id)}','${esc(s.id)}')">🗑️</button>
+      </div>
+    `).join('');
+  }).join('');
+}
+
+function populateSceneCatSelect(){
+  const sel=document.getElementById('cfgSceneCatSelect');
+  let html='<option value="">— 选分类 —</option>';
+  cfgData.categories.sort((a,b)=>a.order-b.order).forEach(c=>{
+    html+=`<option value="${esc(c.id)}">${c.icon} ${esc(c.name)}</option>`;
+  });
+  sel.innerHTML=html;
+}
+
+// 添加分类
+function addCategory(){
+  const inp=document.getElementById('cfgNewCat');
+  const v=inp.value.trim();if(!v)return;
+  if(cfgData.categories.find(c=>c.name===v))return toast('分类已存在');
+  cfgData.categories.push({id:'cat_'+Date.now(),name:v,icon:'📂',order:(cfgData.categories.length||0)+1,scenes:[],items:[]});
+  saveCfg();renderCatList();renderSceneList();inp.value='';toast('分类已添加');
+}
+
+// 删除分类
+function cfgDelCat(catId){
+  const cat=getCat(catId);if(!cat)return;
+  if(!confirm(`确定删除分类「${cat.name}」？其下所有场景和项也会删除。`))return;
+  cfgData.categories=cfgData.categories.filter(c=>String(c.id)!==String(catId));
+  saveCfg();renderCatList();renderSceneList();toast('已删除');
+}
+
+// 编辑分类名
+function cfgEditCat(catId){
+  const cat=getCat(catId);if(!cat)return;
+  const newName=prompt('新分类名称',cat.name);
+  if(!newName||newName===cat.name)return;
+  cat.name=newName.trim();
+  const icon=prompt('分类图标（emoji）',cat.icon);
+  if(icon)cat.icon=icon.trim();
+  saveCfg();renderCatList();renderSceneList();toast('已更新');
+}
+
+// 添加项到分类（无场景时）
+function cfgAddItemToCat(catId){
+  const cat=getCat(catId);if(!cat)return;
+  const v=prompt('添加活动项（多个用换行分隔）');
+  if(!v)return;
+  const items=v.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!cat.items)cat.items=[];
+  items.forEach(it=>{if(!cat.items.includes(it))cat.items.push(it)});
+  saveCfg();renderCatList();renderSceneList();toast(`已添加${items.length}项`);
+}
+
+// 添加场景到分类
+function cfgAddSceneItem(catId){
+  const cat=getCat(catId);if(!cat)return;
+  const v=prompt('新场景名称');
+  if(!v)return;
+  const scenes=cat.scenes||[];
+  scenes.push({id:'scene_'+Date.now(),name:v.trim(),order:scenes.length+1,items:[]});
+  cat.scenes=scenes;
+  saveCfg();renderCatList();renderSceneList();toast('场景已添加');
+}
+
+// 删除场景
+function cfgDelScene(catId,sceneId){
+  const scene=getScene(catId,sceneId);if(!scene)return;
+  if(!confirm(`确定删除场景「${scene.name}」？其下${scene.items.length}项也会删除。`))return;
+  const cat=getCat(catId);if(!cat)return;
+  cat.scenes=(cat.scenes||[]).filter(s=>String(s.id)!==String(sceneId));
+  saveCfg();renderCatList();renderSceneList();toast('已删除');
+}
+
+// 编辑场景
+function cfgEditScene(catId,sceneId){
+  const scene=getScene(catId,sceneId);if(!scene)return;
+  const newName=prompt('新场景名称',scene.name);
+  if(!newName||newName===scene.name)return;
+  scene.name=newName.trim();
+  saveCfg();renderCatList();renderSceneList();toast('已更新');
+}
+
+// 添加场景
+function addScene(){
+  const catId=document.getElementById('cfgSceneCatSelect').value;
+  const name=document.getElementById('cfgNewScene').value.trim();
+  if(!catId)return toast('请先选分类');
+  if(!name)return toast('请输入场景名称');
+  const cat=getCat(catId);if(!cat)return;
+  if(!cat.scenes)cat.scenes=[];
+  cat.scenes.push({id:'scene_'+Date.now(),name,order:cat.scenes.length+1,items:[]});
+  saveCfg();renderCatList();renderSceneList();document.getElementById('cfgNewScene').value='';toast('场景已添加');
+}
+
+// 添加项到场景
+function cfgAddItemToScene(catId,sceneId){
+  const scene=getScene(catId,sceneId);if(!scene)return;
+  const v=prompt('添加活动项（多个用换行分隔）');
+  if(!v)return;
+  const items=v.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!scene.items)scene.items=[];
+  items.forEach(it=>{if(!scene.items.includes(it))scene.items.push(it)});
+  saveCfg();renderCatList();renderSceneList();toast(`已添加${items.length}项`);
+}
 
 // ========== 游戏 ==========
 const LABEL_COLORS=['#ff6b6b','#ffa502','#2ed573','#5352ed','#a55eea','#ff6b81','#00d2d3','#ff9ff3','#54a0ff','#f368e0'];
@@ -739,7 +1156,6 @@ function openGame(id){
   if(!a.items||!a.items.length){toast('先添加选项吧');openManage(id);return}
   curActId=id;
   document.getElementById('gameActName').textContent=a.name;
-  // 重置状态
   const scene=document.getElementById('scene');
   scene.classList.remove('zoom','centered');
   document.getElementById('targetArea').classList.remove('visible');
@@ -749,11 +1165,9 @@ function openGame(id){
   document.getElementById('catImgWrap').classList.remove('throwing');
   document.getElementById('throwBtn').disabled=false;
   document.getElementById('throwBtn').innerHTML='🎯 投飞镖！';
-  // 重置猫位置
   const catEl2=document.getElementById('catInteractive');
   catEl2.style.left='6%';catEl2.style.top='';catEl2.style.bottom='6%';
   catX=0;catY=0;
-  // 渲染靶子选项文字
   renderBoard(a.items);
   document.getElementById('gameView').classList.add('active');
   document.getElementById('bottomArea').style.display='none';
@@ -779,12 +1193,7 @@ function renderBoard(items){
     const y=50+r*Math.sin(rad);
     const color=LABEL_COLORS[i%LABEL_COLORS.length];
     const fontSize=n>7?'9px':'11px';
-    html+=`<div class="board-label" style="
-      left:${x}%;top:${y}%;
-      transform:translate(-50%,-50%) rotate(${angle+90}deg);
-      color:${color};
-      font-size:${fontSize};
-    ">${esc(items[i])}</div>`;
+    html+=`<div class="board-label" style="left:${x}%;top:${y}%;transform:translate(-50%,-50%) rotate(${angle+90}deg);color:${color};font-size:${fontSize}">${esc(items[i])}</div>`;
   }
   el.innerHTML=html;
 }
@@ -795,7 +1204,6 @@ async function throwDart(){
   isBusy=true;
   const btn=document.getElementById('throwBtn');
   btn.disabled=true;btn.innerHTML='✨ 飞行中...';
-
   const result=a.items[Math.floor(Math.random()*a.items.length)];
   const catImgWrap=document.getElementById('catImgWrap');
   const dart=document.getElementById('flyingDart');
@@ -808,29 +1216,20 @@ async function throwDart(){
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('speechBubble').classList.remove('show');
 
-  // 1. 猫投飞镖动作
   catImgWrap.classList.add('throwing');
   showBubble();
 
   await sleep(300);
-
-  // 2. 飞镖飞出 + 速度线
   dart.classList.add('flying');
   document.getElementById('speedLines').classList.add('active');
 
   await sleep(200);
-
-  // 3. 镜头推进
   scene.classList.add('zoom');
 
   await sleep(400);
-
-  // 4. 靶子出现
   target.classList.add('visible');
 
   await sleep(500);
-
-  // 5. 命中效果
   board.classList.add('hit');
   boardDart.classList.add('stuck');
   const dx=(Math.random()-0.5)*30;
@@ -843,16 +1242,11 @@ async function throwDart(){
   dart.classList.remove('flying');
 
   await sleep(400);
-
-  // 6. 镜头回正
   scene.classList.remove('zoom');
   await sleep(300);
-
-  // 7. 靶子居中展示
   scene.classList.add('centered');
   await sleep(400);
 
-  // 8. 显示结果
   document.getElementById('resultValue').textContent=result;
   document.getElementById('resultPanel').classList.add('show');
   const emojis=['😺 喵说就这个！','🐱 命中注定！','✨ 猫神指引！','🎯 一镖即中！','😸 就决定是你了！'];
@@ -911,16 +1305,59 @@ function openSyncSettings(){const c=loadSC();document.getElementById('syncToken'
 function loadSC(){try{return JSON.parse(localStorage.getItem(SYK))||{}}catch(e){return{}}}
 function saveSyncCfg(){const c={token:document.getElementById('syncToken').value.trim(),owner:document.getElementById('syncOwner').value.trim(),repo:document.getElementById('syncRepo').value.trim()};if(!c.token||!c.owner||!c.repo)return toast('请填写完整');localStorage.setItem(SYK,JSON.stringify(c));toast('已保存')}
 function updSync(s,msg){const d=document.getElementById('syncDot'),t=document.getElementById('syncText');d.className='sync-dot';if(s==='syncing'){d.classList.add('syncing');t.textContent='同步中...'}else if(s==='ok'){d.classList.add('ok');t.textContent=msg||'同步成功'}else if(s==='fail'){d.classList.add('fail');t.textContent=msg||'同步失败'}else{t.textContent='未同步'}}
-async function syncPush(){const c=loadSC();if(!c.token||!c.owner||!c.repo)return toast('请先配置');updSync('syncing');try{const url=`https://api.github.com/repos/${c.owner}/${c.repo}/contents/random-tool-data.json`;const h={Authorization:`Bearer ${c.token}`,Accept:'application/vnd.github.v3+json'};let sha='';try{const r=await fetch(url,{headers:h});if(r.ok)sha=(await r.json()).sha||''}catch(e){}const content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));const r=await fetch(url,{method:'PUT',headers:h,body:JSON.stringify({message:`🐱 sync: ${new Date().toLocaleString('zh-CN')}`,content,...(sha?{sha}:{})})});if(r.ok)updSync('ok','上传成功');else{const e=await r.json();updSync('fail',e.message)}}catch(e){updSync('fail',e.message)}}
-async function syncPull(){const c=loadSC();if(!c.token||!c.owner||!c.repo)return toast('请先配置');updSync('syncing');try{const url=`https://api.github.com/repos/${c.owner}/${c.repo}/contents/random-tool-data.json`;const r=await fetch(url,{headers:{Authorization:`Bearer ${c.token}`,Accept:'application/vnd.github.v3+json'}});if(!r.ok){const e=await r.json();return updSync('fail',e.message)}const d=await r.json();const remote=JSON.parse(decodeURIComponent(escape(atob(d.content))));if(remote.activities){data=remote;sv();renderList();updSync('ok','下载成功 '+data.activities.length+'个活动')}else updSync('fail','格式错误')}catch(e){updSync('fail',e.message)}}
+
+async function gitHubPut(c,path,data){
+  const url=`https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`;
+  const h={Authorization:`Bearer ${c.token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'};
+  let sha='';
+  try{
+    const r=await fetch(url,{headers:h});
+    if(r.ok){const j=await r.json();sha=j.sha||''}
+  }catch(e){}
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
+  const r=await fetch(url,{method:'PUT',headers:h,body:JSON.stringify({message:`sync: ${new Date().toLocaleString('zh-CN')}`,content,...(sha?{sha}:{})})});
+  if(!r.ok){const e=await r.json();throw new Error(e.message)}
+}
+
+async function gitHubGet(c,path){
+  const url=`https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`;
+  const h={Authorization:`Bearer ${c.token}`,Accept:'application/vnd.github.v3+json'};
+  const r=await fetch(url,{headers:h});
+  if(!r.ok){const e=await r.json();throw new Error(e.message)}
+  const d=await r.json();
+  return JSON.parse(decodeURIComponent(escape(atob(d.content))));
+}
+
+async function syncPush(){
+  const c=loadSC();if(!c.token||!c.owner||!c.repo)return toast('请先配置');
+  updSync('syncing');
+  try{
+    await gitHubPut(c,'random-tool-data.json',data);
+    await gitHubPut(c,'activity-config.json',cfgData);
+    updSync('ok','上传成功');
+  }catch(e){updSync('fail',e.message)}
+}
+
+async function syncPull(){
+  const c=loadSC();if(!c.token||!c.owner||!c.repo)return toast('请先配置');
+  updSync('syncing');
+  try{
+    const remoteData=await gitHubGet(c,'random-tool-data.json');
+    const remoteCfg=await gitHubGet(c,'activity-config.json');
+    if(remoteData.activities){data=remoteData;sv()}
+    if(remoteCfg.categories){cfgData=remoteCfg;saveCfg()}
+    renderList();
+    updSync('ok',`下载成功`);
+  }catch(e){updSync('fail',e.message)}
+}
 
 // ========== 工具 ==========
-function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 function closeSheet(id){document.getElementById(id).classList.remove('active')}
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
 
 // ========== 初始化 ==========
-ld();renderList();
+ld();loadCfg();renderList();
 
 // 生成速度线
 (function(){
