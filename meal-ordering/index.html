@@ -264,17 +264,48 @@
             right: 24px;
             width: 110px;
             height: 110px;
-            cursor: pointer;
+            cursor: grab;
             z-index: 100;
             transition: transform 0.3s;
+            touch-action: none;
+            user-select: none;
         }
 
         .mascot:hover {
             transform: scale(1.08);
         }
 
-        .mascot:active {
-            transform: scale(0.95);
+        .mascot.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .mascot.hidden {
+            display: none;
+        }
+
+        /* 关闭按钮 */
+        .mascot-close {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .mascot-close.show {
+            display: flex;
         }
 
         .mascot img {
@@ -463,8 +494,9 @@
     </div>
 
     <!-- 猫咪吉祥物 -->
-    <div class="mascot" onclick="toggleBubble()">
-        <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'">
+    <div class="mascot" id="mascot" onclick="handleMascotClick(event)">
+        <div class="mascot-close" id="mascotClose" onclick="hideMascot(event)">×</div>
+        <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'" draggable="false">
     </div>
 
     <!-- 对话气泡 -->
@@ -599,6 +631,107 @@
                     }
                 }, 3000);
             }
+        }
+
+        // 猫咪拖拽功能
+        let isDragging = false;
+        let isClick = false;
+        let startX, startY, offsetX, offsetY;
+        let dragTimeout;
+        const mascot = document.getElementById('mascot');
+        const mascotClose = document.getElementById('mascotClose');
+
+        function getPos(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            const pos = getPos(e);
+            const rect = mascot.getBoundingClientRect();
+            startX = pos.x;
+            startY = pos.y;
+            offsetX = pos.x - rect.left;
+            offsetY = pos.y - rect.top;
+            isDragging = false;
+            isClick = true;
+            
+            dragTimeout = setTimeout(() => {
+                isClick = false;
+            }, 150);
+        }
+
+        function doDrag(e) {
+            if (!offsetX) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            const dx = pos.x - startX;
+            const dy = pos.y - startY;
+            
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                isDragging = true;
+                isClick = false;
+                clearTimeout(dragTimeout);
+                mascot.classList.add('dragging');
+            }
+            
+            if (isDragging) {
+                const newX = pos.x - offsetX;
+                const newY = pos.y - offsetY;
+                mascot.style.left = newX + 'px';
+                mascot.style.top = newY + 'px';
+                mascot.style.right = 'auto';
+                mascot.style.bottom = 'auto';
+            }
+        }
+
+        function endDrag(e) {
+            clearTimeout(dragTimeout);
+            mascot.classList.remove('dragging');
+            
+            if (isClick && !isDragging) {
+                // 是点击，显示关闭按钮
+                mascotClose.classList.toggle('show');
+                // 同时显示气泡
+                toggleBubble();
+            }
+            
+            offsetX = 0;
+            offsetY = 0;
+            setTimeout(() => {
+                isDragging = false;
+                isClick = false;
+            }, 50);
+        }
+
+        // Mouse events
+        mascot.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        mascot.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', doDrag);
+        document.addEventListener('touchend', endDrag);
+
+        // 处理猫咪点击（显示气泡）
+        function handleMascotClick(e) {
+            // 如果正在拖拽，不触发点击
+            if (isDragging) {
+                e.stopPropagation();
+                return;
+            }
+        }
+
+        // 关闭小助理
+        function hideMascot(e) {
+            e.stopPropagation();
+            mascot.classList.add('hidden');
+            document.getElementById('bubble').classList.remove('show');
+            bubbleVisible = false;
         }
 
         // 回车键支持
