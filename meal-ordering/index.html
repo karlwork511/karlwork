@@ -224,6 +224,7 @@
         .btn-sync { background: #27ae60; color: white; }
         .btn-sync:disabled { opacity: 0.5; }
     </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <!-- 设置按钮 -->
@@ -330,7 +331,7 @@
                 <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
                 <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
                 <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
-                <button class="btn btn-sync" onclick="syncToExcel()" id="btnSyncExcel">📊 同步到表格</button>
+                <button class="btn btn-sync" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
             </div>
             <div class="order-list" id="orderList"></div>
         </div>
@@ -352,12 +353,6 @@
             </div>
             <input type="password" class="modal-input" id="settingsPwdInput" placeholder="输入密码连接系统" onkeypress="if(event.key==='Enter')doSettingsConnect()">
             <div id="settingsPwdError" style="color:#e74c3c;font-size:13px;text-align:center;margin-bottom:12px;display:none;">密码错误</div>
-            <div id="webhookConfig" style="display:none; margin-bottom: 16px;">
-                <div style="font-size:13px; color:#7f8c8d; margin-bottom:6px;">金山文档 Webhook URL</div>
-                <input type="text" class="modal-input" id="webhookUrlInput" placeholder="粘贴脚本webhook地址" style="font-size:13px; text-align:left;">
-                <div style="font-size:13px; color:#7f8c8d; margin-bottom:6px; margin-top:8px;">脚本令牌（AirScript-Token）</div>
-                <input type="text" class="modal-input" id="webhookTokenInput" placeholder="粘贴脚本令牌" style="font-size:13px; text-align:left;">
-            </div>
             <div class="modal-btns">
                 <button class="btn btn-secondary" onclick="closeSettings()">关闭</button>
                 <button class="btn btn-primary" id="btnConnect" onclick="doSettingsConnect()">连接</button>
@@ -478,17 +473,10 @@
             updateSettingsStatus();
             document.getElementById('settingsPwdInput').value = '';
             document.getElementById('settingsPwdError').style.display = 'none';
-            document.getElementById('webhookUrlInput').value = localStorage.getItem('meal_webhook_url') || '';
-            document.getElementById('webhookTokenInput').value = localStorage.getItem('meal_webhook_token') || '';
             document.getElementById('settingsModal').classList.add('show');
         }
 
         function closeSettings() {
-            // 保存webhook地址和令牌
-            const webhookUrl = document.getElementById('webhookUrlInput').value.trim();
-            const webhookToken = document.getElementById('webhookTokenInput').value.trim();
-            if (webhookUrl) localStorage.setItem('meal_webhook_url', webhookUrl);
-            if (webhookToken) localStorage.setItem('meal_webhook_token', webhookToken);
             document.getElementById('settingsModal').classList.remove('show');
         }
 
@@ -498,14 +486,12 @@
             const pwdInput = document.getElementById('settingsPwdInput');
             const pwdError = document.getElementById('settingsPwdError');
             const btnConnect = document.getElementById('btnConnect');
-            const webhookConfig = document.getElementById('webhookConfig');
             if (githubToken) {
                 statusEl.className = 'settings-status connected';
                 statusEl.innerHTML = '<span class="status-icon">🟢</span><span>已连接GitHub</span>';
                 dotEl.style.display = 'none';
                 pwdInput.style.display = 'none';
                 pwdError.style.display = 'none';
-                webhookConfig.style.display = 'block';
                 btnConnect.textContent = '退出连接';
                 btnConnect.className = 'btn btn-danger';
             } else {
@@ -513,7 +499,6 @@
                 statusEl.innerHTML = '<span class="status-icon">🔴</span><span>未连接</span>';
                 dotEl.style.display = 'block';
                 pwdInput.style.display = 'block';
-                webhookConfig.style.display = 'none';
                 btnConnect.textContent = '连接';
                 btnConnect.className = 'btn btn-primary';
             }
@@ -712,7 +697,7 @@
                     <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
                         <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
                         <div class="order-info">
-                            <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已同步' : '未同步'}</span></div>
+                            <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></div>
                             <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
                             <div class="order-time">下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
                         </div>
@@ -806,63 +791,45 @@
             } catch(e) { hideLoading(); alert('删除失败'); }
         }
 
-        // ===== 同步到金山文档 =====
-        async function syncToExcel() {
-            const webhookUrl = localStorage.getItem('meal_webhook_url') || '';
-            const webhookToken = localStorage.getItem('meal_webhook_token') || '';
-            if (!webhookUrl) {
-                alert('请先在⚙设置中配置金山文档 Webhook URL');
-                return;
-            }
-            if (!webhookToken) {
-                alert('请先在⚙设置中配置脚本令牌（AirScript-Token）');
-                return;
-            }
+        // ===== 下载 Excel =====
+        async function downloadExcel() {
             const today = new Date().toISOString().split('T')[0];
             try {
                 const orders = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
                 const unsyncedOrders = orders.filter(o => o.sync_status !== 'synced');
                 if (unsyncedOrders.length === 0) {
-                    alert('今日所有订单已同步，无需重复操作');
+                    alert('今日所有订单已下载，无需重复操作');
                     return;
                 }
-                showLoading(`正在同步 ${unsyncedOrders.length} 条订单到金山文档...`);
-                const syncData = unsyncedOrders.map(o => ({
-                    接待人: o.host_name || '',
-                    客户序号: o.customer_no,
-                    套餐: o.meal_name,
-                    备注: o.remark || '',
-                    下单时间: o.submit_time,
-                    状态: o.status,
-                    送达时间: o.deliver_time || ''
+                // 构造 Excel 数据
+                const data = unsyncedOrders.map(o => ({
+                    '接待人': o.host_name || '',
+                    '客户序号': o.customer_no,
+                    '套餐': o.meal_name,
+                    '备注': o.remark || '',
+                    '下单时间': o.submit_time,
+                    '状态': o.status,
+                    '送达时间': o.deliver_time || ''
                 }));
-                const resp = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'AirScript-Token': webhookToken
-                    },
-                    body: JSON.stringify({
-                        Context: {
-                            argv: {
-                                orders: JSON.stringify(syncData),
-                                date: today
-                            }
-                        }
-                    })
-                });
-                if (!resp.ok) throw new Error('Sync failed: ' + resp.status);
-                // 标记已同步
+                // 生成 Excel
+                const ws = XLSX.utils.json_to_sheet(data);
+                // 设置列宽
+                ws['!cols'] = [
+                    {wch: 8}, {wch: 10}, {wch: 24}, {wch: 12}, {wch: 20}, {wch: 10}, {wch: 20}
+                ];
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '订单');
+                const fileName = `翠华订餐_${today}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                // 标记已下载
                 orders.forEach(o => { if (o.sync_status !== 'synced') o.sync_status = 'synced'; });
                 const path = `meal-ordering/data/orders/${today}.json`;
                 const sha = await getSHA(path);
-                await saveJSON(path, orders, sha, 'Sync to Excel');
-                hideLoading();
+                await saveJSON(path, orders, sha, 'Download Excel');
                 await loadOrders();
-                alert(`✅ 成功同步 ${unsyncedOrders.length} 条订单到金山文档！`);
+                alert(`✅ 已下载 ${unsyncedOrders.length} 条订单为 ${fileName}`);
             } catch(e) {
-                hideLoading();
-                alert('同步失败：' + e.message + '\n请检查Webhook地址和令牌是否正确');
+                alert('下载失败：' + e.message);
             }
         }
 
