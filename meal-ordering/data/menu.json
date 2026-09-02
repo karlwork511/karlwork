@@ -25,5 +25,14 @@
     "desc_en": "Boiled Egg, Ham & Cheese Sandwich, Seasonal Fruits, Coffee",
     "icon": "🥣",
     "status": "上架"
+  },
+  {
+    "id": 4,
+    "name": "猪脚饭",
+    "name_en": "ZJFFF",
+    "description": "配肉卷",
+    "desc_en": "PRJ",
+    "icon": "🥗",
+    "status": "上架"
   }
 ]
