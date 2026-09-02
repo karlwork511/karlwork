@@ -167,6 +167,9 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; border-radius: 20px; padding: 30px; max-width: 360px; width: 90%; }
+        .modal-box.wide { max-width: 480px; }
+        .modal-box .modal-input-row { margin-bottom: 12px; }
+        .modal-box .modal-input-row label { display: block; font-size: 13px; color: #7f8c8d; margin-bottom: 6px; font-weight: 500; }
         .modal-box .modal-title { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 16px; text-align: center; }
         .modal-box .modal-input { width: 100%; padding: 14px; font-size: 16px; border: 2px solid #e0e6ed; border-radius: 10px; outline: none; text-align: center; margin-bottom: 16px; }
         .modal-box .modal-input:focus { border-color: #3498db; }
@@ -338,10 +341,12 @@
 
     <!-- 添加/编辑餐品弹窗 -->
     <div class="modal-overlay" id="menuModal">
-        <div class="modal-box">
+        <div class="modal-box wide">
             <div class="modal-title" id="menuModalTitle">添加套餐</div>
-            <input type="text" class="modal-input" id="menuNameInput" placeholder="套餐名称">
-            <input type="text" class="modal-input" id="menuDescInput" placeholder="套餐描述">
+            <div class="modal-input-row"><label>套餐名称</label><input type="text" class="modal-input" id="menuNameInput" placeholder="如：套餐A - 罗宋汤鸡柳通粉"></div>
+            <div class="modal-input-row"><label>套餐名称（英文）</label><input type="text" class="modal-input" id="menuNameEnInput" placeholder="e.g. Chicken Fillet w/ Macaroni in Borsch"></div>
+            <div class="modal-input-row"><label>套餐描述</label><input type="text" class="modal-input" id="menuDescInput" placeholder="如：配：水煮鸡蛋、菠萝包、时令水果"></div>
+            <div class="modal-input-row"><label>套餐描述（英文）</label><input type="text" class="modal-input" id="menuDescEnInput" placeholder="e.g. Boiled Egg, Pineapple Bun, Seasonal Fruits"></div>
             <div class="modal-btns">
                 <button class="btn btn-secondary" onclick="closeMenuModal()">取消</button>
                 <button class="btn btn-primary" onclick="saveMenu()">保存</button>
@@ -403,7 +408,7 @@
 
         // ===== GitHub API =====
         async function fetchJSON(path) {
-            const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}`, {
+            const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}&_t=${Date.now()}`, {
                 headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' }
             });
             if (!resp.ok) throw new Error('Fetch failed');
@@ -701,15 +706,15 @@
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, 'Batch deliver');
                 selectedOrders = [];
-                hideLoading();
-                loadOrders();
+                await loadOrders();
                 toggleSelectMode();
+                hideLoading();
                 alert('送达确认成功！');
             } catch(e) { hideLoading(); alert('操作失败'); }
         }
 
         // ===== 删除订单 =====
-        function showDeleteConfirm() { document.getElementById('deleteModal').classList.add('show'); }
+        function showDeleteConfirm() { document.getElementById('deletePwdInput').value = ''; document.getElementById('btnConfirmDelete').disabled = true; document.getElementById('deleteModal').classList.add('show'); }
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.remove('show');
             document.getElementById('deletePwdInput').value = '';
@@ -729,11 +734,11 @@
                 orders = orders.filter((_, i) => !selectedOrders.includes(i));
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, 'Delete orders');
-                selectedOrders = [];
                 closeDeleteModal();
-                hideLoading();
-                loadOrders();
+                selectedOrders = [];
+                await loadOrders();
                 toggleSelectMode();
+                hideLoading();
             } catch(e) { hideLoading(); alert('删除失败'); }
         }
 
@@ -763,7 +768,7 @@
 
 
 
-        function showAddMenuModal() { editingMenuId = null; document.getElementById('menuModalTitle').textContent = '添加套餐'; document.getElementById('menuNameInput').value = ''; document.getElementById('menuDescInput').value = ''; document.getElementById('menuModal').classList.add('show'); }
+        function showAddMenuModal() { editingMenuId = null; document.getElementById('menuModalTitle').textContent = '添加套餐'; document.getElementById('menuNameInput').value = ''; document.getElementById('menuNameEnInput').value = ''; document.getElementById('menuDescInput').value = ''; document.getElementById('menuDescEnInput').value = ''; document.getElementById('menuModal').classList.add('show'); }
         function closeMenuModal() { document.getElementById('menuModal').classList.remove('show'); }
 
         async function editMenu(idx) {
@@ -771,22 +776,28 @@
             editingMenuId = idx;
             document.getElementById('menuModalTitle').textContent = '编辑套餐';
             document.getElementById('menuNameInput').value = menu[idx].name;
+            document.getElementById('menuNameEnInput').value = menu[idx].name_en || '';
             document.getElementById('menuDescInput').value = menu[idx].description;
+            document.getElementById('menuDescEnInput').value = menu[idx].desc_en || '';
             document.getElementById('menuModal').classList.add('show');
         }
 
         async function saveMenu() {
             const name = document.getElementById('menuNameInput').value.trim();
+            const name_en = document.getElementById('menuNameEnInput').value.trim();
             const desc = document.getElementById('menuDescInput').value.trim();
-            if (!name || !desc) { alert('请填写完整'); return; }
+            const desc_en = document.getElementById('menuDescEnInput').value.trim();
+            if (!name || !desc) { alert('请填写套餐名称和描述'); return; }
             try {
                 const path = 'meal-ordering/data/menu.json';
                 let menu = await fetchJSON(path);
                 if (editingMenuId !== null) {
                     menu[editingMenuId].name = name;
+                    menu[editingMenuId].name_en = name_en;
                     menu[editingMenuId].description = desc;
+                    menu[editingMenuId].desc_en = desc_en;
                 } else {
-                    menu.push({ id: menu.length + 1, name, description: desc, icon: '🥗', status: '上架' });
+                    menu.push({ id: menu.length + 1, name, name_en, description: desc, desc_en, icon: '🥗', status: '上架' });
                 }
                 const sha = await getSHA(path);
                 await saveJSON(path, menu, sha, editingMenuId !== null ? 'Edit menu' : 'Add menu');
@@ -830,8 +841,8 @@
         window.addEventListener('load', () => {
             checkAuth();
             updateSettingsStatus();
+            showPage(1);
             setTimeout(autoShowBubble, 500);
-            document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = 'none');
         });
     </script>
 </body>
