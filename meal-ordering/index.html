@@ -262,15 +262,15 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 72px;
-            height: 72px;
+            width: 110px;
+            height: 110px;
             cursor: pointer;
             z-index: 100;
             transition: transform 0.3s;
         }
 
         .mascot:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         .mascot:active {
@@ -286,7 +286,7 @@
         /* 对话气泡 */
         .bubble {
             position: fixed;
-            bottom: 106px;
+            bottom: 144px;
             right: 24px;
             background: white;
             border-radius: 16px;
@@ -497,6 +497,17 @@
             3: '再检查一下信息对不对～没错的话就点"确认提交"啦～'
         };
 
+        // 自动显示气泡（进入页面时）
+        function autoShowBubble() {
+            const bubble = document.getElementById('bubble');
+            bubbleVisible = true;
+            bubble.classList.add('show');
+            setTimeout(() => {
+                bubbleVisible = false;
+                bubble.classList.remove('show');
+            }, 3000);
+        }
+
         // 页面切换
         function showPage(pageNum) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -506,10 +517,8 @@
             // 更新气泡文案
             document.getElementById('bubbleText').textContent = bubbleTexts[pageNum];
             
-            // 如果气泡是开着的，自动关闭
-            if (bubbleVisible) {
-                toggleBubble();
-            }
+            // 自动显示气泡
+            autoShowBubble();
         }
 
         // 页面1 → 页面2
@@ -597,6 +606,11 @@
             if (e.key === 'Enter') {
                 goToPage2();
             }
+        });
+
+        // 页面加载时自动显示气泡
+        window.addEventListener('load', function() {
+            setTimeout(autoShowBubble, 500);
         });
     </script>
 </body>
