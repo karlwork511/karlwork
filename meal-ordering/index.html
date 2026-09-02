@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>医院点餐系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 8vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+
+        /* 页面切换 */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 输入框 */
+        .input-group {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 16px;
+            color: #34495e;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 20px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .input-group input:focus {
+            border-color: #3498db;
+        }
+
+        .input-group .hint {
+            font-size: 13px;
+            color: #95a5a6;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* 套餐卡片 */
+        .meal-list {
+            display: grid;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .meal-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .meal-card.selected {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .meal-card .meal-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .meal-card .meal-info {
+            flex: 1;
+        }
+
+        .meal-card .meal-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .meal-card .meal-desc {
+            font-size: 13px;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+
+        .meal-card .check-mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: white;
+        }
+
+        .meal-card.selected .check-mark {
+            background: #3498db;
+            border-color: #3498db;
+        }
+
+        /* 确认页 */
+        .confirm-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+
+        .confirm-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .confirm-row:last-child {
+            border-bottom: none;
+        }
+
+        .confirm-row .label {
+            font-size: 15px;
+            color: #7f8c8d;
+        }
+
+        .confirm-row .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* 按钮 */
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+            padding: 0 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 猫咪吉祥物 */
+        .mascot {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 72px;
+            height: 72px;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .mascot:hover {
+            transform: scale(1.1);
+        }
+
+        .mascot:active {
+            transform: scale(0.95);
+        }
+
+        .mascot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 对话气泡 */
+        .bubble {
+            position: fixed;
+            bottom: 106px;
+            right: 24px;
+            background: white;
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 260px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #34495e;
+            z-index: 99;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .bubble.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: 30px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            transform: rotate(45deg);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .bubble .bubble-name {
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 4px;
+        }
+
+        /* 成功提示 */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .success-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .success-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .success-box .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .success-box .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .success-box .desc {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🏥 医院点餐系统</h1>
+            <div class="subtitle">健康体检 · 营养配餐</div>
+        </div>
+
+        <!-- 页面1：点餐入口 -->
+        <div class="page active" id="page1">
+            <div class="input-group">
+                <label>请输入客户序号</label>
+                <input type="text" id="customerNo" placeholder="如：一、二、三、秦、元..." maxlength="10">
+                <div class="hint">请输入体检客户的序号，支持中文、数字、拼音</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="goToPage2()">下一步</button>
+            </div>
+        </div>
+
+        <!-- 页面2：点餐页 -->
+        <div class="page" id="page2">
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 15px; color: #7f8c8d;">客户序号：<span id="displayCustomerNo" style="font-weight: 600; color: #3498db;"></span></div>
+            </div>
+            <div class="meal-list" id="mealList">
+                <div class="meal-card" onclick="selectMeal(this, '套餐A', '米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤')">
+                    <div class="meal-img"></div>
+                    <div class="meal-info">
+                        <div class="meal-name">套餐A</div>
+                        <div class="meal-desc">米饭 + 清蒸鱼 + 炒时蔬 + 紫菜汤</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+                <div class="meal-card" onclick="selectMeal(this, '套餐B', '米饭 + 番茄牛腩 + 凉拌木耳 + 玉米排骨汤')">
+                    <div class="meal-img">🥩</div>
+                    <div class="meal-info">
+                        <div class="meal-name">套餐B</div>
+                        <div class="meal-desc">米饭 + 番茄牛腩 + 凉拌木耳 + 玉米排骨汤</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+                <div class="meal-card" onclick="selectMeal(this, '套餐C', '米饭 + 宫保鸡丁 + 清炒西兰花 + 冬瓜汤')">
+                    <div class="meal-img">🍗</div>
+                    <div class="meal-info">
+                        <div class="meal-name">套餐C</div>
+                        <div class="meal-desc">米饭 + 宫保鸡丁 + 清炒西兰花 + 冬瓜汤</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+                <div class="meal-card" onclick="selectMeal(this, '无糖套餐', '糙米饭 + 清蒸鲈鱼 + 白灼菜心 + 无糖豆浆')">
+                    <div class="meal-img">🥗</div>
+                    <div class="meal-info">
+                        <div class="meal-name">无糖套餐</div>
+                        <div class="meal-desc">糙米饭 + 清蒸鱼 + 白灼菜心 + 无糖豆浆</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goToPage1()">返回</button>
+                <button class="btn btn-primary" id="btnNext" onclick="goToPage3()" disabled>下一步</button>
+            </div>
+        </div>
+
+        <!-- 页面3：确认提交页 -->
+        <div class="page" id="page3">
+            <div class="confirm-box">
+                <div class="confirm-row">
+                    <div class="label">客户序号</div>
+                    <div class="value" id="confirmCustomerNo">-</div>
+                </div>
+                <div class="confirm-row">
+                    <div class="label">所选套餐</div>
+                    <div class="value" id="confirmMeal">-</div>
+                </div>
+                <div class="confirm-row">
+                    <div class="label">套餐内容</div>
+                    <div class="value" id="confirmMealDesc" style="font-size: 14px;">-</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goToPage2()">返回修改</button>
+                <button class="btn btn-primary" onclick="submitOrder()">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 猫咪吉祥物 -->
+    <div class="mascot" onclick="toggleBubble()">
+        <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'">
+    </div>
+
+    <!-- 对话气泡 -->
+    <div class="bubble" id="bubble">
+        <div class="bubble-name"> 小助手</div>
+        <div id="bubbleText">嗨～请先输入客户序号哦～</div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div class="success-overlay" id="successOverlay" onclick="closeSuccess()">
+        <div class="success-box">
+            <div class="icon">🎉</div>
+            <div class="title">提交成功！</div>
+            <div class="desc">订单已记录，等待出餐</div>
+        </div>
+    </div>
+
+    <script>
+        // 页面状态
+        let currentPage = 1;
+        let customerNo = '';
+        let selectedMeal = null;
+        let selectedMealDesc = null;
+        let bubbleVisible = false;
+
+        // 各页面的对话文案
+        const bubbleTexts = {
+            1: '嗨～请先输入客户序号哦，比如"一"、"二"、"秦"都可以～',
+            2: '选一个喜欢的套餐吧～点一下卡片就能选中哦～',
+            3: '再检查一下信息对不对～没错的话就点"确认提交"啦～'
+        };
+
+        // 页面切换
+        function showPage(pageNum) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + pageNum).classList.add('active');
+            currentPage = pageNum;
+            
+            // 更新气泡文案
+            document.getElementById('bubbleText').textContent = bubbleTexts[pageNum];
+            
+            // 如果气泡是开着的，自动关闭
+            if (bubbleVisible) {
+                toggleBubble();
+            }
+        }
+
+        // 页面1 → 页面2
+        function goToPage2() {
+            customerNo = document.getElementById('customerNo').value.trim();
+            if (!customerNo) {
+                alert('请输入客户序号');
+                return;
+            }
+            document.getElementById('displayCustomerNo').textContent = customerNo;
+            showPage(2);
+        }
+
+        // 页面2 → 页面1
+        function goToPage1() {
+            showPage(1);
+        }
+
+        // 选择套餐
+        function selectMeal(element, mealName, mealDesc) {
+            document.querySelectorAll('.meal-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedMeal = mealName;
+            selectedMealDesc = mealDesc;
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        // 页面2 → 页面3
+        function goToPage3() {
+            if (!selectedMeal) {
+                alert('请先选择一个套餐');
+                return;
+            }
+            document.getElementById('confirmCustomerNo').textContent = customerNo;
+            document.getElementById('confirmMeal').textContent = selectedMeal;
+            document.getElementById('confirmMealDesc').textContent = selectedMealDesc;
+            showPage(3);
+        }
+
+        // 提交订单
+        function submitOrder() {
+            document.getElementById('successOverlay').classList.add('show');
+            console.log('订单数据:', {
+                customerNo: customerNo,
+                meal: selectedMeal,
+                mealDesc: selectedMealDesc,
+                submitTime: new Date().toLocaleString()
+            });
+        }
+
+        // 关闭成功提示
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+            customerNo = '';
+            selectedMeal = null;
+            selectedMealDesc = null;
+            document.getElementById('customerNo').value = '';
+            document.querySelectorAll('.meal-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('btnNext').disabled = true;
+            showPage(1);
+        }
+
+        // 切换气泡
+        function toggleBubble() {
+            const bubble = document.getElementById('bubble');
+            bubbleVisible = !bubbleVisible;
+            bubble.classList.toggle('show', bubbleVisible);
+            
+            if (bubbleVisible) {
+                setTimeout(() => {
+                    if (bubbleVisible) {
+                        bubbleVisible = false;
+                        bubble.classList.remove('show');
+                    }
+                }, 3000);
+            }
+        }
+
+        // 回车键支持
+        document.getElementById('customerNo').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                goToPage2();
+            }
+        });
+    </script>
+</body>
+</html>
