@@ -89,7 +89,7 @@
       "categoryId": 1,
       "priority": null,
       "note": null,
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-08-31T03:30:00.000Z"
     }
   ],
