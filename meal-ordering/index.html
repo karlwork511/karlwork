@@ -267,10 +267,20 @@
             .order-actions .btn { padding: 12px 24px; font-size: 15px; }
         }
 
+        .desktop-only { display: none; }
+        .mobile-only { display: inline; }
+        .download-hint { font-size: 12px; color: #95a5a6; margin-left: auto; white-space: nowrap; }
+
         /* 手机端保持卡片模式 */
         @media (max-width: 767px) {
             .order-list { display: grid !important; }
             .order-table-wrap { display: none !important; }
+        }
+
+        /* 桌面端切换 */
+        @media (min-width: 768px) {
+            .desktop-only { display: inline-flex; }
+            .mobile-only { display: none !important; }
         }
     </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -393,7 +403,8 @@
                 <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
                 <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
                 <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
-                <button class="btn btn-sync download-btn" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
+                <button class="btn btn-sync download-btn desktop-only" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
+                <span class="mobile-only download-hint">💡 如需下载订单，请用电脑打开网页</span>
             </div>
             <div class="order-list" id="orderList"></div>
             <div class="order-table-wrap" id="orderTableWrap">
