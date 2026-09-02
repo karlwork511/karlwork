@@ -308,17 +308,40 @@
             display: flex;
         }
 
+        /* 快捷标签 */
+        .quick-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #3498db;
+            background: #f0f8ff;
+            border: 1px solid #3498db;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .quick-tag:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .quick-tag:active {
+            transform: scale(0.95);
+        }
+
         .mascot img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
 
-        /* 对话气泡 */
+        /* 对话气泡 - 跟随猫咪位置 */
         .bubble {
-            position: fixed;
-            bottom: 144px;
-            right: 24px;
+            position: absolute;
+            bottom: 120px;
+            right: 0;
             background: white;
             border-radius: 16px;
             padding: 16px 20px;
@@ -486,6 +509,24 @@
                     <div class="value" id="confirmMealDesc" style="font-size: 14px;">-</div>
                 </div>
             </div>
+            
+            <!-- 备注输入框 -->
+            <div class="remark-box" style="background: white; border-radius: 16px; padding: 20px; margin-top: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+                <div style="font-size: 15px; color: #34495e; font-weight: 500; margin-bottom: 12px;">备注</div>
+                <div style="position: relative;">
+                    <textarea id="remarkInput" placeholder="输入备注信息..." maxlength="100" oninput="updateCharCount()" style="width: 100%; min-height: 80px; padding: 12px 60px 12px 14px; font-size: 15px; border: 2px solid #e0e6ed; border-radius: 12px; outline: none; resize: none; font-family: inherit; line-height: 1.5;"></textarea>
+                    <div id="charCount" style="position: absolute; bottom: 8px; right: 12px; font-size: 13px; color: #95a5a6;">0/100</div>
+                </div>
+                <!-- 快捷选项 -->
+                <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span class="quick-tag" onclick="addRemark('不加奶')">不加奶</span>
+                    <span class="quick-tag" onclick="addRemark('不加糖')">不加糖</span>
+                    <span class="quick-tag" onclick="addRemark('热饮')">热饮</span>
+                    <span class="quick-tag" onclick="addRemark('冷饮')">冷饮</span>
+                    <span class="quick-tag" onclick="addRemark('常温')">常温</span>
+                </div>
+            </div>
+            
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="goToPage2()">返回修改</button>
                 <button class="btn btn-primary" onclick="submitOrder()">确认提交</button>
@@ -493,16 +534,15 @@
         </div>
     </div>
 
-    <!-- 猫咪吉祥物 -->
+    <!-- 猫咪吉祥物（包含气泡） -->
     <div class="mascot" id="mascot" onclick="handleMascotClick(event)">
         <div class="mascot-close" id="mascotClose" onclick="hideMascot(event)">×</div>
         <img src="./mascot.png" alt="小助手" onerror="this.style.display='none'" draggable="false">
-    </div>
-
-    <!-- 对话气泡 -->
-    <div class="bubble" id="bubble">
-        <div class="bubble-name"> 小助手</div>
-        <div id="bubbleText">嗨～请先输入客户序号哦～</div>
+        <!-- 对话气泡 -->
+        <div class="bubble" id="bubble">
+            <div class="bubble-name"> 小助手</div>
+            <div id="bubbleText">嗨～请先输入客户序号哦～</div>
+        </div>
     </div>
 
     <!-- 成功提示 -->
@@ -728,10 +768,13 @@
 
         // 关闭小助理
         function hideMascot(e) {
+            e.preventDefault();
             e.stopPropagation();
-            mascot.classList.add('hidden');
+            e.stopImmediatePropagation();
+            mascot.style.display = 'none';
             document.getElementById('bubble').classList.remove('show');
             bubbleVisible = false;
+            return false;
         }
 
         // 回车键支持
@@ -745,6 +788,35 @@
         window.addEventListener('load', function() {
             setTimeout(autoShowBubble, 500);
         });
+
+        // 备注字数统计
+        function updateCharCount() {
+            const input = document.getElementById('remarkInput');
+            const count = document.getElementById('charCount');
+            count.textContent = input.value.length + '/100';
+        }
+
+        // 快捷添加备注
+        function addRemark(text) {
+            const input = document.getElementById('remarkInput');
+            const current = input.value.trim();
+            if (current.includes(text)) {
+                // 已存在，删除
+                input.value = current.replace(text, '').replace(/、{2,}/g, '、').replace(/^、|、$/g, '').trim();
+            } else {
+                // 不存在，追加
+                if (current) {
+                    input.value = current + '、' + text;
+                } else {
+                    input.value = text;
+                }
+            }
+            // 检查字数限制
+            if (input.value.length > 100) {
+                input.value = input.value.substring(0, 100);
+            }
+            updateCharCount();
+        }
     </script>
 </body>
 </html>
