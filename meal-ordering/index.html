@@ -230,6 +230,48 @@
         .filter-btn.active { background: #3498db; color: white; border-color: #3498db; }
         .order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .order-actions .download-btn { margin-left: auto; }
+
+        /* ===== 桌面端表格样式 ===== */
+        .order-table-wrap { display: none; margin-top: 12px; overflow-x: auto; }
+        .order-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-size: 14px; }
+        .order-table thead th { background: #f8f9fa; padding: 12px 14px; text-align: left; font-weight: 600; color: #34495e; border-bottom: 2px solid #e9ecef; white-space: nowrap; }
+        .order-table tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; color: #555; vertical-align: middle; }
+        .order-table tbody tr:last-child td { border-bottom: none; }
+        .order-table tbody tr:hover { background: #f8fbff; }
+        .order-table tbody tr.delivered-row { opacity: 0.65; }
+        .order-table .tbl-checkbox { width: 20px; height: 20px; border-radius: 4px; border: 2px solid #ddd; display: none; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; color: white; flex-shrink: 0; }
+        .order-table .tbl-checkbox.checked { background: #3498db; border-color: #3498db; }
+        .order-table .tbl-status { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+        .tbl-status.pending { background: #fff3cd; color: #856404; }
+        .tbl-status.done { background: #d4edda; color: #155724; }
+        .tbl-sync { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+        .tbl-sync.synced { background: #d4edda; color: #155724; }
+        .tbl-sync.unsynced { background: #f0f0f0; color: #95a5a6; }
+        .order-table .tbl-actions { display: flex; gap: 6px; }
+        .order-table .tbl-action-btn { padding: 5px 10px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .tbl-action-btn.deliver-btn { background: #27ae60; color: white; }
+        .tbl-action-btn.undo-btn { background: #f39c12; color: white; }
+
+        /* 桌面端响应式 */
+        @media (min-width: 768px) {
+            body { padding-top: 2vh; }
+            .container { max-width: 1100px; }
+            .header h1 { font-size: 32px; }
+            .order-list { display: none !important; }
+            .order-table-wrap { display: block !important; }
+            .order-card .checkbox { display: none !important; }
+            .stats-bar { padding: 24px 30px; }
+            .stat-item .num { font-size: 32px; }
+            .filter-row { gap: 10px; }
+            .filter-btn { padding: 8px 18px; font-size: 14px; }
+            .order-actions .btn { padding: 12px 24px; font-size: 15px; }
+        }
+
+        /* 手机端保持卡片模式 */
+        @media (max-width: 767px) {
+            .order-list { display: grid !important; }
+            .order-table-wrap { display: none !important; }
+        }
     </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -354,6 +396,26 @@
                 <button class="btn btn-sync download-btn" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
             </div>
             <div class="order-list" id="orderList"></div>
+            <div class="order-table-wrap" id="orderTableWrap">
+                <table class="order-table" id="orderTable">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;"><div class="tbl-checkbox" id="tblSelectAll" onclick="tblToggleSelectAll()" style="display:flex;">✓</div></th>
+                            <th>日期</th>
+                            <th>接待人</th>
+                            <th>客户序号</th>
+                            <th>套餐</th>
+                            <th>备注</th>
+                            <th>下单时间</th>
+                            <th>状态</th>
+                            <th>下载</th>
+                            <th>送达时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- 页面5：餐品管理 -->
@@ -750,25 +812,56 @@
         }
 
         function renderOrderList(orders) {
+            // ===== 卡片视图（iPad/手机）=====
             const list = document.getElementById('orderList');
             if (!orders || orders.length === 0) {
                 list.innerHTML = '<p style="text-align:center;color:#95a5a6;padding:40px;">暂无订单</p>';
-                return;
-            }
-            list.innerHTML = orders.map((o, i) => `
-                <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
-                    <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
-                    <div class="order-info">
-                        <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></div>
-                        <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
-                        <div class="order-time">${o._date ? o._date + ' ' : ''}下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
+            } else {
+                list.innerHTML = orders.map((o, i) => `
+                    <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
+                        <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
+                        <div class="order-info">
+                            <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></div>
+                            <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
+                            <div class="order-time">${o._date ? o._date + ' ' : ''}下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
+                        </div>
+                        <span class="status-tag ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span>
                     </div>
-                    <span class="status-tag ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span>
-                </div>
-            `).join('');
-            // 恢复选择模式状态
-            if (selectMode) {
-                document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = 'flex');
+                `).join('');
+                if (selectMode) {
+                    document.querySelectorAll('.order-card .checkbox').forEach(cb => cb.style.display = 'flex');
+                }
+            }
+
+            // ===== 表格视图（桌面端）=====
+            const tbody = document.getElementById('orderTableBody');
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#95a5a6;padding:40px;">暂无订单</td></tr>';
+            } else {
+                tbody.innerHTML = orders.map((o, i) => `
+                    <tr class="${o.status === '已送达' ? 'delivered-row' : ''}" data-idx="${i}">
+                        <td><div class="tbl-checkbox" onclick="toggleOrderSelect(${i})" id="tbl_cb_${i}">✓</div></td>
+                        <td style="white-space:nowrap;color:#888;font-size:13px;">${o._date || ''}</td>
+                        <td style="color:#e67e22;font-weight:500;">${o.host_name || ''}</td>
+                        <td>${o.customer_no}</td>
+                        <td style="max-width:200px;">${o.meal_name}</td>
+                        <td style="color:#e67e22;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${o.remark || ''}">${o.remark || '-'}</td>
+                        <td style="white-space:nowrap;font-size:13px;">${o.submit_time ? o.submit_time.split(' ')[1] || o.submit_time : ''}</td>
+                        <td><span class="tbl-status ${o.status === '已送达' ? 'done' : 'pending'}">${o.status}</span></td>
+                        <td><span class="tbl-sync ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已下载' : '未下载'}</span></td>
+                        <td style="white-space:nowrap;font-size:13px;">${o.deliver_time ? (o.deliver_time.split(' ')[1] || o.deliver_time) : '-'}</td>
+                        <td>
+                            <div class="tbl-actions">
+                                ${o.status === '待出餐' 
+                                    ? `<button class="tbl-action-btn deliver-btn" onclick="tblDeliver('${o._date}', ${i})">送达</button>` 
+                                    : `<button class="tbl-action-btn undo-btn" onclick="tblUndoDeliver('${o._date}', ${i})">撤回</button>`}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                if (selectMode) {
+                    document.querySelectorAll('.tbl-checkbox').forEach(cb => cb.style.display = 'flex');
+                }
             }
         }
 
@@ -798,10 +891,16 @@
         function toggleSelectMode() {
             selectMode = !selectMode;
             document.getElementById('btnSelectMode').textContent = selectMode ? '取消选择' : '选择';
-            document.querySelectorAll('.checkbox').forEach(cb => cb.style.display = selectMode ? 'flex' : 'none');
+            // 卡片视图 checkbox
+            document.querySelectorAll('.order-card .checkbox').forEach(cb => cb.style.display = selectMode ? 'flex' : 'none');
+            // 表格视图 checkbox
+            document.querySelectorAll('.tbl_checkbox, .tbl-checkbox').forEach(cb => {
+                if (cb.id === 'tblSelectAll') { cb.style.display = 'flex'; }
+                else { cb.style.display = selectMode ? 'flex' : 'none'; }
+            });
             if (!selectMode) {
                 selectedOrders = [];
-                document.querySelectorAll('.checkbox').forEach(cb => cb.classList.remove('checked'));
+                document.querySelectorAll('.checkbox, .tbl-checkbox').forEach(cb => cb.classList.remove('checked'));
                 document.getElementById('btnBatchDeliver').style.display = 'none';
                 document.getElementById('btnBatchDelete').style.display = 'none';
             }
@@ -809,14 +908,79 @@
 
         function toggleOrderSelect(idx) {
             if (!selectMode) return;
-            const cb = document.getElementById('cb_' + idx);
-            cb.classList.toggle('checked');
-            if (cb.classList.contains('checked')) { selectedOrders.push(idx); }
-            else { selectedOrders = selectedOrders.filter(i => i !== idx); }
+            // 同步卡片和表格的 checkbox 状态
+            const cb1 = document.getElementById('cb_' + idx);
+            const cb2 = document.getElementById('tbl_cb_' + idx);
+            const isChecked = selectedOrders.includes(idx);
+            if (isChecked) {
+                selectedOrders = selectedOrders.filter(i => i !== idx);
+                if (cb1) cb1.classList.remove('checked');
+                if (cb2) cb2.classList.remove('checked');
+            } else {
+                selectedOrders.push(idx);
+                if (cb1) cb1.classList.add('checked');
+                if (cb2) cb2.classList.add('checked');
+            }
             document.getElementById('btnBatchDeliver').style.display = selectedOrders.length > 0 ? 'block' : 'none';
             document.getElementById('btnBatchDelete').style.display = selectedOrders.length > 0 ? 'block' : 'none';
             document.getElementById('btnBatchDeliver').disabled = selectedOrders.length === 0;
             document.getElementById('btnBatchDelete').disabled = selectedOrders.length === 0;
+        }
+
+        // ===== 表格专属操作 =====
+        function tblToggleSelectAll() {
+            if (!selectMode) { toggleSelectMode(); }
+            const allCb = document.querySelectorAll('.tbl-checkbox:not(#tblSelectAll)');
+            const allSelected = selectedOrders.length === allCb.length && allCb.length > 0;
+            if (allSelected) {
+                // 取消全选
+                selectedOrders = [];
+                document.querySelectorAll('.tbl-checkbox, .order-card .checkbox').forEach(cb => cb.classList.remove('checked'));
+            } else {
+                // 全选
+                selectedOrders = [];
+                allCb.forEach((cb, i) => {
+                    selectedOrders.push(i);
+                    cb.classList.add('checked');
+                    const cardCb = document.getElementById('cb_' + i);
+                    if (cardCb) cardCb.classList.add('checked');
+                });
+            }
+            const selectAllCb = document.getElementById('tblSelectAll');
+            selectAllCb.classList.toggle('checked', selectedOrders.length > 0);
+            document.getElementById('btnBatchDeliver').style.display = selectedOrders.length > 0 ? 'block' : 'none';
+            document.getElementById('btnBatchDelete').style.display = selectedOrders.length > 0 ? 'block' : 'none';
+            document.getElementById('btnBatchDeliver').disabled = selectedOrders.length === 0;
+            document.getElementById('btnBatchDelete').disabled = selectedOrders.length === 0;
+        }
+
+        async function tblDeliver(date, idx) {
+            showLoading('正在确认送达...');
+            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            try {
+                const path = `meal-ordering/data/orders/${date}.json`;
+                let orders = await fetchJSON(path);
+                orders[idx].status = '已送达';
+                orders[idx].deliver_time = `${date} ${timeStr}`;
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, 'Deliver order');
+                await loadOrders();
+                hideLoading();
+            } catch(e) { hideLoading(); alert('操作失败'); }
+        }
+
+        async function tblUndoDeliver(date, idx) {
+            showLoading('正在撤回送达...');
+            try {
+                const path = `meal-ordering/data/orders/${date}.json`;
+                let orders = await fetchJSON(path);
+                orders[idx].status = '待出餐';
+                orders[idx].deliver_time = null;
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, 'Undo deliver');
+                await loadOrders();
+                hideLoading();
+            } catch(e) { hideLoading(); alert('操作失败'); }
         }
 
         // ===== 加载提示 =====
