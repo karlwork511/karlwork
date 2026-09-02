@@ -211,6 +211,18 @@
         .loading-spinner { width: 40px; height: 40px; border: 4px solid #e0e6ed; border-top-color: #3498db; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 15px; color: #7f8c8d; margin-top: 16px; font-weight: 500; }
+
+        /* 接待人快捷标签 */
+        .host-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .host-tag { display: inline-block; padding: 8px 16px; font-size: 15px; color: #e67e22; background: #fef5e7; border: 1.5px solid #e67e22; border-radius: 20px; cursor: pointer; transition: all 0.2s; user-select: none; font-weight: 500; }
+        .host-tag:active, .host-tag.active { background: #e67e22; color: white; transform: scale(0.95); }
+
+        /* 同步状态 */
+        .sync-tag { display: inline-block; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 500; margin-left: 6px; }
+        .sync-tag.synced { background: #d4edda; color: #155724; }
+        .sync-tag.unsynced { background: #f0f0f0; color: #95a5a6; }
+        .btn-sync { background: #27ae60; color: white; }
+        .btn-sync:disabled { opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -237,6 +249,24 @@
         <!-- 页面1：点餐入口 -->
         <div class="page active" id="page1">
             <div class="input-group">
+                <label>请输入接待人</label>
+                <input type="text" id="hostName" placeholder="输入或点击下方选择" maxlength="5">
+                <div class="host-tags" id="hostTags">
+                    <span class="host-tag" onclick="selectHost(this, '范')">范</span>
+                    <span class="host-tag" onclick="selectHost(this, '肖')">肖</span>
+                    <span class="host-tag" onclick="selectHost(this, '郑')">郑</span>
+                    <span class="host-tag" onclick="selectHost(this, '邱')">邱</span>
+                    <span class="host-tag" onclick="selectHost(this, '陈')">陈</span>
+                    <span class="host-tag" onclick="selectHost(this, '吴')">吴</span>
+                    <span class="host-tag" onclick="selectHost(this, '朱')">朱</span>
+                    <span class="host-tag" onclick="selectHost(this, '潘')">潘</span>
+                    <span class="host-tag" onclick="selectHost(this, '张')">张</span>
+                    <span class="host-tag" onclick="selectHost(this, '彭')">彭</span>
+                    <span class="host-tag" onclick="selectHost(this, '许')">许</span>
+                    <span class="host-tag" onclick="selectHost(this, '王')">王</span>
+                </div>
+            </div>
+            <div class="input-group">
                 <label>请输入客户序号</label>
                 <input type="text" id="customerNo" placeholder="如：一、二、三、秦、元..." maxlength="10">
                 <div class="hint">请输入体检客户的序号，支持中文、数字、拼音</div>
@@ -248,7 +278,8 @@
 
         <!-- 页面2：点餐页 -->
         <div class="page" id="page2">
-            <div style="margin-bottom: 16px;">
+            <div style="margin-bottom: 16px; display: flex; gap: 20px;">
+                <div style="font-size: 15px; color: #7f8c8d;">接待人：<span id="displayHostName" style="font-weight: 600; color: #e67e22;"></span></div>
                 <div style="font-size: 15px; color: #7f8c8d;">客户序号：<span id="displayCustomerNo" style="font-weight: 600; color: #3498db;"></span></div>
             </div>
             <div class="meal-list" id="mealList">
@@ -263,6 +294,7 @@
         <!-- 页面3：确认提交页 -->
         <div class="page" id="page3">
             <div class="confirm-box">
+                <div class="confirm-row"><div class="label">接待人</div><div class="value" id="confirmHostName" style="color: #e67e22;">-</div></div>
                 <div class="confirm-row"><div class="label">客户序号</div><div class="value" id="confirmCustomerNo">-</div></div>
                 <div class="confirm-row"><div class="label">所选套餐</div><div class="value" id="confirmMeal">-</div></div>
                 <div class="confirm-row"><div class="label">套餐内容</div><div class="value" id="confirmMealDesc" style="font-size: 14px;">-</div></div>
@@ -298,6 +330,7 @@
                 <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
                 <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
                 <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
+                <button class="btn btn-sync" onclick="syncToExcel()" id="btnSyncExcel">📊 同步到表格</button>
             </div>
             <div class="order-list" id="orderList"></div>
         </div>
@@ -319,6 +352,10 @@
             </div>
             <input type="password" class="modal-input" id="settingsPwdInput" placeholder="输入密码连接系统" onkeypress="if(event.key==='Enter')doSettingsConnect()">
             <div id="settingsPwdError" style="color:#e74c3c;font-size:13px;text-align:center;margin-bottom:12px;display:none;">密码错误</div>
+            <div id="webhookConfig" style="display:none; margin-bottom: 16px;">
+                <div style="font-size:13px; color:#7f8c8d; margin-bottom:6px;">金山文档 Webhook URL（同步订单用）</div>
+                <input type="text" class="modal-input" id="webhookUrlInput" placeholder="粘贴AirScript Webhook地址" style="font-size:13px; text-align:left;">
+            </div>
             <div class="modal-btns">
                 <button class="btn btn-secondary" onclick="closeSettings()">关闭</button>
                 <button class="btn btn-primary" id="btnConnect" onclick="doSettingsConnect()">连接</button>
@@ -390,7 +427,7 @@
 
         // ===== 全局状态 =====
         let currentPage = 1;
-        let customerNo = '', selectedMeal = null, selectedMealDesc = null, bubbleVisible = false;
+        let hostName = '', customerNo = '', selectedMeal = null, selectedMealDesc = null, bubbleVisible = false;
         let selectMode = false, selectedOrders = [];
         let editingMenuId = null;
         let githubToken = localStorage.getItem('meal_token') || '';
@@ -439,10 +476,14 @@
             updateSettingsStatus();
             document.getElementById('settingsPwdInput').value = '';
             document.getElementById('settingsPwdError').style.display = 'none';
+            document.getElementById('webhookUrlInput').value = localStorage.getItem('meal_webhook_url') || '';
             document.getElementById('settingsModal').classList.add('show');
         }
 
         function closeSettings() {
+            // 保存webhook地址
+            const webhookUrl = document.getElementById('webhookUrlInput').value.trim();
+            if (webhookUrl) localStorage.setItem('meal_webhook_url', webhookUrl);
             document.getElementById('settingsModal').classList.remove('show');
         }
 
@@ -452,12 +493,14 @@
             const pwdInput = document.getElementById('settingsPwdInput');
             const pwdError = document.getElementById('settingsPwdError');
             const btnConnect = document.getElementById('btnConnect');
+            const webhookConfig = document.getElementById('webhookConfig');
             if (githubToken) {
                 statusEl.className = 'settings-status connected';
                 statusEl.innerHTML = '<span class="status-icon">🟢</span><span>已连接GitHub</span>';
                 dotEl.style.display = 'none';
                 pwdInput.style.display = 'none';
                 pwdError.style.display = 'none';
+                webhookConfig.style.display = 'block';
                 btnConnect.textContent = '退出连接';
                 btnConnect.className = 'btn btn-danger';
             } else {
@@ -465,6 +508,7 @@
                 statusEl.innerHTML = '<span class="status-icon">🔴</span><span>未连接</span>';
                 dotEl.style.display = 'block';
                 pwdInput.style.display = 'block';
+                webhookConfig.style.display = 'none';
                 btnConnect.textContent = '连接';
                 btnConnect.className = 'btn btn-primary';
             }
@@ -528,12 +572,22 @@
             if (num === 5) loadMenuList();
         }
 
+        // ===== 接待人快捷选择 =====
+        function selectHost(el, name) {
+            document.querySelectorAll('.host-tag').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('hostName').value = name;
+        }
+
         // ===== 点餐流程 =====
         function goToPage1() { showPage(1); }
         function goToPage2() {
             if (!githubToken) { alert('请先在左上角设置中连接系统'); return; }
+            hostName = document.getElementById('hostName').value.trim();
+            if (!hostName) { alert('请输入或选择接待人'); return; }
             customerNo = document.getElementById('customerNo').value.trim();
             if (!customerNo) { alert('请输入客户序号'); return; }
+            document.getElementById('displayHostName').textContent = hostName;
             document.getElementById('displayCustomerNo').textContent = customerNo;
             showPage(2);
             loadMenu();
@@ -568,6 +622,7 @@
 
         function goToPage3() {
             if (!selectedMeal) { alert('请先选择一个套餐'); return; }
+            document.getElementById('confirmHostName').textContent = hostName;
             document.getElementById('confirmCustomerNo').textContent = customerNo;
             document.getElementById('confirmMeal').textContent = selectedMeal;
             document.getElementById('confirmMealDesc').textContent = selectedMealDesc;
@@ -598,13 +653,15 @@
             const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
             const order = {
                 id: String(Date.now()).slice(-6),
+                host_name: hostName,
                 customer_no: customerNo,
                 meal_name: selectedMeal,
                 meal_desc: selectedMealDesc,
                 remark: remark,
                 status: '待出餐',
                 submit_time: `${today} ${timeStr}`,
-                deliver_time: null
+                deliver_time: null,
+                sync_status: ''
             };
 
             showLoading('正在提交订单...');
@@ -622,9 +679,11 @@
 
         function closeSuccess() {
             document.getElementById('successOverlay').classList.remove('show');
-            customerNo = ''; selectedMeal = null; selectedMealDesc = null;
+            hostName = ''; customerNo = ''; selectedMeal = null; selectedMealDesc = null;
+            document.getElementById('hostName').value = '';
             document.getElementById('customerNo').value = '';
             document.getElementById('remarkInput').value = '';
+            document.querySelectorAll('.host-tag').forEach(t => t.classList.remove('active'));
             updateCharCount();
             document.querySelectorAll('.meal-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('btnNext').disabled = true;
@@ -648,7 +707,7 @@
                     <div class="order-card ${o.status === '已送达' ? 'delivered' : ''}" data-idx="${i}">
                         <div class="checkbox" onclick="toggleOrderSelect(${i})" id="cb_${i}">✓</div>
                         <div class="order-info">
-                            <div class="order-no">序号：${o.customer_no}</div>
+                            <div class="order-no"><span style="color:#e67e22;font-size:13px;">${o.host_name || ''}</span> ${o.host_name ? '·' : ''} 序号：${o.customer_no}<span class="sync-tag ${o.sync_status === 'synced' ? 'synced' : 'unsynced'}">${o.sync_status === 'synced' ? '已同步' : '未同步'}</span></div>
                             <div class="order-meal">${o.meal_name}${o.remark ? ' · ' + o.remark : ''}</div>
                             <div class="order-time">下单：${o.submit_time}${o.deliver_time ? ' → 送达：' + o.deliver_time : ''}</div>
                         </div>
@@ -740,6 +799,52 @@
                 toggleSelectMode();
                 hideLoading();
             } catch(e) { hideLoading(); alert('删除失败'); }
+        }
+
+        // ===== 同步到金山文档 =====
+        async function syncToExcel() {
+            const webhookUrl = localStorage.getItem('meal_webhook_url') || '';
+            if (!webhookUrl) {
+                alert('请先在⚙设置中配置金山文档 Webhook URL');
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                const orders = await fetchJSON(`meal-ordering/data/orders/${today}.json`);
+                const unsyncedOrders = orders.filter(o => o.sync_status !== 'synced');
+                if (unsyncedOrders.length === 0) {
+                    alert('今日所有订单已同步，无需重复操作');
+                    return;
+                }
+                showLoading(`正在同步 ${unsyncedOrders.length} 条订单到金山文档...`);
+                const syncData = unsyncedOrders.map(o => ({
+                    接待人: o.host_name || '',
+                    客户序号: o.customer_no,
+                    套餐: o.meal_name,
+                    套餐内容: o.meal_desc,
+                    备注: o.remark || '',
+                    下单时间: o.submit_time,
+                    状态: o.status,
+                    送达时间: o.deliver_time || ''
+                }));
+                const resp = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orders: syncData, date: today })
+                });
+                if (!resp.ok) throw new Error('Sync failed: ' + resp.status);
+                // 标记已同步
+                orders.forEach(o => { if (o.sync_status !== 'synced') o.sync_status = 'synced'; });
+                const path = `meal-ordering/data/orders/${today}.json`;
+                const sha = await getSHA(path);
+                await saveJSON(path, orders, sha, 'Sync to Excel');
+                hideLoading();
+                await loadOrders();
+                alert(`✅ 成功同步 ${unsyncedOrders.length} 条订单到金山文档！`);
+            } catch(e) {
+                hideLoading();
+                alert('同步失败：' + e.message + '\n请检查Webhook地址是否正确');
+            }
         }
 
         // ===== 餐品管理 =====
@@ -838,6 +943,7 @@
 
         // ===== 初始化 =====
         document.getElementById('customerNo').addEventListener('keypress', function(e) { if (e.key === 'Enter') goToPage2(); });
+        document.getElementById('hostName').addEventListener('keypress', function(e) { if (e.key === 'Enter') document.getElementById('customerNo').focus(); });
         window.addEventListener('load', () => {
             checkAuth();
             updateSettingsStatus();
