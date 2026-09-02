@@ -93,8 +93,10 @@
         .meal-card.selected { border-color: #3498db; background: #f0f8ff; }
         .meal-card .meal-img { width: 80px; height: 80px; border-radius: 12px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
         .meal-card .meal-info { flex: 1; }
-        .meal-card .meal-name { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 6px; }
+        .meal-card .meal-name { font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 2px; }
+        .meal-card .meal-name-en { font-size: 12px; color: #95a5a6; font-style: italic; margin-bottom: 6px; }
         .meal-card .meal-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
+        .meal-card .meal-desc-en { font-size: 11px; color: #bdc3c7; font-style: italic; margin-top: 2px; }
         .meal-card .meal-tag { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 600; border-radius: 6px; margin-right: 6px; }
         .meal-card .check-mark { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 14px; color: white; }
         .meal-card.selected .check-mark { background: #3498db; border-color: #3498db; }
@@ -152,7 +154,9 @@
         .menu-item .menu-icon { width: 50px; height: 50px; border-radius: 10px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
         .menu-item .menu-info { flex: 1; }
         .menu-item .menu-name { font-size: 16px; font-weight: 600; color: #2c3e50; }
+        .menu-item .menu-name-en { font-size: 11px; color: #95a5a6; font-style: italic; }
         .menu-item .menu-desc { font-size: 12px; color: #7f8c8d; margin-top: 2px; }
+        .menu-item .menu-desc-en { font-size: 10px; color: #bdc3c7; font-style: italic; }
         .menu-item .menu-actions { display: flex; gap: 8px; }
         .menu-item .menu-actions button { padding: 6px 12px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; }
         .btn-edit { background: #3498db; color: white; }
@@ -197,6 +201,13 @@
         .bubble.show { opacity: 1; transform: translateY(0); }
         .bubble::after { content: ''; position: absolute; bottom: -8px; right: 30px; width: 16px; height: 16px; background: white; transform: rotate(45deg); box-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .bubble .bubble-name { font-weight: 600; color: #3498db; margin-bottom: 4px; }
+
+        /* 加载提示 */
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .loading-overlay.show { opacity: 1; pointer-events: auto; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid #e0e6ed; border-top-color: #3498db; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 15px; color: #7f8c8d; margin-top: 16px; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -336,6 +347,12 @@
                 <button class="btn btn-primary" onclick="saveMenu()">保存</button>
             </div>
         </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">正在提交...</div>
     </div>
 
     <!-- 成功提示 -->
@@ -527,7 +544,9 @@
                         <div class="meal-img">${m.icon || ''}</div>
                         <div class="meal-info">
                             <div class="meal-name">${m.name}</div>
+                            <div class="meal-name-en">${m.name_en || ''}</div>
                             <div class="meal-desc">${m.description}</div>
+                            <div class="meal-desc-en">${m.desc_en || ''}</div>
                         </div>
                         <div class="check-mark">✓</div>
                     </div>
@@ -583,6 +602,7 @@
                 deliver_time: null
             };
 
+            showLoading('正在提交订单...');
             try {
                 const path = `meal-ordering/data/orders/${today}.json`;
                 let orders = [];
@@ -590,8 +610,9 @@
                 orders.push(order);
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, `Add order ${order.id}`);
+                hideLoading();
                 document.getElementById('successOverlay').classList.add('show');
-            } catch(e) { alert('提交失败，请重试'); }
+            } catch(e) { hideLoading(); alert('提交失败，请重试'); }
         }
 
         function closeSuccess() {
@@ -656,8 +677,18 @@
             document.getElementById('btnBatchDelete').disabled = selectedOrders.length === 0;
         }
 
+        // ===== 加载提示 =====
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text || '正在提交...';
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
         async function batchDeliver() {
             if (selectedOrders.length === 0) return;
+            showLoading('正在确认送达...');
             const today = new Date().toISOString().split('T')[0];
             const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
             try {
@@ -670,10 +701,11 @@
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, 'Batch deliver');
                 selectedOrders = [];
+                hideLoading();
                 loadOrders();
                 toggleSelectMode();
                 alert('送达确认成功！');
-            } catch(e) { alert('操作失败'); }
+            } catch(e) { hideLoading(); alert('操作失败'); }
         }
 
         // ===== 删除订单 =====
@@ -689,6 +721,7 @@
         }
         async function confirmDelete() {
             if (selectedOrders.length === 0) return;
+            showLoading('正在删除订单...');
             const today = new Date().toISOString().split('T')[0];
             try {
                 const path = `meal-ordering/data/orders/${today}.json`;
@@ -698,9 +731,10 @@
                 await saveJSON(path, orders, sha, 'Delete orders');
                 selectedOrders = [];
                 closeDeleteModal();
+                hideLoading();
                 loadOrders();
                 toggleSelectMode();
-            } catch(e) { alert('删除失败'); }
+            } catch(e) { hideLoading(); alert('删除失败'); }
         }
 
         // ===== 餐品管理 =====
@@ -712,7 +746,12 @@
                 list.innerHTML = menu.map((m, i) => `
                     <div class="menu-item">
                         <div class="menu-icon">${m.icon || '🥗'}</div>
-                        <div class="menu-info"><div class="menu-name">${m.name}</div><div class="menu-desc">${m.description}</div></div>
+                        <div class="menu-info">
+                            <div class="menu-name">${m.name}</div>
+                            <div class="menu-name-en">${m.name_en || ''}</div>
+                            <div class="menu-desc">${m.description}</div>
+                            <div class="menu-desc-en">${m.desc_en || ''}</div>
+                        </div>
                         <div class="menu-actions">
                             <button class="btn-edit" onclick="editMenu(${i})">编辑</button>
                             <button class="btn-del" onclick="deleteMenu(${i})">删除</button>
@@ -722,7 +761,7 @@
             } catch(e) {}
         }
 
-        function loadMenu() { loadMenuList(); }
+
 
         function showAddMenuModal() { editingMenuId = null; document.getElementById('menuModalTitle').textContent = '添加套餐'; document.getElementById('menuNameInput').value = ''; document.getElementById('menuDescInput').value = ''; document.getElementById('menuModal').classList.add('show'); }
         function closeMenuModal() { document.getElementById('menuModal').classList.remove('show'); }
