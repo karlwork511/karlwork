@@ -34,5 +34,17 @@
     "submit_time": "2026-09-03 10:46:48",
     "deliver_time": null,
     "sync_status": ""
+  },
+  {
+    "id": "814401",
+    "host_name": "陈",
+    "customer_no": "一",
+    "meal_name": "套餐B - 火腿丝鸡汤通粉",
+    "meal_desc": "配：水煮鸡蛋、火腿芝士三文治、时令水果、香滑奶茶",
+    "remark": "",
+    "status": "待出餐",
+    "submit_time": "2026-09-03 10:50:14",
+    "deliver_time": null,
+    "sync_status": ""
   }
 ]
