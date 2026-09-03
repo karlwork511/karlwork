@@ -403,6 +403,7 @@
                 <button class="btn btn-primary" id="btnBatchDeliver" onclick="batchDeliver()" disabled style="display:none;">批量确认送达</button>
                 <button class="btn btn-danger" id="btnBatchDelete" onclick="showDeleteConfirm()" disabled style="display:none;">删除选中</button>
                 <button class="btn btn-secondary" onclick="toggleSelectMode()" id="btnSelectMode">选择</button>
+                <button class="btn btn-secondary" onclick="refreshOrders()" id="btnRefresh">🔄 刷新</button>
                 <button class="btn btn-sync download-btn desktop-only" onclick="downloadExcel()" id="btnSyncExcel">📥 下载 Excel</button>
                 <span class="mobile-only download-hint">💡 如需下载订单，请用电脑打开网页</span>
             </div>
@@ -874,6 +875,19 @@
                     document.querySelectorAll('.tbl-checkbox').forEach(cb => cb.style.display = 'flex');
                 }
             }
+        }
+
+        function refreshOrders() {
+            const btn = document.getElementById('btnRefresh');
+            btn.textContent = '⏳ 刷新中...';
+            btn.disabled = true;
+            loadOrders().then(() => {
+                btn.textContent = '✅ 已刷新';
+                setTimeout(() => { btn.textContent = '🔄 刷新'; btn.disabled = false; }, 1500);
+            }).catch(() => {
+                btn.textContent = '❌ 刷新失败';
+                setTimeout(() => { btn.textContent = '🔄 刷新'; btn.disabled = false; }, 2000);
+            });
         }
 
         function setTimeFilter(f) {
