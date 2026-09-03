@@ -385,6 +385,7 @@
                 <div class="stat-item"><div class="num" id="statTotal">0</div><div class="lbl">下单</div></div>
                 <div class="stat-item"><div class="num" id="statPending">0</div><div class="lbl">待出餐</div></div>
                 <div class="stat-item"><div class="num" id="statDelivered">0</div><div class="lbl">已送达</div></div>
+                <div class="stat-item"><div class="num" id="statUpdateTime" style="font-size:14px;color:#95a5a6;">--:--</div><div class="lbl">最后更新</div></div>
             </div>
             <div class="filter-row">
                 <div class="time-filters">
@@ -523,6 +524,7 @@
         let timeFilter = 'today', statusFilter = 'all';
         let allOrders = []; // 当前加载的所有订单（含日期信息）
         let loadOrdersCounter = 0; // 请求版本号，防止旧请求覆盖新结果
+        let ordersPreloaded = false; // 标记是否已预加载订单
         let editingMenuId = null;
         let githubToken = localStorage.getItem('meal_token') || '';
         const REPO = 'karlwork511/karlwork';
@@ -655,7 +657,7 @@
             document.getElementById('btnBackToMeal').style.display = [4].includes(num) ? 'block' : 'none';
             document.getElementById('btnMenuMgmt').style.display = [4].includes(num) ? 'block' : 'none';
 
-            if (num === 4) loadOrders();
+            if (num === 4) { if (!ordersPreloaded) loadOrders(); }
             if (num === 5) loadMenuList();
         }
 
@@ -759,6 +761,7 @@
                 orders.push(order);
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, `Add order ${order.id}`);
+                ordersPreloaded = false;
                 hideLoading();
                 document.getElementById('successOverlay').classList.add('show');
             } catch(e) { hideLoading(); alert('提交失败，请重试'); }
@@ -828,6 +831,10 @@
                 document.getElementById('statTotal').textContent = total;
                 document.getElementById('statPending').textContent = pending;
                 document.getElementById('statDelivered').textContent = delivered;
+                // 更新最后更新时间
+                const now = new Date();
+                document.getElementById('statUpdateTime').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                ordersPreloaded = true;
 
                 // 状态筛选
                 let filtered = orders;
@@ -886,8 +893,8 @@
                         <td>
                             <div class="tbl-actions">
                                 ${o.status === '待出餐' 
-                                    ? `<button class="tbl-action-btn deliver-btn" onclick="tblDeliver('${o._date}', ${i})">送达</button>` 
-                                    : `<button class="tbl-action-btn undo-btn" onclick="tblUndoDeliver('${o._date}', ${i})">撤回</button>`}
+                                    ? `<button class="tbl-action-btn deliver-btn" onclick="tblDeliver('${o._date}', '${o.id}')">送达</button>` 
+                                    : `<button class="tbl-action-btn undo-btn" onclick="tblUndoDeliver('${o._date}', '${o.id}')">撤回</button>`}
                             </div>
                         </td>
                     </tr>
@@ -902,6 +909,7 @@
             const btn = document.getElementById('btnRefresh');
             btn.textContent = '⏳ 刷新中...';
             btn.disabled = true;
+            ordersPreloaded = false;
             loadOrders().then(() => {
                 btn.textContent = '✅ 已刷新';
                 setTimeout(() => { btn.textContent = '🔄 刷新'; btn.disabled = false; }, 1500);
@@ -915,6 +923,7 @@
             timeFilter = f;
             document.getElementById('tfToday').className = 'filter-btn' + (f === 'today' ? ' active' : '');
             document.getElementById('tfMonth').className = 'filter-btn' + (f === 'month' ? ' active' : '');
+            ordersPreloaded = false;
             loadOrders();
         }
 
@@ -1000,33 +1009,39 @@
             document.getElementById('btnBatchDelete').disabled = selectedOrders.length === 0;
         }
 
-        async function tblDeliver(date, idx) {
+        async function tblDeliver(date, orderId) {
             showLoading('正在确认送达...');
             const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
             try {
                 const path = `meal-ordering/data/orders/${date}.json`;
                 let orders = await fetchJSON(path);
-                orders[idx].status = '已送达';
-                orders[idx].deliver_time = `${date} ${timeStr}`;
+                const realIdx = orders.findIndex(o => o.id === orderId);
+                if (realIdx === -1) throw new Error('订单不存在');
+                orders[realIdx].status = '已送达';
+                orders[realIdx].deliver_time = `${date} ${timeStr}`;
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, 'Deliver order');
+                ordersPreloaded = false;
                 await loadOrders();
                 hideLoading();
-            } catch(e) { hideLoading(); alert('操作失败'); }
+            } catch(e) { hideLoading(); alert('操作失败：' + e.message); }
         }
 
-        async function tblUndoDeliver(date, idx) {
+        async function tblUndoDeliver(date, orderId) {
             showLoading('正在撤回送达...');
             try {
                 const path = `meal-ordering/data/orders/${date}.json`;
                 let orders = await fetchJSON(path);
-                orders[idx].status = '待出餐';
-                orders[idx].deliver_time = null;
+                const realIdx = orders.findIndex(o => o.id === orderId);
+                if (realIdx === -1) throw new Error('订单不存在');
+                orders[realIdx].status = '待出餐';
+                orders[realIdx].deliver_time = null;
                 const sha = await getSHA(path);
                 await saveJSON(path, orders, sha, 'Undo deliver');
+                ordersPreloaded = false;
                 await loadOrders();
                 hideLoading();
-            } catch(e) { hideLoading(); alert('操作失败'); }
+            } catch(e) { hideLoading(); alert('操作失败：' + e.message); }
         }
 
         // ===== 加载提示 =====
@@ -1068,6 +1083,7 @@
                     await saveJSON(path, orders, sha, 'Batch deliver');
                 }
                 selectedOrders = [];
+                ordersPreloaded = false;
                 await loadOrders();
                 toggleSelectMode();
                 hideLoading();
@@ -1110,6 +1126,7 @@
                 }
                 closeDeleteModal();
                 selectedOrders = [];
+                ordersPreloaded = false;
                 await loadOrders();
                 toggleSelectMode();
                 hideLoading();
