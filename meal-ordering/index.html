@@ -787,18 +787,22 @@
                         orders = data.map(o => ({ ...o, _date: today }));
                     } catch(e) { /* no orders today */ }
                 } else {
-                    // 本月：需要遍历当月的日期文件
+                    // 本月：并发请求1号到今天的日期文件
                     const now = new Date();
                     const year = now.getFullYear();
-                    const month = now.getMonth() + 1;
-                    const daysInMonth = new Date(year, month, 0).getDate();
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                        try {
-                            const data = await fetchJSON(`meal-ordering/data/orders/${dateStr}.json`);
-                            orders.push(...data.map(o => ({ ...o, _date: dateStr })));
-                        } catch(e) { /* no file for this date */ }
+                    const month = now.getMonth();
+                    const todayDate = now.getDate();
+                    const promises = [];
+                    for (let d = 1; d <= todayDate; d++) {
+                        const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                        promises.push(
+                            fetchJSON(`meal-ordering/data/orders/${dateStr}.json`)
+                                .then(data => data.map(o => ({ ...o, _date: dateStr })))
+                                .catch(() => [])
+                        );
                     }
+                    const results = await Promise.all(promises);
+                    results.forEach(arr => { if (arr.length > 0) orders.push(...arr); });
                 }
                 // 默认排序：待出餐优先 + 同状态按下单时间升序
                 orders.sort((a, b) => {
