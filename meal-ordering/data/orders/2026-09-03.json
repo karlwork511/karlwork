@@ -9,7 +9,7 @@
     "status": "已送达",
     "submit_time": "2026-09-03 08:53:15",
     "deliver_time": "2026-09-03 08:54:05",
-    "sync_status": ""
+    "sync_status": "synced"
   },
   {
     "id": "362072",
@@ -21,7 +21,7 @@
     "status": "已送达",
     "submit_time": "2026-09-03 10:42:42",
     "deliver_time": "2026-09-03 10:45:23",
-    "sync_status": ""
+    "sync_status": "synced"
   },
   {
     "id": "608372",
@@ -33,7 +33,7 @@
     "status": "已送达",
     "submit_time": "2026-09-03 10:46:48",
     "deliver_time": "2026-09-03 11:59:12",
-    "sync_status": ""
+    "sync_status": "synced"
   },
   {
     "id": "814401",
@@ -45,7 +45,7 @@
     "status": "待出餐",
     "submit_time": "2026-09-03 10:50:14",
     "deliver_time": null,
-    "sync_status": ""
+    "sync_status": "synced"
   },
   {
     "id": "151838",
@@ -57,6 +57,6 @@
     "status": "待出餐",
     "submit_time": "2026-09-03 10:55:51",
     "deliver_time": null,
-    "sync_status": ""
+    "sync_status": "synced"
   }
 ]
