@@ -223,13 +223,17 @@
         .sync-tag.unsynced { background: #f0f0f0; color: #95a5a6; }
         .btn-sync { background: #27ae60; color: white; }
         .btn-sync:disabled { opacity: 0.5; }
-        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
-        .filter-row .time-filters { display: flex; gap: 6px; }
-        .filter-row .status-filters { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
-        .filter-btn { padding: 6px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; border: 1.5px solid #ddd; background: white; color: #555; cursor: pointer; white-space: nowrap; }
+        /* 筛选区 */
+        .filter-section { margin-top: 16px; }
+        .filter-group { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .filter-label { font-size: 14px; font-weight: 600; color: #34495e; white-space: nowrap; min-width: 72px; }
+        .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; border: 1.5px solid #ddd; background: white; color: #555; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .filter-btn:active { transform: scale(0.95); }
         .filter-btn.active { background: #3498db; color: white; border-color: #3498db; }
-        .order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .order-actions .download-btn { margin-left: auto; }
+
+        .order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .order-actions .download-btn { }
 
         /* ===== 桌面端表格样式 ===== */
         .order-table-wrap { display: none; margin-top: 12px; overflow-x: auto; }
@@ -262,7 +266,8 @@
             .order-card .checkbox { display: none !important; }
             .stats-bar { padding: 24px 30px; }
             .stat-item .num { font-size: 32px; }
-            .filter-row { gap: 10px; }
+            .filter-group { gap: 10px; }
+            .filter-label { font-size: 15px; min-width: 80px; }
             .filter-btn { padding: 8px 18px; font-size: 14px; }
             .order-actions .btn { padding: 12px 24px; font-size: 15px; }
         }
@@ -401,17 +406,23 @@
                 <div class="stat-item"><div class="num" id="statDelivered">0</div><div class="lbl">已送达</div></div>
                 <div class="stat-item"><div class="num" id="statUpdateTime" style="font-size:14px;color:#95a5a6;">--:--</div><div class="lbl">最后更新</div></div>
             </div>
-            <div class="filter-row">
-                <div class="time-filters">
-                    <button class="filter-btn active" onclick="setTimeFilter('today')" id="tfToday">今天</button>
-                    <button class="filter-btn" onclick="setTimeFilter('month')" id="tfMonth">本月</button>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <span class="filter-label"> 时间</span>
+                    <div class="filter-btn-group">
+                        <button class="filter-btn active" onclick="setTimeFilter('today')" id="tfToday">今天</button>
+                        <button class="filter-btn" onclick="setTimeFilter('month')" id="tfMonth">本月</button>
+                    </div>
                 </div>
-                <div class="status-filters">
-                    <button class="filter-btn active" onclick="setStatusFilter('all')" id="sfAll">全部</button>
-                    <button class="filter-btn" onclick="setStatusFilter('pending')" id="sfPending">待出餐</button>
-                    <button class="filter-btn" onclick="setStatusFilter('delivered')" id="sfDelivered">已送达</button>
-                    <button class="filter-btn" onclick="setStatusFilter('downloaded')" id="sfDownloaded">已下载</button>
-                    <button class="filter-btn" onclick="setStatusFilter('undownloaded')" id="sfUndownloaded">未下载</button>
+                <div class="filter-group">
+                    <span class="filter-label">📋 状态</span>
+                    <div class="filter-btn-group">
+                        <button class="filter-btn active" onclick="setStatusFilter('all')" id="sfAll">全部</button>
+                        <button class="filter-btn" onclick="setStatusFilter('pending')" id="sfPending">待出餐</button>
+                        <button class="filter-btn" onclick="setStatusFilter('delivered')" id="sfDelivered">已送达</button>
+                        <button class="filter-btn" onclick="setStatusFilter('downloaded')" id="sfDownloaded">已下载</button>
+                        <button class="filter-btn" onclick="setStatusFilter('undownloaded')" id="sfUndownloaded">未下载</button>
+                    </div>
                 </div>
             </div>
             <div class="order-actions">
@@ -995,7 +1006,7 @@
 
         function setStatusFilter(f) {
             statusFilter = f;
-            document.querySelectorAll('.status-filters .filter-btn').forEach(b => b.classList.remove('active'));
+            ['sfAll','sfPending','sfDelivered','sfDownloaded','sfUndownloaded'].forEach(id => document.getElementById(id).classList.remove('active'));
             const map = { all: 'sfAll', pending: 'sfPending', delivered: 'sfDelivered', downloaded: 'sfDownloaded', undownloaded: 'sfUndownloaded' };
             document.getElementById(map[f]).classList.add('active');
             renderOrderList(getFilteredOrders());
