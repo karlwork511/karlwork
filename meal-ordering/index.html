@@ -800,6 +800,14 @@
                         } catch(e) { /* no file for this date */ }
                     }
                 }
+                // 默认排序：待出餐优先 + 同状态按下单时间升序
+                orders.sort((a, b) => {
+                    const statusOrder = { '待出餐': 0, '已送达': 1 };
+                    const sa = statusOrder[a.status] ?? 0;
+                    const sb = statusOrder[b.status] ?? 1;
+                    if (sa !== sb) return sa - sb;
+                    return (a.submit_time || '').localeCompare(b.submit_time || '');
+                });
                 allOrders = orders;
 
                 // 统计（不受状态筛选影响）
