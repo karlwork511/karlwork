@@ -267,6 +267,20 @@
             .order-actions .btn { padding: 12px 24px; font-size: 15px; }
         }
 
+        /* 设置弹窗Tab */
+        .settings-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid #e9ecef; }
+        .settings-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 14px; font-weight: 500; color: #95a5a6; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .settings-tab.active { color: #3498db; border-bottom-color: #3498db; }
+        .settings-panel { display: none; }
+        .settings-panel.active { display: block; }
+        .changelog-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+        .changelog-item:last-child { border-bottom: none; }
+        .changelog-version { font-size: 15px; font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
+        .changelog-date { font-size: 12px; color: #95a5a6; margin-bottom: 8px; }
+        .changelog-changes { list-style: none; padding: 0; }
+        .changelog-changes li { font-size: 13px; color: #555; padding: 3px 0; padding-left: 16px; position: relative; }
+        .changelog-changes li::before { content: '•'; position: absolute; left: 0; color: #3498db; font-weight: bold; }
+
         .desktop-only { display: none; }
         .mobile-only { display: inline; }
         .download-hint { font-size: 12px; color: #95a5a6; margin-left: auto; white-space: nowrap; }
@@ -440,17 +454,32 @@
 
     <!-- 设置弹窗 -->
     <div class="modal-overlay" id="settingsModal">
-        <div class="modal-box">
-            <div class="modal-title">⚙ 系统设置</div>
-            <div class="settings-status disconnected" id="settingsStatus">
-                <span class="status-icon">🔴</span>
-                <span>未连接</span>
+        <div class="modal-box wide" style="max-width:420px;">
+            <div class="settings-tabs">
+                <div class="settings-tab active" onclick="switchSettingsTab('settings')">⚙ 设置</div>
+                <div class="settings-tab" onclick="switchSettingsTab('changelog')">📋 更新记录</div>
             </div>
-            <input type="password" class="modal-input" id="settingsPwdInput" placeholder="输入密码连接系统" onkeypress="if(event.key==='Enter')doSettingsConnect()">
-            <div id="settingsPwdError" style="color:#e74c3c;font-size:13px;text-align:center;margin-bottom:12px;display:none;">密码错误</div>
-            <div class="modal-btns">
-                <button class="btn btn-secondary" onclick="closeSettings()">关闭</button>
-                <button class="btn btn-primary" id="btnConnect" onclick="doSettingsConnect()">连接</button>
+            <!-- 设置面板 -->
+            <div class="settings-panel active" id="panelSettings">
+                <div class="settings-status disconnected" id="settingsStatus">
+                    <span class="status-icon">🔴</span>
+                    <span>未连接</span>
+                </div>
+                <input type="password" class="modal-input" id="settingsPwdInput" placeholder="输入密码连接系统" onkeypress="if(event.key==='Enter')doSettingsConnect()">
+                <div id="settingsPwdError" style="color:#e74c3c;font-size:13px;text-align:center;margin-bottom:12px;display:none;">密码错误</div>
+                <div class="modal-btns">
+                    <button class="btn btn-secondary" onclick="closeSettings()">关闭</button>
+                    <button class="btn btn-primary" id="btnConnect" onclick="doSettingsConnect()">连接</button>
+                </div>
+            </div>
+            <!-- 更新记录面板 -->
+            <div class="settings-panel" id="panelChangelog">
+                <div id="changelogContent" style="max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+                    <p style="text-align:center;color:#95a5a6;padding:20px;">点击加载更新记录</p>
+                </div>
+                <div class="modal-btns" style="margin-top:12px;">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="closeSettings()">关闭</button>
+                </div>
             </div>
         </div>
     </div>
@@ -572,11 +601,48 @@
             updateSettingsStatus();
             document.getElementById('settingsPwdInput').value = '';
             document.getElementById('settingsPwdError').style.display = 'none';
+            switchSettingsTab('settings');
             document.getElementById('settingsModal').classList.add('show');
         }
 
         function closeSettings() {
             document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+            if (tab === 'settings') {
+                document.querySelectorAll('.settings-tab')[0].classList.add('active');
+                document.getElementById('panelSettings').classList.add('active');
+            } else {
+                document.querySelectorAll('.settings-tab')[1].classList.add('active');
+                document.getElementById('panelChangelog').classList.add('active');
+                loadChangelog();
+            }
+        }
+
+        async function loadChangelog() {
+            const content = document.getElementById('changelogContent');
+            content.innerHTML = '<p style="text-align:center;color:#95a5a6;padding:20px;">加载中...</p>';
+            try {
+                const data = await fetchJSON('meal-ordering/data/changelog.json');
+                if (!data || data.length === 0) {
+                    content.innerHTML = '<p style="text-align:center;color:#95a5a6;padding:20px;">暂无更新记录</p>';
+                    return;
+                }
+                content.innerHTML = data.map(item => `
+                    <div class="changelog-item">
+                        <div class="changelog-version">v${item.version}</div>
+                        <div class="changelog-date">${item.date}</div>
+                        <ul class="changelog-changes">
+                            ${item.changes.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            } catch(e) {
+                content.innerHTML = '<p style="text-align:center;color:#95a5a6;padding:20px;">加载失败</p>';
+            }
         }
 
         function updateSettingsStatus() {
