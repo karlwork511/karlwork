@@ -1006,23 +1006,38 @@
         async function batchDeliver() {
             if (selectedOrders.length === 0) return;
             showLoading('正在确认送达...');
-            const today = new Date().toISOString().split('T')[0];
             const timeStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
             try {
-                const path = `meal-ordering/data/orders/${today}.json`;
-                let orders = await fetchJSON(path);
+                // 按日期分组，分别处理
+                const dateGroups = {};
                 selectedOrders.forEach(idx => {
-                    orders[idx].status = '已送达';
-                    orders[idx].deliver_time = `${today} ${timeStr}`;
+                    const o = allOrders[idx];
+                    if (!o) return;
+                    const date = o._date;
+                    if (!dateGroups[date]) dateGroups[date] = [];
+                    dateGroups[date].push({ idx, order: o });
                 });
-                const sha = await getSHA(path);
-                await saveJSON(path, orders, sha, 'Batch deliver');
+                // 逐日期文件更新
+                for (const [date, items] of Object.entries(dateGroups)) {
+                    const path = `meal-ordering/data/orders/${date}.json`;
+                    let orders = await fetchJSON(path);
+                    // 找到该订单在当天文件中的真实索引
+                    items.forEach(({ order }) => {
+                        const realIdx = orders.findIndex(o => o.id === order.id);
+                        if (realIdx !== -1) {
+                            orders[realIdx].status = '已送达';
+                            orders[realIdx].deliver_time = `${date} ${timeStr}`;
+                        }
+                    });
+                    const sha = await getSHA(path);
+                    await saveJSON(path, orders, sha, 'Batch deliver');
+                }
                 selectedOrders = [];
                 await loadOrders();
                 toggleSelectMode();
                 hideLoading();
                 alert('送达确认成功！');
-            } catch(e) { hideLoading(); alert('操作失败'); }
+            } catch(e) { hideLoading(); alert('操作失败：' + e.message); }
         }
 
         // ===== 删除订单 =====
@@ -1039,19 +1054,31 @@
         async function confirmDelete() {
             if (selectedOrders.length === 0) return;
             showLoading('正在删除订单...');
-            const today = new Date().toISOString().split('T')[0];
             try {
-                const path = `meal-ordering/data/orders/${today}.json`;
-                let orders = await fetchJSON(path);
-                orders = orders.filter((_, i) => !selectedOrders.includes(i));
-                const sha = await getSHA(path);
-                await saveJSON(path, orders, sha, 'Delete orders');
+                // 按日期分组，分别处理
+                const dateGroups = {};
+                selectedOrders.forEach(idx => {
+                    const o = allOrders[idx];
+                    if (!o) return;
+                    const date = o._date;
+                    if (!dateGroups[date]) dateGroups[date] = [];
+                    dateGroups[date].push(o);
+                });
+                // 逐日期文件删除
+                for (const [date, items] of Object.entries(dateGroups)) {
+                    const path = `meal-ordering/data/orders/${date}.json`;
+                    let orders = await fetchJSON(path);
+                    const idsToRemove = new Set(items.map(o => o.id));
+                    orders = orders.filter(o => !idsToRemove.has(o.id));
+                    const sha = await getSHA(path);
+                    await saveJSON(path, orders, sha, 'Delete orders');
+                }
                 closeDeleteModal();
                 selectedOrders = [];
                 await loadOrders();
                 toggleSelectMode();
                 hideLoading();
-            } catch(e) { hideLoading(); alert('删除失败'); }
+            } catch(e) { hideLoading(); alert('删除失败：' + e.message); }
         }
 
         // ===== 下载 Excel =====
