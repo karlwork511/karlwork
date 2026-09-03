@@ -169,45 +169,18 @@ img{max-width:100%;display:block}
 @media(max-width:768px){
   .modal .modal > div[style*="grid-template-columns"]{grid-template-columns:1fr !important}
 }
+
+.btn-back-home{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;font-size:14px;font-weight:500;color:var(--blue);background:transparent;border:1.5px solid var(--blue);border-radius:8px;text-decoration:none;transition:all 0.2s;cursor:pointer}
+.btn-back-home:hover{background:var(--blue);color:#fff}
 </style>
 </head>
 <body>
 
 <!-- ===== Navigation ===== -->
 <nav class="nav" id="nav">
-  <div class="nav-logo">SZT<span>.</span></div>
-  <div class="nav-links">
-    <a href="https://karlwork.top/sztofficial/index.html">首页</a>
-    <div class="nav-dropdown">
-      <a href="https://karlwork.top/sztofficial/index.html#products">产品</a>
-      <div class="nav-dropdown-menu">
-        <a href="https://karlwork.top/sztofficial/purchase-system-detail.html" target="_blank">代购系统</a>
-        <a href="https://karlwork.top/sztofficial/logistics-engine-detail.html" target="_blank">物流引擎</a>
-        <a href="https://karlwork.top/sztofficial/wms-warehouse-detail.html" target="_blank">WMS仓库</a>
-      </div>
-    </div>
-    <a href="https://karlwork.top/sztofficial/index.html#features">解决方案</a>
-    <a href="https://karlwork.top/sztofficial/cases.html" class="active">客户案例</a>
-    <a href="https://karlwork.top/sztofficial/index.html#pricing">定价</a>
-    <a href="https://karlwork.top/sztofficial/index.html#about">关于我们</a>
-  </div>
+  <a href="https://karlwork.top/sztofficial/index.html" class="nav-logo" style="text-decoration:none">SZT<span>.</span></a>
   <div class="nav-actions">
-    <span class="nav-lang">🌐 中文 ▾
-      <div class="nav-lang-menu">
-        <a href="#" class="active-lang"><span class="lang-flag">🇨🇳</span>简体中文</a>
-        <a href="#"><span class="lang-flag">🇺🇸</span>English</a>
-        <a href="#"><span class="lang-flag">🇯🇵</span>日本語</a>
-        <a href="#"><span class="lang-flag">🇰🇷</span>한국어</a>
-        <a href="#"><span class="lang-flag">🇷🇺</span>Русский</a>
-        <a href="#"><span class="lang-flag">🇪🇸</span>Español</a>
-        <a href="#"><span class="lang-flag">🇫🇷</span>Français</a>
-        <a href="#"><span class="lang-flag">🇸🇦</span>العربية</a>
-        <a href="#"><span class="lang-flag">🇹🇭</span>ภาษาไทย</a>
-        <a href="#"><span class="lang-flag">🇻🇳</span>Tiếng Việt</a>
-      </div>
-    </span>
-    <button class="btn-ghost" onclick="window.open('https://karlwork.top/sztofficial/index.html#sandbox','_self')">模板体验</button>
-    <button class="btn-primary" onclick="openModal()">立即咨询</button>
+    <a href="https://karlwork.top/sztofficial/index.html" class="btn-back-home">← 返回首页</a>
   </div>
 </nav>
 
