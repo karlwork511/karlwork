@@ -10,5 +10,17 @@
     "submit_time": "2026-09-03 12:09:13",
     "deliver_time": null,
     "sync_status": "synced"
+  },
+  {
+    "id": "280690",
+    "host_name": "范",
+    "customer_no": "一",
+    "meal_name": "猪脚饭",
+    "meal_desc": "配肉卷",
+    "remark": "不加奶",
+    "status": "待出餐",
+    "submit_time": "2026-09-03 14:18:00",
+    "deliver_time": null,
+    "sync_status": ""
   }
 ]
