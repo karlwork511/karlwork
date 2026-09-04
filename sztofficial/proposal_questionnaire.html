@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>求婚视频 · 女主角信息收集</title>
+<style>
+  :root {
+    --canvas: #fdf6f0;
+    --surface: #ffffff;
+    --surface-alt: #fff5ee;
+    --text-primary: #3d2c2c;
+    --text-secondary: #7a6060;
+    --text-hint: #a89090;
+    --accent: #d4726a;
+    --accent-light: #f2d4d0;
+    --accent-soft: #fce8e5;
+    --border: #ecd8d4;
+    --border-focus: #d4726a;
+    --gold: #c9a96e;
+    --gold-light: #f5ead6;
+    --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --font-display: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-sm: 0 1px 3px rgba(61,44,44,0.06);
+    --shadow-md: 0 4px 16px rgba(61,44,44,0.08);
+    --max-width: 720px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    background: var(--canvas);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- 顶部装饰 ---- */
+  .page-top {
+    background: linear-gradient(160deg, #f9e4de 0%, #fdf6f0 50%, #f5ead6 100%);
+    padding: 48px 20px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-top::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(212,114,106,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .page-top::after {
+    content: "";
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(201,169,110,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .page-top h1 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+    letter-spacing: 0.02em;
+  }
+  .page-top .subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .sparkle {
+    display: inline-block;
+    font-size: 20px;
+    margin: 0 4px;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  .sparkle:nth-child(2) { animation-delay: 0.4s; }
+  .sparkle:nth-child(3) { animation-delay: 0.8s; }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* ---- 主体 ---- */
+  main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 8px 16px 60px;
+  }
+
+  /* ---- 说明卡片 ---- */
+  .intro-card {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 24px 24px 20px;
+    margin: 24px 0 8px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .intro-card p {
+    margin: 0 0 12px;
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .intro-card p:last-child { margin-bottom: 0; }
+  .intro-card strong { color: var(--text-primary); }
+
+  .tip-box {
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: #6b5a30;
+    line-height: 1.7;
+  }
+
+  /* ---- 分组 ---- */
+  .section {
+    margin-top: 28px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-light);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    background: var(--accent-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* ---- 问题卡片 ---- */
+  .question-card {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .question-card:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-md);
+  }
+
+  .question-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .question-number {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  .question-hint {
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--surface-alt);
+    resize: vertical;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+  }
+  textarea:focus, input[type="text"]:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  textarea::placeholder, input[type="text"]::placeholder {
+    color: var(--text-hint);
+    font-size: 14px;
+  }
+  textarea { min-height: 80px; }
+  textarea.tall { min-height: 120px; }
+
+  /* ---- 照片上传提示 ---- */
+  .photo-section {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .photo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .photo-item:last-child { border-bottom: none; }
+  .photo-check {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .photo-check.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .photo-check.checked::after {
+    content: "✓";
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .photo-info { flex: 1; }
+  .photo-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .photo-desc {
+    font-size: 13px;
+    color: var(--text-hint);
+    line-height: 1.5;
+  }
+
+  /* ---- 操作栏 ---- */
+  .action-bar {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--canvas) 70%, transparent);
+    padding: 20px 0 24px;
+    margin-top: 32px;
+    text-align: center;
+    z-index: 10;
+  }
+  .btn-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 36px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #c25d55);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(212,114,106,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: var(--font-body);
+  }
+  .btn-copy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(212,114,106,0.45);
+  }
+  .btn-copy:active { transform: translateY(0); }
+  .btn-copy.copied {
+    background: linear-gradient(135deg, #5dba7d, #48a568);
+    box-shadow: 0 4px 16px rgba(93,186,125,0.35);
+  }
+  .btn-copy svg {
+    width: 18px; height: 18px;
+    fill: currentColor;
+  }
+
+  .progress-hint {
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-top: 10px;
+  }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(61,44,44,0.9);
+    color: #fff;
+    padding: 16px 28px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    text-align: center;
+    max-width: 80vw;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    text-align: center;
+    padding: 24px 16px 40px;
+    font-size: 13px;
+    color: var(--text-hint);
+  }
+  footer .heart {
+    color: var(--accent);
+    display: inline-block;
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+  }
+
+  /* ---- 响应式 ---- */
+  @media (max-width: 480px) {
+    .page-top { padding: 36px 16px 24px; }
+    main { padding: 8px 12px 48px; }
+    .question-card { padding: 16px; }
+    .intro-card { padding: 18px; }
+  }
+
+  @media print {
+    .action-bar, .toast { display: none !important; }
+    body { background: #fff; }
+    .page-top { background: none; padding: 20px; }
+    .question-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="intro-card">
+    <div class="tip-box">
+      💡 <strong>不用写得很正式</strong>，想到什么说什么，聊天式地说就行。<br>
+      不确定的跳过就好，不用每一项都填满。<br>
+      填完后点底部按钮，一键复制发给 Karl 就可以啦！
+    </div>
+  </div>
+
+  <!-- 第一部分 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🌸</div>
+      <h2>一、姐姐是个什么样的人？</h2>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q1</span> 性格</label>
+      <div class="question-hint">用 3-5 个词形容姐姐的性格</div>
+      <textarea data-q="q1" placeholder="比如：温柔、倔强、爱笑、有点小迷糊…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q2</span> 小习惯 / 口头禅</label>
+      <div class="question-hint">有没有什么特别可爱或搞笑的小动作？</div>
+      <textarea data-q="q2" placeholder="比如：拍照永远比耶、吃东西先拍照、生气会嘟嘴、说话爱加'哈哈哈'…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q3</span> 最喜欢的东西</label>
+      <div class="question-hint">食物、动物、花、颜色、歌、电影… 随便说</div>
+      <textarea data-q="q3" placeholder="比如：草莓蛋糕、柴犬、向日葵、周杰伦…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q4</span> 最怕 / 最烦的东西</label>
+      <div class="question-hint">这种反差做视频很有趣！</div>
+      <textarea data-q="q4" placeholder="比如：怕虫子、讨厌早起、不能接受香菜…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q5</span> 小时候的梦想</label>
+      <div class="question-hint">她小时候说过长大想干什么吗？</div>
+      <textarea data-q="q5" placeholder="比如：想当画家、想开一家花店…"></textarea>
+    </div>
+  </div>
+
+  <!-- 第二部分 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📖</div>
+      <h2>二、她的成长故事</h2>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q6</span> 家乡和童年</label>
+      <div class="question-hint">你们在哪里长大的？小时候的姐姐是什么样的？有什么有趣的童年故事？</div>
+      <textarea data-q="q6" class="tall" placeholder="比如：我们出生在南方一个小镇，小时候她总是带着我爬树掏鸟窝…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q7</span> 求学经历</label>
+      <div class="question-hint">在哪里读的初中/高中/大学？学什么专业？读书时候是什么状态？</div>
+      <textarea data-q="q7" class="tall" placeholder="挑有印象的讲就行，不用每段都写"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q8</span> 工作之后</label>
+      <div class="question-hint">现在做什么工作？工作状态怎么样？</div>
+      <textarea data-q="q8" placeholder="比如：在互联网公司做设计，经常加班但很热爱…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q9</span> 她的高光时刻</label>
+      <div class="question-hint">有没有什么事让她特别骄傲，或者让你觉得"我姐真厉害"？</div>
+      <textarea data-q="q9" placeholder="比如：拿了某个奖、独立完成了一个大项目、独自旅行…"></textarea>
+    </div>
+
+    <div class="question-card">
+      <label class="question-label"><span class="question-number">Q10</span> 她经历过的困难</label>
+      <div class="question-hint">比如某段低谷期，她是怎么扛过来的？<br>⚠️ 如果不方便说就跳过</div>
+      <textarea data-q="q10" placeholder="不方便可以留空"></textarea>
+    </div>
+  </div>
+
+  <!-- 第三部分 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📷</div>
+      <h2>三、照片素材</h2>
+    </div>
+
+    <div class="photo-section">
+      <p style="font-size:14px; color:var(--text-secondary); margin:0 0 12px;">
+        动画里会用到"女主角从小女孩长大"的镜头，所以需要你帮忙找一些姐姐小时候的照片。不用修图，越真实越好！
+      </p>
+
+      <div class="photo-item">
+        <div class="photo-check" onclick="this.classList.toggle('checked')" data-photo="p3"></div>
+        <div class="photo-info">
+          <div class="photo-title">姐姐小时候的照片</div>
+          <div class="photo-desc">越多越好，婴儿期、幼儿园、小学、中学都可以，动画里会做成从小女孩慢慢长大的效果 🌱</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label class="question-label" style="font-size:14px;">照片备注</label>
+        <div class="question-hint">对照片有什么补充说明可以写在这里</div>
+        <textarea data-q="photo_note" placeholder="比如：小时候的照片在爸妈手机里，我回去找一下再发给你…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部操作 -->
+  <div class="action-bar">
+    <button class="btn-copy" onclick="copyAnswers()">
+      <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+      一键复制所有答案
+    </button>
+    <div class="progress-hint" id="progressHint">已填写 0 / 11 题</div>
+  </div>
+</main>
+
+<footer>
+  用心制作 <span class="heart">❤</span> 祝你们幸福
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const questionMap = {
+    q1:  "Q1 性格",
+    q2:  "Q2 小习惯/口头禅",
+    q3:  "Q3 最喜欢的东西",
+    q4:  "Q4 最怕/最烦的东西",
+    q5:  "Q5 小时候的梦想",
+    q6:  "Q6 家乡和童年",
+    q7:  "Q7 求学经历",
+    q8:  "Q8 工作之后",
+    q9:  "Q9 她的高光时刻",
+    q10: "Q10 她经历过的困难",
+    photo_note: "照片备注"
+  };
+
+  const totalTextareas = Object.keys(questionMap).length;
+
+  function updateProgress() {
+    let filled = 0;
+    document.querySelectorAll('textarea[data-q]').forEach(t => {
+      if (t.value.trim()) filled++;
+    });
+    document.getElementById('progressHint').textContent = `已填写 ${filled} / ${totalTextareas} 题`;
+  }
+
+  document.querySelectorAll('textarea[data-q]').forEach(t => {
+    t.addEventListener('input', updateProgress);
+  });
+
+  function showToast(msg, duration) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), duration || 2000);
+  }
+
+  function copyAnswers() {
+    let lines = [];
+    lines.push("===== 求婚视频 · 女主角信息收集 =====");
+    lines.push("");
+
+    let hasContent = false;
+    const sections = {
+      "一、姐姐是个什么样的人？": ["q1","q2","q3","q4","q5"],
+      "二、她的成长故事": ["q6","q7","q8","q9","q10"],
+      "三、照片素材": ["photo_note"]
+    };
+
+    for (const [sectionTitle, keys] of Object.entries(sections)) {
+      let sectionHasContent = false;
+      let sectionLines = [];
+      sectionLines.push("【" + sectionTitle + "】");
+
+      for (const key of keys) {
+        const el = document.querySelector('[data-q="' + key + '"]');
+        const val = el ? el.value.trim() : "";
+        if (val) {
+          sectionLines.push("");
+          sectionLines.push(questionMap[key] + "：");
+          sectionLines.push(val);
+          sectionHasContent = true;
+          hasContent = true;
+        }
+      }
+
+      // 照片勾选状态
+      if (sectionTitle === "三、照片素材") {
+        const checked = [];
+        document.querySelectorAll('.photo-check.checked').forEach(c => {
+          const title = c.closest('.photo-item').querySelector('.photo-title').textContent;
+          checked.push("✅ " + title);
+        });
+        if (checked.length > 0) {
+          sectionLines.push("");
+          sectionLines.push("照片准备情况：");
+          checked.forEach(c => sectionLines.push(c));
+          sectionHasContent = true;
+          hasContent = true;
+        }
+      }
+
+      if (sectionHasContent) {
+        lines.push("");
+        lines = lines.concat(sectionLines);
+      }
+    }
+
+    if (!hasContent) {
+      showToast("还没有填写内容哦，先填一些再复制 😊");
+      return;
+    }
+
+    lines.push("");
+    lines.push("===== 填写完毕 =====");
+
+    const text = lines.join("\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> 已复制！发给 Karl 吧';
+        showToast("复制成功！直接发给 Karl 就好 ✨");
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> 一键复制所有答案';
+        }, 4000);
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast("复制成功！直接发给 Karl 就好 ✨");
+    } catch(e) {
+      showToast("复制失败，请手动选中内容复制", 3000);
+    }
+    document.body.removeChild(ta);
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
