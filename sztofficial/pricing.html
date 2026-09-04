@@ -47,9 +47,9 @@
     }
     .pricing-section {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      max-width: 960px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 720px;
       margin: 0 auto;
       padding: 0 24px 40px;
     }
@@ -128,7 +128,7 @@
       color: var(--blue-700);
     }
     .table-section {
-      max-width: 960px;
+      max-width: 720px;
       margin: 0 auto;
       padding: 0 24px 40px;
     }
@@ -160,7 +160,7 @@
     }
     .comparison-table thead th:first-child {
       text-align: left;
-      width: 40%;
+      width: 55%;
     }
     .comparison-table tbody td {
       padding: 10px 16px;
@@ -188,7 +188,7 @@
     .cross { color: var(--red-400); font-size: 16px; }
     .highlight-cell { font-weight: 700; color: var(--blue-700); }
     .value-section {
-      max-width: 960px;
+      max-width: 720px;
       margin: 0 auto;
       padding: 0 24px 60px;
     }
@@ -207,7 +207,7 @@
     }
     .value-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
     .value-item {
@@ -236,26 +236,21 @@
       font-size: 12px;
       color: var(--gray-500);
       border-top: 1px solid var(--gray-300);
-      max-width: 960px;
+      max-width: 720px;
       margin: 0 auto;
     }
     @media (max-width: 768px) {
-      .pricing-section { grid-template-columns: 1fr; }
+      .pricing-section { grid-template-columns: 1fr; max-width: 360px; }
       .value-grid { grid-template-columns: 1fr; }
       .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .comparison-table { min-width: 520px; }
       .page-header h1 { font-size: 22px; }
-    }
-    @media (min-width: 769px) and (max-width: 1024px) {
-      .value-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media print {
       body { background: #fff; }
       .pricing-card, .comparison-table, .value-item { box-shadow: none; border: 1px solid #ddd; }
     }
-  
     .top-nav {
-      max-width: 960px;
+      max-width: 720px;
       margin: 0 auto;
       padding: 16px 24px 0;
       display: flex;
@@ -289,7 +284,6 @@
 </head>
 <body>
 
-
 <nav class="top-nav">
   <a href="index.html">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
@@ -299,59 +293,41 @@
 
 <header class="page-header">
   <h1>SZT SaaS 版本功能对比</h1>
-  <p>代购集运平台三档版本，按需选型，灵活扩展</p>
+  <p>两档版本，按需选型，灵活扩展</p>
 </header>
 
 <!-- ===== 定价卡片 ===== -->
 <section class="pricing-section">
-  <!-- 基础版 -->
-  <div class="pricing-card">
-    <div class="card-name">基础版</div>
-    <div class="card-terminals">PC 网页端</div>
-    <div class="card-price">¥29,800 <span>/ 年</span></div>
-    <div class="card-custom">✅ 支持界面定制设计</div>
-    <ul class="card-highlights">
-      <li>前台页面 <span class="val">PC端</span></li>
-      <li>多语言 <span class="val">3种</span></li>
-      <li>多货币 <span class="val">3种</span></li>
-      <li>海外仓库 <span class="val">1个</span></li>
-      <li>支付网关 <span class="val">3种</span></li>
-      <li>员工账号 <span class="val">5个</span></li>
-    </ul>
-  </div>
-
   <!-- 标准版 -->
-  <div class="pricing-card recommended">
-    <div class="badge">🔥 推荐</div>
+  <div class="pricing-card">
     <div class="card-name">标准版</div>
-    <div class="card-terminals">PC + H5 手机端</div>
-    <div class="card-price">¥59,800 <span>/ 年</span></div>
+    <div class="card-terminals">PC + H5 自适应</div>
+    <div class="card-price">¥2,980 <span>/ 年</span></div>
     <div class="card-custom">✅ 支持界面定制设计</div>
     <ul class="card-highlights">
       <li>前台页面 <span class="val">PC + H5</span></li>
-      <li>多语言 <span class="val">5种</span></li>
-      <li>多货币 <span class="val">5种</span></li>
-      <li>海外仓库 <span class="val">2个</span></li>
-      <li>支付网关 <span class="val">5种</span></li>
-      <li>员工账号 <span class="val">10个</span></li>
-      <li>数据大屏 <span class="val">✅</span></li>
+      <li>个性化设计 <span class="val">✅</span></li>
+      <li>自动采购 <span class="val">✅</span></li>
+      <li>国际转运 <span class="val">✅</span></li>
+      <li>多仓库管理 <span class="val">✅</span></li>
+      <li>安卓 / iOS APP <span class="val">—</span></li>
     </ul>
   </div>
 
   <!-- 专业版 -->
-  <div class="pricing-card">
+  <div class="pricing-card recommended">
+    <div class="badge">🔥 推荐</div>
     <div class="card-name">专业版</div>
-    <div class="card-terminals">PC + H5 + APP</div>
-    <div class="card-price">¥99,800 <span>/ 年</span></div>
+    <div class="card-terminals">PC + H5 自适应 + APP</div>
+    <div class="card-price">¥5,980 <span>/ 年</span></div>
     <div class="card-custom">✅ 支持界面定制设计</div>
     <ul class="card-highlights">
       <li>前台页面 <span class="val">PC + H5 + APP</span></li>
-      <li>多语言 <span class="val">10种</span></li>
-      <li>多货币 <span class="val">10种</span></li>
-      <li>海外仓库 <span class="val">5个</span></li>
-      <li>支付网关 <span class="val">10种</span></li>
-      <li>员工账号 <span class="val">不限</span></li>
-      <li>数据大屏 <span class="val">✅</span></li>
+      <li>个性化设计 <span class="val">✅</span></li>
+      <li>自动采购 <span class="val">✅</span></li>
+      <li>国际转运 <span class="val">✅</span></li>
+      <li>多仓库管理 <span class="val">✅</span></li>
+      <li>安卓 / iOS APP <span class="val">✅</span></li>
     </ul>
   </div>
 </section>
@@ -364,66 +340,70 @@
     <thead>
       <tr>
         <th scope="col">功能</th>
-        <th scope="col">基础版</th>
         <th scope="col">标准版</th>
         <th scope="col">专业版</th>
       </tr>
     </thead>
     <tbody>
       <!-- 平台基础 -->
-      <tr class="group-row"><td colspan="4">🖥️ 平台基础</td></tr>
-      <tr><td>界面定制设计</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>多语言支持</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
-      <tr><td>多货币切换</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
-      <tr><td>员工账号数</td><td class="highlight-cell">5个</td><td class="highlight-cell">10个</td><td class="highlight-cell">不限</td></tr>
+      <tr class="group-row"><td colspan="3">🖥️ 平台基础</td></tr>
+      <tr><td>界面定制设计</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>多语言支持</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>多货币切换</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>员工账号数</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
 
       <!-- 商品与采购 -->
-      <tr class="group-row"><td colspan="4">🛒 商品与采购</td></tr>
-      <tr><td>商品搜索（关键词/链接/淘口令）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>猜您喜欢 / 智能推荐</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>商品收藏 / 浏览记录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>自动采购</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>代购手工填单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>手动推荐商品</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr class="group-row"><td colspan="3">🛒 商品与采购</td></tr>
+      <tr><td>商品搜索（关键词/链接/淘口令）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>猜您喜欢 / 智能推荐</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>商品收藏 / 浏览记录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>自动采购</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>代购手工填单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>手动推荐商品</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
 
       <!-- 订单与物流 -->
-      <tr class="group-row"><td colspan="4">📦 订单与物流</td></tr>
-      <tr><td>代购订单管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>国际转运订单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>运费估算</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>包裹管理（入库/出库）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>提包合包</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>物流轨迹追踪</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>多仓库管理</td><td class="highlight-cell">1个</td><td class="highlight-cell">2个</td><td class="highlight-cell">5个</td></tr>
-      <tr><td>集运功能</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>PDA扫码仓储</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>海外自提点</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✅</span></td></tr>
+      <tr class="group-row"><td colspan="3">📦 订单与物流</td></tr>
+      <tr><td>代购订单管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>国际转运订单</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>运费估算</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>包裹管理（入库/出库）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>提包合包</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>物流轨迹追踪</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>多仓库管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>集运功能</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>PDA扫码仓储</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
 
       <!-- 用户与支付 -->
-      <tr class="group-row"><td colspan="4">👤 用户与支付</td></tr>
-      <tr><td>会员注册 / 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>Facebook / Google / Line 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>短信 / 邮箱验证码</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>账户余额管理 / 在线充值</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>余额提现</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>支付网关</td><td class="highlight-cell">3种</td><td class="highlight-cell">5种</td><td class="highlight-cell">10种</td></tr>
+      <tr class="group-row"><td colspan="3">👤 用户与支付</td></tr>
+      <tr><td>会员注册 / 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>Facebook / Google / Line 登录</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>短信 / 邮箱验证码</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>账户余额管理 / 在线充值</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>余额提现</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>支付网关</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
 
       <!-- 营销与运营 -->
-      <tr class="group-row"><td colspan="4">📣 营销与运营</td></tr>
-      <tr><td>运费优惠券</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>公告管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>帮助中心</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>推广联盟</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>敏感词及品牌风控</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
-      <tr><td>数据大屏</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr class="group-row"><td colspan="3">📣 营销与运营</td></tr>
+      <tr><td>运费优惠券</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>公告管理</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>帮助中心</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>推广联盟</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>敏感词及品牌风控</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>数据大屏</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+
+      <!-- 终端支持 -->
+      <tr class="group-row"><td colspan="3">📱 终端支持</td></tr>
+      <tr><td>PC 网页端</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>H5 手机端（自适应）</td><td><span class="check">✅</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>安卓 APP</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td></tr>
+      <tr><td>iOS APP</td><td><span class="cross">—</span></td><td><span class="check">✅</span></td></tr>
 
       <!-- 增值服务 -->
-      <tr class="group-row"><td colspan="4">📦 增值服务（按需加购）</td></tr>
-      <tr><td>H5 手机端</td><td>+10,000/年</td><td>已含</td><td>已含</td></tr>
-      <tr><td>微信小程序端</td><td>+15,000/年</td><td>+15,000/年</td><td>+15,000/年</td></tr>
-      <tr><td>安卓 APP</td><td>+10,000/年</td><td>+10,000/年</td><td>已含</td></tr>
-      <tr><td>iOS APP</td><td>+10,000/年</td><td>+10,000/年</td><td>已含</td></tr>
-      <tr><td>定制开发</td><td colspan="3" style="text-align:center;">1,500元/人/天</td></tr>
+      <tr class="group-row"><td colspan="3">📦 增值服务（按需加购）</td></tr>
+      <tr><td>定制化开发</td><td colspan="2" style="text-align:center;">1,500元/人/天</td></tr>
+      <tr><td>安卓 APP（标准版加购）</td><td colspan="2" style="text-align:center;">详询商务</td></tr>
+      <tr><td>iOS APP（标准版加购）</td><td colspan="2" style="text-align:center;">详询商务</td></tr>
+      <tr><td>现场实施培训</td><td colspan="2" style="text-align:center;">5,000元/次</td></tr>
     </tbody>
   </table>
   </div>
@@ -434,14 +414,10 @@
   <h2>增值服务</h2>
   <p class="subtitle">按需选配，灵活扩展平台能力</p>
   <div class="value-grid">
-    <div class="value-item"><span class="v-name">H5 手机端</span><span class="v-price">10,000元/年</span></div>
-    <div class="value-item"><span class="v-name">额外仓库</span><span class="v-price">5,000元/仓/年</span></div>
-    <div class="value-item"><span class="v-name">额外语言包</span><span class="v-price">3,000元/语种/年</span></div>
-    <div class="value-item"><span class="v-name">小程序端</span><span class="v-price">15,000元/年</span></div>
-    <div class="value-item"><span class="v-name">PDA扫码仓储</span><span class="v-price">8,000元/年</span></div>
     <div class="value-item"><span class="v-name">定制化开发</span><span class="v-price">1,500元/人/天</span></div>
+    <div class="value-item"><span class="v-name">安卓 APP</span><span class="v-price">详询商务</span></div>
+    <div class="value-item"><span class="v-name">iOS APP</span><span class="v-price">详询商务</span></div>
     <div class="value-item"><span class="v-name">现场实施培训</span><span class="v-price">5,000元/次</span></div>
-    <div class="value-item"><span class="v-name">专属客户成功经理</span><span class="v-price">20,000元/年</span></div>
   </div>
 </section>
 
