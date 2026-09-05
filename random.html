@@ -100,14 +100,7 @@ body{
 /* 场景容器 */
 .scene-wrap{flex:1;position:relative;overflow:hidden}
 .scene{position:absolute;inset:0;transition:transform 1s cubic-bezier(.22,.61,.36,1),filter .8s}
-.scene.zoom{transform:scale(2.2) translate(12%,2%);filter:brightness(1.1)}
-.scene.centered .target-area{
-  right:auto!important;left:50%!important;top:45%!important;
-  transform:translate(-50%,-50%)!important;
-  width:72%!important;
-  transition:all .8s cubic-bezier(.22,.61,.36,1);
-}
-.scene.centered{transform:scale(1);filter:brightness(1)}
+
 
 /* ========== 交互式猫咪贴图 ========== */
 .cat-interactive{
@@ -143,14 +136,28 @@ body{
 .cat-img-wrap.dragging{animation:catRun .25s ease-in-out infinite!important}
 @keyframes catRun{0%,100%{transform:rotate(0) translateY(0)}50%{transform:rotate(3deg) translateY(-4px)}}
 
-/* 投飞镖动作 */
-.cat-img-wrap.throwing{animation:catThrow .6s ease-out forwards!important}
-@keyframes catThrow{
+/* 甩竿动作 */
+.cat-img-wrap.casting{animation:catCast .6s ease-out forwards!important}
+@keyframes catCast{
   0%{transform:rotate(0) scale(1)}
-  20%{transform:rotate(-6deg) scale(.96)}
-  45%{transform:rotate(8deg) scale(1.06)}
-  70%{transform:rotate(-3deg) scale(1.02)}
+  15%{transform:rotate(-10deg) scale(.95)}
+  40%{transform:rotate(6deg) scale(1.05)}
+  65%{transform:rotate(-2deg) scale(1.02)}
   100%{transform:rotate(0) scale(1)}
+}
+/* 中鱼后仰 */
+.cat-img-wrap.hooked{animation:catHooked .5s ease-out!important}
+@keyframes catHooked{
+  0%{transform:rotate(0)}
+  30%{transform:rotate(-12deg) translateY(-5px)}
+  60%{transform:rotate(4deg)}
+  100%{transform:rotate(0)}
+}
+/* 收线动作 */
+.cat-img-wrap.reeling{animation:catReel .4s ease-in-out!important}
+@keyframes catReel{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
 }
 
 /* 猫脚下阴影 */
@@ -184,110 +191,145 @@ body{
 }
 .speech-bubble.show{opacity:1;transform:scale(1)}
 
-/* 飞镖(飞行中) */
-.dart{
-  position:absolute;left:38%;bottom:38%;
-  width:28px;height:28px;
-  opacity:0;pointer-events:none;
-  z-index:10;
+/* ========== 钓鱼场景 ========== */
+
+/* 鱼竿 SVG */
+.fishing-rod{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:8;overflow:visible;
 }
-.dart::before{
-  content:'';position:absolute;
-  width:0;height:0;
-  border-left:6px solid transparent;
-  border-right:6px solid transparent;
-  border-bottom:20px solid var(--red);
-  top:0;left:50%;transform:translateX(-50%);
+.fishing-rod .rod-pole{
+  stroke:url(#rodGrad);stroke-width:5;stroke-linecap:round;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  transform-origin:30% 42%;
 }
-.dart::after{
-  content:'';position:absolute;
-  width:8px;height:10px;
-  background:var(--cream);
-  bottom:0;left:50%;transform:translateX(-50%);
-  clip-path:polygon(0 0,100% 0,50% 100%);
+.fishing-rod .rod-pole.casting{animation:rodCast .7s ease-out forwards}
+@keyframes rodCast{
+  0%{transform:rotate(-18deg)}
+  35%{transform:rotate(28deg)}
+  65%{transform:rotate(22deg)}
+  100%{transform:rotate(25deg)}
 }
-.dart.flying{
-  opacity:1;
-  animation:dartFly .8s cubic-bezier(.2,.6,.4,1) forwards;
-}
-@keyframes dartFly{
-  0%{left:38%;bottom:38%;transform:scale(1) rotate(-30deg);opacity:1}
-  30%{left:50%;bottom:55%;transform:scale(1.8) rotate(-20deg);opacity:1}
-  70%{left:62%;bottom:52%;transform:scale(3) rotate(-10deg);opacity:1}
-  100%{left:68%;bottom:48%;transform:scale(4) rotate(0deg);opacity:0}
+.fishing-rod .rod-pole.hooked{animation:rodBend .5s ease-out!important}
+@keyframes rodBend{
+  0%{transform:rotate(25deg)}
+  25%{transform:rotate(35deg)}
+  60%{transform:rotate(20deg)}
+  100%{transform:rotate(25deg)}
 }
 
-/* 速度线 */
-.speed-lines{
-  position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5;
+/* 鱼线 */
+.fishing-rod .rod-line{
+  stroke:rgba(255,255,255,.6);stroke-width:1.2;
+  fill:none;
+  stroke-dasharray:1000;stroke-dashoffset:1000;
 }
-.speed-lines.active{animation:speedFlash .6s .1s ease-out forwards}
-@keyframes speedFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
-.speed-line{
-  position:absolute;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
-  border-radius:2px;
-}
+.fishing-rod .rod-line.cast{animation:lineExtend 1s ease-out forwards}
+@keyframes lineExtend{0%{stroke-dashoffset:1000}100%{stroke-dashoffset:0}}
+.fishing-rod .rod-line.reel{animation:lineRetract .5s ease-in forwards}
+@keyframes lineRetract{0%{stroke-dashoffset:0}100%{stroke-dashoffset:1000}}
 
-/* 靶子(贴图) */
-.target-area{
-  position:absolute;right:2%;top:50%;transform:translateY(-50%);
-  width:46%;display:flex;flex-direction:column;align-items:center;
-  opacity:0;transition:opacity .4s;
-}
-.target-area.visible{opacity:1}
-.board-wrap{position:relative;width:100%;aspect-ratio:1;max-width:260px}
-.board{
-  width:100%;height:100%;border-radius:50%;
-  position:relative;overflow:hidden;
-  box-shadow:0 0 0 6px #6B3A1F,0 0 0 10px rgba(80,40,10,.5),0 8px 30px rgba(0,0,0,.6);
-  transition:transform .4s;
-}
-.board.hit{animation:boardHit .4s ease-out}
-@keyframes boardHit{0%{transform:scale(1)}30%{transform:scale(.93)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
-
-.board-img{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;border-radius:50%;
-}
-
-/* 靶子上的选项文字叠加 */
-.board-labels{position:absolute;inset:0;z-index:5}
-.board-label{
-  position:absolute;top:50%;left:50%;
-  font-size:11px;font-weight:700;
-  white-space:nowrap;
-  text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 6px rgba(0,0,0,.4);
-  transform-origin:0 0;
-  pointer-events:none;
-}
-
-/* 靶心 */
-.board-center{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:36px;height:36px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.9) 30%,rgba(255,234,167,.7) 100%);
-  box-shadow:0 2px 8px rgba(0,0,0,.3);
-  z-index:10;display:flex;align-items:center;justify-content:center;
-  font-size:16px;
-}
-
-/* 飞镖钉在靶上 */
-.board-dart{
-  position:absolute;top:50%;left:50%;z-index:11;
+/* 浮标 */
+.bobber{
+  position:absolute;bottom:18%;left:72%;
   width:16px;height:16px;
-  transform:translate(-50%,-50%) translate(var(--dx,0),var(--dy,0));
-  opacity:0;transition:opacity .2s;
+  background:radial-gradient(circle at 40% 40%,#ff6b6b,#c0392b);
+  border-radius:50%;
+  box-shadow:0 0 6px rgba(255,107,107,.5),0 2px 4px rgba(0,0,0,.3);
+  opacity:0;
+  transform:translateY(-30px);
+  transition:all .6s cubic-bezier(.34,1.56,.64,1);
+  z-index:9;
 }
-.board-dart.stuck{opacity:1;animation:dartStuck .3s ease-out}
-@keyframes dartStuck{0%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(2)}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(1)}}
-.board-dart::before{
-  content:'';position:absolute;
-  width:0;height:0;
-  border-left:5px solid transparent;border-right:5px solid transparent;
-  border-bottom:14px solid var(--red);
-  top:0;left:50%;transform:translateX(-50%);
+.bobber.visible{opacity:1;transform:translateY(0)}
+.bobber.bobbing{animation:bobberBob 2s ease-in-out infinite}
+@keyframes bobberBob{
+  0%,100%{transform:translateY(0) rotate(0)}
+  25%{transform:translateY(-3px) rotate(3deg)}
+  75%{transform:translateY(2px) rotate(-3deg)}
 }
+.bobber.biting{animation:bobberBite .8s ease-in-out forwards}
+@keyframes bobberBite{
+  0%{transform:translateY(0)}
+  20%{transform:translateY(-8px)}
+  40%{transform:translateY(4px)}
+  60%{transform:translateY(-4px)}
+  80%{transform:translateY(2px)}
+  100%{transform:translateY(0)}
+}
+.bobber.dunked{animation:bobberDunk .4s ease-in forwards}
+@keyframes bobberDunk{
+  0%{transform:translateY(0);opacity:1}
+  100%{transform:translateY(12px);opacity:.5}
+}
+
+/* 水面 */
+.water-surface{
+  position:absolute;bottom:0;left:0;right:0;height:22%;
+  background:linear-gradient(180deg,rgba(30,80,160,.25) 0%,rgba(20,60,140,.45) 100%);
+  z-index:6;
+  overflow:hidden;
+}
+.water-surface::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0%,transparent 8%,
+    rgba(255,255,255,.04) 8%,rgba(255,255,255,.04) 10%
+  );
+  animation:waveDrift 4s linear infinite;
+}
+.water-surface::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(100,200,255,.15),transparent,rgba(100,200,255,.1),transparent);
+  animation:waveShimmer 3s ease-in-out infinite;
+}
+@keyframes waveDrift{0%{transform:translateX(0)}100%{transform:translateX(20px)}}
+@keyframes waveShimmer{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* 水花 */
+.splash{
+  position:absolute;bottom:18%;left:72%;
+  width:40px;height:20px;
+  opacity:0;pointer-events:none;z-index:10;
+}
+.splash.active{animation:splashPop .6s ease-out forwards}
+@keyframes splashPop{
+  0%{opacity:0;transform:scale(.3)}
+  30%{opacity:.8;transform:scale(1.2)}
+  100%{opacity:0;transform:scale(1.5) translateY(-10px)}
+}
+.splash-drop{
+  position:absolute;
+  width:4px;height:4px;
+  background:rgba(150,210,255,.6);
+  border-radius:50%;
+}
+
+/* 鱼影(咬钩时闪现) */
+.fish-shadow{
+  position:absolute;bottom:12%;left:68%;
+  width:30px;height:12px;
+  opacity:0;pointer-events:none;z-index:7;
+}
+.fish-shadow.show{animation:fishFlash .6s ease-out forwards}
+@keyframes fishFlash{
+  0%{opacity:0;transform:translateX(0) scaleX(1)}
+  30%{opacity:.6;transform:translateX(-15px) scaleX(.8)}
+  100%{opacity:0;transform:translateX(-30px) scaleX(.6)}
+}
+
+/* 等待提示 */
+.fishing-hint{
+  position:absolute;bottom:26%;left:50%;transform:translateX(-50%);
+  font-size:12px;color:rgba(255,255,255,.5);
+  opacity:0;transition:opacity .4s;
+  z-index:11;pointer-events:none;
+  white-space:nowrap;
+}
+.fishing-hint.show{opacity:1}
+
+/* 飞镖(已删除，钓鱼模式不需要) */
 
 /* 粒子效果 */
 .particles{position:absolute;inset:0;pointer-events:none;z-index:15}
@@ -492,36 +534,53 @@ select.form-input{appearance:none;-webkit-appearance:none;cursor:pointer;backgro
   <div class="scene-wrap">
     <div class="scene" id="scene">
 
-      <!-- 交互式猫咪贴图 -->
+      <!-- 猫贴图 -->
       <div class="cat-interactive" id="catInteractive">
         <div class="cat-img-wrap" id="catImgWrap">
           <div class="cat-shadow"></div>
-          <img id="catImg" src="cowboy_cat_new.png" alt="喵" draggable="false">
+          <img id="catImg" src="fishing_cat.png" alt="喵" draggable="false">
         </div>
         <div class="speech-bubble" id="speechBubble"></div>
       </div>
 
-      <!-- 飞镖(飞行中) -->
-      <div class="dart" id="flyingDart"></div>
+      <!-- 鱼竿 SVG -->
+      <svg class="fishing-rod" id="fishingRod" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="rodGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8B6914"/>
+            <stop offset="40%" stop-color="#C4A44A"/>
+            <stop offset="100%" stop-color="#e74c3c"/>
+          </linearGradient>
+        </defs>
+        <line class="rod-pole" id="rodPole" x1="26" y1="42" x2="70" y2="25"/>
+        <path class="rod-line" id="rodLine" d="M70,25 Q74,40 72,55"/>
+      </svg>
 
-      <!-- 速度线 -->
-      <div class="speed-lines" id="speedLines"></div>
+      <!-- 浮标 -->
+      <div class="bobber" id="bobber"></div>
 
-      <!-- 靶子(贴图) -->
-      <div class="target-area" id="targetArea">
-        <div class="board-wrap">
-          <div class="board" id="dartBoard">
-            <img class="board-img" id="boardImg" src="dartboard.png" alt="飞镖靶">
-            <div class="board-labels" id="boardLabels"></div>
-            <div class="board-center">🎯</div>
-            <div class="board-dart" id="boardDart"></div>
-          </div>
-        </div>
-        <div class="result-panel" id="resultPanel">
-          <div class="result-label">喵帮你选了</div>
-          <div class="result-value" id="resultValue">-</div>
-          <div class="result-emoji" id="resultEmoji"></div>
-        </div>
+      <!-- 水花 -->
+      <div class="splash" id="splash"></div>
+
+      <!-- 鱼影 -->
+      <div class="fish-shadow" id="fishShadow">
+        <svg viewBox="0 0 30 12" width="30" height="12">
+          <ellipse cx="15" cy="6" rx="12" ry="5" fill="rgba(100,180,255,.4)"/>
+          <polygon points="2,6 -4,2 -4,10" fill="rgba(100,180,255,.3)"/>
+        </svg>
+      </div>
+
+      <!-- 水面 -->
+      <div class="water-surface" id="waterSurface"></div>
+
+      <!-- 等待提示 -->
+      <div class="fishing-hint" id="fishingHint">🐟 等鱼上钩...</div>
+
+      <!-- 结果显示 -->
+      <div class="result-panel" id="resultPanel" style="position:absolute;bottom:26%;left:50%;transform:translateX(-50%);z-index:12;width:80%;">
+        <div class="result-label">喵帮你钓到了</div>
+        <div class="result-value" id="resultValue">-</div>
+        <div class="result-emoji" id="resultEmoji"></div>
       </div>
 
       <!-- 粒子 -->
@@ -529,7 +588,7 @@ select.form-input{appearance:none;-webkit-appearance:none;cursor:pointer;backgro
     </div>
   </div>
   <div class="game-bottom">
-    <button class="throw-btn" id="throwBtn" onclick="throwDart()">🎯 投飞镖！</button>
+    <button class="throw-btn" id="throwBtn" onclick="castLine()">🎣 甩竿钓鱼！</button>
     <button class="manage-link" onclick="openManageFromGame()">📝 管理选项</button>
   </div>
 </div>
@@ -1178,26 +1237,20 @@ function cfgAddItemToScene(catId,sceneId){
 }
 
 // ========== 游戏 ==========
-const LABEL_COLORS=['#ff6b6b','#ffa502','#2ed573','#5352ed','#a55eea','#ff6b81','#00d2d3','#ff9ff3','#54a0ff','#f368e0'];
-
 function openGame(id){
   const a=getA(id);if(!a)return;
   if(!a.items||!a.items.length){toast('先添加选项吧');openManage(id);return}
   curActId=id;
   document.getElementById('gameActName').textContent=a.name;
-  const scene=document.getElementById('scene');
-  scene.classList.remove('zoom','centered');
-  document.getElementById('targetArea').classList.remove('visible');
   document.getElementById('resultPanel').classList.remove('show');
-  document.getElementById('boardDart').classList.remove('stuck');
-  document.getElementById('flyingDart').classList.remove('flying');
-  document.getElementById('catImgWrap').classList.remove('throwing');
+  document.getElementById('bobber').className='bobber';
+  document.getElementById('rodPole').className='rod-pole';
+  document.getElementById('rodLine').className='rod-line';
+  document.getElementById('fishingHint').classList.remove('show');
+  document.getElementById('fishShadow').classList.remove('show');
+  document.getElementById('splash').classList.remove('active');
   document.getElementById('throwBtn').disabled=false;
-  document.getElementById('throwBtn').innerHTML='🎯 投飞镖！';
-  const catEl2=document.getElementById('catInteractive');
-  catEl2.style.left='6%';catEl2.style.top='';catEl2.style.bottom='6%';
-  catX=0;catY=0;
-  renderBoard(a.items);
+  document.getElementById('throwBtn').innerHTML='🎣 甩竿钓鱼！';
   document.getElementById('gameView').classList.add('active');
   document.getElementById('bottomArea').style.display='none';
   document.getElementById('mainContent').style.display='none';
@@ -1209,108 +1262,88 @@ function closeGame(){
   curActId=null;isBusy=false;
 }
 
-function renderBoard(items){
-  const el=document.getElementById('boardLabels');
-  const n=Math.min(items.length,10);
-  const deg=360/n;
-  let html='';
-  for(let i=0;i<n;i++){
-    const angle=i*deg-90;
-    const rad=angle*Math.PI/180;
-    const r=38;
-    const x=50+r*Math.cos(rad);
-    const y=50+r*Math.sin(rad);
-    const color=LABEL_COLORS[i%LABEL_COLORS.length];
-    const fontSize=n>7?'9px':'11px';
-    html+=`<div class="board-label" style="left:${x}%;top:${y}%;transform:translate(-50%,-50%) rotate(${angle+90}deg);color:${color};font-size:${fontSize}">${esc(items[i])}</div>`;
-  }
-  el.innerHTML=html;
-}
-
-async function throwDart(){
+async function castLine(){
   if(isBusy)return;
   const a=getA(curActId);if(!a||!a.items?.length)return;
   isBusy=true;
   const btn=document.getElementById('throwBtn');
-  btn.disabled=true;btn.innerHTML='✨ 飞行中...';
+  btn.disabled=true;btn.innerHTML=' 甩竿中...';
   const result=a.items[Math.floor(Math.random()*a.items.length)];
   const catImgWrap=document.getElementById('catImgWrap');
-  const dart=document.getElementById('flyingDart');
-  const scene=document.getElementById('scene');
-  const target=document.getElementById('targetArea');
-  const board=document.getElementById('dartBoard');
-  const boardDart=document.getElementById('boardDart');
+  const rodPole=document.getElementById('rodPole');
+  const rodLine=document.getElementById('rodLine');
+  const bobber=document.getElementById('bobber');
+  const splash=document.getElementById('splash');
+  const fishShadow=document.getElementById('fishShadow');
+  const hint=document.getElementById('fishingHint');
 
-  scene.classList.remove('centered');
+  // Reset
   document.getElementById('resultPanel').classList.remove('show');
   document.getElementById('speechBubble').classList.remove('show');
+  bobber.className='bobber';
+  rodPole.className='rod-pole';
+  rodLine.className='rod-line';
+  fishShadow.classList.remove('show');
+  splash.classList.remove('active');
+  hint.classList.remove('show');
 
-  catImgWrap.classList.add('throwing');
+  // Step 1: 甩竿
+  catImgWrap.classList.add('casting');
   showBubble();
+  rodPole.classList.add('casting');
+
+  await sleep(400);
+
+  // Step 2: 鱼线飞出 + 水花
+  rodLine.classList.add('cast');
+  splash.classList.add('active');
 
   await sleep(300);
-  dart.classList.add('flying');
-  document.getElementById('speedLines').classList.add('active');
-
-  await sleep(200);
-  scene.classList.add('zoom');
+  bobber.classList.add('visible');
 
   await sleep(400);
-  target.classList.add('visible');
 
-  await sleep(500);
-  board.classList.add('hit');
-  boardDart.classList.add('stuck');
-  const dx=(Math.random()-0.5)*30;
-  const dy=(Math.random()-0.5)*30;
-  boardDart.style.setProperty('--dx',dx+'px');
-  boardDart.style.setProperty('--dy',dy+'px');
+  // Step 3: 浮标漂浮，等鱼咬钩
+  bobber.classList.add('bobbing');
+  hint.classList.add('show');
 
-  spawnParticles();
-  document.getElementById('speedLines').classList.remove('active');
-  dart.classList.remove('flying');
+  const waitTime=3000+Math.random()*3000;
+  await sleep(waitTime);
 
-  await sleep(400);
-  scene.classList.remove('zoom');
-  await sleep(300);
-  scene.classList.add('centered');
-  await sleep(400);
+  // Step 4: 咬钩！
+  hint.classList.remove('show');
+  bobber.classList.remove('bobbing');
+  bobber.classList.add('biting');
+  fishShadow.classList.add('show');
+  btn.innerHTML='🐟 咬钩了！';
 
-  document.getElementById('resultValue').textContent=result;
-  document.getElementById('resultPanel').classList.add('show');
-  const emojis=['😺 喵说就这个！','🐱 命中注定！','✨ 猫神指引！','🎯 一镖即中！','😸 就决定是你了！'];
-  document.getElementById('resultEmoji').textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  await sleep(800);
 
-  svH(curActId,result);
-
-  btn.innerHTML='🎯 再投一次';
-  btn.disabled=false;
-  isBusy=false;
-  catImgWrap.classList.remove('throwing');
-}
+  // Step 5: 收线
+  bobber.classList.add('dunked');
+  rodPole.classList.add('hooked');
+  catImgWrap.classList.add('hooked');
 
 function spawnParticles(){
   const el=document.getElementById('particles');
-  const colors=['#ff6b6b','#ffa502','#2ed573','#5352ed','#ff9ff3','#fff'];
-  const targetEl=document.getElementById('targetArea');
-  const rect=targetEl.getBoundingClientRect();
-  const sceneRect=document.getElementById('scene').getBoundingClientRect();
-  const cx=((rect.left+rect.width/2)-sceneRect.left)/sceneRect.width*100;
-  const cy=((rect.top+rect.height/2)-sceneRect.top)/sceneRect.height*100;
+  const colors=['#ff6b6b','#ffa502','#2ed573','#5352ed','#ff9ff3','#74b9ff','#fff'];
+  const cx=72,cy=78;
   let html='';
-  for(let i=0;i<12;i++){
+  for(let i=0;i<10;i++){
     const angle=Math.random()*360;
-    const dist=20+Math.random()*40;
+    const dist=15+Math.random()*30;
     const px=Math.cos(angle*Math.PI/180)*dist;
     const py=Math.sin(angle*Math.PI/180)*dist;
     const color=colors[Math.floor(Math.random()*colors.length)];
-    const size=3+Math.random()*5;
-    const delay=Math.random()*0.2;
+    const size=3+Math.random()*4;
+    const delay=Math.random()*0.15;
     html+=`<div class="particle burst" style="left:${cx}%;top:${cy}%;width:${size}px;height:${size}px;background:${color};--px:${px}px;--py:${py}px;animation-delay:${delay}s"></div>`;
   }
   el.innerHTML=html;
-  setTimeout(()=>el.innerHTML='',1000);
+  setTimeout(()=>el.innerHTML='',800);
 }
+
+
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
@@ -1399,16 +1432,16 @@ function toast(m){const e=document.getElementById('toast');e.textContent=m;e.cla
 // ========== 初始化 ==========
 ld();loadCfg();renderList();checkGitHubConnection();
 
-// 生成速度线
+// 初始化水花粒子
 (function(){
-  const el=document.getElementById('speedLines');
+  const el=document.getElementById('splash');
+  if(!el)return;
   let html='';
-  for(let i=0;i<8;i++){
-    const top=20+Math.random()*60;
-    const left=30+Math.random()*40;
-    const w=40+Math.random()*60;
-    const delay=Math.random()*0.3;
-    html+=`<div class="speed-line" style="top:${top}%;left:${left}%;width:${w}px;animation-delay:${delay}s;transform:rotate(${-15+Math.random()*30}deg)"></div>`;
+  for(let i=0;i<6;i++){
+    const x=-10+Math.random()*50;
+    const y=-5+Math.random()*10;
+    const delay=Math.random()*0.2;
+    html+=`<div class="splash-drop" style="left:${x}px;top:${y}px;animation-delay:${delay}s"></div>`;
   }
   el.innerHTML=html;
 })();
