@@ -1323,6 +1323,29 @@ async function castLine(){
   bobber.classList.add('dunked');
   rodPole.classList.add('hooked');
   catImgWrap.classList.add('hooked');
+  rodPole.classList.remove('casting');
+  rodPole.classList.add('reeling');
+  rodLine.classList.remove('cast');
+  rodLine.classList.add('reel');
+  catImgWrap.classList.remove('casting');
+  catImgWrap.classList.add('reeling');
+
+  await sleep(800);
+
+  // Step 6: 显示结果
+  spawnParticles();
+  document.getElementById('resultEmoji').textContent='🐟';
+  document.getElementById('resultText').textContent=result;
+  document.getElementById('resultPanel').classList.add('show');
+  showBubble();
+  btn.innerHTML='🎣 再钓一次！';
+
+  // 记录历史
+  svH(curActId, result);
+
+  isBusy=false;
+  btn.disabled=false;
+}
 
 function spawnParticles(){
   const el=document.getElementById('particles');
