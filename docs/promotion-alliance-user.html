@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户端推广联盟 - 标注原型</title>
+<style>
+/* ========== 标准标注系统CSS ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f1f5; color: #1d2129; font-size: 14px; line-height: 1.6; }
+.app-container { display: flex; min-height: 100vh; }
+.preview-area { flex: 1; min-width: 0; padding: 20px; overflow-y: auto; }
+.annotation-panel { width: 380px; min-width: 380px; background: #fff; border-left: 1px solid #e5e6eb; overflow-y: auto; padding: 20px; }
+.annotation-panel h2 { font-size: 16px; font-weight: 600; color: #1d2129; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e5e6eb; }
+
+/* 角标样式 */
+.anno-badge { position: absolute; top: -8px; left: -8px; width: 22px; height: 22px; background: #165DFF; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; z-index: 10; transition: transform 0.2s; }
+.anno-badge:hover { transform: scale(1.2); }
+.anno-item { position: relative; }
+.anno-item:hover { outline: 2px dashed #165DFF; outline-offset: 2px; }
+.anno-item.active { outline: 2px solid #165DFF; outline-offset: 2px; }
+
+/* 标注卡片 */
+.anno-card { background: #f7f8fa; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+.anno-card:hover { border-color: #165DFF; background: #f2f3fc; }
+.anno-card.active { border-color: #165DFF; background: #e8effd; }
+.anno-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.anno-card-num { width: 24px; height: 24px; background: #165DFF; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.anno-card-title { font-size: 14px; font-weight: 600; color: #1d2129; }
+.anno-card-summary { font-size: 13px; color: #4e5969; line-height: 1.5; }
+.anno-card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.anno-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e8e8e8; color: #4e5969; }
+.anno-tag.type-interaction { background: #e8f3ff; color: #165DFF; }
+.anno-tag.type-state { background: #fff3e0; color: #ff7d00; }
+.anno-tag.type-area { background: #e8f7ee; color: #00b42a; }
+.anno-tag.type-detail { background: #f0e8ff; color: #722ed1; }
+
+/* 标注详情面板 */
+.anno-detail-panel { display: none; margin-top: 16px; background: #fff; border-radius: 8px; padding: 16px; border: 1px solid #e5e6eb; }
+.anno-detail-panel.show { display: block; }
+.anno-detail-section { margin-bottom: 12px; }
+.anno-detail-section:last-child { margin-bottom: 0; }
+.anno-detail-label { font-size: 12px; color: #86909c; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+.anno-detail-content { font-size: 13px; color: #1d2129; line-height: 1.6; }
+
+/* 弹窗样式 */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #fff; border-radius: 8px; padding: 24px; width: 480px; max-width: 90%; max-height: 80vh; overflow-y: auto; position: relative; }
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+.modal-close { position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border: none; background: #f2f3f5; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #86909c; }
+.modal-close:hover { background: #e5e6eb; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+
+/* ========== 页面自身样式 ========== */
+
+/* DEMO切换器 */
+.demo-switcher { display: flex; gap: 8px; padding: 12px 16px; background: #fff; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); align-items: center; flex-wrap: wrap; }
+.demo-switcher-label { font-size: 13px; color: #86909c; font-weight: 600; margin-right: 4px; }
+.demo-btn { padding: 6px 14px; border: 1px solid #e5e6eb; border-radius: 4px; background: #fff; color: #4e5969; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.demo-btn:hover { border-color: #165DFF; color: #165DFF; }
+.demo-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+
+/* 状态容器 */
+.state-view { display: none; }
+.state-view.active { display: block; }
+
+/* 正常状态的左右布局 */
+.normal-layout { display: flex; gap: 0; min-height: calc(100vh - 120px); background: #F5F7FA; border-radius: 6px; overflow: hidden; }
+
+/* 左侧导航 */
+.side-nav { width: 200px; min-width: 200px; background: #FFFFFF; border-right: 1px solid #E4E7ED; padding: 16px 0; }
+.nav-item { padding: 10px 20px; font-size: 14px; color: #333333; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; user-select: none; border-left: 3px solid transparent; }
+.nav-item:hover { background: #F5F7FA; }
+.nav-item.selected { background: #ECF0FF; color: #165DFF; border-left-color: #165DFF; font-weight: 600; }
+.nav-sub { display: block; }
+.nav-sub-item { padding: 10px 20px 10px 40px; font-size: 13px; color: #666666; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.nav-sub-item:hover { background: #F5F7FA; color: #333333; }
+.nav-sub-item.selected { background: #ECF0FF; color: #165DFF; border-left-color: #165DFF; font-weight: 600; }
+
+/* 右侧主内容区 */
+.main-content { flex: 1; padding: 20px; overflow-y: auto; border-top: 1px solid #E4E7ED; }
+
+/* 个人信息Banner */
+.user-banner { background: linear-gradient(135deg, #409EFF 0%, #3A8EE6 100%); border-radius: 6px; padding: 24px 28px; color: #fff; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; position: relative; overflow: hidden; }
+.user-banner::before { content: ''; position: absolute; top: -30px; right: -20px; width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+.user-banner::after { content: ''; position: absolute; bottom: -40px; right: 60px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+.banner-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.avatar-placeholder { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid rgba(255,255,255,0.4); }
+.banner-user-info { display: flex; flex-direction: column; gap: 6px; }
+.banner-username { font-size: 18px; font-weight: 600; }
+.banner-level-row { display: flex; align-items: center; gap: 8px; }
+.level-badge-banner { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; background: rgba(255,255,255,0.2); border-radius: 12px; font-size: 13px; font-weight: 500; }
+.banner-progress-text { font-size: 12px; opacity: 0.9; }
+.banner-progress-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; margin-top: 2px; }
+.banner-progress-fill { height: 100%; background: rgba(255,255,255,0.8); border-radius: 3px; }
+.banner-right { position: relative; z-index: 1; }
+.btn-banner { padding: 8px 20px; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.btn-banner:hover { background: rgba(255,255,255,0.35); }
+
+/* 资产数据区 */
+.asset-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.asset-card { background: #FFFFFF; border-radius: 6px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.asset-card-title { font-size: 13px; color: #666666; margin-bottom: 8px; }
+.asset-amount { font-size: 28px; font-weight: 700; color: #165DFF; margin-bottom: 4px; }
+.asset-desc { font-size: 12px; color: #999; margin-bottom: 16px; }
+.asset-btns { display: flex; gap: 8px; }
+.btn-asset { padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.2s; border: 1px solid #E4E7ED; background: #fff; color: #333333; }
+.btn-asset:hover { border-color: #165DFF; color: #165DFF; }
+.btn-asset.primary { background: #165DFF; color: #fff; border-color: #165DFF; }
+.btn-asset.primary:hover { background: #4080FF; }
+.asset-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F5F7FA; cursor: pointer; }
+.asset-list-item:last-child { border-bottom: none; }
+.asset-list-item:hover { background: #FAFBFC; }
+.asset-list-label { font-size: 14px; color: #333333; }
+.asset-list-value { font-size: 16px; font-weight: 600; color: #1d2129; }
+.asset-list-arrow { color: #ccc; font-size: 12px; margin-left: 8px; }
+
+/* 立即推广区 */
+.promo-card { background: #FFFFFF; border-radius: 6px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 20px; }
+.promo-card-title { font-size: 16px; font-weight: 600; color: #333333; margin-bottom: 8px; }
+.promo-card-desc { font-size: 13px; color: #666666; margin-bottom: 16px; }
+.promo-content { display: flex; gap: 32px; align-items: flex-start; }
+.promo-qr-section { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.qr-placeholder { width: 140px; height: 140px; background: #F5F7FA; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 13px; border: 2px dashed #E4E7ED; }
+.btn-download-qr { padding: 6px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #E4E7ED; background: #fff; color: #333333; transition: all 0.2s; }
+.btn-download-qr:hover { border-color: #165DFF; color: #165DFF; }
+.promo-code-section { flex: 1; }
+.invite-code-label { font-size: 13px; color: #666666; margin-bottom: 6px; }
+.invite-code-value { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.invite-code-text { font-size: 20px; font-weight: 700; color: #165DFF; letter-spacing: 2px; }
+.copy-icon { cursor: pointer; color: #999; font-size: 16px; transition: color 0.2s; }
+.copy-icon:hover { color: #165DFF; }
+.btn-copy-link { padding: 8px 20px; background: #165DFF; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+.btn-copy-link:hover { background: #4080FF; }
+
+/* 子页面内容 */
+.sub-page { display: none; }
+.sub-page.active { display: block; }
+
+/* 表格 */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: #F5F7FA; padding: 10px 12px; text-align: left; font-weight: 600; color: #666666; border-bottom: 1px solid #E4E7ED; white-space: nowrap; }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid #F5F7FA; color: #333333; }
+.data-table tr:hover td { background: #FAFBFC; }
+.status-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.status-tag.settled { background: #e8f7ee; color: #00b42a; }
+.status-tag.pending { background: #fff3e0; color: #ff7d00; }
+.status-tag.approved { background: #e8f3ff; color: #165DFF; }
+.status-tag.rejected { background: #fff2f0; color: #f53f3f; }
+
+/* 分页 */
+.pagination { display: flex; justify-content: flex-end; gap: 4px; margin-top: 16px; align-items: center; }
+.page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 13px; cursor: pointer; background: #fff; color: #4e5969; }
+.page-btn:hover { border-color: #165DFF; color: #165DFF; }
+.page-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+.page-info { font-size: 13px; color: #86909c; margin-right: 8px; }
+
+/* 筛选栏 */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+.filter-tag { padding: 4px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; background: #F5F7FA; color: #666666; border: 1px solid transparent; transition: all 0.2s; }
+.filter-tag:hover { border-color: #165DFF; color: #165DFF; }
+.filter-tag.active { background: #ECF0FF; color: #165DFF; border-color: #165DFF; }
+
+/* 按钮 */
+.btn-primary { display: inline-block; padding: 8px 24px; background: #165DFF; color: #fff; border: none; border-radius: 4px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.btn-primary:hover { background: #4080FF; }
+.btn-outline { display: inline-block; padding: 8px 20px; background: #fff; color: #165DFF; border: 1px solid #165DFF; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn-outline:hover { background: #ECF0FF; }
+.btn-sm { padding: 6px 16px; font-size: 13px; }
+.link-text { color: #165DFF; font-size: 13px; cursor: pointer; text-decoration: none; }
+.link-text:hover { text-decoration: underline; }
+
+/* 表单 */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: #666666; margin-bottom: 6px; }
+.form-value { font-size: 18px; font-weight: 600; color: #165DFF; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid #E4E7ED; border-radius: 4px; font-size: 14px; color: #333333; transition: border-color 0.2s; }
+.form-input:focus { outline: none; border-color: #165DFF; box-shadow: 0 0 0 2px rgba(22,93,255,0.1); }
+.form-hint { font-size: 12px; color: #999; margin-top: 4px; }
+.radio-group { display: flex; gap: 16px; }
+.radio-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #333333; }
+.radio-item input[type="radio"] { accent-color: #165DFF; }
+.bank-info-area { margin-top: 16px; padding: 16px; background: #F5F7FA; border-radius: 6px; }
+.bank-info-area h4 { font-size: 13px; color: #666666; margin-bottom: 12px; }
+
+/* 邀请码弹窗 */
+.invite-code-display { text-align: center; padding: 20px 0; }
+.invite-code-text-lg { font-size: 28px; font-weight: 700; color: #165DFF; letter-spacing: 4px; margin-bottom: 16px; }
+.invite-link { font-size: 13px; color: #666666; background: #F5F7FA; padding: 8px 16px; border-radius: 4px; margin-bottom: 16px; word-break: break-all; }
+
+/* 未加入状态 */
+.landing-page { text-align: center; padding: 40px 20px; }
+.landing-banner { background: linear-gradient(135deg, #409EFF 0%, #3A8EE6 100%); border-radius: 6px; padding: 40px 32px; color: #fff; margin-bottom: 24px; position: relative; overflow: hidden; }
+.landing-banner::before { content: ''; position: absolute; top: -30%; right: -10%; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+.landing-banner h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; position: relative; z-index: 1; }
+.landing-banner p { font-size: 15px; opacity: 0.9; position: relative; z-index: 1; }
+
+/* 社媒分享渠道 */
+.social-section { margin-bottom: 32px; }
+.social-section h2 { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.social-section .social-desc { font-size: 14px; color: #666; margin-bottom: 20px; }
+.social-channels { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.social-channel { width: 100px; height: 80px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; position: relative; cursor: pointer; transition: transform 0.2s; }
+.social-channel:hover { transform: translateY(-3px); }
+.social-channel .ch-icon { font-size: 28px; margin-bottom: 4px; }
+.social-channel .ch-recommend { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); background: #FFD700; color: #333; font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 700; white-space: nowrap; }
+.ch-tiktok { background: #010101; }
+.ch-discord { background: #5865F2; }
+.ch-reddit { background: #FF4500; }
+.ch-telegram { background: #2AABEE; }
+.ch-facebook { background: #1877F2; }
+
+/* 如何赚取佣金 - 4步流程 */
+.steps-section { margin-bottom: 32px; }
+.steps-section h2 { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.steps-section .steps-desc { font-size: 14px; color: #666; margin-bottom: 24px; }
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.step-card { background: #F5F7FA; border-radius: 12px; padding: 20px 12px; text-align: center; position: relative; }
+.step-number { font-size: 36px; font-weight: 800; color: #165DFF; margin-bottom: 8px; }
+.step-card h4 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.step-card .step-icon { font-size: 36px; margin-top: 8px; }
+.step-arrow { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #333; z-index: 1; }
+
+/* 底部CTA引导Banner */
+.cta-banner { background: #165DFF; border-radius: 16px; padding: 40px 32px; color: #fff; position: relative; overflow: hidden; margin-bottom: 24px; }
+.cta-banner::before { content: ''; position: absolute; top: -20%; left: -5%; width: 160px; height: 160px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+.cta-banner::after { content: ''; position: absolute; bottom: -30%; right: -8%; width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+.cta-banner h2 { font-size: 24px; font-weight: 700; margin-bottom: 10px; position: relative; z-index: 1; }
+.cta-banner .cta-desc { font-size: 14px; opacity: 0.85; margin-bottom: 24px; position: relative; z-index: 1; }
+.cta-banner .cta-btn { display: inline-block; background: #CCFF00; color: #333; padding: 12px 32px; border-radius: 24px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: transform 0.2s; position: relative; z-index: 1; }
+.cta-banner .cta-btn:hover { transform: scale(1.05); }
+
+/* 等级概览 */
+.level-overview { background: #fff; border-radius: 6px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); text-align: left; }
+.level-overview h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #333333; }
+.level-list { display: flex; gap: 12px; margin-bottom: 16px; }
+.level-item { flex: 1; text-align: center; padding: 12px 8px; border-radius: 6px; background: #F5F7FA; }
+.level-item.current { background: #ECF0FF; border: 1px solid #165DFF; }
+.level-badge-icon { font-size: 11px; font-weight: 800; margin-bottom: 4px; color: #fff; background: #999; border-radius: 10px; padding: 3px 8px; display: inline-block; }
+.level-item.current .level-badge-icon { background: #165DFF; }
+.level-name { font-size: 13px; font-weight: 600; color: #333333; }
+.level-range { font-size: 11px; color: #999; }
+.progress-bar-wrap { margin-top: 12px; }
+.progress-label { font-size: 13px; color: #666666; margin-bottom: 6px; display: flex; justify-content: space-between; }
+.progress-track { height: 8px; background: #F5F7FA; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #165DFF, #409EFF); border-radius: 4px; }
+
+/* 已禁用页 */
+.disabled-page { text-align: center; padding: 60px 20px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.disabled-icon { width: 80px; height: 80px; margin: 0 auto 20px; background: #fff2f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.disabled-page h2 { font-size: 20px; color: #333333; margin-bottom: 8px; }
+.disabled-page p { font-size: 14px; color: #999; margin-bottom: 20px; }
+
+/* 等级页面 */
+.level-page-card { background: #fff; border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.level-page-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #333333; }
+.level-cards-row { display: flex; gap: 12px; }
+.level-card-item { flex: 1; text-align: center; padding: 16px 12px; border-radius: 6px; background: #F5F7FA; border: 2px solid transparent; transition: all 0.2s; }
+.level-card-item.current { background: #ECF0FF; border-color: #165DFF; }
+.level-card-icon { font-size: 28px; margin-bottom: 8px; }
+.level-card-name { font-size: 14px; font-weight: 600; color: #333333; margin-bottom: 4px; }
+.level-card-range { font-size: 12px; color: #999; }
+.level-card-rate { font-size: 12px; color: #165DFF; margin-top: 4px; }
+
+
+.account-field { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F5F7FA; }
+.account-field:last-child { border-bottom: none; }
+.account-field-label { font-size: 14px; color: #666666; }
+.account-field-value { font-size: 14px; color: #333333; font-weight: 500; }
+
+/* Toast */
+.toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1d2129; color: #fff; padding: 10px 24px; border-radius: 4px; font-size: 14px; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.toast.show { display: block; animation: fadeInOut 2.5s ease; }
+@keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(-10px); } 10% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .annotation-panel { width: 320px; min-width: 320px; }
+  .benefits-grid, .steps-grid { grid-template-columns: 1fr; }
+  .social-channels { flex-wrap: wrap; }
+  .asset-section { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="annotation-toolbar" id="annotation-toolbar" style="display:none;"></div>
+  <div class="preview-area">
+    <!-- DEMO切换器 -->
+    <div class="demo-switcher" id="anno-2">
+      <div class="anno-badge" data-anno="2">2</div>
+      <span class="demo-switcher-label">DEMO 视图切换：</span>
+      <button class="demo-btn active" data-state="state-a">未加入</button>
+      <button class="demo-btn" data-state="state-b">已禁用</button>
+      <button class="demo-btn" data-state="state-c1">正常-等级关闭</button>
+      <button class="demo-btn" data-state="state-c2">正常-等级开启</button>
+    </div>
+
+    <!-- ===== 状态A：未加入 ===== -->
+    <div class="state-view active" id="state-a">
+      <div id="anno-3" class="anno-item" style="position:relative;">
+        <div class="anno-badge" data-anno="3">3</div>
+        <div class="landing-page">
+          <div class="landing-banner">
+            <h1>推广联盟</h1>
+            <p>邀请好友注册下单，轻松赚取佣金</p>
+          </div>
+          <!-- 社媒分享渠道 -->
+          <div class="social-section">
+            <h2>社媒分享渠道</h2>
+            <p class="social-desc">复制您的专属邀请链接、邀请码或下载邀请海报，分享至下方推荐的社媒渠道，实现佣金最大化！</p>
+            <div class="social-channels">
+              <div class="social-channel ch-tiktok">
+                <span class="ch-recommend"> RECOMMEND</span>
+                <span class="ch-icon">🎵</span>
+                <span>TikTok</span>
+              </div>
+              <div class="social-channel ch-discord">
+                <span class="ch-icon"></span>
+                <span>Discord</span>
+              </div>
+              <div class="social-channel ch-reddit">
+                <span class="ch-icon">🤖</span>
+                <span>Reddit</span>
+              </div>
+              <div class="social-channel ch-telegram">
+                <span class="ch-icon">✈️</span>
+                <span>Telegram</span>
+              </div>
+              <div class="social-channel ch-facebook">
+                <span class="ch-icon">📘</span>
+                <span>Facebook</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 如何赚取佣金 - 4步 -->
+          <div class="steps-section">
+            <h2>如何赚取佣金？</h2>
+            <p class="steps-desc">从上述渠道邀请好友注册后，好友支付国际包裹，完成包裹签收，您将获得佣金</p>
+            <div class="steps-grid">
+              <div class="step-card">
+                <div class="step-number">01</div>
+                <h4>复制您的邀请链接<br>OR 邀请码</h4>
+                <div class="step-icon">🔗</div>
+                <span class="step-arrow">→</span>
+              </div>
+              <div class="step-card">
+                <div class="step-number">02</div>
+                <h4>分享至社媒渠道</h4>
+                <div class="step-icon">📱</div>
+                <span class="step-arrow">→</span>
+              </div>
+              <div class="step-card">
+                <div class="step-number">03</div>
+                <h4>好友支付国际包裹<br>& 签收</h4>
+                <div class="step-icon">📦</div>
+                <span class="step-arrow">→</span>
+              </div>
+              <div class="step-card">
+                <div class="step-number">04</div>
+                <h4>佣金发放到账</h4>
+                <div class="step-icon">💰</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 等级体系概览（无进度条，LV标签） -->
+          <div class="level-overview" id="level-overview-a">
+            <h3>📊 等级体系概览</h3>
+            <div class="level-list">
+              <div class="level-item current">
+                <div class="level-badge-icon">LV1</div>
+                <div class="level-name">梦想推广者</div>
+                <div class="level-range">0 - 1999 经验值</div>
+              </div>
+              <div class="level-item">
+                <div class="level-badge-icon">LV2</div>
+                <div class="level-name">初级推广者</div>
+                <div class="level-range">2000 - 4999 经验值</div>
+              </div>
+              <div class="level-item">
+                <div class="level-badge-icon">LV3</div>
+                <div class="level-name">中级推广者</div>
+                <div class="level-range">5000 - 9999 经验值</div>
+              </div>
+              <div class="level-item">
+                <div class="level-badge-icon">LV4</div>
+                <div class="level-name">高级推广者</div>
+                <div class="level-range">10000+ 经验值</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部CTA引导Banner -->
+          <div class="cta-banner">
+            <h2>准备好开启您的推广收益了吗？</h2>
+            <p class="cta-desc">只需联系客服，即可完成推广者注册，开启您的推广收益之旅</p>
+            <button class="cta-btn" onclick="showJoinToast()">联系客服成为推广者 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 状态B：已禁用 ===== -->
+    <div class="state-view" id="state-b">
+      <div id="anno-3b" style="position:relative;">
+        <div class="anno-badge" data-anno="3">3</div>
+        <div class="disabled-page">
+          <div class="disabled-icon">⚠️</div>
+          <h2>您的推广资格已被禁用</h2>
+          <p>请联系客服了解详情</p>
+          <a class="link-text" onclick="showToast('请联系客服处理')">联系客服</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 状态C1：正常-等级关闭 ===== -->
+    <div class="state-view" id="state-c1">
+      <div class="anno-item" id="anno-4-wrap" style="position:relative;">
+        <div class="anno-badge" data-anno="4" style="top:-8px;left:-8px;">4</div>
+        <div class="normal-layout">
+          <!-- 左侧导航 -->
+          <div class="side-nav" id="sideNavC1">
+            <div class="nav-item selected" data-page="overview-c1" onclick="navClick(this, 'c1')">
+              <span>联盟概览</span>
+            </div>
+            <div class="nav-item selected-sub" style="background:#ECF0FF;border-left-color:#165DFF;font-weight:600;color:#165DFF;cursor:default;">
+              <span>推广明细</span>
+            </div>
+            <div class="nav-sub" id="subNav-bonus-c1">
+              <div class="nav-sub-item" data-page="related-c1" onclick="navClick(this, 'c1')">关联用户</div>
+              <div class="nav-sub-item" data-page="income-c1" onclick="navClick(this, 'c1')">收支明细</div>
+              <div class="nav-sub-item" data-page="commission-c1" onclick="navClick(this, 'c1')">佣金明细</div>
+              <div class="nav-sub-item" data-page="withdraw-c1" onclick="navClick(this, 'c1')">提现记录</div>
+            </div>
+            <div class="nav-item selected-sub" style="background:#ECF0FF;border-left-color:#165DFF;font-weight:600;color:#165DFF;cursor:default;">
+              <span>联盟设置</span>
+            </div>
+            <div class="nav-sub" id="subNav-settings-c1">
+            </div>
+          </div>
+          <!-- 右侧主内容区 -->
+          <div class="main-content" id="mainContent-c1">
+            <!-- 联盟概览页 -->
+            <div class="sub-page active" id="page-overview-c1">
+              <!-- 个人信息Banner -->
+              <div id="anno-5-c1" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="5" style="top:-8px;left:-8px;">5</div>
+                <div class="user-banner">
+                  <div class="banner-left">
+                    <div class="avatar-placeholder">👤</div>
+                    <div class="banner-user-info">
+                      <div class="banner-username">推广员 Karl</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 资产数据区 -->
+              <div id="anno-6-c1" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="6" style="top:-8px;left:-8px;">6</div>
+                <div class="asset-section">
+                  <div class="asset-card">
+                    <div class="asset-card-title">可提现佣金 <span style="font-size:12px;color:#999;font-weight:400;">（已提现佣金 ¥960.00）</span></div>
+                    <div class="asset-amount">¥580.00</div>
+                    <div class="asset-desc">订单完成后佣金自动结算，满100元可提现</div>
+                    <div class="asset-btns">
+                      <button class="btn-asset" onclick="showToast('查看提现记录')">提现记录</button>
+                      <button class="btn-asset primary" onclick="openWithdrawModal()">提现</button>
+                    </div>
+                  </div>
+                  <div class="asset-card">
+                    <div class="asset-list-item" onclick="navToPage('commission-c1','c1')">
+                      <div>
+                        <div class="asset-card-title">已结算佣金</div>
+                        <div class="asset-list-value">¥1,280.00</div>
+                      </div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                    <div class="asset-list-item" onclick="navToPage('commission-c1','c1')">
+                      <div>
+                        <div class="asset-card-title">待结算佣金</div>
+                        <div class="asset-list-value">¥358.00</div>
+                      </div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                    <div class="asset-list-item" onclick="navToPage('related-c1','c1')">
+                      <div>
+                        <div class="asset-card-title">总邀请用户数</div>
+                        <div class="asset-list-value">12</div>
+                      </div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 如何赚取佣金 -->
+              <div class="steps-section" style="margin-top:24px;">
+                <h2>如何赚取佣金？</h2>
+                <p class="steps-desc">从上述渠道邀请好友注册后，好友支付国际包裹，完成包裹签收，您将获得佣金</p>
+                <div class="steps-grid">
+                  <div class="step-card">
+                    <div class="step-number">01</div>
+                    <h4>复制您的邀请链接<br>OR 邀请码</h4>
+                    <div class="step-icon">🔗</div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">02</div>
+                    <h4>分享至社媒渠道</h4>
+                    <div class="step-icon">📱</div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">03</div>
+                    <h4>好友支付国际包裹<br>& 签收</h4>
+                    <div class="step-icon">📦</div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">04</div>
+                    <h4>佣金发放到账</h4>
+                    <div class="step-icon">💰</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 立即推广区 -->
+              <div id="anno-7-c1" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="7" style="top:-8px;left:-8px;">7</div>
+                <div class="promo-card">
+                  <div class="promo-card-title">立即推广</div>
+                  <div class="promo-card-desc">选择推广方式，分享邀请链接或邀请码给好友，好友注册下单即可获得佣金奖励</div>
+                  <div class="promo-content" style="display:flex;gap:16px;align-items:flex-start;">
+                    <div class="promo-method" style="flex:1;text-align:center;">
+                      <div class="invite-code-label" style="margin-bottom:8px;">分享邀请链接</div>
+                      <button class="btn-copy-link" onclick="copyInviteLink()" style="width:100%;">复制邀请链接</button>
+                    </div>
+                    <div class="promo-method" style="flex:1;text-align:center;">
+                      <div class="invite-code-label" style="margin-bottom:8px;">分享我的邀请码</div>
+                      <div class="invite-code-value" style="justify-content:center;margin-bottom:8px;">
+                        <span class="invite-code-text">ABCD1234</span>
+                        <span class="copy-icon" onclick="copyInviteCode()" title="复制邀请码"></span>
+                      </div>
+                      <button class="btn-copy-link" onclick="copyInviteCode()" style="width:100%;">复制邀请码</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关联用户页 -->
+            <div class="sub-page" id="page-related-c1">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <h3 style="font-size:16px;font-weight:600;color:#333;margin-bottom:16px;">关联用户</h3>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">已绑定</span>
+                  <span class="filter-tag">已解绑</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>用户编号</th><th>昵称</th><th>注册时间</th><th>绑定状态</th><th>过期时间</th><th>贡献订单数</th><th>贡献佣金</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>U100028</td><td>用户A***n</td><td>2026-08-15</td><td><span class="status-tag settled">已绑定</span></td><td>2027-08-15</td><td>5</td><td>¥320.00</td></tr>
+                    <tr><td>2</td><td>U10035</td><td>用户B***g</td><td>2026-08-20</td><td><span class="status-tag settled">已绑定</span></td><td>2027-08-20</td><td>3</td><td>¥168.00</td></tr>
+                    <tr><td>3</td><td>U10042</td><td>用户C***e</td><td>2026-09-01</td><td><span class="status-tag pending">已解绑</span></td><td>—</td><td>0</td><td>¥0.00</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 28 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+            <!-- 收支明细页 -->
+            <div class="sub-page" id="page-income-c1">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <h3 style="font-size:16px;font-weight:600;color:#333;margin-bottom:16px;">收支明细</h3>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">收入</span>
+                  <span class="filter-tag">支出</span>
+                  <span class="filter-tag">退回</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>类型</th><th>金额</th><th>余额</th><th>说明</th><th>时间</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td><span class="status-tag settled">收入</span></td><td style="color:#00b42a;">+¥102.40</td><td>¥580.00</td><td>订单佣金结算</td><td>2026-09-18</td></tr>
+                    <tr><td>2</td><td><span class="status-tag rejected">支出</span></td><td style="color:#f53f3f;">-¥500.00</td><td>¥477.60</td><td>提现至银行卡</td><td>2026-09-16</td></tr>
+                    <tr><td>3</td><td><span class="status-tag settled">收入</span></td><td style="color:#00b42a;">+¥188.00</td><td>¥977.60</td><td>订单佣金结算</td><td>2026-09-25</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 15 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+            <!-- 佣金明细页 -->
+            <div class="sub-page" id="page-commission-c1">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <h3 style="margin:0;font-size:16px;font-weight:600;color:#333;">佣金明细</h3>
+                  <button onclick="showToast('查看规则说明')" style="padding:6px 14px;font-size:13px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                </div>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">待结算</span>
+                  <span class="filter-tag">已结算</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>关联订单</th><th>绑定客户</th><th>订单金额</th><th>佣金费率</th><th>佣金金额</th><th>状态</th><th>结算时间</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>ORD20260915001</td><td>用户A***n</td><td>¥1,280.00</td><td>8%</td><td>¥102.40</td><td><span class="status-tag settled">已结算</span></td><td>2026-09-18</td></tr>
+                    <tr><td>2</td><td>ORD20260920003</td><td>用户B***g</td><td>¥860.00</td><td>8%</td><td>¥68.80</td><td><span class="status-tag pending">待结算</span></td><td>-</td></tr>
+                    <tr><td>3</td><td>ORD20260922008</td><td>用户C***e</td><td>¥2,350.00</td><td>8%</td><td>¥188.00</td><td><span class="status-tag settled">已结算</span></td><td>2026-09-25</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 28 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+            <!-- 提现记录页 -->
+            <div class="sub-page" id="page-withdraw-c1">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <h3 style="margin:0;font-size:16px;font-weight:600;color:#333;">提现记录</h3>
+                  <button onclick="showToast('查看规则说明')" style="padding:6px 14px;font-size:13px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                </div>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">待审核</span>
+                  <span class="filter-tag">已批准</span>
+                  <span class="filter-tag">已拒绝</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>提现金额</th><th>银行卡信息</th><th>状态</th><th>申请时间</th><th>审核时间</th><th>拒绝原因</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>¥500.00</td><td>招商银行 ****6789</td><td><span class="status-tag approved">已批准</span></td><td>2026-09-16</td><td>2026-09-17</td><td>-</td></tr>
+                    <tr><td>2</td><td>¥300.00</td><td>工商银行 ****1234</td><td><span class="status-tag pending">待审核</span></td><td>2026-09-28</td><td>-</td><td>-</td></tr>
+                    <tr><td>3</td><td>¥200.00</td><td>建设银行 ****5678</td><td><span class="status-tag rejected">已拒绝</span></td><td>2026-09-10</td><td>2026-09-11</td><td>银行卡信息有误</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 8 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 状态C2：正常-等级开启 ===== -->
+    <div class="state-view" id="state-c2">
+      <div class="anno-item" id="anno-4-wrap-c2" style="position:relative;">
+        <div class="anno-badge" data-anno="4" style="top:-8px;left:-8px;">4</div>
+        <div class="normal-layout">
+          <!-- 左侧导航 -->
+          <div class="side-nav" id="sideNavC2">
+            <div class="nav-item selected" data-page="overview-c2" onclick="navClick(this, 'c2')">
+              <span>联盟概览</span>
+            </div>
+            <div class="nav-item selected-sub" style="background:#ECF0FF;border-left-color:#165DFF;font-weight:600;color:#165DFF;cursor:default;">
+              <span>推广明细</span>
+            </div>
+            <div class="nav-sub">
+              <div class="nav-sub-item" data-page="related-c2" onclick="navClick(this, 'c2')">关联用户</div>
+              <div class="nav-sub-item" data-page="income-c2" onclick="navClick(this, 'c2')">收支明细</div>
+              <div class="nav-sub-item" data-page="commission-c2" onclick="navClick(this, 'c2')">佣金明细</div>
+              <div class="nav-sub-item" data-page="withdraw-c2" onclick="navClick(this, 'c2')">提现记录</div>
+            </div>
+            <div class="nav-item selected-sub" style="background:#ECF0FF;border-left-color:#165DFF;font-weight:600;color:#165DFF;cursor:default;">
+              <span>联盟设置</span>
+            </div>
+            <div class="nav-sub">
+              <div class="nav-sub-item" data-page="level-c2" onclick="navClick(this, 'c2')">我的等级</div>
+            </div>
+          </div>
+
+          <!-- 右侧主内容区 -->
+          <div class="main-content" id="mainContentC2">
+            <!-- 联盟概览页 -->
+            <div class="sub-page active" id="page-overview-c2">
+              <!-- 顶部Banner -->
+              <div id="anno-5-c2" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="5" style="top:-8px;left:-8px;">5</div>
+                <div class="user-banner">
+                  <div class="banner-left">
+                    <div class="avatar-placeholder"></div>
+                    <div class="banner-user-info">
+                      <div class="banner-username">Karl</div>
+                      <div class="banner-level-row">
+                        <span class="level-badge-banner"> 梦想推广者</span>
+                        <span class="banner-progress-text">距离LV2还差1480点经验值</span>
+                      </div>
+                      <div class="banner-progress-bar"><div class="banner-progress-fill" style="width:22%;"></div></div>
+                    </div>
+                  </div>
+                  <div class="banner-right"><button class="btn-banner" onclick="showToast('获取经验值')">获取经验值</button></div>
+                </div>
+              </div>
+
+              <!-- 资产数据区 -->
+              <div id="anno-6-c2" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="6" style="top:-8px;left:-8px;">6</div>
+                <div class="asset-section">
+                  <div class="asset-card">
+                    <div class="asset-card-title">可提现佣金 <span style="font-size:12px;color:#999;font-weight:400;">（已提现佣金 ¥960.00）</span></div>
+                    <div class="asset-amount">¥580.00</div>
+                    <div class="asset-desc">订单完成后佣金自动结算，满100元可提现</div>
+                    <div class="asset-btns">
+                      <button class="btn-asset" onclick="showToast('查看提现记录')">提现记录</button>
+                      <button class="btn-asset primary" onclick="openWithdrawModal()">提现</button>
+                    </div>
+                  </div>
+                  <div class="asset-card">
+                    <div class="asset-list-item" onclick="navToPage('commission-c2','c2')">
+                      <div><div class="asset-card-title">已结算佣金</div><div class="asset-list-value">¥1,280.00</div></div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                    <div class="asset-list-item" onclick="navToPage('commission-c2','c2')">
+                      <div><div class="asset-card-title">待结算佣金</div><div class="asset-list-value">¥358.00</div></div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                    <div class="asset-list-item" onclick="navToPage('related-c2','c2')">
+                      <div><div class="asset-card-title">总邀请用户数</div><div class="asset-list-value">12</div></div>
+                      <span class="asset-list-arrow">▶</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 如何赚取佣金 -->
+              <div class="steps-section" style="margin-top:24px;">
+                <h2>如何赚取佣金？</h2>
+                <p class="steps-desc">从上述渠道邀请好友注册后，好友支付国际包裹，完成包裹签收，您将获得佣金</p>
+                <div class="steps-grid">
+                  <div class="step-card">
+                    <div class="step-number">01</div>
+                    <h4>复制您的邀请链接<br>OR 邀请码</h4>
+                    <div class="step-icon"></div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">02</div>
+                    <h4>分享至社媒渠道</h4>
+                    <div class="step-icon">📱</div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">03</div>
+                    <h4>好友支付国际包裹<br>& 签收</h4>
+                    <div class="step-icon">📦</div>
+                    <span class="step-arrow">→</span>
+                  </div>
+                  <div class="step-card">
+                    <div class="step-number">04</div>
+                    <h4>佣金发放到账</h4>
+                    <div class="step-icon"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 立即推广区 -->
+              <div id="anno-7-c2" class="anno-item" style="position:relative;">
+                <div class="anno-badge" data-anno="7" style="top:-8px;left:-8px;">7</div>
+                <div class="promo-card">
+                  <div class="promo-card-title">立即推广</div>
+                  <div class="promo-card-desc">选择推广方式，分享邀请链接或邀请码给好友，好友注册下单即可获得佣金奖励</div>
+                  <div class="promo-content" style="display:flex;gap:16px;align-items:flex-start;">
+                    <div class="promo-method" style="flex:1;text-align:center;">
+                      <div class="invite-code-label" style="margin-bottom:8px;">分享邀请链接</div>
+                      <button class="btn-copy-link" onclick="copyInviteLink()" style="width:100%;">复制邀请链接</button>
+                    </div>
+                    <div class="promo-method" style="flex:1;text-align:center;">
+                      <div class="invite-code-label" style="margin-bottom:8px;">分享我的邀请码</div>
+                      <div class="invite-code-value" style="justify-content:center;margin-bottom:8px;">
+                        <span class="invite-code-text">ABCD1234</span>
+                        <span class="copy-icon" onclick="copyInviteCode()" title="复制邀请码">📋</span>
+                      </div>
+                      <button class="btn-copy-link" onclick="copyInviteCode()" style="width:100%;">复制邀请码</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关联用户页 -->
+            <div class="sub-page" id="page-related-c2">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <h3 style="font-size:16px;font-weight:600;color:#333;margin-bottom:16px;">关联用户</h3>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">已绑定</span>
+                  <span class="filter-tag">已解绑</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>用户编号</th><th>昵称</th><th>注册时间</th><th>绑定状态</th><th>过期时间</th><th>贡献订单数</th><th>贡献佣金</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>U10028</td><td>用户A***n</td><td>2026-08-15</td><td><span class="status-tag settled">已绑定</span></td><td>2027-08-15</td><td>5</td><td>¥320.00</td></tr>
+                    <tr><td>2</td><td>U10035</td><td>用户B***g</td><td>2026-08-20</td><td><span class="status-tag settled">已绑定</span></td><td>2027-08-20</td><td>3</td><td>¥168.00</td></tr>
+                    <tr><td>3</td><td>U10042</td><td>用户C***e</td><td>2026-09-01</td><td><span class="status-tag pending">已解绑</span></td><td>—</td><td>0</td><td>¥0.00</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 28 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+            <!-- c2子页面：收支明细、佣金明细 -->
+            <div class="sub-page" id="page-income-c2">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <h3 style="font-size:16px;font-weight:600;color:#333;margin-bottom:16px;">收支明细</h3>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">收入</span>
+                  <span class="filter-tag">支出</span>
+                  <span class="filter-tag">退回</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>类型</th><th>金额</th><th>余额</th><th>说明</th><th>时间</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td><span class="status-tag settled">收入</span></td><td style="color:#00b42a;">+¥102.40</td><td>¥580.00</td><td>订单佣金结算</td><td>2026-09-18</td></tr>
+                    <tr><td>2</td><td><span class="status-tag rejected">支出</span></td><td style="color:#f53f3f;">-¥500.00</td><td>¥477.60</td><td>提现至银行卡</td><td>2026-09-16</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="sub-page" id="page-commission-c2">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <h3 style="margin:0;font-size:16px;font-weight:600;color:#333;">佣金明细</h3>
+                  <button onclick="showToast('查看规则说明')" style="padding:6px 14px;font-size:13px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                </div>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">待结算</span>
+                  <span class="filter-tag">已结算</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>关联订单</th><th>绑定客户</th><th>订单金额</th><th>佣金费率</th><th>佣金金额</th><th>状态</th><th>结算时间</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>ORD20260915001</td><td>用户A***n</td><td>¥1,280.00</td><td>8%</td><td>¥102.40</td><td><span class="status-tag settled">已结算</span></td><td>2026-09-18</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 提现记录页 -->
+            <div class="sub-page" id="page-withdraw-c2">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <h3 style="margin:0;font-size:16px;font-weight:600;color:#333;">提现记录</h3>
+                  <button onclick="showToast('查看规则说明')" style="padding:6px 14px;font-size:13px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                </div>
+                <div class="filter-bar">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">待审核</span>
+                  <span class="filter-tag">已批准</span>
+                  <span class="filter-tag">已拒绝</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>#</th><th>提现金额</th><th>银行卡信息</th><th>状态</th><th>申请时间</th><th>审核时间</th><th>拒绝原因</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td>¥500.00</td><td>招商银行 ****6789</td><td><span class="status-tag approved">已批准</span></td><td>2026-09-16</td><td>2026-09-17</td><td>-</td></tr>
+                    <tr><td>2</td><td>¥300.00</td><td>工商银行 ****1234</td><td><span class="status-tag pending">待审核</span></td><td>2026-09-28</td><td>-</td><td>-</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 6 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+            <!-- 我的等级页 -->
+            <div class="sub-page" id="page-level-c2">
+              <div style="background:#fff;border-radius:6px;padding:20px;">
+                <div class="level-page-card" style="margin-bottom:24px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <h3 style="margin:0;">我的等级</h3>
+                    <button onclick="showToast('查看等级规则')" style="padding:6px 14px;font-size:13px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                  </div>
+                  <div class="level-cards-row">
+                    <div class="level-card-item current">
+                      <div class="level-card-icon" style="font-size:11px;font-weight:800;color:#fff;background:#165DFF;border-radius:10px;padding:3px 8px;display:inline-block;">LV1</div>
+                      <div class="level-card-name">梦想推广者</div>
+                      <div class="level-card-range">0 - 1999 经验值</div>
+                      <div class="level-card-rate">佣金费率 5%</div>
+                    </div>
+                    <div class="level-card-item">
+                      <div class="level-card-icon" style="font-size:11px;font-weight:800;color:#fff;background:#999;border-radius:10px;padding:3px 8px;display:inline-block;">LV2</div>
+                      <div class="level-card-name">初级推广者</div>
+                      <div class="level-card-range">2000 - 4999 经验值</div>
+                      <div class="level-card-rate">佣金费率 8%</div>
+                    </div>
+                    <div class="level-card-item">
+                      <div class="level-card-icon" style="font-size:11px;font-weight:800;color:#fff;background:#999;border-radius:10px;padding:3px 8px;display:inline-block;">LV3</div>
+                      <div class="level-card-name">中级推广者</div>
+                      <div class="level-card-range">5000 - 9999 经验值</div>
+                      <div class="level-card-rate">佣金费率 10%</div>
+                    </div>
+                    <div class="level-card-item">
+                      <div class="level-card-icon" style="font-size:11px;font-weight:800;color:#fff;background:#999;border-radius:10px;padding:3px 8px;display:inline-block;">LV4</div>
+                      <div class="level-card-name">高级推广者</div>
+                      <div class="level-card-range">10000+ 经验值</div>
+                      <div class="level-card-rate">佣金费率 12%</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:16px;">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;">
+                      <span>当前等级：梦想推广者</span>
+                      <span>120 / 2000</span>
+                    </div>
+                    <div style="height:8px;background:#F5F7FA;border-radius:4px;overflow:hidden;">
+                      <div style="height:100%;width:6%;background:linear-gradient(90deg,#165DFF,#409EFF);border-radius:4px;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 style="font-size:15px;font-weight:600;color:#333;margin-bottom:16px;">成长值变动明细</h3>
+                <div class="filter-bar" style="margin-bottom:16px;">
+                  <span class="filter-tag active">全部</span>
+                  <span class="filter-tag">收入</span>
+                  <span class="filter-tag">支出</span>
+                </div>
+                <table class="data-table">
+                  <thead><tr><th>时间</th><th>变动类型</th><th>变动值</th><th>变动后成长值</th><th>过期时间</th><th>关联订单/说明</th></tr></thead>
+                  <tbody>
+                    <tr><td>2026-09-15 14:30</td><td><span class="status-tag settled">收入</span></td><td style="color:#00B42A;">+50</td><td>120</td><td>2027-09-15</td><td>好友U10028下单完成</td></tr>
+                    <tr><td>2026-09-12 09:15</td><td><span class="status-tag settled">收入</span></td><td style="color:#00B42A;">+30</td><td>70</td><td>2027-09-12</td><td>好友U10035下单完成</td></tr>
+                    <tr><td>2026-09-08 16:42</td><td><span class="status-tag pending">支出</span></td><td style="color:#F53F3F;">-20</td><td>40</td><td>—</td><td>等级调整</td></tr>
+                    <tr><td>2026-09-01 10:00</td><td><span class="status-tag settled">收入</span></td><td style="color:#00B42A;">+60</td><td>60</td><td>2027-09-01</td><td>好友U10012下单完成</td></tr>
+                  </tbody>
+                </table>
+                <div class="pagination"><span class="page-info">共 4 条</span><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 提现弹窗 ===== -->
+    <div class="modal-overlay" id="withdrawModal">
+      <div class="modal-box" id="anno-8" style="position:relative;width:520px;">
+        <div class="anno-badge" data-anno="8">8</div>
+        <button class="modal-close" onclick="closeWithdrawModal()">✕</button>
+        <div class="modal-title" style="text-align:center;font-size:18px;font-weight:600;margin-bottom:20px;">提现</div>
+        <div class="form-group">
+          <label class="form-label">提现方式</label>
+          <select class="form-input" style="width:100%;padding:10px 12px;border:1px solid #E4E7ED;border-radius:6px;font-size:14px;background:#fff;">
+            <option>银行转账</option>
+            <option>转入余额</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="color:#F53F3F;">* 收款人</label>
+          <input type="text" class="form-input" placeholder="请输入收款人">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="color:#F53F3F;">* 账户</label>
+          <input type="text" class="form-input" placeholder="请输入账户">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="color:#F53F3F;">* 上传照片</label>
+          <div style="width:80px;height:80px;border:2px dashed #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#999;font-size:12px;">
+            🖼️
+          </div>
+          <div style="font-size:12px;color:#F53F3F;margin-top:6px;">请上传文件（最大5MB），格式为png/jpg/jpeg/webp</div>
+        </div>
+        <div style="font-size:14px;color:#333;margin:16px 0;">提现金额：<strong>0</strong>。成功请求后，资金将转入对应账户。</div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button class="btn-outline" onclick="closeWithdrawModal()" style="flex:1;padding:10px;border:1px solid #16B5C0;color:#16B5C0;background:#fff;border-radius:6px;font-size:14px;cursor:pointer;">取消</button>
+          <button class="btn-primary" onclick="submitWithdraw()" style="flex:1;padding:10px;border:none;background:#16B5C0;color:#fff;border-radius:6px;font-size:14px;cursor:pointer;">提交</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 邀请码弹窗 ===== -->
+    <div class="modal-overlay" id="inviteModal">
+      <div class="modal-box" id="anno-9" style="position:relative;">
+        <div class="anno-badge" data-anno="9">9</div>
+        <button class="modal-close" onclick="closeInviteModal()">✕</button>
+        <div class="modal-title">我的邀请码</div>
+        <div class="invite-code-display">
+          <div class="invite-code-text-lg">ABCD1234</div>
+          <div class="invite-link">https://poko.example.com/?ref=ABCD1234</div>
+          <div class="qr-placeholder" style="margin:16px auto;">
+            <span>二维码占位区域</span>
+          </div>
+        </div>
+        <div class="modal-footer" style="justify-content:center;">
+          <button class="btn-outline btn-sm" onclick="copyInviteLink()">复制链接</button>
+          <button class="btn-primary btn-sm" onclick="showToast('分享功能已调用')">分享</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 标注1：总说明（无角标） -->
+    <div id="anno-1" style="position:relative; height:0; overflow:visible;">
+      <div class="anno-badge" data-anno="1" style="top:-24px; left:0;">1</div>
+    </div>
+  </div>
+
+  <!-- 右侧标注面板 -->
+  <div class="annotation-panel" id="annotation-panel">
+    <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e5e6eb;">
+      <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板" style="border:none;background:none;cursor:pointer;font-size:14px;color:#86909c;">◀</button>
+      <span style="font-size:16px;font-weight:600;color:#1d2129;">📌 标注说明</span>
+    </div>
+    <div id="annotation-list">
+
+    <!-- 标注1 -->
+    <div class="anno-card" data-card="1">
+      <div class="anno-card-header">
+        <div class="anno-card-num">1</div>
+        <div class="anno-card-title">页面总说明</div>
+      </div>
+      <div class="anno-card-summary">面向C端用户的推广联盟功能入口，采用左侧导航+右侧内容的经典后台布局，根据用户身份展示引导页、限制页或完整推广中心。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag">总览</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="1">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">用户端推广联盟页面是面向终端用户的推广功能入口。根据用户身份展示不同页面：未加入时展示引导页，已禁用展示限制页，正常状态展示带左侧导航的完整推广中心。支持DEMO模式切换4种视图状态。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">状态说明</div>
+        <div class="anno-detail-content">状态A-未加入：全屏引导页；状态B-已禁用：全屏限制页；状态C1-等级关闭：完整推广中心，无等级信息；状态C2-等级开启：完整推广中心，含等级体系和经验值。</div>
+      </div>
+    </div>
+
+    <!-- 标注2 -->
+    <div class="anno-card" data-card="2">
+      <div class="anno-card-header">
+        <div class="anno-card-num">2</div>
+        <div class="anno-card-title">DEMO切换器</div>
+      </div>
+      <div class="anno-card-summary">开发调试用状态切换面板，4个按钮一键切换：未加入、已禁用、正常-等级关闭、正常-等级开启。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-interaction">交互</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="2">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">页面顶部的状态切换面板，仅在开发/演示环境可见。提供4个切换按钮，点击后页面展示对应状态的完整UI效果。未加入和已禁用不显示左侧导航，正常状态显示完整布局。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">点击不同状态按钮即时切换视图，选中按钮高亮为蓝色。真实生产环境中此面板不渲染。</div>
+      </div>
+    </div>
+
+    <!-- 标注3 -->
+    <div class="anno-card" data-card="3">
+      <div class="anno-card-header">
+        <div class="anno-card-num">3</div>
+        <div class="anno-card-title">引导页/限制页</div>
+      </div>
+      <div class="anno-card-summary">未加入时展示全屏引导页（权益说明+联系客服）；已禁用时展示全屏限制页（警告提示）。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-state">状态</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="3">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">引导页包含Banner、社媒分享渠道（TikTok/Discord/Reddit/Telegram/Facebook）、如何赚取佣金4步流程、等级体系概览（LV1-LV4标签，无进度条）、底部CTA引导Banner（联系客服成为推广者）。限制页展示警告图标和禁用提示。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">状态说明</div>
+        <div class="anno-detail-content">引导页不显示左侧导航，全屏居中展示。等级概览展示4个等级卡片（LV1-LV4标签），不展示经验进度条。底部CTA引导Banner引导用户联系客服成为推广者。</div>
+      </div>
+    </div>
+
+    <!-- 标注4 -->
+    <div class="anno-card" data-card="4">
+      <div class="anno-card-header">
+        <div class="anno-card-num">4</div>
+        <div class="anno-card-title">左侧导航菜单</div>
+      </div>
+      <div class="anno-card-summary">200px宽左侧导航栏，含联盟概览、推广明细（可展开4个子菜单）、联盟设置（可展开子菜单）。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-area">区域</span>
+        <span class="anno-tag type-interaction">交互</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="4">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">左侧导航栏宽度200px，包含：联盟概览（一级菜单）、推广明细（可展开：关联用户/收支明细/佣金明细/提现记录）、联盟设置（可展开：我的等级）。默认全部展开，无折叠按钮。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">点击父菜单展开/折叠子菜单，箭头图标旋转指示状态。点击菜单项切换右侧内容区，选中项背景#ECF0FF、左侧蓝色边框。子菜单项点击同样切换内容并高亮。</div>
+      </div>
+    </div>
+
+    <!-- 标注5 -->
+    <div class="anno-card" data-card="5">
+      <div class="anno-card-header">
+        <div class="anno-card-num">5</div>
+        <div class="anno-card-title">个人信息Banner</div>
+      </div>
+      <div class="anno-card-summary">蓝色渐变背景Banner，左侧头像+名称+等级徽章+进度条，右侧"获取经验值"按钮。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-area">区域</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="5">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">等级开启时：左侧显示圆形头像、推广员名称、等级徽章（如🏆梦想推广者）、等级进度文字（距离下一级的经验值）、进度条，右侧显示"获取经验值"按钮。等级关闭时：仅显示头像和推广员名称，不显示等级相关信息。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">视觉说明</div>
+        <div class="anno-detail-content">背景渐变#409EFF→#3A8EE6，圆角6px，白色文字，装饰性半透明圆形。</div>
+      </div>
+    </div>
+
+    <!-- 标注6 -->
+    <div class="anno-card" data-card="6">
+      <div class="anno-card-header">
+        <div class="anno-card-num">6</div>
+        <div class="anno-card-title">资产数据区</div>
+      </div>
+      <div class="anno-card-summary">白色卡片两列布局：左卡片展示可提现佣金（含已提现佣金灰色小字）+操作按钮，右卡片展示已结算/待结算佣金+总邀请用户数。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-area">区域</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="6">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">左卡片：可提现佣金（大字号蓝色金额，标题右侧灰色小字展示已提现佣金）+说明文字+"提现记录"和"提现"两个按钮。右卡片：三行数据（已结算佣金、待结算佣金、总邀请用户数），每行右侧有箭头可点击跳转对应明细页。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">点击"提现"按钮弹出提现弹窗，点击"提现记录"跳转提现记录页。右卡片各行点击跳转到对应明细页面。</div>
+      </div>
+    </div>
+
+    <!-- 标注7 -->
+    <div class="anno-card" data-card="7">
+      <div class="anno-card-header">
+        <div class="anno-card-num">7</div>
+        <div class="anno-card-title">立即推广区</div>
+      </div>
+      <div class="anno-card-summary">白色卡片展示推广二维码和邀请码，左侧二维码+下载按钮，右侧邀请码+复制按钮。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-area">区域</span>
+        <span class="anno-tag type-interaction">交互</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="7">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">标题"立即推广"+说明文字。展示两种推广方式：分享邀请链接（含二维码+复制链接按钮）和分享我的邀请码（含邀请码+复制按钮）</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">点击"复制邀请链接"按钮复制邀请链接到剪贴板；点击"复制邀请码"按钮复制邀请码到剪贴板。均显示Toast提示。</div>
+      </div>
+    </div>
+
+    <!-- 标注8 -->
+    <div class="anno-card" data-card="8">
+      <div class="anno-card-header">
+        <div class="anno-card-num">8</div>
+        <div class="anno-card-title">提现弹窗</div>
+      </div>
+      <div class="anno-card-summary">提现申请弹窗，支持银行转账和转入余额两种方式，银行转账显示银行卡信息区域。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-interaction">交互</span>
+        <span class="anno-tag type-detail">详情</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="8">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">弹窗展示提现方式下拉框（银行转账/转入余额）、收款人输入框、账户输入框、上传照片区域、提现金额展示。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">业务规则</div>
+        <div class="anno-detail-content">收款人、账户、上传照片为必填项；照片最大5MB，支持png/jpg/jpeg/webp格式；提交后资金转入对应账户。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">切换提现方式联动银行卡区域显隐。提交后关闭弹窗显示Toast提示。</div>
+      </div>
+    </div>
+
+    <!-- 标注9 -->
+    <div class="anno-card" data-card="9">
+      <div class="anno-card-header">
+        <div class="anno-card-num">9</div>
+        <div class="anno-card-title">邀请码弹窗</div>
+      </div>
+      <div class="anno-card-summary">展示专属邀请码、邀请链接和二维码，支持复制链接和分享操作。</div>
+      <div class="anno-card-tags">
+        <span class="anno-tag type-interaction">交互</span>
+        <span class="anno-tag type-detail">详情</span>
+      </div>
+    </div>
+    <div class="anno-detail-panel" data-detail="9">
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">功能说明</div>
+        <div class="anno-detail-content">弹窗居中展示邀请码（大字号蓝色）、邀请链接（灰底文字区域）、二维码占位图。底部提供"复制链接"和"分享"按钮。</div>
+      </div>
+      <div class="anno-detail-section">
+        <div class="anno-detail-label">交互说明</div>
+        <div class="anno-detail-content">点击复制按钮一键复制邀请链接到剪贴板，点击分享调用系统分享功能。点击遮罩或关闭按钮关闭弹窗。</div>
+      </div>
+    </div>
+
+  </div>
+  <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板" style="display:none;position:fixed;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #e5e6eb;border-right:none;border-radius:8px 0 0 8px;padding:8px 4px;cursor:pointer;font-size:14px;z-index:50;">📌</button>
+</div>
+
+<script>
+// ========== 标准标注系统JS ==========
+
+// 标注卡片点击
+document.querySelectorAll('.anno-card').forEach(card => {
+  card.addEventListener('click', function() {
+    const num = this.dataset.card;
+    const detail = document.querySelector(`[data-detail="${num}"]`);
+    const isActive = this.classList.contains('active');
+    
+    document.querySelectorAll('.anno-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.anno-detail-panel').forEach(d => d.classList.remove('show'));
+    
+    if (!isActive) {
+      this.classList.add('active');
+      if (detail) detail.classList.add('show');
+      
+      document.querySelectorAll('.anno-item').forEach(item => item.classList.remove('active'));
+      const targets = document.querySelectorAll(`[data-anno="${num}"]`);
+      targets.forEach(badge => {
+        const parent = badge.closest('.anno-item') || badge.parentElement;
+        if (parent && parent.classList.contains('anno-item')) parent.classList.add('active');
+      });
+      
+      // 滚动到标注面板对应卡片
+      this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+});
+
+// 角标点击
+document.querySelectorAll('.anno-badge').forEach(badge => {
+  badge.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const num = this.dataset.anno;
+    const card = document.querySelector(`[data-card="${num}"]`);
+    if (card) card.click();
+  });
+});
+
+// ========== 面板折叠 ==========
+let panelOpen = true;
+function togglePanel() {
+  const panel = document.getElementById('annotation-panel');
+  const btn = document.getElementById('panel-expand-btn');
+  panelOpen = !panelOpen;
+  if (panelOpen) {
+    panel.style.display = 'block';
+    btn.style.display = 'none';
+  } else {
+    panel.style.display = 'none';
+    btn.style.display = 'block';
+  }
+}
+
+// ========== 页面业务JS ==========
+
+// DEMO状态切换
+document.querySelectorAll('.demo-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const state = this.dataset.state;
+    document.querySelectorAll('.state-view').forEach(v => v.classList.remove('active'));
+    document.getElementById(state).classList.add('active');
+  });
+});
+
+// 左侧导航点击
+function navClick(el, prefix) {
+  const page = el.dataset.page;
+  if (!page) return;
+  
+  // 更新导航选中态
+  const nav = el.closest('.side-nav');
+  nav.querySelectorAll('.nav-item').forEach(n => n.classList.remove('selected'));
+  nav.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('selected'));
+  
+  if (el.classList.contains('nav-sub-item')) {
+    el.classList.add('selected');
+    // 也高亮父菜单
+    const parentSub = el.closest('.nav-sub');
+    if (parentSub) {
+      const parentItem = parentSub.previousElementSibling;
+      if (parentItem && parentItem.classList.contains('nav-item')) {
+        parentItem.classList.add('selected');
+      }
+    }
+  } else {
+    el.classList.add('selected');
+  }
+  
+  // 切换内容
+  const mainContent = el.closest('.normal-layout').querySelector('.main-content');
+  mainContent.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  const targetPage = document.getElementById('page-' + page);
+  if (targetPage) targetPage.classList.add('active');
+}
+
+// 导航子菜单展开/折叠
+function toggleSubNav(el, prefix) {
+  const subNav = el.nextElementSibling;
+  const arrow = el.querySelector('.arrow');
+  if (subNav && subNav.classList.contains('nav-sub')) {
+    subNav.classList.toggle('expanded');
+    if (arrow) arrow.classList.toggle('expanded');
+  }
+}
+
+// 从资产区跳转到子页面
+function navToPage(pageId, prefix) {
+  const mainContent = document.getElementById('mainContent-' + prefix);
+  if (!mainContent) return;
+  mainContent.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+  const targetPage = document.getElementById('page-' + pageId);
+  if (targetPage) targetPage.classList.add('active');
+  
+  // 更新导航选中态
+  const nav = document.getElementById('sideNav' + prefix.toUpperCase());
+  if (nav) {
+    nav.querySelectorAll('.nav-item').forEach(n => n.classList.remove('selected'));
+    nav.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('selected'));
+    const subItem = nav.querySelector(`[data-page="${pageId}"]`);
+    if (subItem) {
+      subItem.classList.add('selected');
+      const parentSub = subItem.closest('.nav-sub');
+      if (parentSub) {
+        parentSub.classList.add('expanded');
+        const parentArrow = parentSub.previousElementSibling?.querySelector('.arrow');
+        if (parentArrow) parentArrow.classList.add('expanded');
+        const parentItem = parentSub.previousElementSibling;
+        if (parentItem) parentItem.classList.add('selected');
+      }
+    }
+  }
+}
+
+// 筛选标签切换
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('filter-tag')) {
+    const bar = e.target.closest('.filter-bar');
+    bar.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+  }
+});
+
+// 提现弹窗
+function openWithdrawModal() {
+  document.getElementById('withdrawModal').classList.add('show');
+}
+function closeWithdrawModal() {
+  document.getElementById('withdrawModal').classList.remove('show');
+}
+
+// 邀请码弹窗
+function openInviteModal() {
+  document.getElementById('inviteModal').classList.add('show');
+}
+function closeInviteModal() {
+  document.getElementById('inviteModal').classList.remove('show');
+}
+
+// 点击遮罩关闭弹窗
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+});
+
+// 银行卡信息显隐
+function toggleBankInfo() {
+  const type = document.querySelector('input[name="withdrawType"]:checked').value;
+  document.getElementById('bankInfoArea').style.display = type === 'bank' ? 'block' : 'none';
+}
+
+// 提交提现
+function submitWithdraw() {
+  const type = document.querySelector('input[name="withdrawType"]:checked').value;
+  closeWithdrawModal();
+  if (type === 'bank') {
+    showToast('提现申请已提交，请等待审核');
+  } else {
+    showToast('已转入余额');
+  }
+}
+
+// 复制邀请码
+function copyInviteCode() {
+  showToast('邀请码已复制');
+}
+
+// 复制邀请链接
+function copyInviteLink() {
+  showToast('邀请链接已复制到剪贴板');
+}
+
+// 联系客服加入
+function showJoinToast() {
+  showToast('请联系客服，由后台管理员为您开通推广资格');
+}
+
+// Toast提示
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>
