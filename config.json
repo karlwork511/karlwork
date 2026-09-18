@@ -27,6 +27,11 @@
             "name": "收支记录页",
             "file": "docs/transaction-record.html",
             "icon": "📊"
+          },
+          {
+            "name": "佣金明细页",
+            "file": "docs/commission-detail.html",
+            "icon": "📋"
           }
         ]
       }
