@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>提现审核页 - 带标注原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;color:#333;background:#F5F7FA;height:100vh;overflow:hidden}
+.app-container{display:flex;flex-direction:column;height:100vh}
+.annotation-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:8px 16px;background:#fff;border-bottom:1px solid #E4E7ED;flex-shrink:0;z-index:100}
+.toolbar-edit-btn{padding:6px 14px;border:1px solid #DCDFE6;background:#fff;border-radius:4px;cursor:pointer;font-size:13px;color:#333;transition:all .2s}
+.toolbar-edit-btn:hover{border-color:#165DFF;color:#165DFF}
+.main-content{display:flex;flex:1;overflow:hidden}
+.preview-area{flex:1;min-width:0;overflow-y:auto;padding:24px;position:relative}
+.annotation-panel{width:300px;background:#F7F8FA;border-left:1px solid #E4E7ED;overflow-y:auto;flex-shrink:0;transition:width .3s ease}
+.annotation-panel.collapsed{width:0;border-left:none;overflow:hidden}
+.panel-header{padding:16px;font-size:15px;font-weight:600;color:#333;border-bottom:1px solid #E4E7ED;background:#F7F8FA;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:8px}
+.panel-toggle-btn{width:24px;height:24px;border:none;background:#E8EAED;border-radius:4px;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.panel-toggle-btn:hover{background:#DCDFE6;color:#333}
+.panel-expand-btn{position:fixed;top:50%;right:0;transform:translateY(-50%);width:36px;height:48px;background:#165DFF;color:#fff;border:none;border-radius:8px 0 0 8px;cursor:pointer;font-size:18px;z-index:999;display:none;box-shadow:-2px 2px 8px rgba(0,0,0,.15)}
+.panel-expand-btn.show{display:block}
+.panel-expand-btn:hover{background:#0E42D2}
+.annotation-item{padding:14px 16px;border-bottom:1px solid #E4E7ED;cursor:pointer;transition:background .2s}
+.annotation-item:hover{background:#EEF0F3}
+.annotation-item.active{background:#E8F3FF}
+.annotation-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.annotation-badge{width:22px;height:22px;border-radius:50%;background:#165DFF;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.annotation-title{font-size:14px;font-weight:600;color:#333}
+.annotation-summary{font-size:12px;color:#666;line-height:1.6;padding-left:32px}
+.anno-marker{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:#165DFF;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;opacity:.5;transition:all .2s;cursor:pointer;z-index:9999;user-select:none}
+.anno-marker.highlight,.anno-marker:hover{opacity:1;transform:scale(1.2);box-shadow:0 2px 8px rgba(22,93,255,.4)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.15);overflow:hidden}
+.modal-header{padding:18px 24px;border-bottom:1px solid #E4E7ED;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600;color:#333}
+.modal-close{width:28px;height:28px;border:none;background:transparent;font-size:20px;color:#999;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:#333}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 24px;border-top:1px solid #E4E7ED;display:flex;justify-content:flex-end;gap:10px}
+.detail-table{width:100%;border-collapse:collapse}
+.detail-table th{background:#FAFAFA;width:100px;padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:#666;border:1px solid #E4E7ED;vertical-align:top}
+.detail-table td{padding:12px 16px;font-size:13px;color:#333;border:1px solid #E4E7ED;line-height:1.7}
+.detail-table textarea{width:100%;min-height:80px;padding:8px 12px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;font-family:inherit;line-height:1.6;resize:vertical;outline:none}
+.detail-table textarea:focus{border-color:#165DFF}
+.btn{padding:8px 16px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid transparent;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#165DFF;color:#fff}
+.btn-primary:hover{background:#0E42D2}
+.btn-default{background:#fff;border-color:#DCDFE6;color:#666}
+.btn-default:hover{border-color:#165DFF;color:#165DFF}
+.btn-danger{background:#fff;border-color:#F53F3F;color:#F53F3F}
+.btn-danger:hover{background:#F53F3F;color:#fff}
+.btn-success{background:#fff;border-color:#00B42A;color:#00B42A}
+.btn-success:hover{background:#00B42A;color:#fff}
+.anno-flash{animation:flashHighlight 1.5s ease-out}
+@keyframes flashHighlight{0%{box-shadow:0 0 0 3px rgba(22,93,255,.6)}100%{box-shadow:0 0 0 3px rgba(22,93,255,0)}}
+.page-title{font-size:18px;font-weight:600;margin-bottom:16px}
+.panel-card{background:#fff;border-radius:6px;padding:20px 24px}
+.filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar label{font-size:13px;color:#666}
+.filter-bar input[type=date]{padding:5px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;color:#333}
+.filter-bar input[type=text]{padding:5px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;color:#333;width:180px}
+.filter-bar select{padding:5px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;color:#333}
+.filter-bar .filter-hint{font-size:12px;color:#F53F3F;display:none}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{background:#FAFAFA;padding:10px 12px;text-align:left;font-size:13px;font-weight:600;color:#666;border-bottom:1px solid #E4E7ED}
+.data-table td{padding:10px 12px;font-size:13px;color:#333;border-bottom:1px solid #F0F0F0}
+.data-table tr:hover td{background:#F5F7FA}
+.status-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px}
+.status-pending{background:#FFF3E0;color:#F57C00}
+.status-approved{background:#E8F5E9;color:#00B42A}
+.status-rejected{background:#FFEBEE;color:#F53F3F}
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:16px}
+.pagination span{font-size:13px;color:#666}
+.pagination button{padding:4px 10px;border:1px solid #DCDFE6;background:#fff;border-radius:4px;cursor:pointer;font-size:13px}
+.pagination button:hover{border-color:#165DFF;color:#165DFF}
+.pagination button.active{background:#165DFF;color:#fff;border-color:#165DFF}
+.action-link{color:#165DFF;cursor:pointer;font-size:13px;margin-right:12px;text-decoration:none}
+.action-link:hover{text-decoration:underline}
+.action-link.danger{color:#F53F3F}
+.action-link.danger:hover{text-decoration:underline}
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:13px;color:#666;margin-bottom:6px}
+.form-row input,.form-row textarea{width:100%;padding:8px 12px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;font-family:inherit;outline:none}
+.form-row input:focus,.form-row textarea:focus{border-color:#165DFF}
+.form-row textarea{min-height:80px;resize:vertical}
+.form-row .readonly{background:#F5F7FA;color:#333}
+.form-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;padding:12px 16px;background:#F7F8FA;border-radius:4px}
+.form-info .info-item{display:flex;flex-direction:column;gap:2px}
+.form-info .info-label{font-size:12px;color:#999}
+.form-info .info-value{font-size:14px;font-weight:600;color:#333}
+</style>
+</head>
+<body>
+<div class="app-container">
+<div class="annotation-toolbar" id="annotation-toolbar">
+<button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+</div>
+<div class="main-content">
+<div class="preview-area">
+<div class="page-container" id="anno-1">
+<div class="page-title">佣金提现审核</div>
+<!-- 筛选区 -->
+<div class="panel-card" id="anno-2">
+<div class="anno-marker" data-id="2">2</div>
+<div class="filter-bar">
+<label>状态</label>
+<select id="status-filter">
+<option value="">全部</option>
+<option value="pending">待审核</option>
+<option value="approved">已批准</option>
+<option value="rejected">已拒绝</option>
+</select>
+<label style="margin-left:12px;">时间</label>
+<input type="date" value="2026-08-17">
+<span style="font-size:13px;color:#999;">至</span>
+<input type="date" value="2026-09-17">
+<label style="margin-left:12px;">关键词</label>
+<input type="text" placeholder="提现单号/推广员编号/昵称">
+<button class="btn btn-primary" style="padding:6px 16px;font-size:13px;">搜索</button>
+<button class="btn btn-default" style="padding:6px 16px;font-size:13px;">导出</button>
+</div>
+</div>
+<!-- 数据表格 -->
+<div class="panel-card" id="anno-3" style="margin-top:16px;">
+<div class="anno-marker" data-id="3">3</div>
+<table class="data-table">
+<thead><tr><th>#</th><th>佣金提现单号</th><th>推广员编号</th><th>昵称</th><th>提现金额</th><th>收款人及收款账户</th><th>账户信息图片</th><th>状态</th><th>申请时间</th><th>操作</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>CW260910001</td><td>P20260901001</td><td>张三</td><td>500.00</td><td>张* 6222021234</td><td><span style="color:#165DFF;cursor:pointer;" onclick="alert('展示账户信息图片')">查看</span></td><td><span class="status-tag status-pending">待审核</span></td><td>2026-09-10 09:15</td><td><span class="action-link" onclick="openApproveModal('CW260910001','P20260901001','张三','500.00','张* 6222021234')">批准</span><span class="action-link danger" onclick="openRejectModal('CW260910001','P20260901001','张三','500.00')">拒绝</span></td></tr>
+<tr><td>2</td><td>CW260912002</td><td>P20260902003</td><td>John</td><td>200.00</td><td>Jo*n 4532097890</td><td><span style="color:#165DFF;cursor:pointer;" onclick="alert('展示账户信息图片')">查看</span></td><td><span class="status-tag status-pending">待审核</span></td><td>2026-09-12 14:20</td><td><span class="action-link" onclick="openApproveModal('CW260912002','P20260902003','John','200.00','Jo*n 4532097890')">批准</span><span class="action-link danger" onclick="openRejectModal('CW260912002','P20260902003','John','200.00')">拒绝</span></td></tr>
+<tr><td>3</td><td>CW260908003</td><td>P20260901005</td><td>王五</td><td>300.00</td><td>王* 6225889012</td><td><span style="color:#165DFF;cursor:pointer;">查看</span></td><td><span class="status-tag status-approved">已批准</span></td><td>2026-09-08 10:00</td><td>-</td></tr>
+<tr><td>4</td><td>CW260905004</td><td>P20260903007</td><td>김민수</td><td>150000.00</td><td>金* 3521554567</td><td><span style="color:#165DFF;cursor:pointer;">查看</span></td><td><span class="status-tag status-rejected">已拒绝</span></td><td>2026-09-05 16:30</td><td>-</td></tr>
+<tr><td>5</td><td>CW260915005</td><td>P20260901001</td><td>张三</td><td>300.00</td><td>张* 6222021234</td><td><span style="color:#165DFF;cursor:pointer;" onclick="alert('展示账户信息图片')">查看</span></td><td><span class="status-tag status-pending">待审核</span></td><td>2026-09-15 11:30</td><td><span class="action-link" onclick="openApproveModal('CW260915005','P20260901001','张三','300.00','张* 6222021234')">批准</span><span class="action-link danger" onclick="openRejectModal('CW260915005','P20260901001','张三','300.00')">拒绝</span></td></tr>
+</tbody>
+</table>
+<div class="pagination"><span>共23条</span><button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>›</button></div>
+</div>
+</div>
+</div>
+<div class="annotation-panel" id="annotation-panel">
+<div class="panel-header">
+<button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板"></button>
+<span>📌 标注说明</span>
+</div>
+<div id="annotation-list"></div>
+</div>
+</div>
+<button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+<!-- 批准弹窗 -->
+<div class="modal-overlay" id="approve-modal">
+<div class="modal" id="anno-4">
+<div class="anno-marker" data-id="4">4</div>
+<div class="modal-header"><div class="modal-title">批准提现</div><button class="modal-close" onclick="closeApproveModal()">×</button></div>
+<div class="modal-body">
+<div class="form-info">
+<div class="info-item"><span class="info-label">佣金提现单号</span><span class="info-value" id="approve-order-no">-</span></div>
+<div class="info-item"><span class="info-label">推广员编号</span><span class="info-value" id="approve-promoter-id">-</span></div>
+<div class="info-item"><span class="info-label">昵称</span><span class="info-value" id="approve-nickname">-</span></div>
+<div class="info-item"><span class="info-label">提现金额</span><span class="info-value" id="approve-amount">-</span></div>
+<div class="info-item" style="grid-column:span 2;"><span class="info-label">收款人及收款账户</span><span class="info-value" id="approve-account">-</span></div>
+</div>
+<div class="form-row">
+<label>银行流水号 <span style="color:#F53F3F;">*</span></label>
+<input type="text" placeholder="请输入银行流水号" id="approve-serial">
+</div>
+<div class="form-row">
+<label>备注</label>
+<textarea placeholder="选填，审核备注" id="approve-remark"></textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" onclick="closeApproveModal()">取消</button>
+<button class="btn btn-primary" onclick="closeApproveModal();alert('已批准')">确认批准</button>
+</div>
+</div>
+</div>
+<!-- 拒绝弹窗 -->
+<div class="modal-overlay" id="reject-modal">
+<div class="modal" id="anno-5">
+<div class="anno-marker" data-id="5">5</div>
+<div class="modal-header"><div class="modal-title">拒绝提现</div><button class="modal-close" onclick="closeRejectModal()">×</button></div>
+<div class="modal-body">
+<div class="form-info">
+<div class="info-item"><span class="info-label">佣金提现单号</span><span class="info-value" id="reject-order-no">-</span></div>
+<div class="info-item"><span class="info-label">推广员编号</span><span class="info-value" id="reject-promoter-id">-</span></div>
+<div class="info-item"><span class="info-label">昵称</span><span class="info-value" id="reject-nickname">-</span></div>
+<div class="info-item"><span class="info-label">提现金额</span><span class="info-value" id="reject-amount">-</span></div>
+</div>
+<div class="form-row">
+<label>拒绝原因 <span style="color:#F53F3F;">*</span></label>
+<textarea placeholder="请填写拒绝原因，将展示给推广员查看" id="reject-reason"></textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" onclick="closeRejectModal()">取消</button>
+<button class="btn btn-danger" onclick="closeRejectModal();alert('已拒绝，佣金退回余额')">确认拒绝</button>
+</div>
+</div>
+</div>
+<!-- 标注详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+<div class="modal">
+<div class="modal-header"><div class="modal-title" id="modal-title">标注详情</div><button class="modal-close" onclick="closeModal()">×</button></div>
+<div class="modal-body"><table class="detail-table" id="detail-table"></table></div>
+<div class="modal-footer">
+<button class="btn btn-default btn-danger" id="delete-btn" style="display:none;margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+<button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+<button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+<button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+<button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+</div>
+</div>
+</div>
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+<div class="modal">
+<div class="modal-header"><div class="modal-title">📌 标注管理</div><button class="modal-close" onclick="closeManageModal()">×</button></div>
+<div class="modal-body" id="manage-modal-body"></div>
+<div class="modal-footer"><button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button></div>
+</div>
+</div>
+<script>
+const STORAGE_KEY='annotated-prototype-withdrawal-review';
+let currentAnnotation=null,isEditing=false,customAnnotations=null;
+const annotations=[
+{id:1,title:'页面总说明',summary:'财务提现审核页，运营审核推广员的提现申请，支持批准（填流水号）和拒绝（填原因）',target:'#anno-1',showMarker:false,type:'overview',detail:{feature:'财务/运营人员在此页面审核推广员提交的提现申请。待审核的申请可执行批准或拒绝操作，已批准/已拒绝的仅展示。'}},
+{id:2,title:'筛选区',summary:'支持按状态、时间范围、关键词筛选提现申请记录',target:'#anno-2',showMarker:true,type:'area',detail:{feature:'提供多维度筛选条件，快速定位需要审核的提现申请。',display:'状态筛选（全部/待审核/已批准/已拒绝）、时间范围（起止日期）、关键词搜索（提现单号/推广员编号/昵称）。',interaction:'选择筛选条件后点击搜索按钮执行筛选，点击导出按钮导出当前筛选结果。'}},
+{id:3,title:'提现申请列表',summary:'展示所有提现申请记录，待审核状态可执行批准/拒绝操作',target:'#anno-3',showMarker:true,type:'area',detail:{feature:'以表格形式展示提现申请列表，待审核记录右侧显示批准和拒绝操作链接。',display:'字段：序号、佣金提现单号（CW前缀）、推广员编号、昵称、提现金额、收款人及收款账户（收款人姓名脱敏，收款账号完整展示）、账户信息图片（点击查看大图）、状态、申请时间、操作。',business:'仅待审核状态显示操作列；已批准和已拒绝状态操作列显示"-"。批准后需填写银行流水号；拒绝后佣金退回推广员余额，需填写拒绝原因。',state:'待审核=运营未处理；已批准=审核通过已打款；已拒绝=审核不通过佣金退回。'}},
+{id:4,title:'批准提现弹窗',summary:'填写银行流水号后确认批准，佣金打款至推广员账户',target:'#anno-4',showMarker:true,type:'interaction',detail:{feature:'点击「批准」后弹出弹窗，展示提现申请详情，需填写银行流水号方可提交。',display:'展示信息：佣金提现单号、推广员编号、昵称、提现金额、收款人及收款账户。必填字段：银行流水号。选填字段：备注。',business:'银行流水号为必填项，提交后状态变为已批准，佣金从平台打款至推广员账户。',interaction:'点击批准链接打开弹窗，填写流水号后点击确认批准提交；点击取消关闭弹窗。',copywriting:'银行流水号未填写时提示"请填写银行流水号"。'}},
+{id:5,title:'拒绝提现弹窗',summary:'填写拒绝原因后确认拒绝，佣金退回推广员余额',target:'#anno-5',showMarker:true,type:'interaction',detail:{feature:'点击「拒绝」后弹出弹窗，展示提现申请详情，需填写拒绝原因方可提交。',display:'展示信息：佣金提现单号、推广员编号、昵称、提现金额。必填字段：拒绝原因。',business:'拒绝原因为必填项，提交后状态变为已拒绝，佣金退回推广员余额。拒绝原因将展示给推广员查看。',interaction:'点击拒绝链接打开弹窗，填写原因后点击确认拒绝提交；点击取消关闭弹窗。',copywriting:'拒绝原因未填写时提示"请填写拒绝原因"。'}}
+];
+const DETAIL_LABELS={feature:'功能说明',display:'字段/展示规则',interaction:'交互规则',business:'业务规则',state:'状态说明',exception:'异常/边界',copywriting:'文案规范'};
+function loadCustomAnnotations(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)customAnnotations=JSON.parse(s)}catch(e){}}
+function getActiveAnnotations(){return customAnnotations||annotations}
+function renderAnnotationList(){const list=document.getElementById('annotation-list');const data=getActiveAnnotations();list.innerHTML=data.map(item=>`<div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})"><div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div><div class="annotation-summary">${item.summary}</div></div>`).join('')}
+function highlightMarker(id){const m=document.querySelector(`.anno-marker[data-id="${id}"]`);if(m)m.classList.add('highlight');const i=document.querySelector(`.annotation-item[data-id="${id}"]`);if(i)i.classList.add('active')}
+function unhighlightMarker(id){const m=document.querySelector(`.anno-marker[data-id="${id}"]`);if(m)m.classList.remove('highlight');const i=document.querySelector(`.annotation-item[data-id="${id}"]`);if(i)i.classList.remove('active')}
+document.querySelectorAll('.anno-marker').forEach(marker=>{marker.addEventListener('mouseenter',()=>highlightMarker(parseInt(marker.dataset.id)));marker.addEventListener('mouseleave',()=>unhighlightMarker(parseInt(marker.dataset.id)));marker.addEventListener('click',()=>showDetail(parseInt(marker.dataset.id)))});
+function handleAnnotationClick(id){scrollToAnnotation(id);setTimeout(()=>showDetail(id),300)}
+function scrollToAnnotation(id){const data=getActiveAnnotations();const item=data.find(a=>a.id===id);if(!item)return;const target=document.querySelector(item.target);const previewArea=document.querySelector('.preview-area');if(target&&previewArea){const t=target.offsetTop-20;previewArea.scrollTo({top:t,behavior:'smooth'});target.classList.remove('anno-flash');void target.offsetWidth;target.classList.add('anno-flash');setTimeout(()=>target.classList.remove('anno-flash'),1500)}}
+function showDetail(id){const item=getActiveAnnotations().find(a=>a.id===id);if(!item)return;currentAnnotation=item;isEditing=false;document.getElementById('modal-title').textContent=`${item.id}. ${item.title}`;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display=customAnnotations?'inline-flex':'none';document.getElementById('delete-btn').style.display=(id!==1)?'inline-flex':'none';document.getElementById('detail-modal').classList.add('show')}
+function renderDetailTable(item){const detail=item.detail;const rows=[];const moduleOrder=['feature','display','interaction','business','state','exception','copywriting'];moduleOrder.forEach(key=>{if(detail[key])rows.push({label:DETAIL_LABELS[key],value:detail[key],key:key})});const table=document.getElementById('detail-table');if(isEditing){table.innerHTML=rows.map(row=>`<tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>`).join('')}else{table.innerHTML=rows.map(row=>`<tr><th>${row.label}</th><td>${row.value.replace(/\n/g,'<br>')}</td></tr>`).join('')}}
+function toggleEdit(){isEditing=!isEditing;renderDetailTable(currentAnnotation);document.getElementById('edit-btn').style.display=isEditing?'none':'inline-flex';document.getElementById('save-btn').style.display=isEditing?'inline-flex':'none'}
+function saveAnnotation(){const textareas=document.querySelectorAll('#detail-table textarea');if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const item=customAnnotations.find(a=>a.id===currentAnnotation.id);if(!item)return;textareas.forEach(ta=>{item.detail[ta.dataset.key]=ta.value});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));currentAnnotation=item;isEditing=false;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display='inline-flex';renderAnnotationList();const btn=document.getElementById('save-btn');const orig=btn.textContent;btn.textContent='已保存 ✓';setTimeout(()=>{btn.textContent=orig},1500)}
+function resetAnnotation(){if(!confirm('确定要重置为原始内容吗？'))return;localStorage.removeItem(STORAGE_KEY);customAnnotations=null;const original=annotations.find(a=>a.id===currentAnnotation.id);currentAnnotation=original;isEditing=false;renderDetailTable(original);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display='none';document.getElementById('delete-btn').style.display='none';renderAnnotationList()}
+function closeModal(){document.getElementById('detail-modal').classList.remove('show')}
+document.getElementById('detail-modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeApproveModal();closeRejectModal()}});
+const PANEL_STATE_KEY=STORAGE_KEY+'-panel';
+function initPanelState(){try{const c=localStorage.getItem(PANEL_STATE_KEY)==='1';if(c){document.getElementById('annotation-panel').classList.add('collapsed');document.getElementById('panel-expand-btn').classList.add('show')}}catch(e){}}
+function togglePanel(){const panel=document.getElementById('annotation-panel');const expandBtn=document.getElementById('panel-expand-btn');const isCollapsed=panel.classList.toggle('collapsed');expandBtn.classList.toggle('show',isCollapsed);try{localStorage.setItem(PANEL_STATE_KEY,isCollapsed?'1':'0')}catch(e){}}
+function openEditMode(){const data=getActiveAnnotations();let html='<div style="display:flex;flex-direction:column;gap:0;">';data.forEach(item=>{html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;"><div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})"><div class="annotation-badge">${item.id}</div><div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div><div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div></div><div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>${item.id!==1?`<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>`:''}</div></div>`});html+='</div>';document.getElementById('manage-modal-body').innerHTML=html;document.getElementById('manage-modal').classList.add('show')}
+function closeManageModal(){document.getElementById('manage-modal').classList.remove('show')}
+function deleteAnnotationById(id){const data=getActiveAnnotations();const item=data.find(a=>a.id===id);if(!item||item.id===1)return;if(!confirm(`确定要删除标注「${item.title}」吗？`))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(a=>a.id!==id);customAnnotations.forEach((a,i)=>{a.id=i+1});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();openEditMode()}
+function addAnnotation(){if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const newId=customAnnotations.length+1;const newItem={id:newId,title:'新标注 '+newId,summary:'点击编辑修改标注内容...',target:'#anno-'+newId,showMarker:true,type:'area',detail:{feature:'请填写功能说明...'}};customAnnotations.push(newItem);localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();closeManageModal();currentAnnotation=newItem;isEditing=true;document.getElementById('modal-title').textContent=`${newItem.id}. ${newItem.title}`;renderDetailTable(newItem);document.getElementById('edit-btn').style.display='none';document.getElementById('save-btn').style.display='inline-flex';document.getElementById('reset-btn').style.display='none';document.getElementById('delete-btn').style.display='inline-flex';document.getElementById('detail-modal').classList.add('show')}
+function deleteAnnotation(){if(!currentAnnotation||currentAnnotation.id===1)return;if(!confirm(`确定要删除标注「${currentAnnotation.title}」吗？`))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(a=>a.id!==currentAnnotation.id);customAnnotations.forEach((item,index)=>{item.id=index+1});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));closeModal();renderAnnotationList()}
+function exportAnnotatedHTML(){const activeData=getActiveAnnotations();const originalHTML=document.documentElement.outerHTML;const dataStr=JSON.stringify(activeData,null,2);const replacement='const annotations = '+dataStr+';';const newHTML=originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/,replacement);const blob=new Blob([newHTML],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const title=document.title||'带标注原型';const date=new Date().toISOString().slice(0,10).replace(/-/g,'');a.download=`${title}_${date}.html`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);const btn=document.getElementById('export-btn');const orig=btn.textContent;btn.textContent='导出成功 ✓';setTimeout(()=>{btn.textContent=orig},2000)}
+function openApproveModal(orderNo,promoterId,nickname,amount,account){document.getElementById('approve-order-no').textContent=orderNo;document.getElementById('approve-promoter-id').textContent=promoterId;document.getElementById('approve-nickname').textContent=nickname;document.getElementById('approve-amount').textContent=amount;document.getElementById('approve-account').textContent=account;document.getElementById('approve-serial').value='';document.getElementById('approve-remark').value='';document.getElementById('approve-modal').classList.add('show')}
+function closeApproveModal(){document.getElementById('approve-modal').classList.remove('show')}
+function openRejectModal(orderNo,promoterId,nickname,amount){document.getElementById('reject-order-no').textContent=orderNo;document.getElementById('reject-promoter-id').textContent=promoterId;document.getElementById('reject-nickname').textContent=nickname;document.getElementById('reject-amount').textContent='¥'+amount;document.getElementById('reject-reason').value='';document.getElementById('reject-modal').classList.add('show')}
+function closeRejectModal(){document.getElementById('reject-modal').classList.remove('show')}
+document.getElementById('approve-modal').addEventListener('click',function(e){if(e.target===this)closeApproveModal()});
+document.getElementById('reject-modal').addEventListener('click',function(e){if(e.target===this)closeRejectModal()});
+loadCustomAnnotations();renderAnnotationList();initPanelState();
+</script>
+</body>
+</html>
