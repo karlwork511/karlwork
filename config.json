@@ -49,6 +49,16 @@
             "icon": "📋"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "推广联盟主页",
+            "file": "docs/promotion-alliance-user.html",
+            "icon": "📱"
+          }
+        ]
       }
     ]
   },
