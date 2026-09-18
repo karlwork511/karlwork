@@ -1,5 +1,12 @@
 [
   {
+    "id": "promotion-alliance",
+    "name": "推广联盟",
+    "desc": "推广员管理、佣金规则、等级体系、提现规则、收支记录、佣金明细、数据概览完整原型",
+    "docs": [],
+    "groups": []
+  },
+  {
     "id": "saas-subscription",
     "name": "SaaS 订阅系统",
     "desc": "代购集运SaaS订阅模式，含运营侧+租户侧完整后台",
