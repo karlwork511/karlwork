@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推广员列表页 - 带标注原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+        
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        .main-content { display: flex; flex-direction: row; flex: 1; overflow: hidden; }
+        
+        /* 顶部标注工具栏 */
+        .annotation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 8px 16px;
+            background: #fff;
+            border-bottom: 1px solid #E4E7ED;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .toolbar-edit-btn {
+            padding: 6px 14px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+        
+        .preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; background: #F5F7FA; }
+        
+        /* 右侧标注面板 */
+        .annotation-panel {
+            width: 300px;
+            background: #F7F8FA;
+            border-left: 1px solid #E4E7ED;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+        .annotation-panel.collapsed {
+            width: 0;
+            border-left: none;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #E4E7ED;
+            background: #F7F8FA;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-toggle-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #E8EAED;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+        .panel-expand-btn {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 48px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 999;
+            display: none;
+            box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+        }
+        .panel-expand-btn.show { display: block; }
+        .panel-expand-btn:hover { background: #0E42D2; }
+        .annotation-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #E4E7ED;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .annotation-item:hover { background: #EEF0F3; }
+        .annotation-item.active { background: #E8F3FF; }
+        .annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .annotation-badge {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+        .annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+        
+        /* 数字角标 */
+        .anno-marker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            z-index: 9999;
+            user-select: none;
+        }
+        .anno-marker.highlight,
+        .anno-marker:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+        }
+        
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 560px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+        .modal-close {
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            font-size: 20px; color: #999;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { color: #333; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #E4E7ED;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* 详情表格 */
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            background: #FAFAFA;
+            width: 100px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border: 1px solid #E4E7ED;
+            vertical-align: top;
+        }
+        .detail-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #E4E7ED;
+            line-height: 1.7;
+        }
+        .detail-table textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+        .detail-table textarea:focus { border-color: #165DFF; }
+        
+        /* 按钮 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #165DFF; color: #fff; }
+        .btn-primary:hover { background: #0E42D2; }
+        .btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+        .btn-default:hover { border-color: #165DFF; color: #165DFF; }
+        .btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+        .btn-danger:hover { background: #F53F3F; color: #fff; }
+        
+        /* 滚动定位闪烁动画 */
+        .anno-flash {
+            animation: flashHighlight 1.5s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+            100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+        .form-group textarea:focus { border-color: #165DFF; }
+
+        /* 业务弹窗样式 */
+        .biz-modal .modal-overlay {
+            display: none;
+        }
+        .biz-modal .modal-overlay.show {
+            display: flex;
+        }
+        
+        /* ===== 推广员列表页原型样式 ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .page-title { font-size: 20px; font-weight: 600; color: #333; }
+        
+        /* Tab 导航 */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #E4E7ED;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .tab-item {
+            padding: 12px 24px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-item:hover { color: #165DFF; }
+        .tab-item.active {
+            color: #165DFF;
+            border-bottom-color: #165DFF;
+            font-weight: 600;
+        }
+        
+        .action-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        
+        .filter-bar {
+            background: #fff;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-item { display: flex; align-items: center; gap: 8px; }
+        .filter-item label { font-size: 13px; color: #666; white-space: nowrap; }
+        .filter-input {
+            padding: 6px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+            width: 160px;
+        }
+        .filter-input:focus { border-color: #165DFF; }
+        .filter-select {
+            padding: 6px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+        }
+        
+        .table-card {
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: #FAFAFA;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 1px solid #E4E7ED;
+        }
+        .data-table td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #F0F0F0;
+            color: #333;
+        }
+        .data-table tr:hover { background: #FAFBFC; }
+        
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .status-active { background: #E8F5E9; color: #2E7D32; }
+        .status-disabled { background: #FFEBEE; color: #C62828; }
+        
+        .more-btn {
+            padding: 4px 8px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+        }
+        .more-btn:hover { border-color: #165DFF; color: #165DFF; }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid #E4E7ED;
+        }
+        .pagination-info { font-size: 13px; color: #666; }
+        .pagination-controls { display: flex; gap: 8px; align-items: center; }
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .page-btn:hover { border-color: #165DFF; color: #165DFF; }
+        .page-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+        .page-size-select {
+            padding: 6px 8px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* 下拉菜单 */
+        .dropdown-menu {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #E4E7ED;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            min-width: 120px;
+            z-index: 100;
+            display: none;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover { background: #F5F7FA; }
+        .dropdown-item.danger { color: #F53F3F; }
+        .dropdown-item.danger:hover { background: #FFF1F0; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部标注工具栏 -->
+        <div class="annotation-toolbar" id="annotation-toolbar">
+            <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+        </div>
+        
+        <!-- 主内容区（左右布局） -->
+        <div class="main-content">
+            <!-- 左侧原型区 -->
+            <div class="preview-area">
+            <div class="page-container" id="anno-1" style="position:relative;">
+                <!-- ① 页面总说明不打角标 -->
+                
+                <div class="page-header">
+                    <div class="page-title">推广管理</div>
+                </div>
+                
+                <!-- Tab 导航 -->
+                <div class="tab-nav" id="anno-6">
+                    <div class="anno-marker" data-id="6">6</div>
+                    <div class="tab-item">推广员管理</div>
+                    <div class="tab-item active">规则配置</div>
+                    <div class="tab-item">收支记录</div>
+                    <div class="tab-item">佣金明细</div>
+                    <div class="tab-item">数据概览</div>
+                </div>
+                
+                <div class="action-buttons" style="margin-bottom:16px;">
+                    <button class="btn btn-default">导出列表</button>
+                    <button class="btn btn-primary" onclick="openBizModal('add-modal')">添加推广员</button>
+                </div>
+                
+                <div class="filter-bar" style="position:relative;" id="anno-2">
+                    <div class="anno-marker" data-id="2">2</div>
+                    <div class="filter-item">
+                        <label>推广员编号/邮箱</label>
+                        <input type="text" class="filter-input" placeholder="请输入">
+                    </div>
+                    <div class="filter-item">
+                        <label>等级</label>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>铜牌</option>
+                            <option>银牌</option>
+                            <option>金牌</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>状态</label>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>已开启</option>
+                            <option>已禁用</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>添加时间</label>
+                        <input type="date" class="filter-input">
+                        <span>至</span>
+                        <input type="date" class="filter-input">
+                    </div>
+                    <button class="btn btn-primary">查询</button>
+                    <button class="btn btn-default">重置</button>
+                </div>
+                
+                <div class="table-card" style="position:relative;" id="anno-3">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>推广员编号</th>
+                                <th>邮箱</th>
+                                <th>等级</th>
+                                <th>成长值</th>
+                                <th>佣金率</th>
+                                <th>绑定用户数</th>
+                                <th>推广交易数</th>
+                                <th>历史佣金</th>
+                                <th>状态</th>
+                                <th>添加时间</th>
+                                <th>备注</th>
+                                <th style="width:80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>P001234</td>
+                                <td>user1@example.com</td>
+                                <td>金牌</td>
+                                <td>520</td>
+                                <td>15%</td>
+                                <td>28</td>
+                                <td>45</td>
+                                <td>¥12,580</td>
+                                <td><span class="status-tag status-active">已开启</span></td>
+                                <td>2026-08-15</td>
+                                <td>核心推广员</td>
+                                <td style="position:relative;">
+                                    <button class="more-btn" onclick="toggleDropdown(this)">更多 ▾</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>P001235</td>
+                                <td>user2@example.com</td>
+                                <td>银牌</td>
+                                <td>180</td>
+                                <td>10%</td>
+                                <td>12</td>
+                                <td>18</td>
+                                <td>¥3,240</td>
+                                <td><span class="status-tag status-active">已开启</span></td>
+                                <td>2026-08-20</td>
+                                <td>-</td>
+                                <td style="position:relative;">
+                                    <button class="more-btn" onclick="toggleDropdown(this)">更多 ▾</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>P001236</td>
+                                <td>user3@example.com</td>
+                                <td>铜牌</td>
+                                <td>50</td>
+                                <td>5%</td>
+                                <td>3</td>
+                                <td>5</td>
+                                <td>¥680</td>
+                                <td><span class="status-tag status-disabled">已禁用</span></td>
+                                <td>2026-09-01</td>
+                                <td>试用期</td>
+                                <td style="position:relative;">
+                                    <button class="more-btn" onclick="toggleDropdown(this)">更多 ▾</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" style="position:relative;" id="anno-4">
+                        <div class="anno-marker" data-id="4">4</div>
+                        <div class="pagination-info">共 128 条，每页</div>
+                        <div class="pagination-controls">
+                            <select class="page-size-select">
+                                <option>10</option>
+                                <option>20</option>
+                                <option>50</option>
+                            </select>
+                            <span>条</span>
+                            <button class="page-btn">上一页</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作下拉菜单（隐藏，动态定位） -->
+                <div class="dropdown-menu" id="anno-5" style="display:none;">
+                    <div class="dropdown-item" onclick="hideDropdown();openBizModal('edit-modal')">编辑</div>
+                    <div class="dropdown-item" onclick="hideDropdown();openBizModal('detail-modal-biz')">详情</div>
+                    <div class="dropdown-item" onclick="hideDropdown();openBizModal('level-modal')">等级调整</div>
+                    <div class="dropdown-item" onclick="hideDropdown();openBizModal('disable-modal')">禁用</div>
+                    <div class="dropdown-item danger" onclick="hideDropdown();openBizModal('delete-modal')">删除</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧标注面板 -->
+        <div class="annotation-panel" id="annotation-panel">
+            <div class="panel-header">
+                <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+                <span> 标注说明</span>
+            </div>
+            <div id="annotation-list"></div>
+        </div>
+        </div><!-- /main-content -->
+        
+        <!-- 折叠态悬浮按钮 -->
+        <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    </div>
+    
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">标注详情</div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="detail-table" id="detail-table"></table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+                <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+                <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出 HTML</button>
+                <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+                <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 标注管理弹窗 -->
+    <div class="modal-overlay" id="manage-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">📌 标注管理</div>
+                <button class="modal-close" onclick="closeManageModal()">×</button>
+            </div>
+            <div class="modal-body" id="manage-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 业务弹窗：添加推广员 -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal" style="position:relative;">
+            <div class="anno-marker" data-id="7" style="z-index:1001;">7</div>
+            <div class="modal-header">
+                <div class="modal-title">添加推广员</div>
+                <button class="modal-close" onclick="closeBizModal('add-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择用户</label>
+                    <div style="position:relative;">
+                        <input type="text" class="filter-input" placeholder="输入用户编号或邮箱搜索" id="user-search-input" oninput="showUserSearchResults()" autocomplete="off">
+                        <!-- 搜索结果下拉 -->
+                        <div id="user-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #DCDFE6;border-radius:4px;max-height:200px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                            <div class="user-search-item" onclick="selectUser('U10086', '张三', 'zhangsan@qq.com')">
+                                <div style="font-weight:600;">U10086</div>
+                                <div style="color:#666;font-size:12px;">张三 · zhangsan@qq.com</div>
+                            </div>
+                            <div class="user-search-item" onclick="selectUser('U10087', '李四', 'lisi@qq.com')">
+                                <div style="font-weight:600;">U10087</div>
+                                <div style="color:#666;font-size:12px;">李四 · lisi@qq.com</div>
+                            </div>
+                            <div class="user-search-item" onclick="selectUser('U10088', '王五', 'wangwu@qq.com')">
+                                <div style="font-weight:600;">U10088</div>
+                                <div style="color:#666;font-size:12px;">王五 · wangwu@qq.com</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 已选择的用户展示 -->
+                    <div id="selected-user" style="display:none;margin-top:8px;padding:8px 12px;background:#F0F9FF;border:1px solid #BAE0FF;border-radius:4px;font-size:13px;display:flex;align-items:center;justify-content:space-between;">
+                        <span id="selected-user-info">U10086 · 张三 · zhangsan@qq.com</span>
+                        <span style="cursor:pointer;color:#999;" onclick="clearSelectedUser()">✕</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>佣金率（%）</label>
+                    <input type="number" class="filter-input" placeholder="请输入佣金率，如 10">
+                    <p style="font-size:12px;color:#999;margin-top:4px;">💡 未开启代理等级时可手动填写；已开启代理等级时佣金率由等级自动决定</p>
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea class="filter-input" rows="3" placeholder="可选，填写备注信息"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeBizModal('add-modal')">取消</button>
+                <button class="btn btn-primary" onclick="closeBizModal('add-modal')">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 业务弹窗：编辑推广员 -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">编辑推广员</div>
+                <button class="modal-close" onclick="closeBizModal('edit-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>推广员编号</label>
+                    <input type="text" class="filter-input" value="P001234" disabled style="background:#F5F7FA;">
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="text" class="filter-input" value="user1@example.com" disabled style="background:#F5F7FA;">
+                </div>
+                <div class="form-group">
+                    <label>佣金率（%）</label>
+                    <input type="number" class="filter-input" value="15">
+                    <p style="font-size:12px;color:#999;margin-top:4px;">💡 未开启代理等级时可手动修改；已开启代理等级时字段置灰，需通过等级调整修改</p>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select class="filter-select">
+                        <option selected>已开启</option>
+                        <option>已禁用</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea class="filter-input" rows="3" placeholder="可选"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeBizModal('edit-modal')">取消</button>
+                <button class="btn btn-primary" onclick="closeBizModal('edit-modal')">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 业务弹窗：等级调整 -->
+    <div class="modal-overlay" id="level-modal">
+        <div class="modal" style="position:relative;">
+            <div class="anno-marker" data-id="9" style="z-index:1001;">9</div>
+            <div class="modal-header">
+                <div class="modal-title">等级调整</div>
+                <button class="modal-close" onclick="closeBizModal('level-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>推广员</label>
+                    <input type="text" class="filter-input" value="P001234 / user1@example.com" disabled style="background:#F5F7FA;">
+                </div>
+                <div class="form-group">
+                    <label>当前等级</label>
+                    <input type="text" class="filter-input" value="银牌（成长值 180）" disabled style="background:#F5F7FA;">
+                </div>
+                <div class="form-group">
+                    <label>调整成长值</label>
+                    <input type="number" class="filter-input" id="adjustGrowthInput" placeholder="请输入调整后的成长值" oninput="calcAdjustLevel()">
+                </div>
+                <div class="form-group">
+                    <label>调整后等级</label>
+                    <input type="text" class="filter-input" id="adjustLevelResult" value="请输入成长值后自动计算" disabled style="background:#F5F7FA;color:#999;">
+                </div>
+                <div class="form-group">
+                    <label>调整原因</label>
+                    <textarea class="filter-input" rows="3" placeholder="请填写调整原因（选填）"></textarea>
+                </div>
+                <p style="font-size:12px;color:#999;margin-top:8px;">说明：输入调整后的成长值，系统自动计算对应等级；等级分为铜牌（0-199）、银牌（200-499）、金牌（500-999）、钻石（1000+）</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeBizModal('level-modal')">取消</button>
+                <button class="btn btn-primary" onclick="closeBizModal('level-modal')">确认调整</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 业务弹窗：禁用确认 -->
+    <div class="modal-overlay" id="disable-modal">
+        <div class="modal" style="width:420px;">
+            <div class="modal-header">
+                <div class="modal-title">确认禁用</div>
+                <button class="modal-close" onclick="closeBizModal('disable-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:#333;line-height:1.8;">确定要禁用推广员 <strong>P001234</strong>（user1@example.com）吗？</p>
+                <p style="font-size:13px;color:#666;line-height:1.8;margin-top:12px;">禁用后：</p>
+                <ul style="font-size:13px;color:#666;line-height:1.8;padding-left:20px;margin-top:4px;">
+                    <li>停止产生新佣金</li>
+                    <li>已生成的待结算佣金将继续结算</li>
+                    <li>该推广员将被禁止提现</li>
+                    <li>现有绑定关系保留</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeBizModal('disable-modal')">取消</button>
+                <button class="btn btn-primary" style="background:#F53F3F;" onclick="closeBizModal('disable-modal')">确认禁用</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 业务弹窗：删除确认 -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal" style="width:420px;position:relative;">
+            <div class="anno-marker" data-id="11" style="z-index:1001;">11</div>
+            <div class="modal-header">
+                <div class="modal-title">确认删除</div>
+                <button class="modal-close" onclick="closeBizModal('delete-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:#333;line-height:1.8;">确定要删除推广员 <strong>P001234</strong>（user1@example.com）吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeBizModal('delete-modal')">取消</button>
+                <button class="btn btn-primary" style="background:#F53F3F;" onclick="closeBizModal('delete-modal')">确认删除</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const STORAGE_KEY = 'annotated-prototype-promoter-list';
+        let currentAnnotation = null;
+        let isEditing = false;
+        let customAnnotations = null;
+        
+        // ===== 标注数据 =====
+        const annotations = [
+            {
+                id: 1,
+                title: '页面总说明',
+                summary: '推广员列表页，支持查询、筛选、添加、编辑、禁用推广员，查看佣金详情，调整等级等操作',
+                target: '#anno-1',
+                showMarker: false,
+                type: 'overview',
+                detail: {
+                    feature: '推广员管理核心页面，租户可查看所有推广员的基本信息、等级、佣金率、绑定用户数、推广交易数、已结算佣金等数据，并进行添加、编辑、禁用、删除等操作。顶部 Tab 导航提供页面间切换：推广员管理、规则配置、收支记录、佣金明细、数据概览。'
+                }
+            },
+            {
+                id: 2,
+                title: '筛选查询区',
+                summary: '支持按编号/邮箱、等级、状态、注册时间筛选推广员',
+                target: '#anno-2',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '提供多维度筛选条件，快速定位目标推广员',
+                    display: '推广员编号/邮箱（文本输入）、等级（下拉：全部/铜牌/银牌/金牌）、状态（下拉：全部/已开启/已禁用）、注册时间（日期范围）',
+                    interaction: '点击查询按钮执行筛选，点击重置按钮清空所有条件恢复默认',
+                    business: '筛选条件支持组合使用，注册时间支持选择起止日期范围'
+                }
+            },
+            {
+                id: 3,
+                title: '推广员列表',
+                summary: '展示推广员核心数据，支持批量选择和单条操作',
+                target: '#anno-3',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '以表格形式展示所有推广员的关键信息，支持单条操作',
+                    display: '字段包括：推广员编号、邮箱、等级、成长值、佣金率、绑定用户数、推广交易数、历史佣金、状态、注册时间、操作。状态用标签区分：已开启（绿色）、已禁用（红色）',
+                    interaction: '鼠标悬停行高亮，点击操作列更多按钮展开下拉菜单',
+                    business: '等级和佣金率根据是否开启代理等级动态显示：未开等级显示个人佣金率，开了等级显示等级名称。推广交易数为该推广员累计有效交易笔数，历史佣金为该推广员已结算佣金与待结算佣金的累计总额'
+                }
+            },
+            {
+                id: 4,
+                title: '分页控件',
+                summary: '支持自定义每页条数，翻页浏览全部推广员',
+                target: '#anno-4',
+                showMarker: true,
+                type: 'field',
+                detail: {
+                    feature: '当推广员数量较多时，分页展示避免单次加载过多数据',
+                    display: '左侧显示总条数和每页条数选择器，右侧显示上一页/下一页按钮和页码',
+                    interaction: '切换每页条数后重新加载列表，点击页码跳转对应页，当前页高亮显示',
+                    business: '默认每页 10 条，可选 10/20/50 条'
+                }
+            },
+            {
+                id: 5,
+                title: '操作菜单',
+                summary: '提供编辑、详情、等级调整、禁用、删除五个操作',
+                target: '#anno-5',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '点击操作列更多按钮展开下拉菜单，提供单条推广员的管理操作',
+                    interaction: '编辑：打开标注7编辑弹窗修改佣金率等信息；详情：跳转佣金详情页（含邀请记录/交易记录/提现申请/成长值明细四个子 Tab）；等级调整：打开标注8等级调整弹窗；禁用：打开标注9禁用确认弹窗；删除：打开标注10删除确认弹窗',
+                    business: '删除操作需二次确认提示；禁用后停止新佣金产生，已生成的待结算佣金继续结算，禁止提现'
+                }
+            },
+            {
+                id: 6,
+                title: 'Tab 导航区',
+                summary: '推广联盟模块的五大功能页签切换：推广员管理、规则配置、收支记录、佣金明细、数据概览',
+                target: '#anno-6',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '将佣金规则配置和提现规则配置整合为「规则配置」Tab，与推广员管理、收支记录、数据概览共同组成顶部导航',
+                    display: '水平排列四个 Tab 标签，当前页高亮显示（蓝色底边），其他页灰色，鼠标悬停变蓝',
+                    interaction: '点击 Tab 标签切换对应功能页面，当前页面标签高亮，内容区域刷新为对应页面',
+                    business: '规则配置 Tab 整合佣金规则配置和提现规则配置两部分内容，统一管理推广联盟的佣金与提现策略。佣金明细展示每笔订单佣金的预估、结算、取消全链路；提现审核为独立页面（归属财务模块），不在此导航中'
+                }
+            },
+            {
+                id: 7,
+                title: '添加推广员弹窗',
+                summary: '填写用户编号/邮箱，添加新推广员；佣金率根据是否开启代理等级动态控制',
+                target: '#add-modal',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '管理员通过此弹窗手动添加新推广员，填写基本信息后确认创建',
+                    display: '包含三个字段：用户编号/邮箱（文本输入框，必填）、佣金率%（数字输入框，必填）、备注（文本域，选填）',
+                    interaction: '点击"确认添加"按钮创建推广员并关闭弹窗；点击"取消"放弃创建并关闭弹窗',
+                    business: '用户编号/邮箱用于匹配已有用户账户；备注信息可选填，用于记录推广员来源等备注。佣金率字段根据是否开启代理等级动态控制：未开启代理等级时可手动填写，保存到推广员的个人佣金率；已开启代理等级时字段置灰，提示"已开启代理等级，佣金率由等级自动决定"，新推广员默认从最低等级开始，佣金率由该等级决定'
+                }
+            },
+            {
+                id: 8,
+                title: '编辑推广员弹窗',
+                summary: '修改推广员的佣金率、状态和备注信息',
+                target: '#edit-modal',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '管理员通过此弹窗修改推广员的可编辑属性，推广员编号和邮箱为只读展示',
+                    display: '包含五个字段：推广员编号（只读）、邮箱（只读）、佣金率%（可编辑数字输入框）、状态（下拉选择：已开启/已禁用）、备注（文本域，选填）',
+                    interaction: '修改完成后点击"保存"按钮提交更改；点击"取消"放弃修改并关闭弹窗',
+                    business: '推广员编号和邮箱不可修改；修改佣金率立即生效，影响后续新订单的佣金计算；切换状态为"已禁用"会立即停止该推广员的新佣金产生'
+                }
+            },
+            {
+                id: 9,
+                title: '等级调整弹窗',
+                summary: '通过输入成长值手动调整推广员的代理等级',
+                target: '#level-modal',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '管理员手动调整推广员的代理等级，适用于特殊奖励或惩罚场景',
+                    display: '包含五个字段：推广员（只读，显示编号和邮箱）、当前等级（只读，显示等级名称和成长值）、调整成长值（数字输入框，输入调整后的成长值）、调整后等级（只读，输入成长值后自动计算展示）、调整原因（文本域，选填）。等级划分：铜牌（0-199）、银牌（200-499）、金牌（500-999）、钻石（1000+）',
+                    interaction: '输入成长值后下方自动计算并展示对应等级（只读）；点击"确认调整"按钮执行；点击"取消"放弃调整',
+                    business: '手动调整等级以成长值为准，系统自动匹配对应等级；调整后推广员立即生效新等级对应的佣金费率；手动调整的等级同样遵循"只升不降"原则，后续自动计算时不会因成长值变化而降低手动设定的等级'
+                }
+            },
+            {
+                id: 10,
+                title: '禁用确认弹窗',
+                summary: '二次确认禁用推广员，说明禁用后的影响',
+                target: '#disable-modal',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '管理员禁用推广员前的二次确认，明确告知禁用后的具体影响',
+                    display: '展示将被禁用的推广员编号和邮箱；列出禁用后的四项影响：停止产生新佣金、已生成的待结算佣金将继续结算、该推广员将被禁止提现、现有绑定关系保留',
+                    interaction: '点击"确认禁用"按钮执行禁用操作并关闭弹窗；点击"取消"放弃操作',
+                    business: '禁用后该推广员无法继续产生新佣金；已生成的待结算佣金不受影响，继续按正常流程结算；禁止该推广员发起新的提现申请；与已有绑定用户的关系保持不变，仅暂停佣金功能'
+                }
+            },
+            {
+                id: 11,
+                title: '删除确认弹窗',
+                summary: '二次确认删除推广员，列表移除但数据保留',
+                target: '#delete-modal',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '管理员删除推广员前的安全确认弹窗',
+                    display: '展示将被删除的推广员编号和邮箱；列出删除后的影响：列表中移除、邀请绑定关系保留、待结算佣金继续结算、恢复身份时历史数据自动带出',
+                    interaction: '点击"确认删除"按钮执行删除操作并关闭弹窗；点击"取消"放弃操作',
+                    business: '删除推广员时，列表中移除该推广员但数据库数据保留；邀请绑定关系不解除；待结算佣金继续结算；后续恢复推广员身份时历史数据自动带出；不需要输入推广员编码确认'
+                }
+            }
+        ];
+        
+        // ===== 标注模块标签映射 =====
+        const DETAIL_LABELS = {
+            feature: '功能说明',
+            display: '字段/展示规则',
+            interaction: '交互规则',
+            business: '业务规则',
+            state: '状态说明',
+            exception: '异常/边界',
+            copywriting: '文案规范'
+        };
+        
+        // ===== 下方代码不要修改 =====
+        function loadCustomAnnotations() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) customAnnotations = JSON.parse(saved);
+            } catch(e) {}
+        }
+        function getActiveAnnotations() {
+            return customAnnotations || annotations;
+        }
+        function renderAnnotationList() {
+            const list = document.getElementById('annotation-list');
+            const data = getActiveAnnotations();
+            list.innerHTML = data.map(item => `
+                <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+                    <div class="annotation-header">
+                        <div class="annotation-badge">${item.id}</div>
+                        <div class="annotation-title">${item.title}</div>
+                    </div>
+                    <div class="annotation-summary">${item.summary}</div>
+                </div>
+            `).join('');
+        }
+        function highlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.add('highlight');
+            const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+            if (item) item.classList.add('active');
+        }
+        function unhighlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.remove('highlight');
+            const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+            if (item) item.classList.remove('active');
+        }
+        document.querySelectorAll('.anno-marker').forEach(marker => {
+            marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+            marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+            marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+        });
+        
+        function handleAnnotationClick(id) {
+            scrollToAnnotation(id);
+            setTimeout(() => showDetail(id), 300);
+        }
+        
+        function scrollToAnnotation(id) {
+            const data = getActiveAnnotations();
+            const item = data.find(a => a.id === id);
+            if (!item) return;
+            const target = document.querySelector(item.target);
+            const previewArea = document.querySelector('.preview-area');
+            if (target && previewArea) {
+                const targetTop = target.offsetTop - 20;
+                previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+                target.classList.remove('anno-flash');
+                void target.offsetWidth;
+                target.classList.add('anno-flash');
+                setTimeout(() => target.classList.remove('anno-flash'), 1500);
+            }
+        }
+        
+        function showDetail(id) {
+            const item = getActiveAnnotations().find(a => a.id === id);
+            if (!item) return;
+            currentAnnotation = item;
+            isEditing = false;
+            document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+            renderDetailTable(item);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+            document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+            document.getElementById('detail-modal').classList.add('show');
+        }
+        function renderDetailTable(item) {
+            const detail = item.detail;
+            const rows = [];
+            const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+            moduleOrder.forEach(key => {
+                if (detail[key]) {
+                    rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+                }
+            });
+            const table = document.getElementById('detail-table');
+            if (isEditing) {
+                table.innerHTML = rows.map(row => `
+                    <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+                `).join('');
+            } else {
+                table.innerHTML = rows.map(row => `
+                    <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+                `).join('');
+            }
+        }
+        function toggleEdit() {
+            isEditing = !isEditing;
+            renderDetailTable(currentAnnotation);
+            document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+            document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+        }
+        function saveAnnotation() {
+            const textareas = document.querySelectorAll('#detail-table textarea');
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+            if (!item) return;
+            textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            currentAnnotation = item;
+            isEditing = false;
+            renderDetailTable(item);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'inline-flex';
+            renderAnnotationList();
+            const btn = document.getElementById('save-btn');
+            const original = btn.textContent;
+            btn.textContent = '已保存 ✓';
+            setTimeout(() => { btn.textContent = original; }, 1500);
+        }
+        function resetAnnotation() {
+            if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            customAnnotations = null;
+            const original = annotations.find(a => a.id === currentAnnotation.id);
+            currentAnnotation = original;
+            isEditing = false;
+            renderDetailTable(original);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'none';
+            document.getElementById('delete-btn').style.display = 'none';
+            renderAnnotationList();
+        }
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+        function initPanelState() {
+            try {
+                const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+                if (collapsed) {
+                    document.getElementById('annotation-panel').classList.add('collapsed');
+                    document.getElementById('panel-expand-btn').classList.add('show');
+                }
+            } catch(e) {}
+        }
+        function togglePanel() {
+            const panel = document.getElementById('annotation-panel');
+            const expandBtn = document.getElementById('panel-expand-btn');
+            const isCollapsed = panel.classList.toggle('collapsed');
+            expandBtn.classList.toggle('show', isCollapsed);
+            try {
+                localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+            } catch(e) {}
+        }
+        
+        function openEditMode() {
+            const data = getActiveAnnotations();
+            let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+            data.forEach(item => {
+                listHtml += `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+                    <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                        <div class="annotation-badge">${item.id}</div>
+                        <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                        <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-shrink:0;">
+                        <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                        ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+                    </div>
+                </div>`;
+            });
+            listHtml += '</div>';
+            document.getElementById('manage-modal-body').innerHTML = listHtml;
+            document.getElementById('manage-modal').classList.add('show');
+        }
+        function closeManageModal() {
+            document.getElementById('manage-modal').classList.remove('show');
+        }
+        function deleteAnnotationById(id) {
+            const data = getActiveAnnotations();
+            const item = data.find(a => a.id === id);
+            if (!item || item.id === 1) return;
+            if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            customAnnotations = customAnnotations.filter(a => a.id !== id);
+            customAnnotations.forEach((a, i) => { a.id = i + 1; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            renderAnnotationList();
+            openEditMode();
+        }
+        function addAnnotation() {
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            const newId = customAnnotations.length + 1;
+            const newItem = {
+                id: newId,
+                title: '新标注 ' + newId,
+                summary: '点击编辑修改标注内容...',
+                target: '#anno-' + newId,
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '请填写功能说明...',
+                }
+            };
+            customAnnotations.push(newItem);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            renderAnnotationList();
+            closeManageModal();
+            currentAnnotation = newItem;
+            isEditing = true;
+            document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+            renderDetailTable(newItem);
+            document.getElementById('edit-btn').style.display = 'none';
+            document.getElementById('save-btn').style.display = 'inline-flex';
+            document.getElementById('reset-btn').style.display = 'none';
+            document.getElementById('delete-btn').style.display = 'inline-flex';
+            document.getElementById('detail-modal').classList.add('show');
+        }
+        function deleteAnnotation() {
+            if (!currentAnnotation || currentAnnotation.id === 1) return;
+            if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+            customAnnotations.forEach((item, index) => { item.id = index + 1; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            closeModal();
+            renderAnnotationList();
+        }
+        
+        function exportAnnotatedHTML() {
+            const activeData = getActiveAnnotations();
+            const originalHTML = document.documentElement.outerHTML;
+            const dataStr = JSON.stringify(activeData, null, 2);
+            const replacement = 'const annotations = ' + dataStr + ';';
+            const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+            const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const title = document.title || '带标注原型';
+            const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+            a.download = `${title}_${date}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            const btn = document.getElementById('export-btn');
+            const original = btn.textContent;
+            btn.textContent = '导出成功 ✓';
+            setTimeout(() => { btn.textContent = original; }, 2000);
+        }
+        
+        function toggleDropdown(btn) {
+            const dropdown = document.getElementById('anno-5');
+            const rect = btn.getBoundingClientRect();
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            const isShown = dropdown.style.display === 'block';
+            dropdown.style.display = isShown ? 'none' : 'block';
+        }
+        function hideDropdown() {
+            document.getElementById('anno-5').style.display = 'none';
+        }
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.more-btn')) {
+                document.getElementById('anno-5').style.display = 'none';
+            }
+        });
+        
+        loadCustomAnnotations();
+        renderAnnotationList();
+        initPanelState();
+
+        // ===== 业务弹窗控制 =====
+        function openBizModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+        function closeBizModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        // 等级调整：输入成长值自动计算等级
+        function calcAdjustLevel() {
+            var val = parseInt(document.getElementById('adjustGrowthInput').value);
+            var resultEl = document.getElementById('adjustLevelResult');
+            if (isNaN(val) || val < 0) {
+                resultEl.value = '请输入成长值后自动计算';
+                resultEl.style.color = '#999';
+                return;
+            }
+            var level, emoji;
+            if (val < 200) { level = '铜牌'; emoji = '🥉'; }
+            else if (val < 500) { level = '银牌'; emoji = '🥈'; }
+            else if (val < 1000) { level = '金牌'; emoji = ''; }
+            else { level = '钻石'; emoji = '💎'; }
+            resultEl.value = emoji + ' ' + level + '（成长值 ' + val + '）';
+            resultEl.style.color = '#333';
+        }
+        // 点击遮罩关闭业务弹窗
+        document.querySelectorAll('#add-modal, #edit-modal, #level-modal, #disable-modal, #delete-modal').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) closeBizModal(this.id);
+            });
+        });
+    </script>
+</body>
+</html>
