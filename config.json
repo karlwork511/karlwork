@@ -22,6 +22,11 @@
             "name": "规则配置页",
             "file": "docs/rule-config.html",
             "icon": "⚙️"
+          },
+          {
+            "name": "收支记录页",
+            "file": "docs/transaction-record.html",
+            "icon": "📊"
           }
         ]
       }
