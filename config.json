@@ -32,6 +32,11 @@
             "name": "佣金明细页",
             "file": "docs/commission-detail.html",
             "icon": "📋"
+          },
+          {
+            "name": "数据概览页",
+            "file": "docs/data-overview.html",
+            "icon": "📋"
           }
         ]
       }
