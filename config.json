@@ -12,6 +12,11 @@
             "name": "推广员列表页",
             "file": "docs/promoter-list.html",
             "icon": "📋"
+          },
+          {
+            "name": "推广员详情页",
+            "file": "docs/promoter-detail.html",
+            "icon": "📋"
           }
         ]
       }
