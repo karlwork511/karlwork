@@ -39,6 +39,16 @@
             "icon": "📋"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "佣金提现审核页",
+            "file": "docs/withdrawal-review.html",
+            "icon": "📋"
+          }
+        ]
       }
     ]
   },
