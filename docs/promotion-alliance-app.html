@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推广联盟-用户端APP原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #E8E8E8; }
+
+/* ===== 标注系统样式 ===== */
+.app-container { display: flex; height: 100vh; position: relative; }
+.preview-area { flex: 1; overflow-y: auto; padding: 20px; background: #E8E8E8; display: flex; justify-content: center; align-items: flex-start; }
+.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; }
+.annotation-panel.collapsed { width: 0; overflow: hidden; border: none; }
+.panel-header { padding: 12px 16px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.panel-toggle-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 8px; }
+#annotation-list { padding: 0; }
+.annotation-item { padding: 12px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.15s; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #EEF0F3; }
+.annotation-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.annotation-badge { width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 13px; color: #666; }
+.annotation-toolbar { position: absolute; top: 12px; right: 320px; z-index: 100; }
+.toolbar-edit-btn { padding: 6px 16px; background: #165DFF; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.panel-expand-btn { position: fixed; top: 16px; right: 16px; z-index: 200; display: none; padding: 10px 14px; background: #165DFF; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.panel-expand-btn.show { display: block; }
+.anno-marker { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0.5; cursor: pointer; transition: all 0.2s; }
+.anno-marker:hover, .anno-marker.highlight { opacity: 1; transform: scale(1.2); }
+.anno-flash { animation: flash 1s ease-in-out 2; }
+@keyframes flash { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 0 4px rgba(22,93,255,0.3)} }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 520px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.modal-header { padding: 16px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 15px; font-weight: 600; color: #333; }
+.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th { padding: 10px 12px; text-align: left; font-size: 13px; color: #666; border-bottom: 1px solid #E4E7ED; width: 120px; }
+.detail-table td { padding: 10px 12px; font-size: 13px; color: #333; border-bottom: 1px solid #F0F0F0; }
+.detail-table textarea { width: 100%; min-height: 60px; padding: 8px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; resize: vertical; }
+.btn { padding: 8px 20px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-default { background: #F5F7FA; color: #333; }
+.btn-danger { background: #fff; color: #F53F3F; border: 1px solid #F53F3F; }
+
+/* ===== APP原型区域 ===== */
+.app-wrapper { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+/* DEMO切换栏 */
+.demo-toggle-bar { display: flex; gap: 8px; background: #fff; padding: 8px 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.demo-toggle-btn { padding: 6px 16px; border: 1px solid #DCDFE6; border-radius: 6px; background: #fff; font-size: 13px; color: #666; cursor: pointer; transition: all 0.2s; }
+.demo-toggle-btn.active { background: #165DFF; color: #fff; border-color: #165DFF; }
+
+/* 手机外壳 */
+.phone-frame { width: 375px; height: 720px; border: 3px solid #333; border-radius: 36px; overflow: hidden; background: #F5F7FA; position: relative; display: flex; flex-direction: column; }
+
+/* 状态栏 */
+.status-bar { height: 44px; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+.status-bar .time { color: #fff; font-size: 15px; font-weight: 600; }
+.status-bar .icons { display: flex; align-items: center; gap: 6px; }
+.status-bar .signal { display: flex; gap: 1px; align-items: flex-end; }
+.status-bar .signal span { display: block; width: 3px; background: #fff; border-radius: 1px; }
+.status-bar .signal span:nth-child(1) { height: 4px; }
+.status-bar .signal span:nth-child(2) { height: 6px; }
+.status-bar .signal span:nth-child(3) { height: 8px; }
+.status-bar .signal span:nth-child(4) { height: 10px; }
+.status-bar .wifi { color: #fff; font-size: 12px; }
+.status-bar .battery { width: 24px; height: 11px; border: 1.5px solid #fff; border-radius: 2px; position: relative; padding: 1.5px; }
+.status-bar .battery::after { content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 2px; height: 5px; background: #fff; border-radius: 0 1px 1px 0; }
+.status-bar .battery-inner { width: 70%; height: 100%; background: #34C759; border-radius: 1px; }
+
+/* 导航栏 */
+.nav-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid #F0F0F0; flex-shrink: 0; }
+.nav-bar .nav-title { font-size: 16px; font-weight: 600; color: #333; }
+.nav-bar .nav-back { position: absolute; left: 12px; font-size: 20px; color: #333; cursor: pointer; background: none; border: none; padding: 4px 8px; }
+.nav-bar .nav-right { position: absolute; right: 16px; font-size: 18px; cursor: pointer; }
+
+/* 内容区 */
+.page-content { flex: 1; overflow-y: auto; padding: 12px; }
+.page-content::-webkit-scrollbar { width: 0; }
+
+/* 用户信息卡片 */
+.user-banner { background: linear-gradient(135deg, #165DFF 0%, #4080FF 100%); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; position: relative; }
+.user-avatar { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.5); }
+.user-info { flex: 1; }
+.user-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.user-name { color: #fff; font-size: 16px; font-weight: 600; }
+.user-level { display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,0.25); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.user-level-icon { font-size: 10px; }
+.user-progress-text { color: rgba(255,255,255,0.8); font-size: 11px; margin-bottom: 4px; }
+.user-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+.user-progress-fill { height: 100%; background: #fff; border-radius: 2px; transition: width 0.3s; }
+.user-exp-btn { padding: 6px 12px; background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; font-size: 12px; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+
+/* 资产卡片 */
+.asset-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.asset-main { text-align: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #F0F0F0; }
+.asset-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+.asset-amount { font-size: 28px; font-weight: 700; color: #165DFF; }
+.asset-amount .currency { font-size: 16px; }
+.asset-row { display: flex; gap: 0; }
+.asset-item { flex: 1; text-align: center; cursor: pointer; padding: 4px 0; }
+.asset-item:not(:last-child) { border-right: 1px solid #F0F0F0; }
+.asset-item .item-value { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px; }
+.asset-item .item-value .unit { font-size: 12px; font-weight: 400; color: #999; }
+.asset-item .item-label { font-size: 11px; color: #999; }
+
+/* 推广卡片 */
+.promo-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.promo-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 12px; }
+.promo-content { display: flex; align-items: center; gap: 16px; }
+.promo-qrcode { width: 100px; height: 100px; background: #F0F0F0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px; flex-shrink: 0; }
+.promo-info { flex: 1; }
+.promo-code-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.promo-code-label { font-size: 12px; color: #999; }
+.promo-code { font-size: 18px; font-weight: 700; color: #333; letter-spacing: 2px; }
+.promo-copy-btn { padding: 4px 12px; background: #165DFF; color: #fff; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.promo-desc { font-size: 12px; color: #999; }
+
+/* ===== 明细详情页 ===== */
+.detail-tabs { display: flex; background: #fff; border-bottom: 1px solid #F0F0F0; flex-shrink: 0; }
+.detail-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; color: #999; cursor: pointer; position: relative; transition: color 0.2s; }
+.detail-tab.active { color: #165DFF; font-weight: 600; }
+.detail-tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 2px; background: #165DFF; border-radius: 1px; }
+
+/* 列表项 */
+.list-item { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.list-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.list-item-time { font-size: 12px; color: #999; }
+.list-item-amount { font-size: 16px; font-weight: 600; }
+.list-item-amount.income { color: #00B42A; }
+.list-item-amount.expense { color: #F53F3F; }
+.list-item-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666; margin-bottom: 4px; }
+.list-item-row:last-child { margin-bottom: 0; }
+.status-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.status-tag.settled { background: #E8FFEA; color: #00B42A; }
+.status-tag.pending { background: #FFF7E8; color: #FF7D00; }
+.status-tag.cancelled { background: #FFECE8; color: #F53F3F; }
+.status-tag.approved { background: #E8FFEA; color: #00B42A; }
+.status-tag.rejected { background: #FFECE8; color: #F53F3F; }
+
+/* 成长值列表 */
+.growth-item { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.growth-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.growth-type { font-size: 14px; font-weight: 500; color: #333; }
+.growth-value { font-size: 16px; font-weight: 600; }
+.growth-value.positive { color: #00B42A; }
+.growth-value.negative { color: #F53F3F; }
+.growth-item-row { font-size: 12px; color: #999; margin-bottom: 2px; }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 40px 0; color: #ccc; }
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 8px; }
+.empty-state .empty-text { font-size: 13px; }
+
+/* 隐藏 */
+.hidden { display: none !important; }
+
+/* 底部提现弹窗 */
+.bottom-sheet-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 500; }
+.bottom-sheet-overlay.show { display: block; }
+.bottom-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 16px 16px 0 0; padding: 20px; z-index: 501; transform: translateY(100%); transition: transform 0.3s ease; }
+.bottom-sheet.show { transform: translateY(0); }
+.bottom-sheet-title { font-size: 16px; font-weight: 600; color: #333; text-align: center; margin-bottom: 20px; }
+.bottom-sheet .form-row { margin-bottom: 16px; }
+.bottom-sheet .form-label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; }
+.bottom-sheet .form-input { width: 100%; padding: 10px 12px; border: 1px solid #DCDFE6; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; }
+.bottom-sheet .form-input:focus { border-color: #165DFF; }
+.bottom-sheet .btn-withdraw-submit { width: 100%; padding: 14px; background: #165DFF; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.bottom-sheet .btn-withdraw-submit:active { background: #0e4bd4; }
+.bottom-sheet-handle { width: 36px; height: 4px; background: #E4E7ED; border-radius: 2px; margin: 0 auto 16px; }
+
+
+/* 提现弹窗（居中） */
+.withdraw-modal-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 500; border-radius: 0 0 33px 33px; align-items: center; justify-content: center; }
+.withdraw-modal-overlay.show { display: flex; }
+.withdraw-modal { background: #fff; border-radius: 16px; padding: 0; width: 320px; z-index: 501; }
+.withdraw-header { display: flex; align-items: center; justify-content: center; padding: 16px 20px; border-bottom: 1px solid #F2F3F5; position: relative; }
+.withdraw-title { font-size: 16px; font-weight: 600; color: #333; }
+.withdraw-close { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #999; background: none; border: none; cursor: pointer; }
+.withdraw-body { padding: 20px; }
+.withdraw-select { width: 100%; padding: 12px; border: 1px solid #DCDFE6; border-radius: 8px; font-size: 14px; color: #333; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; cursor: pointer; background: #fff; }
+.withdraw-available { display: flex; align-items: baseline; justify-content: space-between; padding: 12px; background: #F5F7FA; border-radius: 8px; margin-bottom: 14px; }
+.withdraw-available-label { font-size: 13px; color: #666; }
+.withdraw-available-value { font-size: 18px; font-weight: 700; color: #00B4D8; }
+.withdraw-amount-row { display: flex; align-items: baseline; margin-bottom: 12px; }
+.withdraw-amount-input { font-size: 16px; font-weight: 600; text-align: center; }
+.withdraw-input-hint { font-size: 11px; color: #999; margin-top: 4px; }
+.withdraw-amount-label { font-size: 14px; color: #333; font-weight: 500; }
+.withdraw-amount-value { font-size: 22px; color: #00B4D8; font-weight: 600; margin-left: 8px; }
+.withdraw-tip { background: #F0F9FF; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #666; display: flex; align-items: flex-start; gap: 6px; margin-bottom: 20px; line-height: 1.5; }
+.tip-icon { color: #00B4D8; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.withdraw-submit-btn { width: 100%; padding: 14px; background: #00B4D8; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.withdraw-submit-btn:active { background: #009EC0; }
+
+
+/* 提现弹窗 - 方式切换 */
+.withdraw-tabs { display: flex; border-bottom: 1px solid #F2F3F5; }
+.withdraw-tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; }
+.withdraw-tab.active { color: #333; font-weight: 600; border-bottom-color: #00B4D8; }
+.withdraw-method-panel { padding: 0; }
+.withdraw-field { margin-bottom: 14px; }
+.withdraw-field-label { font-size: 13px; color: #333; margin-bottom: 6px; display: block; font-weight: 500; }
+.withdraw-field-label .required { color: #F53F3F; margin-right: 2px; }
+.withdraw-input { width: 100%; padding: 10px 12px; border: 1px solid #DCDFE6; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; }
+.withdraw-input:focus { border-color: #00B4D8; }
+.withdraw-upload { width: 72px; height: 72px; border: 1px dashed #DCDFE6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #C0C4CC; cursor: pointer; background: #FAFAFA; }
+.withdraw-upload-hint { font-size: 11px; color: #F53F3F; margin-top: 6px; line-height: 1.4; }
+.withdraw-btn-row { display: flex; gap: 12px; margin-top: 16px; }
+.withdraw-cancel-btn { flex: 1; padding: 14px; background: #fff; color: #00B4D8; border: 1px solid #00B4D8; border-radius: 8px; font-size: 15px; cursor: pointer; }
+.withdraw-cancel-btn:active { background: #F0FAFF; }
+
+
+/* 成长值明细页 */
+.growth-detail-header { padding: 16px 20px 20px; background: linear-gradient(135deg, #165DFF 0%, #4080FF 100%); border-radius: 0 0 16px 16px; margin: 0 16px; }
+.growth-current-level { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 4px; }
+.growth-current-value { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 16px; }
+.growth-current-value span { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.7); margin-left: 4px; }
+.level-nodes { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.level-node { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.level-dot { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.level-dot.active { background: #fff; color: #165DFF; }
+.level-node-label { font-size: 10px; color: rgba(255,255,255,0.7); }
+.level-node-label.active { color: #fff; font-weight: 600; }
+.level-line { flex: 1; height: 2px; background: rgba(255,255,255,0.3); margin: 0 -2px; margin-bottom: 16px; }
+.level-line.active { background: #fff; }
+.growth-section-title { font-size: 14px; font-weight: 600; color: #333; padding: 16px 20px 8px; }
+
+/* 资产卡片 - 明细按钮 & 箭头 & 提现按钮 */
+.asset-detail-btn { font-size: 12px; color: #165DFF; cursor: pointer; font-weight: 500; }
+.asset-detail-btn:active { opacity: 0.7; }
+.asset-item .arrow { font-size: 16px; color: #C0C4CC; margin-left: 4px; font-weight: 300; }
+.btn-withdraw { display: block; width: 100%; margin-top: 12px; padding: 12px; background: #165DFF; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-withdraw:active { background: #0e4bd4; }
+
+</style>
+</head>
+<body>
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <div class="preview-area">
+        <div class="app-wrapper">
+            <!-- DEMO切换栏 -->
+            <div class="demo-toggle-bar">
+                <button class="demo-toggle-btn" id="demo-not-joined" onclick="setDemoMode('not-joined')">未加入</button>
+                <button class="demo-toggle-btn" id="demo-disabled" onclick="setDemoMode('disabled')">已禁用</button>
+                <button class="demo-toggle-btn" id="demo-level-off" onclick="setDemoMode('off')">正常-等级关闭</button>
+                <button class="demo-toggle-btn active" id="demo-level-on" onclick="setDemoMode('on')">正常-等级开启</button>
+            </div>
+
+            <!-- 手机外壳 -->
+            <div class="phone-frame" id="phone-frame">
+
+                <!-- 状态A：未加入 -->
+                <div id="state-not-joined" class="state-view hidden" style="display:none;">
+                    <div class="page-content" style="display:flex;flex-direction:column;height:100%;">
+                        <div class="status-bar"><div class="time">9:41</div><div class="icons"><div class="signal"><span></span><span></span><span></span><span></span></div><div class="wifi"><svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M7 10.5a1 1 0 100 2 1 1 0 000-2z" fill="currentColor"/></svg></div><div class="battery"><div class="battery-inner"></div></div></div></div>
+                        <div class="nav-bar"><span class="nav-title" style="flex:1;text-align:center;">推广联盟</span></div>
+                        <div style="flex:1;overflow-y:auto;">
+                            <!-- 顶部横幅 -->
+                            <div style="background:linear-gradient(135deg,#165DFF 0%,#4080FF 100%);padding:32px 20px 24px;text-align:center;margin:0 16px;border-radius:0 0 16px 16px;">
+                                <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">推广联盟</div>
+                                <div style="font-size:13px;color:rgba(255,255,255,0.9);">邀请好友注册下单，轻松赚取佣金</div>
+                            </div>
+                            <!-- 社媒分享渠道 -->
+                            <div style="padding:16px 16px 4px;">
+                                <div style="font-size:15px;font-weight:600;color:#333;text-align:center;margin-bottom:6px;">社媒分享渠道</div>
+                                <div style="font-size:11px;color:#999;text-align:center;margin-bottom:12px;">复制您的专属邀请链接、邀请码或下载邀请海报，分享至下方推荐的社媒渠道，实现佣金最大化！</div>
+                                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+                                    <div style="background:#000;border-radius:12px;padding:12px 4px 10px;text-align:center;position:relative;">
+                                        <div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);background:#FFD700;color:#000;font-size:7px;font-weight:700;padding:2px 4px;border-radius:3px;white-space:nowrap;">RECOMMEND</div>
+                                        <div style="font-size:22px;margin-top:6px;margin-bottom:4px;">🎵</div>
+                                        <div style="font-size:10px;color:#fff;">TikTok</div>
+                                    </div>
+                                    <div style="background:#5865F2;border-radius:12px;padding:12px 4px 10px;text-align:center;">
+                                        <div style="font-size:22px;margin-bottom:4px;">💬</div>
+                                        <div style="font-size:10px;color:#fff;">Discord</div>
+                                    </div>
+                                    <div style="background:#FF4500;border-radius:12px;padding:12px 4px 10px;text-align:center;">
+                                        <div style="font-size:22px;margin-bottom:4px;">🤖</div>
+                                        <div style="font-size:10px;color:#fff;">Reddit</div>
+                                    </div>
+                                    <div style="background:#2AABEE;border-radius:12px;padding:12px 4px 10px;text-align:center;">
+                                        <div style="font-size:22px;margin-bottom:4px;">️</div>
+                                        <div style="font-size:10px;color:#fff;">Telegram</div>
+                                    </div>
+                                    <div style="background:#1877F2;border-radius:12px;padding:12px 4px 10px;text-align:center;">
+                                        <div style="font-size:22px;margin-bottom:4px;">📘</div>
+                                        <div style="font-size:10px;color:#fff;">Facebook</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 功能卡片 -->
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:20px 16px;">
+                                <div style="background:#fff;border-radius:12px;padding:16px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                                    <div style="font-size:28px;margin-bottom:8px;">💰</div>
+                                    <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:4px;">邀请好友得佣金</div>
+                                    <div style="font-size:11px;color:#999;line-height:1.4;">成功邀请好友注册并下单，即可获得订单佣金奖励</div>
+                                </div>
+                                <div style="background:#fff;border-radius:12px;padding:16px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                                    <div style="font-size:28px;margin-bottom:8px;">⚡</div>
+                                    <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:4px;">佣金实时到账</div>
+                                    <div style="font-size:11px;color:#999;line-height:1.4;">订单完成后佣金自动计算，支持快速提现到银行卡</div>
+                                </div>
+                                <div style="background:#fff;border-radius:12px;padding:16px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                                    <div style="font-size:28px;margin-bottom:8px;"></div>
+                                    <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:4px;">多级推广收益</div>
+                                    <div style="font-size:11px;color:#999;line-height:1.4;">支持多级推广体系，下级推广同样可获得佣金分成</div>
+                                </div>
+                            </div>
+
+                            <!-- 底部按钮 -->
+                            <div style="padding:0 16px 20px;text-align:center;">
+                                <button onclick="showToast('申请已提交')" style="width:100%;padding:14px;background:#165DFF;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;">联系客服加入</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 状态B：已禁用 -->
+                <div id="state-disabled" class="state-view hidden" style="display:none;">
+                    <div class="page-content" style="display:flex;flex-direction:column;height:100%;">
+                        <div class="status-bar"><div class="time">9:41</div><div class="icons"><div class="signal"><span></span><span></span><span></span><span></span></div><div class="wifi"><svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M7 10.5a1 1 0 100 2 1 1 0 000-2z" fill="#fff"/><path d="M3.05 7.05a5.5 5.5 0 017.9 0" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M.64 4.64a8.9 8.9 0 0112.72 0" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="battery"><div class="battery-inner"></div></div></div></div>
+                        <div class="nav-bar"><span class="nav-title" style="flex:1;text-align:center;">推广联盟</span></div>
+                        <div class="page-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 20px;">
+                            <div style="font-size:48px;margin-bottom:16px;">🚫</div>
+                            <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:8px;">账号已被禁用</div>
+                            <div style="font-size:13px;color:#999;text-align:center;margin-bottom:24px;">您的推广员账号已被管理员禁用<br>如有疑问请联系平台客服</div>
+                            <div style="padding:12px 32px;background:#F5F7FA;color:#999;border-radius:8px;font-size:14px;">暂无可用操作</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== 首页 ========== -->
+                <div id="page-home">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="time">9:41</div>
+                        <div class="icons">
+                            <div class="signal"><span></span><span></span><span></span><span></span></div>
+                            <div class="wifi">
+                                <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M7 10.5a1 1 0 100 2 1 1 0 000-2z" fill="#fff"/><path d="M3.5 8.5a5 5 0 017 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M1 5.5a8.5 8.5 0 0112 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            </div>
+                            <div class="battery"><div class="battery-inner"></div></div>
+                        </div>
+                    </div>
+                    <!-- 导航栏 -->
+                    <div class="nav-bar" id="anno-1">
+                        <button class="nav-back" onclick="showToast('返回')">←</button>
+                        <span class="nav-title">推广联盟</span>
+                        <span class="nav-right">🔔</span>
+                    </div>
+                    <!-- 内容区 -->
+                    <div class="page-content">
+                        <!-- 用户信息卡片 -->
+                        <div class="user-banner" id="anno-2">
+                            <div class="user-avatar">👤</div>
+                            <div class="user-info">
+                                <div class="user-name-row">
+                                    <span class="user-name">Karl</span>
+                                    <span class="user-level" id="level-badge"><span class="user-level-icon">⭐</span> 梦想推广者</span>
+                                </div>
+                                <div id="level-progress-section">
+                                    <div class="user-progress-text">距离LV2还差1480点成长值</div>
+                                    <div class="user-progress-bar"><div class="user-progress-fill" style="width:22%"></div></div>
+                                </div>
+                            </div>
+                            <button class="user-exp-btn" id="exp-btn" onclick="goGrowthDetail()">获取成长值</button>
+                        </div>
+
+                        <!-- 资产数据卡片 -->
+                        <div class="asset-card" id="anno-3">
+                            <div class="asset-main">
+                                <div>
+                                    <div class="asset-label" style="display:flex;align-items:center;justify-content:space-between;">
+                                        <span>可提现奖金（元）</span>
+                                        <span class="asset-detail-btn" onclick="goDetail()">明细 ›</span>
+                                    </div>
+                                    <div class="asset-amount"><span class="currency">¥</span>1,280.00</div>
+                                </div>
+                            </div>
+                            <div class="asset-row">
+                                <div class="asset-item" onclick="goDetailTab('commission')">
+                                    <div class="item-value">¥2,026<span class="arrow">›</span></div>
+                                    <div class="item-label">已结算</div>
+                                </div>
+                                <div class="asset-item" onclick="goDetailTab('commission')">
+                                    <div class="item-value">¥358<span class="arrow">›</span></div>
+                                    <div class="item-label">待结算</div>
+                                </div>
+                                <div class="asset-item" onclick="goDetailTab('users')">
+                                    <div class="item-value">12<span class="unit">人</span><span class="arrow">›</span></div>
+                                    <div class="item-label">邀请用户</div>
+                                </div>
+                            </div>
+                            <button class="btn-withdraw" onclick="openWithdrawModal()">提现</button>
+                        </div>
+
+                        <!-- 立即推广区 -->
+                        <div class="promo-card" id="anno-4">
+                            <div class="promo-title">立即推广</div>
+                            <div class="promo-content">
+                                <div class="promo-info" style="flex:1;">
+                                    <div class="promo-code-row">
+                                        <span class="promo-code-label">邀请码</span>
+                                        <span class="promo-code">AB3X9K</span>
+                                        <button class="promo-copy-btn" onclick="showToast('邀请码已复制')">复制</button>
+                                    </div>
+                                    <div class="promo-code-row">
+                                        <span class="promo-code-label">推广链接</span>
+                                        <span class="promo-code" style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://poko.com/r/AB3X9K</span>
+                                        <button class="promo-copy-btn" onclick="showToast('推广链接已复制')">复制</button>
+                                    </div>
+                                    <div class="promo-desc">邀请好友注册下单，赚取佣金奖励</div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- 底部提现弹窗 -->
+                        <!-- 提现弹窗 -->
+                        <div class="withdraw-modal-overlay" id="withdraw-overlay" onclick="closeWithdrawModal()">
+                            <div class="withdraw-modal" onclick="event.stopPropagation()">
+                                <div class="withdraw-header">
+                                    <div class="withdraw-title">提现</div>
+                                    <button class="withdraw-close" onclick="closeWithdrawModal()">关闭</button>
+                                </div>
+                                <!-- 提现方式 Tab -->
+                                <div class="withdraw-tabs">
+                                    <div class="withdraw-tab active" onclick="switchWithdrawMethod('balance', this)">余额</div>
+                                    <div class="withdraw-tab" onclick="switchWithdrawMethod('bank', this)">银行转账</div>
+                                </div>
+                                <div class="withdraw-body">
+                                    <!-- 余额方式 -->
+                                    <div id="withdraw-method-balance" class="withdraw-method-panel">
+                                        <div class="withdraw-available">
+                                            <span class="withdraw-available-label">可提现金额</span>
+                                            <span class="withdraw-available-value">¥1,280.00</span>
+                                        </div>
+                                        <div class="withdraw-field">
+                                            <div class="withdraw-field-label">提现金额</div>
+                                            <input class="withdraw-input withdraw-amount-input" type="number" placeholder="请输入提现金额" value="">
+                                            <div class="withdraw-input-hint">最低提现金额 ¥100</div>
+                                        </div>
+                                        <div class="withdraw-tip">
+                                            <span class="tip-icon">①</span>
+                                            <span>请求成功后，资金将转入相应账户。</span>
+                                        </div>
+                                        <button class="withdraw-submit-btn" onclick="closeWithdrawModal();showToast('提现申请已提交')">提交</button>
+                                    </div>
+                                    <!-- 银行转账方式 -->
+                                    <div id="withdraw-method-bank" class="withdraw-method-panel" style="display:none;">
+                                        <div class="withdraw-available">
+                                            <span class="withdraw-available-label">可提现金额</span>
+                                            <span class="withdraw-available-value">¥1,280.00</span>
+                                        </div>
+                                        <div class="withdraw-field">
+                                            <div class="withdraw-field-label">提现金额</div>
+                                            <input class="withdraw-input withdraw-amount-input" type="number" placeholder="请输入提现金额" value="">
+                                            <div class="withdraw-input-hint">最低提现金额 ¥100</div>
+                                        </div>
+                                        <div class="withdraw-field">
+                                            <div class="withdraw-field-label"><span class="required">*</span>收款人</div>
+                                            <input class="withdraw-input" placeholder="请输入收款人">
+                                        </div>
+                                        <div class="withdraw-field">
+                                            <div class="withdraw-field-label"><span class="required">*</span>账户</div>
+                                            <input class="withdraw-input" placeholder="请输入账户">
+                                        </div>
+                                        <div class="withdraw-field">
+                                            <div class="withdraw-field-label"><span class="required">*</span>上传照片</div>
+                                            <div class="withdraw-upload">
+                                                <div class="upload-icon">️</div>
+                                            </div>
+                                            <div class="withdraw-upload-hint">请上传文件（最大5MB），格式为png/jpg/jpeg/webp</div>
+                                        </div>
+                                        <div class="withdraw-tip">
+                                            <span class="tip-icon">①</span>
+                                            <span>成功请求后，资金将转入对应账户。</span>
+                                        </div>
+                                        <div class="withdraw-btn-row">
+                                            <button class="withdraw-cancel-btn" onclick="closeWithdrawModal()">取消</button>
+                                            <button class="withdraw-submit-btn" style="flex:1;" onclick="closeWithdrawModal();showToast('提现申请已提交')">提交</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== 明细详情页 ========== -->
+                <div id="page-detail" class="hidden" style="display:none;flex-direction:column;height:100%;">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="time">9:41</div>
+                        <div class="icons">
+                            <div class="signal"><span></span><span></span><span></span><span></span></div>
+                            <div class="wifi">
+                                <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M7 10.5a1 1 0 100 2 1 1 0 000-2z" fill="#fff"/><path d="M3.5 8.5a5 5 0 017 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M1 5.5a8.5 8.5 0 0112 0" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            </div>
+                            <div class="battery"><div class="battery-inner"></div></div>
+                        </div>
+                    </div>
+                    <!-- 标题栏 -->
+                    <div class="nav-bar">
+                        <button class="nav-back" onclick="goHome()">←</button>
+                        <span class="nav-title" id="detail-page-title">佣金明细</span>
+                        <button onclick="showToast('查看规则说明')" style="padding:4px 10px;font-size:12px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                    </div>
+                    <!-- 子Tab栏（仅佣金明细页有） -->
+                    <div class="detail-tabs" id="detail-sub-tabs">
+                        <div class="detail-tab active" data-sub="settled" onclick="switchSubTab('settled')">已结算</div>
+                        <div class="detail-tab" data-sub="pending" onclick="switchSubTab('pending')">待结算</div>
+                        <div class="detail-tab" data-sub="cancelled" onclick="switchSubTab('cancelled')">已取消</div>
+                        <div class="detail-tab hidden" id="tab-growth" data-sub="growth" onclick="switchSubTab('growth')" style="display:none;">成长值</div>
+                    </div>
+                    <!-- 内容区 -->
+                    <div class="page-content" id="detail-content">
+                        <!-- 佣金明细 -->
+                        <div id="tab-commission" class="tab-pane" id="anno-6">
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span class="list-item-time">2026-08-15 14:32</span>
+                                    <span class="status-tag settled">已结算</span>
+                                </div>
+                                <div class="list-item-row"><span>被邀请人：用户A***n</span></div>
+                                <div class="list-item-row"><span>订单号：PKG20260815001</span></div>
+                                <div class="list-item-row"><span>佣金费率：15% 可佣金额：¥80</span><span style="color:#00B42A;font-weight:600;">+¥12.00</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span class="list-item-time">2026-08-14 09:18</span>
+                                    <span class="status-tag settled">已结算</span>
+                                </div>
+                                <div class="list-item-row"><span>被邀请人：用户B***x</span></div>
+                                <div class="list-item-row"><span>订单号：PKG20260814003</span></div>
+                                <div class="list-item-row"><span>佣金费率：15% 可佣金额：¥120</span><span style="color:#00B42A;font-weight:600;">+¥18.00</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span class="list-item-time">2026-08-13 16:45</span>
+                                    <span class="status-tag pending">待结算</span>
+                                </div>
+                                <div class="list-item-row"><span>被邀请人：用户C***m</span></div>
+                                <div class="list-item-row"><span>订单号：PKG20260813007</span></div>
+                                <div class="list-item-row"><span>佣金费率：15% 可佣金额：¥200</span><span style="color:#FF7D00;font-weight:600;">+¥30.00</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span class="list-item-time">2026-08-12 11:20</span>
+                                    <span class="status-tag cancelled">已取消</span>
+                                </div>
+                                <div class="list-item-row"><span>被邀请人：用户D***k</span></div>
+                                <div class="list-item-row"><span>订单号：PKG20260812002</span></div>
+                                <div class="list-item-row"><span>佣金费率：15% 可佣金额：¥60</span><span style="color:#F53F3F;font-weight:600;">¥0.00</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span class="list-item-time">2026-08-10 08:55</span>
+                                    <span class="status-tag pending">待结算</span>
+                                </div>
+                                <div class="list-item-row"><span>被邀请人：用户E***r</span></div>
+                                <div class="list-item-row"><span>订单号：PKG20260810005</span></div>
+                                <div class="list-item-row"><span>佣金费率：15% 可佣金额：¥358</span><span style="color:#FF7D00;font-weight:600;">+¥53.70</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 收支记录 -->
+                        <div id="tab-finance" class="tab-pane hidden">
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">佣金收入</span>
+                                    <span class="list-item-amount income">+¥12.00</span>
+                                </div>
+                                <div class="list-item-row"><span>2026-08-15 14:32</span></div>
+                                <div class="list-item-row"><span>流水号：CM0915001234</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">佣金收入</span>
+                                    <span class="list-item-amount income">+¥18.00</span>
+                                </div>
+                                <div class="list-item-row"><span>2026-08-14 09:18</span></div>
+                                <div class="list-item-row"><span>流水号：CM0814002456</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">提现支出</span>
+                                    <span class="list-item-amount expense">-¥100.00</span>
+                                </div>
+                                <div class="list-item-row"><span>2026-08-10 09:15</span></div>
+                                <div class="list-item-row"><span>流水号：CM0810002567</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">佣金收入</span>
+                                    <span class="list-item-amount income">+¥25.00</span>
+                                </div>
+                                <div class="list-item-row"><span>2026-08-08 17:42</span></div>
+                                <div class="list-item-row"><span>流水号：CM0808003891</span></div>
+                            </div>
+                        </div>
+
+
+                        <!-- 邀请用户 -->
+                        <div id="tab-users" class="tab-pane hidden">
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">用户A***n</span>
+                                    <span class="status-tag settled">已下单</span>
+                                </div>
+                                <div class="list-item-row"><span>注册时间：2026-08-01 10:23</span></div>
+                                <div class="list-item-row"><span>累计订单：3 笔</span><span style="color:#00B42A;font-weight:600;">+¥120</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">用户B***x</span>
+                                    <span class="status-tag settled">已下单</span>
+                                </div>
+                                <div class="list-item-row"><span>注册时间：2026-08-03 14:55</span></div>
+                                <div class="list-item-row"><span>累计订单：5 笔</span><span style="color:#00B42A;font-weight:600;">+¥280</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">用户C***m</span>
+                                    <span class="status-tag pending">未下单</span>
+                                </div>
+                                <div class="list-item-row"><span>注册时间：2026-08-05 09:12</span></div>
+                                <div class="list-item-row"><span>累计订单：0 笔</span><span style="color:#C0C4CC;">¥0</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">用户D***k</span>
+                                    <span class="status-tag settled">已下单</span>
+                                </div>
+                                <div class="list-item-row"><span>注册时间：2026-08-07 16:38</span></div>
+                                <div class="list-item-row"><span>累计订单：2 笔</span><span style="color:#00B42A;font-weight:600;">+¥96</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:14px;font-weight:500;color:#333;">用户E***r</span>
+                                    <span class="status-tag settled">已下单</span>
+                                </div>
+                                <div class="list-item-row"><span>注册时间：2026-08-10 11:07</span></div>
+                                <div class="list-item-row"><span>累计订单：4 笔</span><span style="color:#00B42A;font-weight:600;">+¥204</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 提现记录 -->
+                        <div id="tab-withdraw" class="tab-pane hidden">
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:18px;font-weight:600;color:#333;">¥100.00</span>
+                                    <span class="status-tag approved">已批准</span>
+                                </div>
+                                <div class="list-item-row"><span>银行卡 ****1234</span></div>
+                                <div class="list-item-row"><span>申请时间：2026-08-10 09:15</span></div>
+                                <div class="list-item-row"><span>到账时间：2026-08-12 15:30</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:18px;font-weight:600;color:#333;">¥200.00</span>
+                                    <span class="status-tag pending">待审核</span>
+                                </div>
+                                <div class="list-item-row"><span>银行卡 ****1234</span></div>
+                                <div class="list-item-row"><span>申请时间：2026-08-16 10:30</span></div>
+                                <div class="list-item-row"><span>到账时间：待审核</span></div>
+                            </div>
+                            <div class="list-item">
+                                <div class="list-item-header">
+                                    <span style="font-size:18px;font-weight:600;color:#333;">¥50.00</span>
+                                    <span class="status-tag rejected">已拒绝</span>
+                                </div>
+                                <div class="list-item-row"><span>银行卡 ****5678</span></div>
+                                <div class="list-item-row"><span>申请时间：2026-08-05 14:20</span></div>
+                                <div class="list-item-row"><span>拒绝原因：银行卡信息有误</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 成长值（等级开启时显示） -->
+                        <div id="tab-growth-pane" class="tab-pane hidden">
+                            <div class="growth-item">
+                                <div class="growth-item-header">
+                                    <span class="growth-type">订单佣金奖励</span>
+                                    <span class="growth-value positive">+120</span>
+                                </div>
+                                <div class="growth-item-row">当前值：2,520</div>
+                                <div class="growth-item-row">时间：2026-08-15 14:32</div>
+                                <div class="growth-item-row">过期时间：2027-08-15</div>
+                            </div>
+                            <div class="growth-item">
+                                <div class="growth-item-header">
+                                    <span class="growth-type">邀请新用户</span>
+                                    <span class="growth-value positive">+200</span>
+                                </div>
+                                <div class="growth-item-row">当前值：2,400</div>
+                                <div class="growth-item-row">时间：2026-08-14 09:18</div>
+                                <div class="growth-item-row">过期时间：2027-08-14</div>
+                            </div>
+                            <div class="growth-item">
+                                <div class="growth-item-header">
+                                    <span class="growth-type">成长值过期扣减</span>
+                                    <span class="growth-value negative">-150</span>
+                                </div>
+                                <div class="growth-item-row">当前值：2,200</div>
+                                <div class="growth-item-row">时间：2026-08-10 00:00</div>
+                                <div class="growth-item-row">过期时间：-</div>
+                            </div>
+                            <div class="growth-item">
+                                <div class="growth-item-header">
+                                    <span class="growth-type">订单佣金奖励</span>
+                                    <span class="growth-value positive">+180</span>
+                                </div>
+                                <div class="growth-item-row">当前值：2,350</div>
+                                <div class="growth-item-row">时间：2026-08-08 17:42</div>
+                                <div class="growth-item-row">过期时间：2027-08-08</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ========== 成长值明细页 ========== -->
+                <div id="page-growth-detail" class="hidden" style="display:none;flex-direction:column;height:100%;">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="time">9:41</div>
+                        <div class="icons">
+                            <div class="signal"><span></span><span></span><span></span><span></span></div>
+                            <div class="wifi">
+                                <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M7 10.5a1 1 0 100 2 1 1 0 000-2z" fill="#fff"/><path d="M3.05 7.05a5.5 5.5 0 017.9 0" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M.64 4.64a8.9 8.9 0 0112.72 0" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </div>
+                            <div class="battery"><div class="battery-inner"></div></div>
+                        </div>
+                    </div>
+                    <!-- 导航栏 -->
+                    <div class="nav-bar">
+                        <button class="nav-back" onclick="goHome()">←</button>
+                        <span class="nav-title">成长值明细</span>
+                        <button onclick="showToast('查看规则说明')" style="padding:4px 10px;font-size:12px;color:#165DFF;background:#fff;border:1px solid #165DFF;border-radius:4px;cursor:pointer;">规则说明</button>
+                    </div>
+                    <!-- 等级总览 -->
+                    <div class="growth-detail-header">
+                        <div class="growth-current-level">当前等级：LV1 梦想推广者</div>
+                        <div class="growth-current-value">2,200<span>成长值</span></div>
+                        <div class="level-nodes">
+                            <div class="level-node">
+                                <div class="level-dot active">LV1</div>
+                                <div class="level-node-label active">梦想</div>
+                            </div>
+                            <div class="level-line active"></div>
+                            <div class="level-node">
+                                <div class="level-dot">LV2</div>
+                                <div class="level-node-label">进阶</div>
+                            </div>
+                            <div class="level-line"></div>
+                            <div class="level-node">
+                                <div class="level-dot">LV3</div>
+                                <div class="level-node-label">精英</div>
+                            </div>
+                            <div class="level-line"></div>
+                            <div class="level-node">
+                                <div class="level-dot">LV4</div>
+                                <div class="level-node-label">卓越</div>
+                            </div>
+                            <div class="level-line"></div>
+                            <div class="level-node">
+                                <div class="level-dot">LV5</div>
+                                <div class="level-node-label">梦想</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 变动明细 -->
+                    <div class="growth-section-title">变动明细</div>
+                    <div class="page-content" style="flex:1;overflow-y:auto;padding:0 16px 16px;">
+                        <div class="growth-item">
+                            <div class="growth-item-header">
+                                <span class="growth-type">订单佣金奖励</span>
+                                <span class="growth-value positive">+120</span>
+                            </div>
+                            <div class="growth-item-row">当前值：2,520</div>
+                            <div class="growth-item-row">时间：2026-08-15 14:32</div>
+                            <div class="growth-item-row">过期时间：2027-08-15</div>
+                        </div>
+                        <div class="growth-item">
+                            <div class="growth-item-header">
+                                <span class="growth-type">邀请新用户</span>
+                                <span class="growth-value positive">+200</span>
+                            </div>
+                            <div class="growth-item-row">当前值：2,400</div>
+                            <div class="growth-item-row">时间：2026-08-14 09:18</div>
+                            <div class="growth-item-row">过期时间：2027-08-14</div>
+                        </div>
+                        <div class="growth-item">
+                            <div class="growth-item-header">
+                                <span class="growth-type">成长值过期扣减</span>
+                                <span class="growth-value negative">-150</span>
+                            </div>
+                            <div class="growth-item-row">当前值：2,200</div>
+                            <div class="growth-item-row">时间：2026-08-10 00:00</div>
+                            <div class="growth-item-row">过期时间：-</div>
+                        </div>
+                        <div class="growth-item">
+                            <div class="growth-item-header">
+                                <span class="growth-type">订单佣金奖励</span>
+                                <span class="growth-value positive">+180</span>
+                            </div>
+                            <div class="growth-item-row">当前值：2,350</div>
+                            <div class="growth-item-row">时间：2026-08-08 17:42</div>
+                            <div class="growth-item-row">过期时间：2027-08-08</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" id="reset-btn" onclick="resetAnnotation()" style="display:none">重置</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" onclick="saveAnnotation()" style="display:none">保存</button>
+            <button class="btn btn-danger" id="delete-btn" onclick="deleteAnnotation()" style="display:none">删除</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '推广联盟用户端APP版原型，包含首页和明细详情页',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '推广联盟用户端APP版，面向已注册为推广员的用户。首页展示个人信息、资产数据和推广入口；明细详情页通过顶部Tab切换查看佣金明细、收支记录和提现记录。',
+            interaction: '首页底部导航可切换首页/明细/设置/我的；明细页顶部Tab可切换不同记录类型。'
+        }
+    },
+    {
+        id: 2,
+        title: '用户信息卡片',
+        summary: '展示推广员头像、昵称、等级和成长值进度',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示当前推广员的基本信息和等级状态',
+            display: '头像、用户名、等级徽章、成长值进度条和距离下一等级的差额',
+            state: '等级未开启时不显示等级徽章和进度条'
+        }
+    },
+    {
+        id: 3,
+        title: '资产数据卡片',
+        summary: '展示可提现金额、已结算、待结算和邀请用户数',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '汇总展示推广员的核心资产数据',
+            display: '可提现奖金（大字号突出显示）、已结算佣金、待结算佣金、邀请用户数',
+            interaction: '各数据项可点击跳转到对应明细页面'
+        }
+    },
+    {
+        id: 4,
+        title: '立即推广区',
+        summary: '展示推广二维码和邀请码，支持一键复制',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '提供推广员的推广入口，方便分享邀请',
+            display: '二维码、邀请码和复制按钮',
+            interaction: '点击复制按钮复制邀请码到剪贴板',
+            copywriting: '提示文案：邀请好友注册下单，赚取佣金奖励'
+        }
+    },
+    {
+        id: 5,
+        title: '明细Tab切换',
+        summary: '顶部Tab切换佣金明细、收支记录、提现记录',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '在明细详情页通过Tab切换查看不同类型的记录',
+            display: '佣金明细：每笔订单佣金状态和金额；收支记录：资金流水；提现记录：提现申请状态',
+            interaction: '点击Tab切换内容区，激活态有蓝色下划线标识',
+            state: '等级开启时新增成长值Tab'
+        }
+    },
+    {
+        id: 6,
+        title: '佣金明细列表',
+        summary: '每笔订单的佣金预估、结算和取消记录',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示每笔提包订单的佣金全链路记录',
+            display: '时间、被邀请人、订单号、佣金费率、可佣金额、状态和佣金金额',
+            state: '已结算=绿色、待结算=橙色、已取消=红色',
+            business: '佣金=可佣金额×锁定费率；提包单签收后自动结算；取消则佣金作废'
+        }
+    }
+];
+
+// ===== 页面切换 =====
+function goDetail() {
+    goDetailTo('commission');
+}
+function goHome() {
+    document.getElementById('page-detail').style.display = 'none';
+    document.getElementById('page-detail').classList.add('hidden');
+    document.getElementById('page-growth-detail').style.display = 'none';
+    document.getElementById('page-growth-detail').classList.add('hidden');
+    document.getElementById('page-home').style.display = '';
+}
+
+// ===== Tab切换 =====
+function switchSubTab(sub) {
+    document.querySelectorAll('#detail-sub-tabs .detail-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelector('#detail-sub-tabs .detail-tab[data-sub="' + sub + '"]').classList.add('active');
+    // 过滤佣金明细列表
+    document.querySelectorAll('#tab-commission .list-item').forEach(function(item) {
+        var tag = item.querySelector('.status-tag');
+        if (tag) {
+            var show = (sub === 'settled' && tag.classList.contains('settled')) ||
+                       (sub === 'pending' && tag.classList.contains('pending')) ||
+                       (sub === 'cancelled' && tag.classList.contains('cancelled'));
+            item.style.display = show ? 'block' : 'none';
+        }
+    });
+    // 显示佣金面板
+    document.querySelectorAll('.tab-pane').forEach(function(p) { p.style.display = 'none'; });
+    var cp = document.getElementById('tab-commission');
+    if (cp) { cp.style.display = 'block'; cp.classList.remove('hidden'); }
+}
+
+function switchTab(tabName) {
+    var tabs = document.querySelectorAll('.detail-tab');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    var activeTab = document.querySelector('.detail-tab[data-tab="' + tabName + '"]');
+    if (activeTab) activeTab.classList.add('active');
+
+    var panes = document.querySelectorAll('.tab-pane');
+    panes.forEach(function(p) { p.classList.add('hidden'); });
+
+    if (tabName === 'commission') {
+        document.getElementById('tab-commission').classList.remove('hidden');
+    } else if (tabName === 'finance') {
+        document.getElementById('tab-finance').classList.remove('hidden');
+    } else if (tabName === 'withdraw') {
+        document.getElementById('tab-withdraw').classList.remove('hidden');
+    } else if (tabName === 'growth') {
+        document.getElementById('tab-growth-pane').classList.remove('hidden');
+    }
+}
+
+// ===== 状态切换 =====
+function updateStateVisibility() {
+    var ids = ['state-not-joined', 'state-disabled', 'page-home', 'page-detail', 'page-growth-detail'];
+    ids.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.style.display = 'none'; el.classList.add('hidden'); }
+    });
+    if (demoMode === 'not-joined') {
+        var s = document.getElementById('state-not-joined');
+        if (s) { s.style.display = ''; s.classList.remove('hidden'); }
+    } else if (demoMode === 'disabled') {
+        var s = document.getElementById('state-disabled');
+        if (s) { s.style.display = ''; s.classList.remove('hidden'); }
+    } else {
+        var s = document.getElementById('page-home');
+        if (s) { s.style.display = ''; s.classList.remove('hidden'); }
+    }
+}
+
+// ===== DEMO模式切换 =====
+var demoMode = 'on';
+function setDemoMode(mode) {
+    demoMode = mode;
+    document.getElementById('demo-not-joined').classList.toggle('active', mode === 'not-joined');
+    document.getElementById('demo-disabled').classList.toggle('active', mode === 'disabled');
+    document.getElementById('demo-level-off').classList.toggle('active', mode === 'off');
+    document.getElementById('demo-level-on').classList.toggle('active', mode === 'on');
+
+    var badge = document.getElementById('level-badge');
+    var progress = document.getElementById('level-progress-section');
+    var expBtn = document.getElementById('exp-btn');
+    var growthTab = document.getElementById('tab-growth');
+
+    if (mode === 'on') {
+        badge.style.display = 'inline-flex';
+        progress.style.display = 'block';
+        expBtn.style.display = 'block';
+        growthTab.style.display = '';
+        growthTab.classList.remove('hidden');
+    } else {
+        badge.style.display = 'none';
+        progress.style.display = 'none';
+        expBtn.style.display = 'none';
+        growthTab.style.display = 'none';
+        growthTab.classList.add('hidden');
+        // 如果当前在成长值tab，切回佣金明细
+        var activeGrowth = document.querySelector('.detail-tab.active');
+        if (activeGrowth && activeGrowth.dataset.tab === 'growth') {
+            switchTab('commission');
+        }
+    }
+    updateStateVisibility();
+}
+
+// 初始化DEMO状态
+setDemoMode('on');
+
+// ===== Toast =====
+function switchWithdrawMethod(method, el) {
+    document.querySelectorAll('.withdraw-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+    document.querySelectorAll('.withdraw-method-panel').forEach(function(p) { p.style.display = 'none'; });
+    document.getElementById('withdraw-method-' + method).style.display = 'block';
+}
+
+function openWithdrawModal() {
+    var overlay = document.getElementById('withdraw-overlay');
+    if (overlay) { overlay.classList.add('show'); }
+}
+function closeWithdrawModal() {
+    var overlay = document.getElementById('withdraw-overlay');
+    if (overlay) { overlay.classList.remove('show'); }
+}
+function goGrowthDetail() {
+    document.getElementById('page-home').style.display = 'none';
+    document.getElementById('page-detail').style.display = 'none';
+    document.getElementById('page-detail').classList.add('hidden');
+    var pg = document.getElementById('page-growth-detail');
+    pg.classList.remove('hidden');
+    pg.style.display = 'flex';
+}
+
+function goDetailTab(tab) {
+    goDetailTo(tab);
+}
+
+function goDetailTo(page) {
+    document.getElementById('page-home').style.display = 'none';
+    document.getElementById('page-detail').classList.remove('hidden');
+    document.getElementById('page-detail').style.display = 'flex';
+    
+    // 隐藏所有 pane
+    document.querySelectorAll('.tab-pane').forEach(function(p) { p.style.display = 'none'; });
+    
+    // 根据入口显示对应内容
+    var titleMap = { commission: '佣金明细', finance: '收支记录', users: '邀请用户', withdraw: '提现记录' };
+    document.getElementById('detail-page-title').textContent = titleMap[page] || '明细';
+    
+    // 佣金明细显示子Tab，其他不显示
+    var subTabs = document.getElementById('detail-sub-tabs');
+    if (page === 'commission') {
+        subTabs.style.display = 'flex';
+        switchSubTab('settled');
+    } else {
+        subTabs.style.display = 'none';
+        var paneId = 'tab-' + page;
+        var pane = document.getElementById(paneId);
+        if (pane) { pane.style.display = 'block'; pane.classList.remove('hidden'); }
+    }
+}
+
+function showToast(msg) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:absolute;top:60px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;z-index:9999;white-space:nowrap;';
+    document.getElementById('phone-frame').appendChild(t);
+    setTimeout(function() { t.remove(); }, 2000);
+}
+
+// ===== 标注系统JS =====
+const STORAGE_KEY='annotated-prototype-app-promotion';let currentAnnotation=null;let isEditing=false;let customAnnotations=null;
+const DETAIL_LABELS={feature:'功能说明',display:'字段/展示规则',interaction:'交互规则',business:'业务规则',state:'状态说明',exception:'异常/边界',copywriting:'文案规范'};
+function loadCustomAnnotations(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)customAnnotations=JSON.parse(s);}catch(e){}}
+function getActiveAnnotations(){return customAnnotations||annotations;}
+function renderAnnotationList(){const list=document.getElementById('annotation-list');const data=getActiveAnnotations();list.innerHTML=data.map(function(item){return '<div class="annotation-item" data-id="'+item.id+'" onclick="handleAnnotationClick('+item.id+')" onmouseenter="highlightMarker('+item.id+')" onmouseleave="unhighlightMarker('+item.id+')"><div class="annotation-header"><div class="annotation-badge">'+item.id+'</div><div class="annotation-title">'+item.title+'</div></div><div class="annotation-summary">'+item.summary+'</div></div>';}).join('');}
+function highlightMarker(id){const m=document.querySelector('.anno-marker[data-id="'+id+'"]');if(m)m.classList.add('highlight');const i=document.querySelector('.annotation-item[data-id="'+id+'"]');if(i)i.classList.add('active');}
+function unhighlightMarker(id){const m=document.querySelector('.anno-marker[data-id="'+id+'"]');if(m)m.classList.remove('highlight');const i=document.querySelector('.annotation-item[data-id="'+id+'"]');if(i)i.classList.remove('active');}
+
+function bindMarkers(){
+    document.querySelectorAll('.anno-marker').forEach(function(m){
+        m.addEventListener('mouseenter',function(){highlightMarker(parseInt(m.dataset.id));});
+        m.addEventListener('mouseleave',function(){unhighlightMarker(parseInt(m.dataset.id));});
+        m.addEventListener('click',function(){showDetail(parseInt(m.dataset.id));});
+    });
+}
+
+function createMarkers(){
+    var data=getActiveAnnotations();
+    document.querySelectorAll('.anno-marker').forEach(function(m){m.remove();});
+    data.forEach(function(item){
+        if(item.showMarker){
+            var target=document.querySelector(item.target);
+            if(target){
+                var marker=document.createElement('div');
+                marker.className='anno-marker';
+                marker.dataset.id=item.id;
+                marker.textContent=item.id;
+                target.style.position='relative';
+                target.appendChild(marker);
+            }
+        }
+    });
+    bindMarkers();
+}
+
+function handleAnnotationClick(id){scrollToAnnotation(id);setTimeout(function(){showDetail(id);},300);}
+function scrollToAnnotation(id){const data=getActiveAnnotations();const item=data.find(function(a){return a.id===id;});if(!item)return;const target=document.querySelector(item.target);const pa=document.querySelector('.preview-area');if(target&&pa){const t=target.offsetTop-20;pa.scrollTo({top:t,behavior:'smooth'});target.classList.remove('anno-flash');void target.offsetWidth;target.classList.add('anno-flash');setTimeout(function(){target.classList.remove('anno-flash');},1500);}}
+function showDetail(id){const item=getActiveAnnotations().find(function(a){return a.id===id;});if(!item)return;currentAnnotation=item;isEditing=false;document.getElementById('modal-title').textContent=item.id+'. '+item.title;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display=customAnnotations?'inline-flex':'none';document.getElementById('delete-btn').style.display=(id!==1)?'inline-flex':'none';document.getElementById('detail-modal').classList.add('show');}
+function renderDetailTable(item){const d=item.detail;const rows=[];['feature','display','interaction','business','state','exception','copywriting'].forEach(function(k){if(d[k])rows.push({label:DETAIL_LABELS[k],value:d[k],key:k});});const t=document.getElementById('detail-table');if(isEditing){t.innerHTML=rows.map(function(r){return '<tr><th>'+r.label+'</th><td><textarea data-key="'+r.key+'">'+r.value+'</textarea></td></tr>';}).join('');}else{t.innerHTML=rows.map(function(r){return '<tr><th>'+r.label+'</th><td>'+r.value.replace(/\n/g,'<br>')+'</td></tr>';}).join('');}}
+function toggleEdit(){isEditing=!isEditing;renderDetailTable(currentAnnotation);document.getElementById('edit-btn').style.display=isEditing?'none':'inline-flex';document.getElementById('save-btn').style.display=isEditing?'inline-flex':'none';}
+function saveAnnotation(){const tas=document.querySelectorAll('#detail-table textarea');if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const item=customAnnotations.find(function(a){return a.id===currentAnnotation.id;});if(!item)return;tas.forEach(function(ta){item.detail[ta.dataset.key]=ta.value;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));currentAnnotation=item;isEditing=false;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display='inline-flex';renderAnnotationList();}
+function resetAnnotation(){if(!confirm('确定要重置为原始内容吗？'))return;localStorage.removeItem(STORAGE_KEY);customAnnotations=null;renderAnnotationList();closeModal();}
+function closeModal(){document.getElementById('detail-modal').classList.remove('show');}
+document.getElementById('detail-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+const PANEL_STATE_KEY=STORAGE_KEY+'-panel';
+function initPanelState(){try{const c=localStorage.getItem(PANEL_STATE_KEY)==='1';if(c){document.getElementById('annotation-panel').classList.add('collapsed');document.getElementById('panel-expand-btn').classList.add('show');}}catch(e){}}
+function togglePanel(){const p=document.getElementById('annotation-panel');const b=document.getElementById('panel-expand-btn');const c=p.classList.toggle('collapsed');b.classList.toggle('show',c);try{localStorage.setItem(PANEL_STATE_KEY,c?'1':'0');}catch(e){}}
+function openEditMode(){const data=getActiveAnnotations();let h='<div style="display:flex;flex-direction:column;">';data.forEach(function(item){h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #E4E7ED;"><div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail('+item.id+')"><div class="annotation-badge">'+item.id+'</div><div style="font-size:13px;font-weight:600;">'+item.title+'</div><div style="font-size:11px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+item.summary+'</div></div><div style="display:flex;gap:6px;"><button class="btn btn-default" style="padding:3px 10px;font-size:11px;" onclick="closeManageModal();showDetail('+item.id+');setTimeout(()=>toggleEdit(),100)">编辑</button>'+(item.id!==1?'<button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="deleteAnnotationById('+item.id+')">删除</button>':'')+'</div></div>';});h+='</div>';document.getElementById('manage-modal-body').innerHTML=h;document.getElementById('manage-modal').classList.add('show');}
+function closeManageModal(){document.getElementById('manage-modal').classList.remove('show');}
+function deleteAnnotationById(id){const data=getActiveAnnotations();const item=data.find(function(a){return a.id===id;});if(!item||item.id===1)return;if(!confirm('确定要删除标注「'+item.title+'」吗？'))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(function(a){return a.id!==id;});customAnnotations.forEach(function(a,i){a.id=i+1;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();createMarkers();openEditMode();}
+function addAnnotation(){if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const nid=customAnnotations.length+1;const ni={id:nid,title:'新标注 '+nid,summary:'点击编辑修改...',target:'#anno-'+nid,showMarker:true,type:'area',detail:{feature:'请填写功能说明...'}};customAnnotations.push(ni);localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();createMarkers();closeManageModal();currentAnnotation=ni;isEditing=true;document.getElementById('modal-title').textContent=ni.id+'. '+ni.title;renderDetailTable(ni);document.getElementById('edit-btn').style.display='none';document.getElementById('save-btn').style.display='inline-flex';document.getElementById('reset-btn').style.display='none';document.getElementById('delete-btn').style.display='inline-flex';document.getElementById('detail-modal').classList.add('show');}
+function deleteAnnotation(){if(!currentAnnotation||currentAnnotation.id===1)return;if(!confirm('确定要删除标注「'+currentAnnotation.title+'」吗？'))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(function(a){return a.id!==currentAnnotation.id;});customAnnotations.forEach(function(item,i){item.id=i+1;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));closeModal();renderAnnotationList();createMarkers();}
+function exportAnnotatedHTML(){const ad=getActiveAnnotations();const oh=document.documentElement.outerHTML;const ds=JSON.stringify(ad,null,2);const nh=oh.replace(/const annotations = \[[\s\S]*?\n\];/,'const annotations = '+ds+';');const blob=new Blob([nh],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(document.title||'原型')+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+
+// ===== 初始化 =====
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+createMarkers();
+</script>
+</body>
+</html>
