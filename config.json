@@ -57,6 +57,11 @@
             "name": "推广联盟主页",
             "file": "docs/promotion-alliance-user.html",
             "icon": "📱"
+          },
+          {
+            "name": "APP推广联盟主页",
+            "file": "docs/promotion-alliance-app.html",
+            "icon": "📋"
           }
         ]
       }
