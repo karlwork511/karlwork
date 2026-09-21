@@ -720,7 +720,8 @@
 
     <!-- 业务弹窗：编辑推广员 -->
     <div class="modal-overlay" id="edit-modal">
-        <div class="modal">
+        <div class="modal" style="position:relative;">
+            <div class="anno-marker" data-id="8" style="z-index:1001;">8</div>
             <div class="modal-header">
                 <div class="modal-title">编辑推广员</div>
                 <button class="modal-close" onclick="closeBizModal('edit-modal')">×</button>
@@ -798,7 +799,8 @@
 
     <!-- 业务弹窗：禁用确认 -->
     <div class="modal-overlay" id="disable-modal">
-        <div class="modal" style="width:420px;">
+        <div class="modal" style="width:420px;position:relative;">
+            <div class="anno-marker" data-id="10" style="z-index:1001;">10</div>
             <div class="modal-header">
                 <div class="modal-title">确认禁用</div>
                 <button class="modal-close" onclick="closeBizModal('disable-modal')">×</button>
@@ -908,7 +910,7 @@
                 type: 'interaction',
                 detail: {
                     feature: '点击操作列更多按钮展开下拉菜单，提供单条推广员的管理操作',
-                    interaction: '编辑：打开标注7编辑弹窗修改佣金率等信息；详情：跳转佣金详情页（含邀请记录/交易记录/提现申请/成长值明细四个子 Tab）；等级调整：打开标注8等级调整弹窗；禁用：打开标注9禁用确认弹窗；删除：打开标注10删除确认弹窗',
+                    interaction: '编辑：打开标注7编辑弹窗修改佣金率等信息；详情：跳转佣金详情页（含邀请记录/佣金明细/收支记录/提现申请/成长值明细五个子Tab）；等级调整：打开标注8等级调整弹窗；禁用：打开标注9禁用确认弹窗；删除：打开标注10删除确认弹窗',
                     business: '删除操作需二次确认提示；禁用后停止新佣金产生，已生成的待结算佣金继续结算，禁止提现'
                 }
             },
@@ -921,7 +923,7 @@
                 type: 'area',
                 detail: {
                     feature: '将佣金规则配置和提现规则配置整合为「规则配置」Tab，与推广员管理、收支记录、数据概览共同组成顶部导航',
-                    display: '水平排列四个 Tab 标签，当前页高亮显示（蓝色底边），其他页灰色，鼠标悬停变蓝',
+                    display: '水平排列五个 Tab 标签，当前页高亮显示（蓝色底边），其他页灰色，鼠标悬停变蓝',
                     interaction: '点击 Tab 标签切换对应功能页面，当前页面标签高亮，内容区域刷新为对应页面',
                     business: '规则配置 Tab 整合佣金规则配置和提现规则配置两部分内容，统一管理推广联盟的佣金与提现策略。佣金明细展示每笔订单佣金的预估、结算、取消全链路；提现审核为独立页面（归属财务模块），不在此导航中'
                 }
