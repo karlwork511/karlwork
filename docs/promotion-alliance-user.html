@@ -281,6 +281,38 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   .social-channels { flex-wrap: wrap; }
   .asset-section { grid-template-columns: 1fr; }
 }
+
+/* 推广方式列表 */
+.promo-method-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.promo-method-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #f7f8fa; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+.promo-method-item:hover { background: #e8effd; }
+.promo-method-item:active { background: #dce6fc; }
+.method-icon { width: 44px; height: 44px; border-radius: 10px; background: #165DFF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.method-info { flex: 1; }
+.method-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.method-desc { font-size: 12px; color: #86909c; }
+.method-action { padding: 8px 16px; background: #165DFF; color: #fff; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.method-action:hover { background: #4080FF; }
+.method-arrow { color: #c9cdd4; font-size: 16px; }
+/* 海报弹窗 */
+.poster-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.poster-modal-overlay.show { display: flex; }
+.poster-modal-box { background: #fff; border-radius: 12px; width: 90%; max-width: 360px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.poster-modal-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.poster-modal-title { font-size: 16px; font-weight: 600; }
+.poster-modal-close { width: 28px; height: 28px; border: none; background: #f2f3f5; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #86909c; }
+.poster-modal-close:hover { background: #e5e6eb; }
+.poster-modal-body { padding: 24px; text-align: center; }
+.poster-image { width: 100%; max-width: 280px; height: 360px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; padding: 20px; }
+.poster-image-logo { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+.poster-image-text { font-size: 13px; text-align: center; margin-bottom: 16px; opacity: 0.9; line-height: 1.6; }
+.poster-image-qr { width: 100px; height: 100px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 11px; margin-bottom: 16px; }
+.poster-image-footer { font-size: 11px; opacity: 0.8; }
+.poster-modal-hint { margin-top: 16px; font-size: 13px; color: #86909c; }
+.poster-modal-footer { padding: 16px 20px; border-top: 1px solid #f0f0f0; }
+.btn-save-poster { width: 100%; padding: 12px; background: #165DFF; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-save-poster:hover { background: #4080FF; }
+
 </style>
 </head>
 <body>
@@ -533,20 +565,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
               <div id="anno-7-c1" class="anno-item" style="position:relative;">
                 <div class="anno-badge" data-anno="7" style="top:-8px;left:-8px;">7</div>
                 <div class="promo-card">
-                  <div class="promo-card-title">立即推广</div>
-                  <div class="promo-card-desc">选择推广方式，分享邀请链接或邀请码给好友，好友注册下单即可获得佣金奖励</div>
-                  <div class="promo-content" style="display:flex;gap:16px;align-items:flex-start;">
-                    <div class="promo-method" style="flex:1;text-align:center;">
-                      <div class="invite-code-label" style="margin-bottom:8px;">分享邀请链接</div>
-                      <button class="btn-copy-link" onclick="copyInviteLink()" style="width:100%;">复制邀请链接</button>
-                    </div>
-                    <div class="promo-method" style="flex:1;text-align:center;">
-                      <div class="invite-code-label" style="margin-bottom:8px;">分享我的邀请码</div>
-                      <div class="invite-code-value" style="justify-content:center;margin-bottom:8px;">
-                        <span class="invite-code-text">ABCD1234</span>
-                        <span class="copy-icon" onclick="copyInviteCode()" title="复制邀请码"></span>
+                  <div class="promo-card-title">分享推广</div>
+                  <div class="promo-card-desc">选择推广方式，好友通过你的邀请注册下单，你即可获得佣金奖励</div>
+                  <div class="promo-method-list">
+                    <div class="promo-method-item" onclick="copyPromoCode()">
+                      <div class="method-icon"></div>
+                      <div class="method-info">
+                        <div class="method-name">复制推广码</div>
+                        <div class="method-desc">好友手动输入推广码完成绑定</div>
                       </div>
-                      <button class="btn-copy-link" onclick="copyInviteCode()" style="width:100%;">复制邀请码</button>
+                      <button class="method-action">复制</button>
+                    </div>
+                    <div class="promo-method-item" onclick="copyPromoLink()">
+                      <div class="method-icon"></div>
+                      <div class="method-info">
+                        <div class="method-name">复制推广链接</div>
+                        <div class="method-desc">好友点击链接直接进入注册页</div>
+                      </div>
+                      <button class="method-action">复制</button>
+                    </div>
+                    <div class="promo-method-item" onclick="showPosterModal()">
+                      <div class="method-icon">️</div>
+                      <div class="method-info">
+                        <div class="method-name">分享推广海报</div>
+                        <div class="method-desc">生成专属海报，保存图片后分享给好友</div>
+                      </div>
+                      <button class="method-action">生成海报</button>
                     </div>
                   </div>
                 </div>
@@ -764,20 +808,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
               <div id="anno-7-c2" class="anno-item" style="position:relative;">
                 <div class="anno-badge" data-anno="7" style="top:-8px;left:-8px;">7</div>
                 <div class="promo-card">
-                  <div class="promo-card-title">立即推广</div>
-                  <div class="promo-card-desc">选择推广方式，分享邀请链接或邀请码给好友，好友注册下单即可获得佣金奖励</div>
-                  <div class="promo-content" style="display:flex;gap:16px;align-items:flex-start;">
-                    <div class="promo-method" style="flex:1;text-align:center;">
-                      <div class="invite-code-label" style="margin-bottom:8px;">分享邀请链接</div>
-                      <button class="btn-copy-link" onclick="copyInviteLink()" style="width:100%;">复制邀请链接</button>
-                    </div>
-                    <div class="promo-method" style="flex:1;text-align:center;">
-                      <div class="invite-code-label" style="margin-bottom:8px;">分享我的邀请码</div>
-                      <div class="invite-code-value" style="justify-content:center;margin-bottom:8px;">
-                        <span class="invite-code-text">ABCD1234</span>
-                        <span class="copy-icon" onclick="copyInviteCode()" title="复制邀请码">📋</span>
+                  <div class="promo-card-title">分享推广</div>
+                  <div class="promo-card-desc">选择推广方式，好友通过你的邀请注册下单，你即可获得佣金奖励</div>
+                  <div class="promo-method-list">
+                    <div class="promo-method-item" onclick="copyPromoCode()">
+                      <div class="method-icon"></div>
+                      <div class="method-info">
+                        <div class="method-name">复制推广码</div>
+                        <div class="method-desc">好友手动输入推广码完成绑定</div>
                       </div>
-                      <button class="btn-copy-link" onclick="copyInviteCode()" style="width:100%;">复制邀请码</button>
+                      <div class="method-arrow">›</div>
+                    </div>
+                    <div class="promo-method-item" onclick="copyPromoLink()">
+                      <div class="method-icon"></div>
+                      <div class="method-info">
+                        <div class="method-name">复制推广链接</div>
+                        <div class="method-desc">好友点击链接直接进入注册页</div>
+                      </div>
+                      <div class="method-arrow">›</div>
+                    </div>
+                    <div class="promo-method-item" onclick="showPosterModal()">
+                      <div class="method-icon">️</div>
+                      <div class="method-info">
+                        <div class="method-name">分享推广海报</div>
+                        <div class="method-desc">生成专属海报，保存图片后分享给好友</div>
+                      </div>
+                      <div class="method-arrow">›</div>
                     </div>
                   </div>
                 </div>
@@ -1148,9 +1204,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
     <div class="anno-card" data-card="7">
       <div class="anno-card-header">
         <div class="anno-card-num">7</div>
-        <div class="anno-card-title">立即推广区</div>
+        <div class="anno-card-title">分享推广区</div>
       </div>
-      <div class="anno-card-summary">白色卡片展示推广二维码和邀请码，左侧二维码+下载按钮，右侧邀请码+复制按钮。</div>
+      <div class="anno-card-summary">白色卡片展示三种推广方式：复制推广码、复制推广链接、分享推广海报，每种方式含图标+名称+说明+操作按钮。</div>
       <div class="anno-card-tags">
         <span class="anno-tag type-area">区域</span>
         <span class="anno-tag type-interaction">交互</span>
@@ -1159,11 +1215,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
     <div class="anno-detail-panel" data-detail="7">
       <div class="anno-detail-section">
         <div class="anno-detail-label">功能说明</div>
-        <div class="anno-detail-content">标题"立即推广"+说明文字。展示两种推广方式：分享邀请链接（含二维码+复制链接按钮）和分享我的邀请码（含邀请码+复制按钮）</div>
+        <div class="anno-detail-content">标题"分享推广"+说明文字。展示三种推广方式：复制推广码、复制推广链接、分享推广海报。每种方式包含图标、名称、说明描述。</div>
       </div>
       <div class="anno-detail-section">
         <div class="anno-detail-label">交互说明</div>
-        <div class="anno-detail-content">点击"复制邀请链接"按钮复制邀请链接到剪贴板；点击"复制邀请码"按钮复制邀请码到剪贴板。均显示Toast提示。</div>
+        <div class="anno-detail-content">   复制推广码：点击"复制"按钮，将推广码复制到剪贴板，显示Toast提示。<br>
+          ② 复制推广链接：点击"复制"按钮，将推广链接复制到剪贴板，显示Toast提示。<br>
+           分享推广海报：点击"生成海报"按钮，弹出海报预览弹窗。海报包含POKO品牌Logo、推广文案、专属二维码、下载提示。弹窗提供"保存海报"按钮，点击后下载图片到本地。点击遮罩或关闭按钮可关闭弹窗。</div>
       </div>
     </div>
 
@@ -1431,7 +1489,79 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
+
+// 复制推广码
+function copyPromoCode() {
+  const code = 'ABCD1234';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast('✅ 推广码已复制：' + code);
+    }).catch(() => {
+      showToast('❌ 复制失败，请手动复制');
+    });
+  } else {
+    showToast('推广码：' + code);
+  }
+}
+// 复制推广链接
+function copyPromoLink() {
+  const link = 'https://poko.example.com/register?ref=ABCD1234';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(() => {
+      showToast('✅ 链接已复制');
+    }).catch(() => {
+      showToast('❌ 复制失败，请手动复制');
+    });
+  } else {
+    showToast('链接：' + link);
+  }
+}
+// 显示海报弹窗
+function showPosterModal() {
+  document.getElementById('posterModal').classList.add('show');
+}
+// 关闭海报弹窗
+function closePosterModal() {
+  document.getElementById('posterModal').classList.remove('show');
+}
+// 保存海报
+function savePoster() {
+  showToast('✅ 海报已保存');
+  setTimeout(() => closePosterModal(), 1000);
+}
+// 点击遮罩关闭海报弹窗
+document.addEventListener('DOMContentLoaded', function() {
+  const posterModal = document.getElementById('posterModal');
+  if (posterModal) {
+    posterModal.addEventListener('click', function(e) {
+      if (e.target === this) closePosterModal();
+    });
+  }
+});
+
 </script>
+
+<!-- 海报弹窗 -->
+<div class="poster-modal-overlay" id="posterModal">
+  <div class="poster-modal-box">
+    <div class="poster-modal-header">
+      <div class="poster-modal-title">我的推广海报</div>
+      <button class="poster-modal-close" onclick="closePosterModal()">✕</button>
+    </div>
+    <div class="poster-modal-body">
+      <div class="poster-image">
+        <div class="poster-image-logo">POKO</div>
+        <div class="poster-image-text">跨境购物更简单<br>新人立享优惠</div>
+        <div class="poster-image-qr">二维码</div>
+        <div class="poster-image-footer">扫码下载 POKO APP</div>
+      </div>
+      <div class="poster-modal-hint">长按图片保存或点击下方按钮</div>
+    </div>
+    <div class="poster-modal-footer">
+      <button class="btn-save-poster" onclick="savePoster()">💾 保存海报</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
