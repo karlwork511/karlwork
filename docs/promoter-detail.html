@@ -149,11 +149,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 <table class="data-table">
 <thead><tr><th>#</th><th>用户信息</th><th>昵称</th><th>注册时间</th><th>最后登录时间</th><th>解绑时间</th><th>当前状态</th></tr></thead>
 <tbody>
-<tr><td>1</td><td>U100201</td><td>用户A</td><td>2026-07-10</td><td>2026-09-15</td><td>2027-07-10</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
-<tr><td>2</td><td>U100202</td><td>用户B</td><td>2026-07-12</td><td>2026-09-10</td><td>2027-07-12</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
+<tr><td>1</td><td>U100201</td><td>用户A</td><td>2026-07-10</td><td>2026-09-15</td><td>-</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
+<tr><td>2</td><td>U100202</td><td>用户B</td><td>2026-07-12</td><td>2026-09-10</td><td>-</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
 <tr><td>3</td><td>U100203</td><td>用户C</td><td>2026-08-01</td><td>2026-09-16</td><td>2026-09-01</td><td><span class="status-tag status-unbound">已解绑</span></td></tr>
 <tr><td>4</td><td>U100204</td><td>用户D</td><td>2026-08-15</td><td>2026-09-12</td><td>2026-09-10</td><td><span class="status-tag status-unbound">已解绑</span></td></tr>
-<tr><td>5</td><td>U100205</td><td>用户E</td><td>2026-08-20</td><td>2026-08-25</td><td>2027-08-20</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
+<tr><td>5</td><td>U100205</td><td>用户E</td><td>2026-08-20</td><td>2026-08-25</td><td>-</td><td><span class="status-tag status-bound">已绑定</span></td></tr>
 </tbody>
 </table>
 <div class="pagination"><span>共28条</span><button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>›</button></div>
@@ -278,7 +278,7 @@ const annotations=[
 {id:2,title:'推广员信息卡',summary:'展示推广员基本信息和历史推广数据，不受时间筛选影响',target:'#anno-2',showMarker:true,type:'area',detail:{feature:'Tab列表上方固定展示该推广员的核心信息，便于快速了解推广员概况。',display:'共9个字段：推广员编号、昵称、当前等级、成长值、佣金费率、累计推广用户数、可提现金额、待结算金额、已结算金额。其中等级用主色高亮显示。'}},
 {id:3,title:'Tab导航',summary:'5个子Tab切换：邀请记录/佣金明细/收支记录/提现申请/成长值明细',target:'#anno-3',showMarker:true,type:'area',detail:{feature:'点击Tab切换下方内容区域，默认展示「邀请记录」。',interaction:'点击Tab切换对应面板内容，当前Tab高亮显示（主色+底部边线）。'}},
 {id:4,title:'邀请记录',summary:'展示该推广员邀请的用户列表，含绑定状态和解绑时间',target:'#anno-4',showMarker:true,type:'area',detail:{feature:'记录推广员邀请的所有用户，支持日期筛选。',display:'字段：序号、用户信息、昵称、注册时间、最后登录时间、解绑时间（未解绑显示"-"）、当前状态（已绑定/已解绑）。',business:'「已解绑」用户显示解绑时间，「已绑定」用户解绑时间显示"-"。'}},
-{id:5,title:'提现申请',summary:'展示该推广员的提现申请记录，支持状态筛选和导出',target:'#anno-5',showMarker:true,type:'area',detail:{feature:'记录推广员提交的提现申请，运营可筛选查看不同状态的申请。',display:'字段：序号、序列号、代理ID、代理昵称、提现金额、账户信息（银行卡号+开户行+开户名）、状态、申请时间。',interaction:'支持状态筛选（全部/待审核/已批准/已拒绝），支持导出列表。',state:'待审核→运营审核后可变为已批准或已拒绝；已批准=佣金已打款；已拒绝=佣金退回余额。'}}
+{id:5,title:'提现申请',summary:'展示该推广员的提现申请记录，支持状态筛选和导出',target:'#anno-5',showMarker:true,type:'area',detail:{feature:'记录推广员提交的提现申请，运营可筛选查看不同状态的申请。',display:'字段：序号、佣金提现单号、推广员编号、昵称、提现金额、收款人及收款账户、状态、申请时间。',interaction:'支持状态筛选（全部/待审核/已批准/已拒绝），支持导出列表。',state:'待审核→运营审核后可变为已批准或已拒绝；已批准=佣金已打款；已拒绝=佣金退回余额。'}}
 ];
 const DETAIL_LABELS={feature:'功能说明',display:'字段/展示规则',interaction:'交互规则',business:'业务规则',state:'状态说明',exception:'异常/边界',copywriting:'文案规范'};
 function loadCustomAnnotations(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)customAnnotations=JSON.parse(s)}catch(e){}}
