@@ -3,7 +3,13 @@
     "id": "promotion-alliance",
     "name": "推广联盟",
     "desc": "推广员管理、佣金规则、等级体系、提现规则、收支记录、佣金明细、数据概览完整原型",
-    "docs": [],
+    "docs": [
+      {
+        "name": "推广联盟需求文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/Xhz3dzlaToG99tx2mvdcsctyn7c",
+        "icon": "📎"
+      }
+    ],
     "groups": [
       {
         "title": "运营 · 推广管理",
