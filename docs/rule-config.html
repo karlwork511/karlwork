@@ -1,495 +1,1608 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>规则配置页 - POKO推广联盟</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
-.app-container { display: flex; flex-direction: row; height: 100vh; }
-.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
-.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease; }
-.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
-.panel-header { padding: 12px 16px; font-size: 14px; font-weight: 600; color: #333; border-bottom: 1px solid #E4E7ED; background: #F7F8FA; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 8px; }
-.panel-toggle-btn { width: 24px; height: 24px; border: none; background: #E8EAED; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
-.panel-expand-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 36px; height: 48px; background: #165DFF; color: #fff; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15); }
-.panel-expand-btn.show { display: block; }
-.panel-expand-btn:hover { background: #0E42D2; }
-.annotation-item { padding: 12px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.2s; }
-.annotation-item:hover { background: #EEF0F3; }
-.annotation-item.active { background: #E8F3FF; }
-.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.annotation-badge { width: 20px; height: 20px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.annotation-title { font-size: 13px; font-weight: 600; color: #333; }
-.annotation-summary { font-size: 11px; color: #888; line-height: 1.5; padding-left: 30px; }
-.anno-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none; }
-.anno-marker.highlight, .anno-marker:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4); }
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-.modal-overlay.show { display: flex; }
-.modal { background: #fff; border-radius: 8px; width: 520px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; }
-.modal-header { padding: 16px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
-.modal-title { font-size: 15px; font-weight: 600; color: #333; }
-.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; }
-.modal-close:hover { color: #333; }
-.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
-.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
-.detail-table { width: 100%; border-collapse: collapse; }
-.detail-table th { background: #FAFAFA; width: 100px; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; vertical-align: top; }
-.detail-table td { padding: 10px 14px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.6; }
-.detail-table textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; }
-.detail-table textarea:focus { border-color: #165DFF; }
-.btn { padding: 7px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
-.btn-primary { background: #165DFF; color: #fff; }
-.btn-primary:hover { background: #0E42D2; }
-.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
-.btn-default:hover { border-color: #165DFF; color: #165DFF; }
-.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
-.btn-danger:hover { background: #F53F3F; color: #fff; }
-.anno-flash { animation: flashHighlight 1.5s ease-out; }
-@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); } 100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则配置页</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
 
-/* 页面样式 */
-.page-header { margin-bottom: 16px; }
-.page-header h1 { font-size: 18px; font-weight: 600; }
-.tab-nav { display: flex; gap: 24px; border-bottom: 1px solid #E4E7ED; margin-bottom: 20px; }
-.tab-item { padding: 10px 0; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
-.tab-item:hover { color: #165DFF; }
-.tab-item.active { color: #165DFF; font-weight: 600; border-bottom-color: #165DFF; }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
 
-.config-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-.config-card-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
-.config-row { display: flex; align-items: center; padding: 10px 0; }
-.config-label { font-size: 13px; color: #666; min-width: 100px; }
-.form-select { padding: 6px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; background: #fff; }
-.form-select:focus { border-color: #165DFF; }
-.form-input { padding: 6px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; width: 200px; }
-.form-input:focus { border-color: #165DFF; }
+        /* 左右分栏容器 */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
 
-.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #DCDFE6; border-radius: 20px; transition: 0.3s; }
-.switch-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
-.switch input:checked + .switch-slider { background: #165DFF; }
-.switch input:checked + .switch-slider:before { transform: translateX(20px); }
+        /* 顶部标注工具栏 */
+        .annotation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 8px 16px;
+            background: #fff;
+            border-bottom: 1px solid #E4E7ED;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .toolbar-edit-btn {
+            padding: 6px 14px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
 
-.level-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.level-table th { background: #FAFBFC; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 500; color: #666; border: 1px solid #E8E8E8; }
-.level-table td { padding: 10px 14px; font-size: 13px; border: 1px solid #E8E8E8; }
-.level-table input { padding: 6px 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; width: 100%; outline: none; }
-.level-table input:focus { border-color: #165DFF; }
-.icon-btn { padding: 3px 6px; border: none; background: transparent; cursor: pointer; font-size: 13px; color: #165DFF; }
-.icon-btn:hover { color: #0E42D2; }
-.icon-btn.danger { color: #F53F3F; }
-.icon-btn.danger:hover { color: #C02020; }
-.action-bar { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-.toolbar-edit-btn { padding: 4px 10px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; transition: all 0.2s; }
-.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
-</style>
+        .preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+
+        /* 右侧标注面板 */
+        .annotation-panel {
+            width: 300px;
+            background: #F7F8FA;
+            border-left: 1px solid #E4E7ED;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+        .annotation-panel.collapsed {
+            width: 0;
+            border-left: none;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #E4E7ED;
+            background: #F7F8FA;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-toggle-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #E8EAED;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+        .panel-expand-btn {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 48px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 999;
+            display: none;
+            box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+        }
+        .panel-expand-btn.show { display: block; }
+        .panel-expand-btn:hover { background: #0E42D2; }
+        .annotation-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #E4E7ED;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .annotation-item:hover { background: #EEF0F3; }
+        .annotation-item.active { background: #E8F3FF; }
+        .annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .annotation-badge {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+        .annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+        /* 数字角标 */
+        .anno-marker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #165DFF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            z-index: 9999;
+            user-select: none;
+        }
+        .anno-marker.highlight,
+        .anno-marker:hover {
+            opacity: 1;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 560px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title { font-size: 16px; font-weight: 600; color: #333; }
+        .modal-close {
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            font-size: 20px; color: #999;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { color: #333; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #E4E7ED;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 详情表格 */
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            background: #FAFAFA;
+            width: 100px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border: 1px solid #E4E7ED;
+            vertical-align: top;
+        }
+        .detail-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #E4E7ED;
+            line-height: 1.7;
+        }
+        .detail-table textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+        .detail-table textarea:focus { border-color: #165DFF; }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #165DFF; color: #fff; }
+        .btn-primary:hover { background: #0E42D2; }
+        .btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+        .btn-default:hover { border-color: #165DFF; color: #165DFF; }
+        .btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+        .btn-danger:hover { background: #F53F3F; color: #fff; }
+
+        /* 滚动定位闪烁动画 */
+        .anno-flash {
+            animation: flashHighlight 1.5s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+            100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+        }
+
+        /* ===== 规则配置页样式 ===== */
+        .rule-config-page {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #E4E7ED;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        .rule-desc-btn {
+            padding: 8px 16px;
+            border: 1px solid #165DFF;
+            background: #fff;
+            color: #165DFF;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .rule-desc-btn:hover {
+            background: #165DFF;
+            color: #fff;
+        }
+
+        .config-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #E4E7ED;
+            position: relative;
+        }
+        .config-section:last-of-type {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+        .form-label {
+            width: 120px;
+            font-size: 14px;
+            color: #333;
+            flex-shrink: 0;
+        }
+        .form-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .radio-item input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .input-field {
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            border-color: #165DFF;
+        }
+        .input-field.disabled {
+            background: #F5F7FA;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .input-short {
+            width: 120px;
+        }
+        .input-medium {
+            width: 200px;
+        }
+
+        .select-field {
+            padding: 8px 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .switch {
+            width: 44px;
+            height: 22px;
+            background: #DCDFE6;
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .switch.active {
+            background: #165DFF;
+        }
+        .switch-knob {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .switch.active .switch-knob {
+            transform: translateX(22px);
+        }
+        .switch-label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .textarea-field {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .textarea-field:focus {
+            border-color: #165DFF;
+        }
+
+        .sub-label {
+            font-size: 13px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        /* 等级表格 */
+        .level-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        .level-table th {
+            background: #FAFAFA;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border: 1px solid #E4E7ED;
+        }
+        .level-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid #E4E7ED;
+        }
+        .level-table input {
+            padding: 6px 10px;
+            border: 1px solid #DCDFE6;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+        .level-table input:focus {
+            border-color: #165DFF;
+        }
+        .level-table .readonly-input {
+            background: #F5F7FA;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .add-level-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            border: 1px dashed #165DFF;
+            background: #fff;
+            color: #165DFF;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .add-level-btn:hover {
+            background: #F0F5FF;
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #E4E7ED;
+        }
+        .save-btn {
+            padding: 12px 32px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .save-btn:hover {
+            background: #0E42D2;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+        .hidden-section.show {
+            display: block;
+        }
+
+        .rule-desc-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        /* 说明图标 tooltip */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #E8EAED;
+            color: #666;
+            font-size: 11px;
+            cursor: pointer;
+            margin-left: 4px;
+            position: relative;
+            font-style: normal;
+        }
+        .info-icon:hover {
+            background: #165DFF;
+            color: #fff;
+        }
+        .info-icon:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: #333;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 4px;
+            white-space: normal;
+            width: 180px;
+            z-index: 10000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            line-height: 1.6;
+        }
+
+        /* Tab 导航 */
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #E4E7ED;
+            margin-bottom: 24px;
+        }
+        .tab-item {
+            padding: 12px 24px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-item:hover {
+            color: #165DFF;
+        }
+        .tab-item.active {
+            color: #165DFF;
+            border-bottom-color: #165DFF;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="preview-area">
-        <div class="page-container" id="anno-1">
-            <div class="page-header"><h1>推广管理</h1></div>
-            <div class="tab-nav" id="anno-2">
-                <div class="anno-marker" data-id="2">2</div>
-                <div class="tab-item" onclick="window.open('https://karlwork.top/docs/promoter-list.html','_self')" style="cursor:pointer;">推广员管理</div>
-                <div class="tab-item active" onclick="window.open('https://karlwork.top/docs/rule-config.html','_self')" style="cursor:pointer;">规则配置</div>
-                <div class="tab-item" onclick="window.open('https://karlwork.top/docs/transaction-record.html','_self')" style="cursor:pointer;">收支记录</div>
-                <div class="tab-item" onclick="window.open('https://karlwork.top/docs/commission-detail.html','_self')" style="cursor:pointer;">佣金明细</div>
-                <div class="tab-item" onclick="window.open('https://karlwork.top/docs/data-overview.html','_self')" style="cursor:pointer;">数据概览</div>
-            </div>
-            <div style="display:flex;gap:20px;align-items:flex-start;">
-                <div style="flex:1;min-width:0;">
-                    <div style="position:relative;" id="anno-3">
-                        <div class="anno-marker" data-id="3">3</div>
-                        <div class="config-card" style="margin-bottom:20px;">
-                            <div class="config-card-title" style="display:flex;justify-content:space-between;align-items:center;">
-                                <span>佣金规则</span>
-                                <button class="btn btn-default" style="padding:2px 8px;font-size:11px;" onclick="openBizModal('commission-rule-desc-modal')">📝 配置规则说明</button>
-                            </div>
-                            <div style="display:flex;flex-direction:column;gap:16px;">
-                                <div style="display:flex;align-items:center;gap:16px;">
-                                    <span class="config-label">佣金基数</span>
-                                    <select class="form-select" style="flex:1;max-width:400px;">
-                                        <option>应付运费（不含增值服务费、优惠券、积分抵扣等）</option>
-                                        <option>实际总支付金额</option>
-                                        <option>应付总金额（不含优惠券、积分抵扣等）</option>
-                                    </select>
-                                </div>
-                                <div style="display:flex;align-items:center;gap:16px;">
-                                    <span class="config-label">代理等级</span>
-                                    <label class="switch"><input type="checkbox" id="level-toggle" checked onchange="toggleLevelMode()"><span class="switch-slider"></span></label>
-                                    <span style="font-size:13px;color:#666;" id="level-status-text">已开启</span>
-                                </div>
-                                <div style="display:flex;align-items:center;gap:16px;">
-                                    <span class="config-label">默认佣金率</span>
-                                    <input type="number" class="form-input" value="5" disabled id="default-rate" style="width:120px;">
-                                    <span style="font-size:13px;color:#999;" id="rate-tip">已开启代理等级，此字段不生效</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="config-card" id="level-config-card">
-                            <div class="config-card-title" style="display:flex;justify-content:space-between;align-items:center;">
-                                <span>代理等级配置</span>
-                                <button class="btn btn-primary" style="padding:5px 12px;font-size:12px;" onclick="openBizModal('add-level-modal')">+ 添加等级</button>
-                            </div>
-                            <table class="level-table">
-                                <thead><tr><th>等级名称</th><th>成长值门槛(≥)</th><th>佣金费率(%)</th><th style="width:120px;">操作</th></tr></thead>
-                                <tbody>
-                                    <tr><td><input type="text" value="铜牌"></td><td><input type="number" value="0"></td><td><input type="number" value="5"></td><td><button class="icon-btn">编辑</button> <button class="icon-btn danger">删除</button></td></tr>
-                                    <tr><td><input type="text" value="银牌"></td><td><input type="number" value="200"></td><td><input type="number" value="10"></td><td><button class="icon-btn">编辑</button> <button class="icon-btn danger">删除</button></td></tr>
-                                    <tr><td><input type="text" value="金牌"></td><td><input type="number" value="500"></td><td><input type="number" value="15"></td><td><button class="icon-btn">编辑</button> <button class="icon-btn danger">删除</button></td></tr>
-                                </tbody>
-                            </table>
-                            <div class="action-bar"><button class="btn btn-default">取消</button><button class="btn btn-primary">保存佣金规则</button></div>
-                        </div>
-                    </div>
+    <div class="app-container">
+        <!-- 顶部标注工具栏 -->
+        <div class="annotation-toolbar" id="annotation-toolbar">
+            <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+        </div>
+
+        <!-- 左右分栏容器 -->
+        <div class="main-layout">
+            <!-- 左侧原型区 -->
+            <div class="preview-area">
+            <div class="rule-config-page page-container" id="anno-1">
+                <!-- 页面总说明 - 不打角标 -->
+
+                <!-- 页面头部 -->
+                <div class="page-header">
+                    <div class="page-title">规则配置页</div>
+                    <button class="rule-desc-btn" id="anno-2">推广规则说明配置</button>
                 </div>
-                <div style="width:340px;flex-shrink:0;">
-                    <div style="position:relative;" id="anno-4">
-                        <div class="anno-marker" data-id="4">4</div>
-                        <div class="config-card">
-                            <div class="config-card-title">全局规则配置</div>
-                            <div style="display:flex;flex-direction:column;gap:16px;">
-                                <div>
-                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                                        <span style="font-size:12px;color:#999;font-weight:600;">基础规则</span>
-                                        <button class="btn btn-default" style="padding:2px 8px;font-size:11px;" onclick="openBizModal('global-config-modal')">⚙️ 配置</button>
-                                    </div>
-                                    <div style="display:flex;flex-direction:column;gap:10px;">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">注册即为代理</span>
-                                            <div style="display:flex;align-items:center;gap:8px;"><label class="switch" style="transform:scale(0.8);"><input type="checkbox" disabled><span class="switch-slider"></span></label><span style="font-size:13px;color:#999;">已关闭</span></div>
-                                        </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">绑定有效期</span>
-                                            <span style="font-size:13px;color:#165DFF;font-weight:500;">永久</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="border-top:1px dashed #E4E7ED;padding-top:14px;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                                        <span style="font-size:12px;color:#999;font-weight:600;">升级规则</span>
-                                        <button class="btn btn-default" style="padding:2px 8px;font-size:11px;" onclick="openBizModal('upgrade-config-modal')">⚙️ 配置</button>
-                                    </div>
-                                    <div style="display:flex;flex-direction:column;gap:8px;">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">成长值有效期</span>
-                                            <span style="font-size:13px;color:#165DFF;font-weight:500;" id="growth-validity-display">1年</span>
-                                        </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">邀请新用户收入</span>
-                                            <span style="font-size:13px;color:#00B42A;font-weight:500;" id="invite-status">开</span>
-                                        </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">被邀请人下单收入</span>
-                                            <span style="font-size:13px;color:#00B42A;font-weight:500;" id="order-status">开</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="border-top:1px dashed #E4E7ED;padding-top:14px;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                                        <span style="font-size:12px;color:#999;font-weight:600;">提现规则</span>
-                                        <button class="btn btn-default" style="padding:2px 8px;font-size:11px;" onclick="openBizModal('withdraw-config-modal')">⚙️ 配置</button>
-                                    </div>
-                                    <div style="display:flex;flex-direction:column;gap:10px;">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">最低提现金额</span>
-                                            <span style="font-size:13px;color:#333;font-weight:500;">¥ 100</span>
-                                        </div>
-                                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                                            <span style="font-size:13px;color:#333;">提现渠道</span>
-                                            <span style="font-size:13px;color:#333;">银行卡</span>
-                                        </div>
-                                    </div>
-                                </div>
+
+                <!-- 一级 Tab 导航 -->
+                <div class="tab-nav" style="margin-bottom: 16px;">
+                    <div class="tab-item">推广员管理</div>
+                    <div class="tab-item active">规则配置</div>
+                    <div class="tab-item">收支记录</div>
+                    <div class="tab-item">佣金明细</div>
+                    <div class="tab-item">数据概览</div>
+                </div>
+
+                <!-- 二级 Tab 导航 -->
+                <div class="tab-nav">
+                    <div class="tab-item active" data-tab="commission" onclick="switchTab('commission')">佣金规则</div>
+                    <div class="tab-item" data-tab="basic" onclick="switchTab('basic')">基础规则</div>
+                    <div class="tab-item" data-tab="withdraw" onclick="switchTab('withdraw')">提现规则</div>
+                    <div class="tab-item" data-tab="level" onclick="switchTab('level')">推广员等级</div>
+                </div>
+
+                <!-- Tab 内容：佣金规则 -->
+                <div class="tab-content active" id="tab-commission">
+                <!-- 1. 佣金基数 -->
+                <div class="config-section" id="anno-3">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <div class="section-title">1. 佣金基数</div>
+                    <div class="form-row">
+                        <div class="form-content">
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="commissionBase" value="shipping">
+                                    <span>应付运费</span>
+                                    <span class="info-icon" data-tip="仅计算用户提包时，支付的运费部分。不含优惠券、增值服务费等">ⓘ</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="commissionBase" value="payment" checked>
+                                    <span>实际总支付金额</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="commissionBase" value="total">
+                                    <span>应付总金额</span>
+                                    <span class="info-icon" data-tip="仅计算用户提包时，支付的运费 + 增值服务费，不含优惠券">ⓘ</span>
+                                </label>
                             </div>
+                            <span class="sub-label">（单选，默认选中"实际总支付金额"）</span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="annotation-panel" id="annotation-panel">
-        <div class="panel-header">
-            <button class="panel-toggle-btn" onclick="togglePanel()">◀</button>
-            <span style="flex:1;">标注说明</span>
-            <button class="toolbar-edit-btn" onclick="openEditMode()">✏️ 编辑</button>
-        </div>
-        <div id="annotation-list"></div>
-    </div>
-    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()">📌</button>
-</div>
 
-<div class="modal-overlay" id="detail-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title" id="modal-title">标注详情</div><button class="modal-close" onclick="closeModal()">×</button></div>
-        <div class="modal-body"><table class="detail-table" id="detail-table"></table></div>
-        <div class="modal-footer">
-            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none;margin-right:auto;" onclick="deleteAnnotation()">删除</button>
-            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
-            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
-            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
-            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
-        </div>
-    </div>
-</div>
-<div class="modal-overlay" id="manage-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">📌 标注管理</div><button class="modal-close" onclick="closeManageModal()">×</button></div>
-        <div class="modal-body" id="manage-modal-body"></div>
-        <div class="modal-footer"><button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button></div>
-    </div>
-</div>
-<div class="modal-overlay" id="add-level-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">添加代理等级</div><button class="modal-close" onclick="closeBizModal('add-level-modal')">×</button></div>
-        <div class="modal-body">
-            <div style="margin-bottom:16px;"><label style="display:block;font-size:13px;color:#333;margin-bottom:6px;">等级名称</label><input type="text" class="form-input" style="width:100%;" placeholder="如：钻石"></div>
-            <div style="margin-bottom:16px;"><label style="display:block;font-size:13px;color:#333;margin-bottom:6px;">成长值门槛(≥)</label><input type="number" class="form-input" style="width:100%;" placeholder="达到该等级所需的最低成长值"></div>
-            <div><label style="display:block;font-size:13px;color:#333;margin-bottom:6px;">佣金费率(%)</label><input type="number" class="form-input" style="width:100%;" placeholder="该等级对应的佣金百分比"></div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('add-level-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('add-level-modal')">确认添加</button></div>
-    </div>
-</div>
-<div class="modal-overlay" id="global-config-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">全局规则配置</div><button class="modal-close" onclick="closeBizModal('global-config-modal')">×</button></div>
-        <div class="modal-body">
-            <div class="config-row"><span class="config-label">注册即为代理</span><label class="switch"><input type="checkbox"><span class="switch-slider"></span></label><p style="font-size:12px;color:#999;margin-top:4px;">开启后用户注册时自动成为推广员</p></div>
-            <div class="config-row"><span class="config-label">绑定有效期</span><div style="display:flex;gap:16px;"><label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="bp" checked> 永久</label><label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="bp"> 半年</label><label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="bp"> 一年</label><label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="bp"> 二年</label></div></div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('global-config-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('global-config-modal')">提交</button></div>
-    </div>
-</div>
-<div class="modal-overlay" id="withdraw-config-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">提现规则配置</div><button class="modal-close" onclick="closeBizModal('withdraw-config-modal')">×</button></div>
-        <div class="modal-body">
-            <div style="margin-bottom:16px;"><label style="display:block;font-size:13px;color:#333;margin-bottom:6px;">最低提现金额(¥)</label><input type="number" class="form-input" style="width:100%;" value="100"></div>
-            <div><label style="display:block;font-size:13px;color:#333;margin-bottom:6px;">提现渠道</label><p style="font-size:13px;color:#333;">银行卡</p><p style="font-size:12px;color:#999;margin-top:6px;">推广员统一使用银行卡提现，需填写银行卡号、开户行、开户名</p></div>
-        </div>
-        <div style="margin-top:16px;padding-top:12px;border-top:1px dashed #E4E7ED;">
-            <button class="btn btn-default" style="padding:4px 12px;font-size:12px;color:#165DFF;border:1px solid #165DFF;background:#fff;" onclick="openBizModal('withdraw-rule-desc-modal')">📝 配置规则说明</button>
-            <p style="font-size:12px;color:#999;margin-top:6px;">规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('withdraw-config-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('withdraw-config-modal')">提交</button></div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="upgrade-config-modal">
-    <div class="modal" style="width:640px;position:relative;">
-        <div class="anno-marker" data-id="5">5</div>
-        <div class="modal-header"><div class="modal-title">升级规则配置</div><button class="modal-close" onclick="closeBizModal('upgrade-config-modal')">×</button></div>
-        <div class="modal-body">
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">成长值有效期</label>
-                <div style="display:flex;gap:16px;">
-                    <label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="growth-validity" value="permanent"> 永久</label>
-                    <label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="growth-validity" value="half-year"> 半年</label>
-                    <label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="growth-validity" value="1-year" checked> 1年</label>
-                    <label style="font-size:13px;display:flex;align-items:center;gap:4px;"><input type="radio" name="growth-validity" value="2-year"> 2年</label>
-                </div>
-                <p style="font-size:12px;color:#999;margin-top:8px;">每笔成长值都有独立的过期时间，过期后按日批量重算等级</p>
-            </div>
-            <div>
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">成长值获取规则</label>
-                <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                    <thead><tr style="background:#F7F8FA;"><th style="padding:8px 12px;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #E4E7ED;">#</th><th style="padding:8px 12px;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #E4E7ED;">规则名称</th><th style="padding:8px 12px;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #E4E7ED;">规则类型</th><th style="padding:8px 12px;text-align:center;font-weight:600;color:#666;border-bottom:2px solid #E4E7ED;">开关</th><th style="padding:8px 12px;text-align:center;font-weight:600;color:#666;border-bottom:2px solid #E4E7ED;">操作</th></tr></thead>
-                    <tbody>
-                        <tr><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;">1</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;">邀请新用户收入</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;color:#666;">邀请新用户转化为成长值</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;text-align:center;"><label style="position:relative;display:inline-block;width:36px;height:20px;background:#00B42A;border-radius:10px;cursor:pointer;"><input type="checkbox" checked style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:50%;background:#fff;border:none;cursor:pointer;"></label></td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;text-align:center;"><button class="btn btn-default" style="padding:2px 10px;font-size:12px;" onclick="closeBizModal('upgrade-config-modal');openBizModal('invite-rule-modal')">编辑</button></td></tr>
-                        <tr><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;">2</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;">被邀请人下单收入</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;color:#666;">被邀请人下单后根据金额或订单数量转化为成长值</td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;text-align:center;"><label style="position:relative;display:inline-block;width:36px;height:20px;background:#00B42A;border-radius:10px;cursor:pointer;"><input type="checkbox" checked style="position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:50%;background:#fff;border:none;cursor:pointer;"></label></td><td style="padding:10px 12px;border-bottom:1px solid #F0F0F0;text-align:center;"><button class="btn btn-default" style="padding:2px 10px;font-size:12px;" onclick="closeBizModal('upgrade-config-modal');openBizModal('order-rule-modal')">编辑</button></td></tr>
-                    </tbody>
-                </table>
-                <p style="font-size:12px;color:#999;margin-top:8px;">💡 关闭某条规则后，对应行为不再产生成长值。等级计算方式固定为「按日批量重算」，不支持实时更新</p>
-            </div>
-        </div>
-        <div style="margin-top:16px;padding-top:12px;border-top:1px dashed #E4E7ED;">
-            <button class="btn btn-default" style="padding:4px 12px;font-size:12px;color:#165DFF;border:1px solid #165DFF;background:#fff;" onclick="openBizModal('upgrade-rule-desc-modal')">📝 配置规则说明</button>
-            <p style="font-size:12px;color:#999;margin-top:6px;">规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('upgrade-config-modal')">取消</button><button class="btn btn-primary" onclick="saveUpgradeConfig()">提交</button></div>
-    </div>
-</div>
-
-<!-- 邀请新用户收入 - 配置弹窗 -->
-<div class="modal-overlay" id="invite-rule-modal">
-    <div class="modal" style="position:relative;">
-        <div class="anno-marker" data-id="6">6</div>
-        <div class="modal-header"><div class="modal-title">通过邀请新用户积累成长点</div><button class="modal-close" onclick="closeBizModal('invite-rule-modal')">×</button></div>
-        <div class="modal-body">
-            <div style="font-size:13px;color:#666;margin-bottom:16px;">通过邀请新用户积累成长点</div>
-            <div class="form-group">
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:6px;font-weight:500;">每新邀请用户注册可获得的成长值</label>
-                <input type="number" placeholder="请输入" style="width:100%;padding:8px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;outline:none;">
-            </div>
-            <div class="form-group">
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:6px;font-weight:500;">新用户首单支付奖励的成长值</label>
-                <input type="number" placeholder="请输入" style="width:100%;padding:8px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;outline:none;">
-            </div>
-            <div>
-                <a style="font-size:13px;color:#165DFF;cursor:pointer;text-decoration:underline;">设置规则说明</a>
-                <p style="font-size:12px;color:#999;margin-top:6px;">规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
-            </div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('invite-rule-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('invite-rule-modal');alert('邀请新用户规则已保存')">提交</button></div>
-    </div>
-</div>
-
-<!-- 被邀请人下单收入 - 配置弹窗 -->
-<div class="modal-overlay" id="order-rule-modal">
-    <div class="modal" style="width:560px;position:relative;">
-        <div class="anno-marker" data-id="7">7</div>
-        <div class="modal-header"><div class="modal-title">被邀请者通过下单积累成长点</div><button class="modal-close" onclick="closeBizModal('order-rule-modal')">×</button></div>
-        <div class="modal-body">
-            <div style="font-size:13px;color:#666;margin-bottom:16px;">被邀请者通过下单积累成长点</div>
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">被邀请者首次下单</label>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:13px;display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;" onclick="toggleOrderInput('first','fixed')"><input type="radio" name="first-order-type" value="fixed" checked id="first-fixed"> 每笔订单赚取固定成长点</label>
-                    <label style="font-size:13px;display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;" onclick="toggleOrderInput('first','percent')"><input type="radio" name="first-order-type" value="percent" id="first-percent"> 根据订单金额按比例获取成长点</label>
-                </div>
-                <div class="form-group">
-                    <label style="display:block;font-size:13px;color:#333;margin-bottom:6px;" id="first-input-label">被邀请者（首次下单支付）赚取成长点</label>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <input type="number" placeholder="请输入" style="width:100%;padding:8px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;outline:none;" id="first-input">
-                        <span id="first-unit" style="display:none;font-size:13px;color:#666;white-space:nowrap;">%</span>
+                <!-- 2. 默认佣金率 -->
+                <div class="config-section" id="anno-4">
+                    <div class="anno-marker" data-id="4">4</div>
+                    <div class="section-title">2. 默认佣金率</div>
+                    <div class="form-row">
+                        <div class="form-content">
+                            <input type="number" class="input-field input-short" placeholder="请输入" value="5">
+                            <span>%</span>
+                            <span class="sub-label">（推广员等级关闭时生效）</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div style="margin-bottom:20px;border-top:1px solid #E4E7ED;padding-top:16px;">
-                <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">被邀请者下单（非首次）</label>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:13px;display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;" onclick="toggleOrderInput('sub','fixed')"><input type="radio" name="sub-order-type" value="fixed" checked id="sub-fixed"> 每笔订单赚取固定成长点</label>
-                    <label style="font-size:13px;display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;" onclick="toggleOrderInput('sub','percent')"><input type="radio" name="sub-order-type" value="percent" id="sub-percent"> 根据订单金额按比例获取成长点</label>
+                <div style="display: flex; justify-content: center; margin-top: 24px;">
+                    <button class="save-btn" onclick="saveTab('commission')">保存佣金规则</button>
                 </div>
-                <div class="form-group">
-                    <label style="display:block;font-size:13px;color:#333;margin-bottom:6px;" id="sub-input-label">被邀请者（下单支付）赚取成长点</label>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <input type="number" placeholder="请输入" style="width:100%;padding:8px 10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;outline:none;" id="sub-input">
-                        <span id="sub-unit" style="display:none;font-size:13px;color:#666;white-space:nowrap;">%</span>
+                </div>
+
+                <!-- Tab 内容：基础规则 -->
+                <div class="tab-content" id="tab-basic">
+                <!-- 3. 基础规则 -->
+                <div class="config-section" id="anno-5">
+                    <div class="anno-marker" data-id="5">5</div>
+                    <div class="section-title">基础规则</div>
+                    <div class="form-row">
+                        <div class="form-label">注册即为推广员</div>
+                        <div class="form-content">
+                            <div class="switch-container">
+                                <div class="switch active" id="registerAsPromoterSwitch">
+                                    <div class="switch-knob"></div>
+                                </div>
+                                <span class="switch-label">（默认开启）</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label">绑定有效期</div>
+                        <div class="form-content">
+                            <label class="radio-item">
+                                <input type="radio" name="bindValidity" value="unbind" checked onchange="toggleBindValidity()">
+                                <span>解绑</span>
+                            </label>
+                            <input type="number" class="input-field input-short" placeholder="请输入天数" value="30" id="bindValidityDays" style="margin-left: 8px;">
+                            <span>天</span>
+                            <label class="radio-item" style="margin-left: 16px;">
+                                <input type="radio" name="bindValidity" value="permanent" onchange="toggleBindValidity()">
+                                <span>不解绑</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
+                <div style="display: flex; justify-content: center; margin-top: 24px;">
+                    <button class="save-btn" onclick="saveTab('basic')">保存基础规则</button>
+                </div>
+                </div>
+
+                <!-- Tab 内容：提现规则 -->
+                <div class="tab-content" id="tab-withdraw">
+                <!-- 4. 提现规则 -->
+                <div class="config-section" id="anno-6">
+                    <div class="anno-marker" data-id="6">6</div>
+                    <div class="section-title">提现规则</div>
+                    <div class="form-row">
+                        <div class="form-label">单笔不低于</div>
+                        <div class="form-content">
+                            <input type="number" class="input-field input-short" placeholder="请输入" value="100">
+                            <span>元</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label">提现频次</div>
+                        <div class="form-content">
+                            <select class="select-field">
+                                <option value="daily" selected>每日</option>
+                                <option value="weekly">每周</option>
+                                <option value="monthly">每月</option>
+                            </select>
+                            <span>可申请提现</span>
+                            <input type="number" class="input-field input-short" placeholder="请输入" value="1">
+                            <span>次</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-content">
+                            <div class="rule-desc-label">提现规则说明：</div>
+                            <textarea class="textarea-field" placeholder="请输入提现规则说明..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; margin-top: 24px;">
+                    <button class="save-btn" onclick="saveTab('withdraw')">保存提现规则</button>
+                </div>
+                </div>
+
+                <!-- Tab 内容：推广员等级 -->
+                <div class="tab-content" id="tab-level">
+                <!-- 5. 推广员等级开关 -->
+                <div class="config-section" id="anno-7">
+                    <div class="anno-marker" data-id="7">7</div>
+                    <div class="section-title">推广员等级</div>
+                    <div class="form-row">
+                        <div class="form-content">
+                            <div class="switch-container">
+                                <div class="switch" id="promoterLevelSwitch" onclick="togglePromoterLevel()">
+                                    <div class="switch-knob"></div>
+                                </div>
+                                <span class="switch-label">开启推广员等级</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6+7. 等级规则说明 + 推广员等级配置（条件显隐） -->
+                <div class="config-section hidden-section" id="anno-8">
+                    <div class="anno-marker" data-id="8">8</div>
+                    <div class="section-title">6. 等级规则说明</div>
+                    <div class="form-row">
+                        <div class="form-label">成长值有效期</div>
+                        <div class="form-content">
+                            <label class="radio-item">
+                                <input type="radio" name="growthValidity" value="permanent" checked onchange="toggleGrowthValidity()">
+                                <span>永久有效</span>
+                            </label>
+                            <label class="radio-item" style="margin-left: 16px;">
+                                <input type="radio" name="growthValidity" value="limited" onchange="toggleGrowthValidity()">
+                                <span>有期限</span>
+                            </label>
+                            <input type="number" class="input-field input-short" placeholder="请输入天数" value="365" id="growthValidityDays" disabled style="opacity: 0.5; margin-left: 8px;">
+                            <span>天</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label">邀请注册</div>
+                        <div class="form-content">
+                            <span>+</span>
+                            <input type="number" class="input-field input-short" placeholder="请输入" value="10">
+                            <span>成长值/人</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label">新用户首单支付</div>
+                        <div class="form-content">
+                            <span>+</span>
+                            <input type="number" class="input-field input-short" placeholder="请输入" value="50">
+                            <span>成长值/人</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label">被邀请者下单</div>
+                        <div class="form-content" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="radio-item">
+                                    <input type="radio" name="orderGrowthType" value="percent" checked onchange="toggleOrderGrowthType()">
+                                    <span>按订单金额比例</span>
+                                </label>
+                                <input type="number" class="input-field input-short" placeholder="请输入" value="5" id="orderGrowthPercent">
+                                <span>% 计算（取整）</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="radio-item">
+                                    <input type="radio" name="orderGrowthType" value="fixed" onchange="toggleOrderGrowthType()">
+                                    <span>每笔订单赚取固定成长点</span>
+                                </label>
+                                <input type="number" class="input-field input-short" placeholder="请输入" value="10" id="orderGrowthFixed" disabled style="opacity: 0.5;">
+                                <span>成长值/单</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-content">
+                            <div class="rule-desc-label">等级规则说明：</div>
+                            <textarea class="textarea-field" placeholder="请输入等级规则说明..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 32px;">7. 推广员等级配置</div>
+                    <table class="level-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">排序</th>
+                                <th>等级名</th>
+                                <th>成长值区间</th>
+                                <th>佣金费率</th>
+                                <th style="width: 80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><input type="text" value="LV1" class="input-medium"></td>
+                                <td>
+                                    <input type="text" value="0" class="input-short readonly-input" readonly> -
+                                    <input type="text" value="∞" class="input-short readonly-input" readonly style="color: #999;">
+                                </td>
+                                <td><input type="text" value="5%" class="input-short"></td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="add-level-btn" onclick="addLevelRow()">+ 添加等级</button>
+                    <div style="margin-top: 12px; font-size: 12px; color: #666;">
+                        <div>• 起始成长值自动计算，不可修改</div>
+                        <div>• 修改结束成长值，下个等级起始值自动更新</div>
+                        <div>• 默认新等级从上个等级 +1000</div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; margin-top: 24px;">
+                    <button class="save-btn" onclick="saveTab('level')">保存等级配置</button>
+                </div>
+                </div>
             </div>
-            <div>
-                <a style="font-size:13px;color:#165DFF;cursor:pointer;text-decoration:underline;">设置规则说明</a>
-                <p style="font-size:12px;color:#999;margin-top:6px;">规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
+        </div>
+
+        <!-- 右侧标注面板 -->
+        <div class="annotation-panel" id="annotation-panel">
+            <div class="panel-header">
+                <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+                <span>📌 标注说明</span>
+            </div>
+            <div id="annotation-list"></div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">标注详情</div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="detail-table" id="detail-table"></table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+                <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+                <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出 HTML</button>
+                <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+                <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
             </div>
         </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('order-rule-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('order-rule-modal');alert('被邀请人下单规则已保存')">提交</button></div>
     </div>
-</div>
 
-<!-- 佣金规则 - 规则说明弹窗 -->
-<div class="modal-overlay" id="commission-rule-desc-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">佣金规则说明</div><button class="modal-close" onclick="closeBizModal('commission-rule-desc-modal')">×</button></div>
-        <div class="modal-body">
-            <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">规则说明内容</label>
-            <textarea style="width:100%;min-height:160px;padding:10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;resize:vertical;outline:none;line-height:1.6;" placeholder="请输入佣金规则的说明内容，如：&#10;1. 佣金按包裹签收状态自动结算&#10;2. 佣金基数为应付运费（不含增值服务费）&#10;3. 代理等级按成长值自动升降级">佣金计算规则说明：
-1. 佣金基数为应付运费（不含增值服务费、优惠券、积分抵扣等）
-2. 开启代理等级后，按等级统一费率计算佣金
-3. 包裹状态变为已收货时自动触发佣金结算
-4. 佣金可在收支记录中查看，满足最低提现金额后可申请提现</textarea>
-            <p style="font-size:12px;color:#999;margin-top:8px;">💡 规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
+    <!-- 标注管理弹窗 -->
+    <div class="modal-overlay" id="manage-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">📌 标注管理</div>
+                <button class="modal-close" onclick="closeManageModal()">×</button>
+            </div>
+            <div class="modal-body" id="manage-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+            </div>
         </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('commission-rule-desc-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('commission-rule-desc-modal');showToast('佣金规则说明已保存')">保存</button></div>
     </div>
-</div>
 
-<!-- 升级规则 - 规则说明弹窗 -->
-<div class="modal-overlay" id="upgrade-rule-desc-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">升级规则说明</div><button class="modal-close" onclick="closeBizModal('upgrade-rule-desc-modal')">×</button></div>
-        <div class="modal-body">
-            <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">规则说明内容</label>
-            <textarea style="width:100%;min-height:160px;padding:10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;resize:vertical;outline:none;line-height:1.6;" placeholder="请输入升级规则的说明内容，如：&#10;1. 成长值按日批量重算等级&#10;2. 邀请新用户可获得成长值&#10;3. 被邀请人下单可产生成长值">代理等级升级规则说明：
-1. 成长值有效期为1年，过期后按日批量重算等级
-2. 邀请新用户注册并完成首单可获得成长值奖励
-3. 被邀请人每笔订单支付后，推广员可获得对应成长值
-4. 等级按成长值门槛自动升降，不同等级享受不同佣金费率</textarea>
-            <p style="font-size:12px;color:#999;margin-top:8px;">💡 规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('upgrade-rule-desc-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('upgrade-rule-desc-modal');showToast('升级规则说明已保存')">保存</button></div>
-    </div>
-</div>
+    <script>
+        const STORAGE_KEY = 'annotated-prototype-rule-config';
+        let currentAnnotation = null;
+        let isEditing = false;
+        let customAnnotations = null;
 
-<!-- 提现规则 - 规则说明弹窗 -->
-<div class="modal-overlay" id="withdraw-rule-desc-modal">
-    <div class="modal">
-        <div class="modal-header"><div class="modal-title">提现规则说明</div><button class="modal-close" onclick="closeBizModal('withdraw-rule-desc-modal')">×</button></div>
-        <div class="modal-body">
-            <label style="display:block;font-size:13px;color:#333;margin-bottom:8px;font-weight:600;">规则说明内容</label>
-            <textarea style="width:100%;min-height:160px;padding:10px;border:1px solid #DCDFE6;border-radius:4px;font-size:13px;resize:vertical;outline:none;line-height:1.6;" placeholder="请输入提现规则的说明内容，如：&#10;1. 最低提现金额为100元&#10;2. 统一使用银行卡提现&#10;3. 提现审核由财务处理">提现规则说明：
-1. 最低提现金额为 ¥100，低于此金额不可申请提现
-2. 提现统一使用银行卡渠道，需填写银行卡号、开户行及开户名
-3. 提现申请提交后由财务审核处理，审核通过后款项转入指定银行卡
-4. 提现记录可在收支记录中查看</textarea>
-            <p style="font-size:12px;color:#999;margin-top:8px;">💡 规则说明将在客户端（APP/H5/网站）展示给推广员查看</p>
-        </div>
-        <div class="modal-footer"><button class="btn btn-default" onclick="closeBizModal('withdraw-rule-desc-modal')">取消</button><button class="btn btn-primary" onclick="closeBizModal('withdraw-rule-desc-modal');showToast('提现规则说明已保存')">保存</button></div>
-    </div>
-</div>
+        // ===== 标注数据 =====
+        const annotations = [
+            {
+                id: 1,
+                title: '页面总说明',
+                summary: '推广联盟规则配置页，租户在此配置佣金规则、提现规则、推广员等级等全局规则。页面采用平铺式布局，从上到下依次展示各配置模块。',
+                target: '#anno-1',
+                showMarker: false,
+                type: 'overview',
+                detail: {
+                    feature: '推广联盟规则配置页，供租户配置推广联盟的全局业务规则。包括佣金计算规则、基础规则、提现规则、推广员等级规则等。配置保存后对所有推广员生效。',
+                    business: '1. 页面采用平铺式布局，从上到下依次展示各配置模块\n2. 每个模块用分割线区分\n3. 底部固定保存按钮\n4. 右上角可跳转规则说明配置页',
+                    state: '推广员等级相关配置（成长值规则、等级列表）默认隐藏，开启"推广员等级"开关后才显示'
+                }
+            },
+            {
+                id: 2,
+                title: '规则说明配置入口',
+                summary: '页面右上角按钮，点击跳转到独立的规则说明配置页面，用于编辑推广联盟的介绍文案、FAQ、协议等说明内容。',
+                target: '#anno-2',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '规则说明配置入口按钮，位于页面右上角',
+                    interaction: '点击后跳转到"推广联盟规则说明配置"页面，该页面用于编辑：推广联盟介绍文案、常见问题 FAQ、推广员协议/条款、其他说明文案',
+                    business: '规则说明配置是独立页面，与规则配置页分离，避免主页面过于复杂'
+                }
+            },
+            {
+                id: 3,
+                title: '佣金基数',
+                summary: '选择佣金计算的基数，三选一：应付运费/实际总支付金额/应付总金额。默认选中"实际总支付金额"。',
+                target: '#anno-3',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '佣金基数选择区，决定佣金按什么金额计算',
+                    display: '三个单选按钮：应付运费、实际总支付金额（默认选中）、应付总金额',
+                    business: '1. 单选，必选\n2. 默认选中"实际总支付金额"\n3. 选择后全局生效，所有推广员佣金按此基数计算',
+                    interaction: '点击单选按钮切换选择，选中项高亮显示'
+                }
+            },
+            {
+                id: 4,
+                title: '默认佣金率',
+                summary: '设置默认佣金比例（百分比），仅在推广员等级功能关闭时生效。开启等级后，佣金费率按各等级配置的费率计算。',
+                target: '#anno-4',
+                showMarker: true,
+                type: 'field',
+                detail: {
+                    feature: '默认佣金率输入框，设置全局默认佣金比例',
+                    display: '数字输入框 + %符号，支持小数',
+                    business: '1. 仅在"推广员等级"开关关闭时生效\n2. 开启等级后，佣金费率按等级配置计算，此字段失效\n3. 输入范围：0-100，支持小数',
+                    interaction: '输入数字，失焦后校验格式'
+                }
+            },
+            {
+                id: 5,
+                title: '基础规则',
+                summary: '配置基础规则，包括"注册即为推广员"开关（默认开启）和绑定有效期（支持数字天数或永久）。勾选永久后天数输入框置灰。',
+                target: '#anno-5',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '基础规则配置区，控制推广员的注册方式和绑定关系有效期',
+                    display: '1. "注册即为推广员"开关（默认开启）\n2. 绑定有效期：数字输入框（天）+ 永久单选按钮',
+                    business: '1. "注册即为推广员"开启后，用户注册自动成为推广员，无需运营手动添加\n2. 绑定有效期控制推广员与被邀请用户的绑定关系时长\n3. 选择"永久"后，天数输入框置灰不可编辑',
+                    interaction: '1. 点击开关切换开启/关闭状态\n2. 选择"永久"单选按钮后，天数输入框置灰\n3. 选择天数输入框后，"永久"取消选中',
+                    state: '开关开启状态：蓝色背景，按钮在右侧\n开关关闭状态：灰色背景，按钮在左侧'
+                }
+            },
+            {
+                id: 6,
+                title: '提现规则',
+                summary: '配置提现门槛和频次限制，包括单笔最低金额、提现频次（每日/每周/每月）、每次可申请次数。下方有提现规则说明文本域，用于编辑展示给用户端的规则说明文案。',
+                target: '#anno-6',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '提现规则配置区，设置提现门槛、频次限制及规则说明文案',
+                    display: '1. 单笔不低于：数字输入框 + 元\n2. 提现频次：下拉选择（每日/每周/每月）+ 可申请提现次数输入框\n3. 提现规则说明：多行文本域',
+                    business: '1. 单笔最低金额：推广员单次提现的最低金额限制\n2. 提现频次：控制推广员在指定周期内可提现的次数\n3. 规则说明文案展示在用户端提现页面，给用户查看',
+                    interaction: '1. 输入数字设置金额和次数\n2. 下拉选择提现频次\n3. 文本域输入规则说明文案',
+                    copywriting: '规则说明文案示例："提现申请提交后，财务将在 1-3 个工作日内审核打款。提现金额将转入您绑定的银行卡账户。"'
+                }
+            },
+            {
+                id: 7,
+                title: '推广员等级开关',
+                summary: '开启/关闭推广员等级功能。关闭时，所有推广员统一按默认佣金率计算；开启后，显示等级规则说明和等级配置模块，佣金费率按各等级配置计算。',
+                target: '#anno-7',
+                showMarker: true,
+                type: 'interaction',
+                detail: {
+                    feature: '推广员等级功能总开关，控制是否启用等级体系',
+                    display: '开关按钮 + "开启推广员等级"文字标签',
+                    business: '1. 关闭时：所有推广员统一使用"默认佣金率"\n2. 开启时：显示"等级规则说明"和"推广员等级配置"两个模块\n3. 开启后，佣金费率按各等级配置的费率计算，不再使用默认佣金率',
+                    interaction: '点击开关切换状态，开启后下方等级相关模块平滑展开',
+                    state: '关闭状态：开关灰色，下方等级模块隐藏\n开启状态：开关蓝色，下方等级模块显示'
+                }
+            },
+            {
+                id: 8,
+                title: '等级规则说明与等级配置',
+                summary: '推广员等级开启后显示。包含成长值有效期（支持永久）、获取规则（邀请注册/首单支付/下单按比例）、等级规则说明文本域，以及推广员等级列表（支持增删改）。等级成长值区间起始值自动计算不可修改，修改结束值后下个等级起始值自动更新。',
+                target: '#anno-8',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '等级规则说明与等级配置区，配置成长值规则和等级体系',
+                    display: '1. 成长值有效期：数字输入框 + 永久单选\n2. 获取规则：邀请注册成长值/人、新用户首单支付成长值/人、被邀请人下单按订单金额百分比\n3. 等级规则说明：多行文本域\n4. 等级列表表格：排序、等级名、成长值区间、佣金费率、操作\n5. 添加等级按钮',
+                    business: '1. 成长值有效期控制成长值的时效，到期后失效扣减\n2. 获取规则定义推广员如何获得成长值\n3. 等级列表初始只有一档：0-∞\n4. 添加新等级时，默认从上个等级结束值 +1000\n5. 起始成长值自动计算，不可修改\n6. 修改结束成长值，下个等级起始值自动更新为上个等级结束值 +1',
+                    interaction: '1. 选择"永久"后天数输入框置灰\n2. 输入各获取规则的成长值数值\n3. 点击"添加等级"新增一行\n4. 编辑等级名、结束成长值、佣金费率\n5. 修改结束值后，下个等级起始值自动更新',
+                    state: '整个模块默认隐藏，推广员等级开关开启后才显示',
+                    exception: '等级列表至少保留一个等级，不可全部删除\n成长值区间起始值必须小于结束值'
+                }
+            }
+        ];
 
-<script>
-const STORAGE_KEY='annotated-prototype-rule-config';let currentAnnotation=null;let isEditing=false;let customAnnotations=null;
-const annotations=[
-    {id:1,title:'页面总说明',summary:'规则配置页，配置佣金规则、代理等级及全局规则',target:'#anno-1',showMarker:false,type:'overview',detail:{feature:'推广联盟的规则配置页面，租户在此统一管理佣金计算方式、代理等级体系、绑定规则、提现规则、升级规则。所有配置项均为租户级别，不同租户可独立配置',display:'页面采用左右分栏布局：左侧为佣金规则和代理等级配置表（主区域），右侧为全局规则配置卡片（包含基础规则、升级规则、提现规则三个子区域）',interaction:'佣金基数和默认佣金率支持直接编辑；代理等级开关切换后动态展示/隐藏等级配置表；右侧各项规则通过子区域旁的配置按钮弹窗编辑',business:'开启代理等级后默认佣金率不生效，所有推广员按等级费率计算；成长值有效期决定每笔成长值的过期时间；结算无需配置，包裹变更为已收货时自动触发佣金结算'}},
-    {id:2,title:'Tab 导航区',summary:'推广联盟五大功能页签切换',target:'#anno-2',showMarker:true,type:'area',detail:{feature:'推广联盟模块的五大功能页签切换：推广员管理、规则配置、收支记录、佣金明细、数据概览',interaction:'点击页签切换对应功能页面，当前页签为规则配置'}},
-    {id:3,title:'佣金规则配置区',summary:'配置佣金基数、等级开关、默认佣金率及代理等级明细表',target:'#anno-3',showMarker:true,type:'area',detail:{feature:'佣金规则配置区，包含佣金基数选择、是否开启代理等级、默认佣金率设置，以及代理等级明细表',display:'佣金基数为下拉选择；代理等级开关控制是否启用等级体系；开启等级时展示等级配置表',interaction:'切换代理等级开关时，等级配置表动态显示/隐藏；等级表支持行内编辑和添加/删除等级',business:'开启代理等级后，所有推广员佣金费率按等级统一计算；费率在提交提包单时锁定',exception:'等级计算方式仅支持「按日批量重算」，原型弹窗中不展示该配置项，仅在需求文档中说明'}},
-    {id:4,title:'全局规则配置区',summary:'右侧集中展示基础规则、升级规则、提现规则',target:'#anno-4',showMarker:true,type:'area',detail:{feature:'右侧全局规则配置卡片，将基础规则、升级规则、提现规则集中在一个卡片内，每个子区域有独立的配置按钮',display:'基础规则：注册即为代理开关、绑定有效期；升级规则：成长值有效期；提现规则：最低提现金额、提现渠道（固定银行卡）',interaction:'点击子区域旁的配置按钮打开编辑弹窗，修改后点击提交即时生效',business:'注册即为代理默认关闭；绑定有效期支持永久/半年/1年/2年；成长值有效期决定每笔成长值的过期时间，过期后按日批量重算等级；结算无需配置，提包单状态变更为已收货时自动触发佣金结算；提现支持银行卡（需审核）和转到余额（免审核即时到账）两种方式；最低提现金额以下的佣金不可申请提现；提现审核归属财务模块'}},
-    {id:5,title:'升级规则配置弹窗',summary:'配置成长值有效期、成长值获取规则列表',target:'#upgrade-config-modal',showMarker:true,type:'interaction',detail:{feature:'升级规则的统一配置入口，包含成长值有效期设置和成长值获取规则管理',display:'上半部分：成长值有效期选项（永久/半年/1年/2年）；下半部分：成长值获取规则列表，展示规则名称、规则类型、开关状态、编辑按钮。当前包含两条规则：①邀请新用户收入（邀请新用户转化为成长值）；②被邀请人下单收入（被邀请人下单后根据金额或订单数量转化为成长值）',interaction:'每条规则的开关可独立启用/禁用，关闭后对应行为不再产生成长值。点击编辑按钮打开对应的规则配置弹窗',business:'成长值有效期决定每笔成长值的过期时间，过期后按日批量重算等级；等级计算方式固定为按日批量重算，不支持实时更新；开关状态实时生效，已产生的成长值不受影响'}},
-    {id:6,title:'邀请新用户收入规则配置',summary:'配置邀请新用户注册和首单支付的成长值奖励',target:'#invite-rule-modal',showMarker:true,type:'interaction',detail:{feature:'配置邀请新用户转化为成长值的具体参数',display:'两个配置项：①每新邀请用户注册可获得的成长值（固定值输入）；②新用户首单支付奖励的成长值（固定值输入）。底部有设置规则说明链接',interaction:'填写数值后点击提交保存；点击"设置规则说明"可编辑展示给推广员的规则说明文案',business:'两条子规则可同时生效，也可单独关闭其中一条；规则说明会在客户端（小程序/网站）展示给推广员查看'}},
-    {id:7,title:'被邀请人下单收入规则配置',summary:'配置首次下单和非首次下单的成长值获取方式',target:'#order-rule-modal',showMarker:true,type:'interaction',detail:{feature:'配置被邀请者通过下单为推广员产生成长值的规则',display:'分为两个独立区块：①被邀请者首次下单——可选"每笔订单赚取固定成长点"或"根据订单金额按比例获取成长点"，并填写对应数值；②被邀请者下单（非首次）——同样支持固定值或按比例两种模式。底部有设置规则说明链接',interaction:'首次下单和非首次下单的规则类型和数值可分别配置；点击"设置规则说明"可编辑推广员可见的说明文案',business:'首次下单和非首次下单是两条独立规则，可分别启用或关闭；按比例模式以订单实际支付金额为基数计算成长值；规则说明在客户端展示给推广员查看'}}
-];
-const DETAIL_LABELS={feature:'功能说明',display:'字段/展示规则',interaction:'交互规则',business:'业务规则',state:'状态说明',exception:'异常/边界',copywriting:'文案规范'};
-function loadCustomAnnotations(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)customAnnotations=JSON.parse(s);}catch(e){}}
-function getActiveAnnotations(){return customAnnotations||annotations;}
-function renderAnnotationList(){const list=document.getElementById('annotation-list');const data=getActiveAnnotations();list.innerHTML=data.map(item=>`<div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})"><div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div><div class="annotation-summary">${item.summary}</div></div>`).join('');}
-function highlightMarker(id){const m=document.querySelector(`.anno-marker[data-id="${id}"]`);if(m)m.classList.add('highlight');const i=document.querySelector(`.annotation-item[data-id="${id}"]`);if(i)i.classList.add('active');}
-function unhighlightMarker(id){const m=document.querySelector(`.anno-marker[data-id="${id}"]`);if(m)m.classList.remove('highlight');const i=document.querySelector(`.annotation-item[data-id="${id}"]`);if(i)i.classList.remove('active');}
-document.querySelectorAll('.anno-marker').forEach(m=>{m.addEventListener('mouseenter',()=>highlightMarker(parseInt(m.dataset.id)));m.addEventListener('mouseleave',()=>unhighlightMarker(parseInt(m.dataset.id)));m.addEventListener('click',()=>showDetail(parseInt(m.dataset.id)));});
-function handleAnnotationClick(id){scrollToAnnotation(id);setTimeout(()=>showDetail(id),300);}
-function scrollToAnnotation(id){const data=getActiveAnnotations();const item=data.find(a=>a.id===id);if(!item)return;const target=document.querySelector(item.target);const pa=document.querySelector('.preview-area');if(target&&pa){const t=target.offsetTop-20;pa.scrollTo({top:t,behavior:'smooth'});target.classList.remove('anno-flash');void target.offsetWidth;target.classList.add('anno-flash');setTimeout(()=>target.classList.remove('anno-flash'),1500);}}
-function showDetail(id){const item=getActiveAnnotations().find(a=>a.id===id);if(!item)return;currentAnnotation=item;isEditing=false;document.getElementById('modal-title').textContent=`${item.id}. ${item.title}`;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display=customAnnotations?'inline-flex':'none';document.getElementById('delete-btn').style.display=(id!==1)?'inline-flex':'none';document.getElementById('detail-modal').classList.add('show');}
-function renderDetailTable(item){const d=item.detail;const rows=[];['feature','display','interaction','business','state','exception','copywriting'].forEach(k=>{if(d[k])rows.push({label:DETAIL_LABELS[k],value:d[k],key:k});});const t=document.getElementById('detail-table');if(isEditing){t.innerHTML=rows.map(r=>`<tr><th>${r.label}</th><td><textarea data-key="${r.key}">${r.value}</textarea></td></tr>`).join('');}else{t.innerHTML=rows.map(r=>`<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join('');}}
-function toggleEdit(){isEditing=!isEditing;renderDetailTable(currentAnnotation);document.getElementById('edit-btn').style.display=isEditing?'none':'inline-flex';document.getElementById('save-btn').style.display=isEditing?'inline-flex':'none';}
-function saveAnnotation(){const tas=document.querySelectorAll('#detail-table textarea');if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const item=customAnnotations.find(a=>a.id===currentAnnotation.id);if(!item)return;tas.forEach(ta=>{item.detail[ta.dataset.key]=ta.value;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));currentAnnotation=item;isEditing=false;renderDetailTable(item);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display='inline-flex';renderAnnotationList();const btn=document.getElementById('save-btn');const o=btn.textContent;btn.textContent='已保存 ✓';setTimeout(()=>{btn.textContent=o;},1500);}
-function resetAnnotation(){if(!confirm('确定要重置为原始内容吗？'))return;localStorage.removeItem(STORAGE_KEY);customAnnotations=null;currentAnnotation=annotations.find(a=>a.id===currentAnnotation.id);isEditing=false;renderDetailTable(currentAnnotation);document.getElementById('edit-btn').style.display='inline-flex';document.getElementById('save-btn').style.display='none';document.getElementById('reset-btn').style.display='none';document.getElementById('delete-btn').style.display='none';renderAnnotationList();}
-function closeModal(){document.getElementById('detail-modal').classList.remove('show');}
-document.getElementById('detail-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
-const PANEL_STATE_KEY=STORAGE_KEY+'-panel';
-function initPanelState(){try{const c=localStorage.getItem(PANEL_STATE_KEY)==='1';if(c){document.getElementById('annotation-panel').classList.add('collapsed');document.getElementById('panel-expand-btn').classList.add('show');}}catch(e){}}
-function togglePanel(){const p=document.getElementById('annotation-panel');const b=document.getElementById('panel-expand-btn');const c=p.classList.toggle('collapsed');b.classList.toggle('show',c);try{localStorage.setItem(PANEL_STATE_KEY,c?'1':'0');}catch(e){}}
-function openEditMode(){const data=getActiveAnnotations();let h='<div style="display:flex;flex-direction:column;">';data.forEach(item=>{h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #E4E7ED;"><div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})"><div class="annotation-badge">${item.id}</div><div style="font-size:13px;font-weight:600;">${item.title}</div><div style="font-size:11px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div></div><div style="display:flex;gap:6px;"><button class="btn btn-default" style="padding:3px 10px;font-size:11px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>${item.id!==1?`<button class="btn btn-danger" style="padding:3px 10px;font-size:11px;" onclick="deleteAnnotationById(${item.id})">删除</button>`:''}</div></div>`;});h+='</div>';document.getElementById('manage-modal-body').innerHTML=h;document.getElementById('manage-modal').classList.add('show');}
-function closeManageModal(){document.getElementById('manage-modal').classList.remove('show');}
-function deleteAnnotationById(id){const data=getActiveAnnotations();const item=data.find(a=>a.id===id);if(!item||item.id===1)return;if(!confirm(`确定要删除标注「${item.title}」吗？`))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(a=>a.id!==id);customAnnotations.forEach((a,i)=>{a.id=i+1;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();openEditMode();}
-function addAnnotation(){if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));const nid=customAnnotations.length+1;const ni={id:nid,title:'新标注 '+nid,summary:'点击编辑修改...',target:'#anno-'+nid,showMarker:true,type:'area',detail:{feature:'请填写功能说明...'}};customAnnotations.push(ni);localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));renderAnnotationList();closeManageModal();currentAnnotation=ni;isEditing=true;document.getElementById('modal-title').textContent=`${ni.id}. ${ni.title}`;renderDetailTable(ni);document.getElementById('edit-btn').style.display='none';document.getElementById('save-btn').style.display='inline-flex';document.getElementById('reset-btn').style.display='none';document.getElementById('delete-btn').style.display='inline-flex';document.getElementById('detail-modal').classList.add('show');}
-function deleteAnnotation(){if(!currentAnnotation||currentAnnotation.id===1)return;if(!confirm(`确定要删除标注「${currentAnnotation.title}」吗？`))return;if(!customAnnotations)customAnnotations=JSON.parse(JSON.stringify(annotations));customAnnotations=customAnnotations.filter(a=>a.id!==currentAnnotation.id);customAnnotations.forEach((item,i)=>{item.id=i+1;});localStorage.setItem(STORAGE_KEY,JSON.stringify(customAnnotations));closeModal();renderAnnotationList();}
-function exportAnnotatedHTML(){const ad=getActiveAnnotations();const oh=document.documentElement.outerHTML;const ds=JSON.stringify(ad,null,2);const nh=oh.replace(/const annotations = \[[\s\S]*?\n\];/,'const annotations = '+ds+';');const blob=new Blob([nh],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(document.title||'原型')+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);const btn=document.getElementById('export-btn');const o=btn.textContent;btn.textContent='导出成功 ✓';setTimeout(()=>{btn.textContent=o;},2000);}
-function openBizModal(id){document.getElementById(id).classList.add('show');}
-function closeBizModal(id){document.getElementById(id).classList.remove('show');}
-function toggleOrderInput(prefix,type){
-    const input=document.getElementById(prefix+'-input');
-    const unit=document.getElementById(prefix+'-unit');
-    const label=document.getElementById(prefix+'-input-label');
-    if(type==='percent'){
-        unit.style.display='inline';
-        input.placeholder='如：5';
-        label.textContent=prefix==='first'?'被邀请者（首次下单支付）赚取成长点（百分比）':'被邀请者（下单支付）赚取成长点（百分比）';
-    }else{
-        unit.style.display='none';
-        input.placeholder='请输入';
-        label.textContent=prefix==='first'?'被邀请者（首次下单支付）赚取成长点':'被邀请者（下单支付）赚取成长点';
-    }
-}
-function toggleLevelMode(){const c=document.getElementById('level-toggle').checked;document.getElementById('default-rate').disabled=c;document.getElementById('level-status-text').textContent=c?'已开启':'已关闭';document.getElementById('rate-tip').textContent=c?'已开启代理等级，此字段不生效':'未开启代理等级，所有推广员使用此默认佣金率';document.getElementById('level-config-card').style.display=c?'block':'none';}
-function saveUpgradeConfig(){const radios=document.getElementsByName('growth-validity');let selected='1年';radios.forEach(r=>{if(r.checked){const map={'permanent':'永久','half-year':'半年','1-year':'1年','2-year':'2年'};selected=map[r.value]||'1年';}});document.getElementById('growth-validity-display').textContent=selected;closeBizModal('upgrade-config-modal');alert('升级规则已保存');}
-function showToast(msg){let t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:6px;font-size:14px;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,0.15);';document.body.appendChild(t);setTimeout(()=>{t.remove();},2000);}
-loadCustomAnnotations();renderAnnotationList();initPanelState();
-</script>
+        // ===== 标注模块标签映射 =====
+        const DETAIL_LABELS = {
+            feature: '功能说明',
+            display: '字段/展示规则',
+            interaction: '交互规则',
+            business: '业务规则',
+            state: '状态说明',
+            exception: '异常/边界',
+            copywriting: '文案规范'
+        };
+
+        // ===== 下方代码不要修改 =====
+
+        function loadCustomAnnotations() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) customAnnotations = JSON.parse(saved);
+            } catch(e) {}
+        }
+        function getActiveAnnotations() {
+            return customAnnotations || annotations;
+        }
+        function renderAnnotationList() {
+            const list = document.getElementById('annotation-list');
+            const data = getActiveAnnotations();
+            list.innerHTML = data.map(item => `
+                <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+                    <div class="annotation-header">
+                        <div class="annotation-badge">${item.id}</div>
+                        <div class="annotation-title">${item.title}</div>
+                    </div>
+                    <div class="annotation-summary">${item.summary}</div>
+                </div>
+            `).join('');
+        }
+        function highlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.add('highlight');
+            const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+            if (item) item.classList.add('active');
+        }
+        function unhighlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.remove('highlight');
+            const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+            if (item) item.classList.remove('active');
+        }
+        document.querySelectorAll('.anno-marker').forEach(marker => {
+            marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+            marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+            marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+        });
+
+        // 点击标注：先滚动定位，再弹详情
+        function handleAnnotationClick(id) {
+            scrollToAnnotation(id);
+            setTimeout(() => showDetail(id), 300);
+        }
+
+        // 滚动定位到对应模块
+        function scrollToAnnotation(id) {
+            const data = getActiveAnnotations();
+            const item = data.find(a => a.id === id);
+            if (!item) return;
+            const target = document.querySelector(item.target);
+            const previewArea = document.querySelector('.preview-area');
+            if (target && previewArea) {
+                const targetTop = target.offsetTop - 20;
+                previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+                // 闪烁高亮
+                target.classList.remove('anno-flash');
+                void target.offsetWidth;
+                target.classList.add('anno-flash');
+                setTimeout(() => target.classList.remove('anno-flash'), 1500);
+            }
+        }
+
+        function showDetail(id) {
+            const item = getActiveAnnotations().find(a => a.id === id);
+            if (!item) return;
+            currentAnnotation = item;
+            isEditing = false;
+            document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+            renderDetailTable(item);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+            document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+            document.getElementById('detail-modal').classList.add('show');
+        }
+        function renderDetailTable(item) {
+            const detail = item.detail;
+            const rows = [];
+            const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+            moduleOrder.forEach(key => {
+                if (detail[key]) {
+                    rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+                }
+            });
+            const table = document.getElementById('detail-table');
+            if (isEditing) {
+                table.innerHTML = rows.map(row => `
+                    <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+                `).join('');
+            } else {
+                table.innerHTML = rows.map(row => `
+                    <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+                `).join('');
+            }
+        }
+        function toggleEdit() {
+            isEditing = !isEditing;
+            renderDetailTable(currentAnnotation);
+            document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+            document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+        }
+        function saveAnnotation() {
+            const textareas = document.querySelectorAll('#detail-table textarea');
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+            if (!item) return;
+            textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            currentAnnotation = item;
+            isEditing = false;
+            renderDetailTable(item);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'inline-flex';
+            renderAnnotationList();
+            const btn = document.getElementById('save-btn');
+            const original = btn.textContent;
+            btn.textContent = '已保存 ✓';
+            setTimeout(() => { btn.textContent = original; }, 1500);
+        }
+        function resetAnnotation() {
+            if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            customAnnotations = null;
+            const original = annotations.find(a => a.id === currentAnnotation.id);
+            currentAnnotation = original;
+            isEditing = false;
+            renderDetailTable(original);
+            document.getElementById('edit-btn').style.display = 'inline-flex';
+            document.getElementById('save-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'none';
+            document.getElementById('delete-btn').style.display = 'none';
+            renderAnnotationList();
+        }
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ===== 面板折叠 =====
+        const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+        function initPanelState() {
+            try {
+                const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+                if (collapsed) {
+                    document.getElementById('annotation-panel').classList.add('collapsed');
+                    document.getElementById('panel-expand-btn').classList.add('show');
+                }
+            } catch(e) {}
+        }
+        function togglePanel() {
+            const panel = document.getElementById('annotation-panel');
+            const expandBtn = document.getElementById('panel-expand-btn');
+            const isCollapsed = panel.classList.toggle('collapsed');
+            expandBtn.classList.toggle('show', isCollapsed);
+            try {
+                localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+            } catch(e) {}
+        }
+
+        // ===== 标注管理（顶部「编辑标注」按钮）=====
+        function openEditMode() {
+            const data = getActiveAnnotations();
+            let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+            data.forEach(item => {
+                listHtml += `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+                    <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                        <div class="annotation-badge">${item.id}</div>
+                        <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                        <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-shrink:0;">
+                        <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                        ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+                    </div>
+                </div>`;
+            });
+            listHtml += '</div>';
+            document.getElementById('manage-modal-body').innerHTML = listHtml;
+            document.getElementById('manage-modal').classList.add('show');
+        }
+        function closeManageModal() {
+            document.getElementById('manage-modal').classList.remove('show');
+        }
+        function deleteAnnotationById(id) {
+            const data = getActiveAnnotations();
+            const item = data.find(a => a.id === id);
+            if (!item || item.id === 1) return;
+            if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            customAnnotations = customAnnotations.filter(a => a.id !== id);
+            customAnnotations.forEach((a, i) => { a.id = i + 1; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            renderAnnotationList();
+            openEditMode();
+        }
+        function addAnnotation() {
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            const newId = customAnnotations.length + 1;
+            const newItem = {
+                id: newId,
+                title: '新标注 ' + newId,
+                summary: '点击编辑修改标注内容...',
+                target: '#anno-' + newId,
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '请填写功能说明...',
+                }
+            };
+            customAnnotations.push(newItem);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            renderAnnotationList();
+            closeManageModal();
+            currentAnnotation = newItem;
+            isEditing = true;
+            document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+            renderDetailTable(newItem);
+            document.getElementById('edit-btn').style.display = 'none';
+            document.getElementById('save-btn').style.display = 'inline-flex';
+            document.getElementById('reset-btn').style.display = 'none';
+            document.getElementById('delete-btn').style.display = 'inline-flex';
+            document.getElementById('detail-modal').classList.add('show');
+        }
+        function deleteAnnotation() {
+            if (!currentAnnotation || currentAnnotation.id === 1) return;
+            if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+            if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+            customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+            customAnnotations.forEach((item, index) => { item.id = index + 1; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+            closeModal();
+            renderAnnotationList();
+        }
+
+        function exportAnnotatedHTML() {
+            const activeData = getActiveAnnotations();
+            const originalHTML = document.documentElement.outerHTML;
+            const dataStr = JSON.stringify(activeData, null, 2);
+            const replacement = 'const annotations = ' + dataStr + ';';
+            const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+            const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const title = document.title || '带标注原型';
+            const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+            a.download = `${title}_${date}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            const btn = document.getElementById('export-btn');
+            const original = btn.textContent;
+            btn.textContent = '导出成功 ✓';
+            setTimeout(() => { btn.textContent = original; }, 2000);
+        }
+
+        // ===== 页面交互逻辑 =====
+        // Tab 切换
+        function switchTab(tabName) {
+            // 切换 Tab 项
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.tab-item[data-tab="${tabName}"]`).classList.add('active');
+            
+            // 切换 Tab 内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // 保存并校验
+        function saveTab(tabName) {
+            const tabNames = {
+                'commission': '佣金规则',
+                'basic': '基础规则',
+                'withdraw': '提现规则',
+                'level': '推广员等级'
+            };
+            
+            // 校验逻辑
+            let isValid = true;
+            let errorMsg = '';
+            
+            if (tabName === 'commission') {
+                // 校验佣金基数
+                const selectedBase = document.querySelector('input[name="commissionBase"]:checked');
+                if (!selectedBase) {
+                    isValid = false;
+                    errorMsg = '请选择佣金基数';
+                }
+                // 校验默认佣金率
+                const commissionRate = document.querySelector('#tab-commission .input-field');
+                if (commissionRate && (!commissionRate.value || commissionRate.value < 0 || commissionRate.value > 100)) {
+                    isValid = false;
+                    errorMsg = '默认佣金率需输入 0-100 之间的数值';
+                }
+            } else if (tabName === 'basic') {
+                // 校验绑定有效期
+                const unbindRadio = document.querySelector('input[name="bindValidity"][value="unbind"]');
+                if (unbindRadio && unbindRadio.checked) {
+                    const bindDays = document.getElementById('bindValidityDays');
+                    if (bindDays && (!bindDays.value || bindDays.value <= 0)) {
+                        isValid = false;
+                        errorMsg = '解绑天数需输入大于 0 的数值';
+                    }
+                }
+            } else if (tabName === 'withdraw') {
+                // 校验单笔最低金额
+                const minAmount = document.querySelector('#tab-withdraw .input-field');
+                if (minAmount && (!minAmount.value || minAmount.value <= 0)) {
+                    isValid = false;
+                    errorMsg = '单笔最低提现金额需输入大于 0 的数值';
+                }
+            } else if (tabName === 'level') {
+                // 校验成长值有效期
+                const limitedRadio = document.querySelector('input[name="growthValidity"][value="limited"]');
+                if (limitedRadio && limitedRadio.checked) {
+                    const growthDays = document.getElementById('growthValidityDays');
+                    if (growthDays && (!growthDays.value || growthDays.value <= 0)) {
+                        isValid = false;
+                        errorMsg = '成长值有效期需输入大于 0 的数值';
+                    }
+                }
+                // 校验等级配置
+                const levelRows = document.querySelectorAll('.level-table tbody tr');
+                levelRows.forEach((row, index) => {
+                    const levelName = row.querySelector('td:nth-child(2) input');
+                    if (levelName && !levelName.value.trim()) {
+                        isValid = false;
+                        errorMsg = `等级${index + 1}的名称不能为空`;
+                    }
+                });
+            }
+            
+            if (!isValid) {
+                alert(errorMsg);
+                return;
+            }
+            
+            // 保存成功提示
+            alert(`${tabNames[tabName]}保存成功！`);
+        }
+
+        function toggleBindValidity() {
+            const unbindRadio = document.querySelector('input[name="bindValidity"][value="unbind"]');
+            const daysInput = document.getElementById('bindValidityDays');
+            if (unbindRadio.checked) {
+                daysInput.disabled = false;
+                daysInput.style.opacity = '1';
+            } else {
+                daysInput.disabled = true;
+                daysInput.style.opacity = '0.5';
+            }
+        }
+
+        // 点击天数输入框时自动切换为解绑
+        document.addEventListener('DOMContentLoaded', function() {
+            const daysInput = document.getElementById('bindValidityDays');
+            if (daysInput) {
+                daysInput.addEventListener('focus', function() {
+                    const unbindRadio = document.querySelector('input[name="bindValidity"][value="unbind"]');
+                    if (!unbindRadio.checked) {
+                        unbindRadio.checked = true;
+                        toggleBindValidity();
+                    }
+                });
+            }
+        });
+
+        function toggleGrowthValidity() {
+            const limitedRadio = document.querySelector('input[name="growthValidity"][value="limited"]');
+            const daysInput = document.getElementById('growthValidityDays');
+            if (limitedRadio.checked) {
+                daysInput.disabled = false;
+                daysInput.style.opacity = '1';
+            } else {
+                daysInput.disabled = true;
+                daysInput.style.opacity = '0.5';
+            }
+        }
+
+        function togglePromoterLevel() {
+            const switchEl = document.getElementById('promoterLevelSwitch');
+            const levelSection = document.getElementById('anno-8');
+            const isActive = switchEl.classList.toggle('active');
+            if (isActive) {
+                levelSection.classList.add('show');
+            } else {
+                levelSection.classList.remove('show');
+            }
+        }
+
+        // 切换被邀请人下单成长值计算类型
+        function toggleOrderGrowthType() {
+            const percentRadio = document.querySelector('input[name="orderGrowthType"][value="percent"]');
+            const percentInput = document.getElementById('orderGrowthPercent');
+            const fixedInput = document.getElementById('orderGrowthFixed');
+            
+            if (percentRadio.checked) {
+                percentInput.disabled = false;
+                percentInput.style.opacity = '1';
+                fixedInput.disabled = true;
+                fixedInput.style.opacity = '0.5';
+            } else {
+                percentInput.disabled = true;
+                percentInput.style.opacity = '0.5';
+                fixedInput.disabled = false;
+                fixedInput.style.opacity = '1';
+            }
+        }
+
+        // 等级结束值输入联动
+        function bindLevelInputEvent(input) {
+            input.addEventListener('input', function() {
+                const row = this.closest('tr');
+                const tbody = document.querySelector('.level-table tbody');
+                const rows = tbody.querySelectorAll('tr');
+                const rowIndex = Array.from(rows).indexOf(row);
+                
+                // 更新下个等级的起始值
+                if (rowIndex < rows.length - 1) {
+                    const nextRow = rows[rowIndex + 1];
+                    const nextStartInput = nextRow.querySelectorAll('td:nth-child(3) .input-short')[0];
+                    const currentEndValue = parseInt(this.value) || 0;
+                    nextStartInput.value = currentEndValue + 1;
+                }
+            });
+        }
+
+        // 初始化绑定已有输入框事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定等级结束值输入事件
+            document.querySelectorAll('.level-table tbody tr').forEach(row => {
+                const endInput = row.querySelectorAll('td:nth-child(3) .input-short')[1];
+                if (endInput && !endInput.readOnly) {
+                    bindLevelInputEvent(endInput);
+                }
+            });
+        });
+
+        // 添加等级行
+        function addLevelRow() {
+            const tbody = document.querySelector('.level-table tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const rowCount = rows.length;
+            
+            // 获取上一个等级的结束值
+            const lastRow = rows[rowCount - 1];
+            const lastEndInput = lastRow.querySelectorAll('td:nth-child(3) .input-short')[1];
+            const prevEndValue = parseInt(lastEndInput.value) || 0;
+            
+            const newStartValue = prevEndValue + 1;
+            const newEndValue = prevEndValue + 1000;
+
+            // 更新上一个等级：结束值改为可编辑
+            lastEndInput.classList.remove('readonly-input');
+            lastEndInput.readOnly = false;
+            lastEndInput.style.color = '';
+            lastEndInput.value = prevEndValue;
+            // 绑定输入联动事件
+            bindLevelInputEvent(lastEndInput);
+            
+            // 给上一个等级添加删除按钮（第一个等级 LV1 不添加）
+            const lastOpCell = lastRow.querySelector('td:last-child');
+            if (rowCount > 1) {
+                lastOpCell.innerHTML = `<a href="javascript:void(0)" style="color: #F53F3F; font-size: 13px;" onclick="deleteLevelRow(this)">删除</a>`;
+            }
+
+            // 新增行
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${rowCount + 1}</td>
+                <td><input type="text" value="LV${rowCount + 1}" class="input-medium"></td>
+                <td>
+                    <input type="text" value="${newStartValue}" class="input-short readonly-input" readonly> -
+                    <input type="text" value="∞" class="input-short readonly-input" readonly style="color: #999;">
+                </td>
+                <td><input type="text" value="5%" class="input-short"></td>
+                <td>-</td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        // 删除等级行
+        function deleteLevelRow(link) {
+            const row = link.closest('tr');
+            const tbody = document.querySelector('.level-table tbody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            // 第一个等级不可删除
+            if (rows[0] === row) {
+                alert('第一个等级不可删除');
+                return;
+            }
+            
+            const rowIndex = Array.from(rows).indexOf(row);
+            const isLastRow = rowIndex === rows.length - 1;
+            
+            // 如果删除的是最后一行，需要把上一行的结束值改回∞
+            if (isLastRow) {
+                const prevRow = rows[rowIndex - 1];
+                const prevEndInput = prevRow.querySelectorAll('td:nth-child(3) .input-short')[1];
+                prevEndInput.value = '∞';
+                prevEndInput.classList.add('readonly-input');
+                prevEndInput.readOnly = true;
+                prevEndInput.style.color = '#999';
+                
+                // 移除上一行的删除按钮
+                const prevOpCell = prevRow.querySelector('td:last-child');
+                prevOpCell.textContent = '-';
+            }
+            
+            row.remove();
+            
+            // 重新排序
+            const newRows = tbody.querySelectorAll('tr');
+            newRows.forEach((r, i) => { 
+                r.querySelector('td:first-child').textContent = i + 1; 
+            });
+        }
+
+        // 初始化
+        toggleBindValidity();
+        loadCustomAnnotations();
+        renderAnnotationList();
+        initPanelState();
+    </script>
 </body>
 </html>
