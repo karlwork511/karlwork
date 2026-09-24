@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开通引导组件</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; }
+        
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* 顶部标注工具栏 */
+        .annotation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 8px 16px;
+            background: #fff;
+            border-bottom: 1px solid #E4E7ED;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .toolbar-edit-btn {
+            padding: 6px 14px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+        
+        /* 主布局 */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        /* 左侧预览区 */
+        .preview-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            background: #f0f2f5;
+        }
+        
+        /* 右侧标注面板 */
+        .annotation-panel {
+            width: 320px;
+            background: #F7F8FA;
+            border-left: 1px solid #E4E7ED;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s;
+        }
+        .annotation-panel.collapsed { width: 0; overflow: hidden; }
+        
+        .panel-header {
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .panel-toggle-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .annotation-list { padding: 0; }
+        .annotation-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E4E7ED;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .annotation-item:hover { background: #EEF0F3; }
+        .annotation-item.active { background: #E8F3FF; border-left: 3px solid #165DFF; }
+        .annotation-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .annotation-badge {
+            width: 20px;
+            height: 20px;
+            background: #165DFF;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .annotation-summary {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        /* 折叠按钮 */
+        .panel-expand-btn {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 64px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 100;
+        }
+        .panel-expand-btn.show { display: flex; }
+        
+        /* ===== 开通引导组件样式 ===== */
+        .guide-component {
+            background: #fff;
+            border-radius: 12px;
+            margin: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        /* 展开态 */
+        .guide-expanded {
+            padding: 24px;
+        }
+        .guide-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .guide-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .guide-icon {
+            font-size: 24px;
+        }
+        .guide-title-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .guide-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .skip-btn {
+            padding: 6px 12px;
+            border: none;
+            background: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+        .skip-btn:hover { color: #165DFF; }
+        .guide-collapse-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border: 1px solid #E4E7ED;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .guide-collapse-btn:hover { border-color: #165DFF; color: #165DFF; }
+        
+        /* 进度条 */
+        .progress-section {
+            margin-bottom: 20px;
+        }
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+        }
+        .progress-text strong {
+            color: #165DFF;
+            font-size: 16px;
+        }
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #E4E7ED;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #165DFF 0%, #0E42D2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* 任务列表 - 横向 */
+        .task-list {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: #F7F8FA;
+            border-radius: 10px;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        .task-item:hover { background: #EEF0F3; }
+        .task-item.completed {
+            background: #F0FFF4;
+        }
+        .task-item.completed .task-title { color: #00B42A; }
+        
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .task-status {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .task-status.pending {
+            border: 2px solid #E4E7ED;
+            color: #999;
+        }
+        .task-status.done {
+            background: #00B42A;
+            color: #fff;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .task-desc {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .task-action {
+            padding: 6px 14px;
+            border: 1px solid #165DFF;
+            background: #fff;
+            color: #165DFF;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .task-action:hover {
+            background: #165DFF;
+            color: #fff;
+        }
+        .task-action.completed {
+            border-color: #00B42A;
+            color: #00B42A;
+            cursor: default;
+        }
+        .task-action.completed:hover {
+            background: #fff;
+        }
+        
+        /* 收起态 */
+        .guide-collapsed {
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .guide-collapsed-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .guide-collapsed-icon {
+            font-size: 20px;
+        }
+        .guide-collapsed-text {
+            font-size: 14px;
+            color: #666;
+        }
+        .guide-collapsed-text strong {
+            color: #165DFF;
+        }
+        .guide-expand-btn {
+            padding: 8px 16px;
+            border: 1px solid #165DFF;
+            background: #fff;
+            color: #165DFF;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .guide-expand-btn:hover {
+            background: #165DFF;
+            color: #fff;
+        }
+        
+        /* 全部完成态 */
+        .guide-completed {
+            padding: 24px;
+            text-align: center;
+        }
+        .guide-completed-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .guide-completed-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00B42A;
+            margin-bottom: 8px;
+        }
+        .guide-completed-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .guide-enter-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .guide-enter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22, 93, 255, 0.3);
+        }
+        .guide-close-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .guide-close-btn:hover { color: #333; }
+        
+        /* 隐藏状态 */
+        .guide-component.hidden {
+            display: none;
+        }
+        
+        /* 示例页面背景（模拟推广员列表页） */
+        .demo-page {
+            padding: 24px;
+        }
+        .demo-page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .demo-placeholder {
+            background: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #999;
+        }
+        
+        /* 体验用户端弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border-radius: 4px;
+        }
+        .modal-close:hover { background: #f5f5f5; }
+        .modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+        .modal-link {
+            display: block;
+            padding: 12px 16px;
+            background: #F7F8FA;
+            border-radius: 8px;
+            color: #165DFF;
+            font-size: 14px;
+            word-break: break-all;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal-link:hover { background: #E8F3FF; }
+        .modal-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+        }
+        
+        /* 角标 */
+        .anno-marker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(22, 93, 255, 0.85);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .anno-marker:hover, .anno-marker.highlight {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        
+        /* 详情弹窗 */
+        .detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .detail-overlay.show { display: flex; }
+        .detail-modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .detail-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .detail-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .detail-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border-radius: 4px;
+        }
+        .detail-close:hover { background: #f5f5f5; }
+        .detail-body { padding: 24px; }
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #F7F8FA;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            width: 120px;
+            border-bottom: 1px solid #E4E7ED;
+        }
+        .detail-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            border-bottom: 1px solid #E4E7ED;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部标注工具栏 -->
+        <div class="annotation-toolbar">
+            <button class="toolbar-edit-btn" onclick="openEditMode()">✏️ 编辑标注</button>
+        </div>
+        
+        <!-- 主布局 -->
+        <div class="main-layout">
+            <!-- 左侧预览区 -->
+            <div class="preview-area">
+                <!-- 引导组件 -->
+                <div class="guide-component" id="anno-2" style="position:relative;">
+                    <div class="anno-marker" data-id="2">2</div>
+                    
+                    <!-- 展开态 -->
+                    <div class="guide-expanded" id="guideExpanded">
+                        <div class="guide-header">
+                            <div class="guide-title">
+                                <span class="guide-icon">🎉</span>
+                                <span class="guide-title-text">欢迎使用推广联盟</span>
+                            </div>
+                            <div class="guide-header-actions">
+                                <button class="skip-btn" onclick="skipGuide()">跳过引导</button>
+                                <button class="guide-collapse-btn" onclick="collapseGuide()">
+                                    <span>收起</span>
+                                    <span>▲</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-section" id="anno-3" style="position:relative;">
+                            <div class="anno-marker" data-id="3">3</div>
+                            <div class="progress-info">
+                                <span class="progress-text">进度：<strong id="progressCount">0/3</strong></span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-list" id="anno-4" style="position:relative;">
+                            <div class="anno-marker" data-id="4">4</div>
+                            
+                            <div class="task-item" id="task-1">
+                                <div class="task-header">
+                                    <div class="task-status pending">①</div>
+                                    <div class="task-content">
+                                        <div class="task-title">设置推广规则</div>
+                                        <div class="task-desc">了解佣金规则、基础规则、提现规则、推广员等级</div>
+                                    </div>
+                                </div>
+                                <button class="task-action" onclick="doTask(1)">去设置</button>
+                            </div>
+                            
+                            <div class="task-item" id="task-2">
+                                <div class="task-header">
+                                    <div class="task-status pending">②</div>
+                                    <div class="task-content">
+                                        <div class="task-title">添加第一个推广员</div>
+                                        <div class="task-desc">从已有用户中选择推广员</div>
+                                    </div>
+                                </div>
+                                <button class="task-action" onclick="doTask(2)">去添加</button>
+                            </div>
+                            
+                            <div class="task-item" id="task-3">
+                                <div class="task-header">
+                                    <div class="task-status pending">③</div>
+                                    <div class="task-content">
+                                        <div class="task-title">体验用户端</div>
+                                        <div class="task-desc">查看推广员视角，获取推广链接</div>
+                                    </div>
+                                </div>
+                                <button class="task-action" onclick="doTask(3)">去体验</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 收起态 -->
+                    <div class="guide-collapsed" id="guideCollapsed" style="display:none;">
+                        <div class="guide-collapsed-left">
+                            <span class="guide-collapsed-icon">📋</span>
+                            <span class="guide-collapsed-text"><strong id="pendingCount">3</strong> 项未完成</span>
+                        </div>
+                        <button class="guide-expand-btn" onclick="expandGuide()">展开</button>
+                    </div>
+                    
+                    <!-- 全部完成态 -->
+                    <div class="guide-completed" id="guideCompleted" style="display:none;">
+                        <div class="guide-completed-icon">✅</div>
+                        <div class="guide-completed-title">全部设置完成！</div>
+                        <div class="guide-completed-desc">开始你的推广之旅吧</div>
+                        <button class="guide-enter-btn" onclick="enterManagement()">进入推广员管理</button>
+                        <button class="guide-close-btn" onclick="closeGuide()">关闭引导</button>
+                    </div>
+                </div>
+                
+                <!-- 示例页面背景 -->
+                <div class="demo-page" id="anno-5" style="position:relative;">
+                    <div class="anno-marker" data-id="5">5</div>
+                    <div class="demo-page-title">推广员列表页（示例背景）</div>
+                    <div class="demo-placeholder">
+                        <p>这里是推广员列表页的内容区域</p>
+                        <p style="margin-top: 12px; font-size: 13px;">引导组件固定在页面顶部，下方为正常页面内容</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧标注面板 -->
+            <div class="annotation-panel" id="annotation-panel">
+                <div class="panel-header">
+                    <button class="panel-toggle-btn" onclick="togglePanel()">◀</button>
+                    <span>📌 标注说明</span>
+                </div>
+                <div class="annotation-list" id="annotation-list"></div>
+            </div>
+        </div>
+        
+        <!-- 折叠按钮 -->
+        <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()">📌</button>
+    </div>
+    
+    <!-- 体验用户端弹窗 -->
+    <div class="modal-overlay" id="experienceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">体验用户端推广联盟</div>
+                <button class="modal-close" onclick="closeExperienceModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-code">📱</div>
+                <div class="modal-link" onclick="copyLink()">
+                    https://your-domain.com/promotion?tenant=xxx
+                </div>
+                <div class="modal-desc">
+                    扫码或复制链接，注册后自动成为推广员<br>
+                    体验完整的推广员视角流程
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 标注详情弹窗 -->
+    <div class="detail-overlay" id="detail-modal">
+        <div class="detail-modal">
+            <div class="detail-header">
+                <div class="detail-title" id="modal-title">标注详情</div>
+                <button class="detail-close" onclick="closeDetailModal()">×</button>
+            </div>
+            <div class="detail-body" id="modal-body"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 任务状态
+        let completedTasks = new Set();
+        const totalTasks = 3;
+        
+        // 执行任务（模拟）
+        function doTask(taskId) {
+            if (taskId === 3) {
+                // 任务3：弹出体验用户端弹窗
+                document.getElementById('experienceModal').classList.add('show');
+            } else {
+                // 任务1、2：模拟完成
+                completeTask(taskId);
+            }
+        }
+        
+        // 完成任务
+        function completeTask(taskId) {
+            completedTasks.add(taskId);
+            updateUI();
+        }
+        
+        // 更新UI
+        function updateUI() {
+            const completed = completedTasks.size;
+            
+            // 更新进度
+            document.getElementById('progressCount').textContent = `${completed}/${totalTasks}`;
+            document.getElementById('progressFill').style.width = `${(completed / totalTasks) * 100}%`;
+            document.getElementById('pendingCount').textContent = totalTasks - completed;
+            
+            // 更新任务项
+            for (let i = 1; i <= totalTasks; i++) {
+                const taskEl = document.getElementById(`task-${i}`);
+                const statusEl = taskEl.querySelector('.task-status');
+                const actionEl = taskEl.querySelector('.task-action');
+                
+                if (completedTasks.has(i)) {
+                    taskEl.classList.add('completed');
+                    statusEl.classList.remove('pending');
+                    statusEl.classList.add('done');
+                    statusEl.textContent = '✓';
+                    actionEl.classList.add('completed');
+                    actionEl.textContent = '已完成';
+                } else {
+                    taskEl.classList.remove('completed');
+                    statusEl.classList.remove('done');
+                    statusEl.classList.add('pending');
+                    statusEl.textContent = ['①', '②', '③'][i-1];
+                    actionEl.classList.remove('completed');
+                    actionEl.textContent = ['去设置', '去添加', '去体验'][i-1];
+                }
+            }
+            
+            // 全部完成
+            if (completed === totalTasks) {
+                document.getElementById('guideExpanded').style.display = 'none';
+                document.getElementById('guideCompleted').style.display = 'block';
+            }
+        }
+        
+        // 收起引导
+        function collapseGuide() {
+            document.getElementById('guideExpanded').style.display = 'none';
+            document.getElementById('guideCollapsed').style.display = 'flex';
+        }
+        
+        // 展开引导
+        function expandGuide() {
+            if (completedTasks.size === totalTasks) {
+                document.getElementById('guideCollapsed').style.display = 'none';
+                document.getElementById('guideCompleted').style.display = 'block';
+            } else {
+                document.getElementById('guideCollapsed').style.display = 'none';
+                document.getElementById('guideExpanded').style.display = 'block';
+            }
+        }
+        
+        // 跳过引导
+        function skipGuide() {
+            document.getElementById('guideExpanded').style.display = 'none';
+            document.getElementById('guideCollapsed').style.display = 'none';
+            document.getElementById('guideCompleted').style.display = 'none';
+            document.querySelector('.guide-component').classList.add('hidden');
+        }
+        
+        // 关闭引导
+        function closeGuide() {
+            document.getElementById('guideCompleted').style.display = 'none';
+            document.querySelector('.guide-component').classList.add('hidden');
+        }
+        
+        // 进入管理
+        function enterManagement() {
+            alert('跳转推广员列表页');
+        }
+        
+        // 体验弹窗
+        function closeExperienceModal() {
+            document.getElementById('experienceModal').classList.remove('show');
+            // 模拟完成任务
+            completeTask(3);
+        }
+        
+        function copyLink() {
+            const link = 'https://your-domain.com/promotion?tenant=xxx';
+            navigator.clipboard.writeText(link).then(() => {
+                alert('链接已复制');
+            });
+        }
+        
+        // ===== 标注系统 =====
+        const annotations = [
+            {
+                id: 1,
+                title: '页面总说明',
+                summary: '开通引导组件，可嵌入推广联盟后台任意页面顶部，引导租户完成核心设置。',
+                target: '#anno-2',
+                showMarker: false,
+                type: 'overview',
+                detail: {
+                    feature: '独立的引导组件，租户开通推广联盟后展示。组件固定在页面顶部，支持折叠/展开。不修改现有原型页面，开发时直接集成。'
+                }
+            },
+            {
+                id: 2,
+                title: '引导组件容器',
+                summary: '整体组件的外层容器，包含展开态、收起态、完成态三种状态。',
+                target: '#anno-2',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '引导组件的外层容器，根据状态切换显示不同内容。\n\n三种状态：\n- 展开态：显示完整任务列表\n- 收起态：显示简要摘要\n- 完成态：显示完成提示',
+                    display: '圆角卡片样式，带阴影\n固定在页面顶部\n不随页面滚动',
+                    interaction: '状态切换由任务完成情况触发'
+                }
+            },
+            {
+                id: 3,
+                title: '进度条',
+                summary: '显示当前引导任务的完成进度。',
+                target: '#anno-3',
+                showMarker: true,
+                type: 'field',
+                detail: {
+                    feature: '可视化展示引导任务的完成进度，帮助租户了解还需要完成多少任务。',
+                    display: '进度文本：X/3\n进度条：百分比填充',
+                    interaction: '每完成一个任务，进度条自动更新'
+                }
+            },
+            {
+                id: 4,
+                title: '任务列表',
+                summary: '3个引导任务，每个任务包含状态、说明和操作按钮。',
+                target: '#anno-4',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '展示3个核心引导任务，每个任务可独立操作。',
+                    display: '每个任务项包含：\n- 序号状态（圆圈）\n- 任务标题\n- 任务说明\n- 操作按钮',
+                    interaction: '任务①：点击「去设置」→ 跳转规则配置页\n任务②：点击「去添加」→ 弹出添加推广员弹窗\n任务③：点击「去体验」→ 弹出推广链接弹窗（二维码+链接）\n\n完成后：任务项变绿，按钮显示"已完成"'
+                }
+            },
+            {
+                id: 5,
+                title: '页面背景',
+                summary: '引导组件下方的正常页面内容（推广员列表页）。',
+                target: '#anno-5',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '引导组件下方的正常页面内容，此处仅作为示例背景展示。实际开发时引导组件嵌入现有页面。',
+                    display: '引导组件固定在顶部，下方为正常页面内容',
+                    interaction: '引导组件可折叠，折叠后不遮挡下方内容'
+                }
+            }
+        ];
+        
+        let panelCollapsed = localStorage.getItem('panel-collapsed') === 'true';
+        
+        function initPanel() {
+            if (panelCollapsed) {
+                document.getElementById('annotation-panel').classList.add('collapsed');
+                document.getElementById('panel-expand-btn').classList.add('show');
+            }
+            renderAnnotationList();
+        }
+        
+        function togglePanel() {
+            panelCollapsed = !panelCollapsed;
+            document.getElementById('annotation-panel').classList.toggle('collapsed');
+            document.getElementById('panel-expand-btn').classList.toggle('show');
+            localStorage.setItem('panel-collapsed', panelCollapsed);
+        }
+        
+        function renderAnnotationList() {
+            const list = document.getElementById('annotation-list');
+            list.innerHTML = annotations.map(anno => `
+                <div class="annotation-item" data-id="${anno.id}" onclick="showDetail(${anno.id})" onmouseenter="highlightMarker(${anno.id})" onmouseleave="unhighlightMarker(${anno.id})">
+                    <div class="annotation-title">
+                        ${anno.showMarker ? `<span class="annotation-badge">${anno.id}</span>` : ''}
+                        <span>${anno.title}</span>
+                    </div>
+                    <div class="annotation-summary">${anno.summary}</div>
+                </div>
+            `).join('');
+        }
+        
+        function highlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.add('highlight');
+        }
+        
+        function unhighlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.remove('highlight');
+        }
+        
+        function showDetail(id) {
+            const anno = annotations.find(a => a.id === id);
+            if (!anno) return;
+            
+            document.getElementById('modal-title').textContent = `${anno.showMarker ? anno.id + '. ' : ''}${anno.title}`;
+            
+            let html = '<table class="detail-table">';
+            if (anno.detail.feature) html += `<tr><th>功能说明</th><td>${anno.detail.feature.replace(/\n/g, '<br>')}</td></tr>`;
+            if (anno.detail.display) html += `<tr><th>字段/展示</th><td>${anno.detail.display.replace(/\n/g, '<br>')}</td></tr>`;
+            if (anno.detail.interaction) html += `<tr><th>交互规则</th><td>${anno.detail.interaction.replace(/\n/g, '<br>')}</td></tr>`;
+            if (anno.detail.business) html += `<tr><th>业务规则</th><td>${anno.detail.business.replace(/\n/g, '<br>')}</td></tr>`;
+            html += '</table>';
+            
+            document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('detail-modal').classList.add('show');
+            
+            const target = document.querySelector(anno.target);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+        
+        function openEditMode() {
+            alert('编辑标注功能（开发中）');
+        }
+        
+        // 点击遮罩关闭弹窗
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDetailModal();
+        });
+        
+        document.getElementById('experienceModal').addEventListener('click', function(e) {
+            if (e.target === this) closeExperienceModal();
+        });
+        
+        // 角标悬停联动
+        document.querySelectorAll('.anno-marker').forEach(marker => {
+            marker.addEventListener('mouseenter', function() {
+                const id = this.dataset.id;
+                const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+                if (item) item.classList.add('active');
+            });
+            marker.addEventListener('mouseleave', function() {
+                const id = this.dataset.id;
+                const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+                if (item) item.classList.remove('active');
+            });
+            marker.addEventListener('click', function() {
+                showDetail(parseInt(this.dataset.id));
+            });
+        });
+        
+        // 初始化
+        initPanel();
+    </script>
+</body>
+</html>
