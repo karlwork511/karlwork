@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推广联盟介绍页</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; }
+        
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* 顶部标注工具栏 */
+        .annotation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 8px 16px;
+            background: #fff;
+            border-bottom: 1px solid #E4E7ED;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .toolbar-edit-btn {
+            padding: 6px 14px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+        
+        /* 主布局 */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        /* 左侧预览区 */
+        .preview-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            background: #fff;
+        }
+        
+        /* 右侧标注面板 */
+        .annotation-panel {
+            width: 320px;
+            background: #F7F8FA;
+            border-left: 1px solid #E4E7ED;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s;
+        }
+        .annotation-panel.collapsed { width: 0; overflow: hidden; }
+        
+        .panel-header {
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .panel-toggle-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #DCDFE6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .annotation-list { padding: 0; }
+        .annotation-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E4E7ED;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .annotation-item:hover { background: #EEF0F3; }
+        .annotation-item.active { background: #E8F3FF; border-left: 3px solid #165DFF; }
+        .annotation-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .annotation-badge {
+            width: 20px;
+            height: 20px;
+            background: #165DFF;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .annotation-summary {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        /* 折叠按钮 */
+        .panel-expand-btn {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 64px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 100;
+        }
+        .panel-expand-btn.show { display: flex; }
+        
+        /* ===== 介绍页样式 ===== */
+        .intro-page {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #f0f7ff 0%, #fff 100%);
+        }
+        
+        /* Banner */
+        .banner {
+            padding: 80px 40px 60px;
+            text-align: center;
+            position: relative;
+        }
+        .banner-title {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+        .banner-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .banner-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .banner-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(22, 93, 255, 0.3);
+        }
+        
+        /* 核心功能 */
+        .features {
+            padding: 60px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .features-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #1a1a2e;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .feature-card {
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .feature-card:hover { transform: translateY(-4px); }
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .feature-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a2e;
+        }
+        .feature-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* 预期收益 */
+        .benefits {
+            padding: 60px 40px;
+            background: #fff;
+        }
+        .benefits-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #1a1a2e;
+        }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .benefit-item {
+            text-align: center;
+            padding: 24px;
+        }
+        .benefit-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #165DFF;
+            margin-bottom: 8px;
+        }
+        .benefit-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .benefit-desc {
+            font-size: 13px;
+            color: #999;
+        }
+        
+        /* 成功案例 */
+        .cases {
+            padding: 60px 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .cases-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #1a1a2e;
+        }
+        .cases-carousel {
+            position: relative;
+            overflow: hidden;
+        }
+        .cases-track {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+        .case-card {
+            min-width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .case-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .case-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .case-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .case-tag {
+            font-size: 12px;
+            color: #165DFF;
+            background: #E8F3FF;
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        .case-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .case-metric {
+            text-align: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .case-metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #165DFF;
+            margin-bottom: 4px;
+        }
+        .case-metric-label {
+            font-size: 13px;
+            color: #666;
+        }
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .carousel-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .carousel-btn:hover { border-color: #165DFF; color: #165DFF; }
+        .carousel-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .carousel-dot.active {
+            background: #165DFF;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        /* 底部CTA */
+        .bottom-cta {
+            padding: 60px 40px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, #f0f7ff 100%);
+        }
+        .cta-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .cta-desc {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(22, 93, 255, 0.3);
+        }
+        .cta-hint {
+            font-size: 13px;
+            color: #999;
+            margin-top: 16px;
+        }
+        
+        /* 角标 */
+        .anno-marker {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(22, 93, 255, 0.85);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .anno-marker:hover, .anno-marker.highlight {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E4E7ED;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border-radius: 4px;
+        }
+        .modal-close:hover { background: #f5f5f5; }
+        .modal-body { padding: 24px; }
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #F7F8FA;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            width: 120px;
+            border-bottom: 1px solid #E4E7ED;
+        }
+        .detail-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            border-bottom: 1px solid #E4E7ED;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部标注工具栏 -->
+        <div class="annotation-toolbar">
+            <button class="toolbar-edit-btn" onclick="openEditMode()">✏️ 编辑标注</button>
+        </div>
+        
+        <!-- 主布局 -->
+        <div class="main-layout">
+            <!-- 左侧预览区 -->
+            <div class="preview-area">
+                <div class="intro-page" id="anno-1">
+                    <!-- Banner -->
+                    <div class="banner" id="anno-2" style="position:relative;">
+                        <div class="anno-marker" data-id="2">2</div>
+                        <h1 class="banner-title">让你的老用户帮你拉新用户</h1>
+                        <p class="banner-subtitle">零成本裂变，5分钟开启推广联盟</p>
+                        <button class="banner-cta">
+                            <span>立即开启</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 核心功能 -->
+                    <div class="features" id="anno-3" style="position:relative;">
+                        <div class="anno-marker" data-id="3">3</div>
+                        <h2 class="features-title">核心功能</h2>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">👥</div>
+                                <div class="feature-name">轻松管理推广员</div>
+                                <div class="feature-desc">从已有用户中选择推广员，支持等级体系和成长值激励</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💰</div>
+                                <div class="feature-name">佣金自动结算</div>
+                                <div class="feature-desc">配置佣金规则后，系统自动计算和结算佣金，支持多种提现方式</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-name">全链路数据追踪</div>
+                                <div class="feature-desc">实时查看推广效果、佣金支出、推广员业绩，数据一目了然</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 预期收益 -->
+                    <div class="benefits" id="anno-4" style="position:relative;">
+                        <div class="anno-marker" data-id="4">4</div>
+                        <h2 class="benefits-title">预期收益</h2>
+                        <div class="benefits-grid">
+                            <div class="benefit-item">
+                                <div class="benefit-value">40%</div>
+                                <div class="benefit-label">平均注册提升</div>
+                                <div class="benefit-desc">通过老用户裂变带来新注册用户</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-value">60%</div>
+                                <div class="benefit-label">获客成本降低</div>
+                                <div class="benefit-desc">按效果付费，只有产生订单才结算佣金</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-value">更高</div>
+                                <div class="benefit-label">转化率</div>
+                                <div class="benefit-desc">熟人推荐信任度更高，转化率更好</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 成功案例 -->
+                    <div class="cases" id="anno-5" style="position:relative;">
+                        <div class="anno-marker" data-id="5">5</div>
+                        <h2 class="cases-title">成功案例</h2>
+                        <div class="cases-carousel">
+                            <div class="cases-track" id="casesTrack">
+                                <!-- 案例1 -->
+                                <div class="case-card">
+                                    <div class="case-header">
+                                        <div class="case-avatar">A</div>
+                                        <div>
+                                            <div class="case-name">示例商户 A</div>
+                                            <span class="case-tag">跨境电商</span>
+                                        </div>
+                                    </div>
+                                    <div class="case-metrics">
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">28</div>
+                                            <div class="case-metric-label">推广员数量</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">156 单</div>
+                                            <div class="case-metric-label">新增订单</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">↑85%</div>
+                                            <div class="case-metric-label">订单提升</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 案例2 -->
+                                <div class="case-card">
+                                    <div class="case-header">
+                                        <div class="case-avatar">B</div>
+                                        <div>
+                                            <div class="case-name">示例商户 B</div>
+                                            <span class="case-tag">美妆护肤</span>
+                                        </div>
+                                    </div>
+                                    <div class="case-metrics">
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">45</div>
+                                            <div class="case-metric-label">推广员数量</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">320 单</div>
+                                            <div class="case-metric-label">新增订单</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">¥12,800</div>
+                                            <div class="case-metric-label">新增利润</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 案例3 -->
+                                <div class="case-card">
+                                    <div class="case-header">
+                                        <div class="case-avatar">C</div>
+                                        <div>
+                                            <div class="case-name">示例商户 C</div>
+                                            <span class="case-tag">数码家电</span>
+                                        </div>
+                                    </div>
+                                    <div class="case-metrics">
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">15</div>
+                                            <div class="case-metric-label">推广员数量</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">¥3.2</div>
+                                            <div class="case-metric-label">获客成本</div>
+                                        </div>
+                                        <div class="case-metric">
+                                            <div class="case-metric-value">↑120%</div>
+                                            <div class="case-metric-label">订单提升</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-controls">
+                                <button class="carousel-btn" onclick="prevCase()">‹</button>
+                                <div class="carousel-dots">
+                                    <div class="carousel-dot active" onclick="goToCase(0)"></div>
+                                    <div class="carousel-dot" onclick="goToCase(1)"></div>
+                                    <div class="carousel-dot" onclick="goToCase(2)"></div>
+                                </div>
+                                <button class="carousel-btn" onclick="nextCase()">›</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 底部CTA -->
+                    <div class="bottom-cta" id="anno-6" style="position:relative;">
+                        <div class="anno-marker" data-id="6">6</div>
+                        <h2 class="cta-title">准备好开始了吗？</h2>
+                        <p class="cta-desc">5分钟配置完成，让老用户帮你带来新客户</p>
+                        <button class="cta-button">
+                            <span>立即开启推广联盟</span>
+                            <span>→</span>
+                        </button>
+                        <p class="cta-hint">0 技术基础 · 免费开通 · 按效果付费</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧标注面板 -->
+            <div class="annotation-panel" id="annotation-panel">
+                <div class="panel-header">
+                    <button class="panel-toggle-btn" onclick="togglePanel()">◀</button>
+                    <span>📌 标注说明</span>
+                </div>
+                <div class="annotation-list" id="annotation-list"></div>
+            </div>
+        </div>
+        
+        <!-- 折叠按钮 -->
+        <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()">📌</button>
+    </div>
+    
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">标注详情</div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 标注数据
+        const annotations = [
+            {
+                id: 1,
+                title: '页面总说明',
+                summary: '推广联盟工具介绍页，展示工具价值、核心功能、预期收益和成功案例，引导租户开通使用。',
+                target: '#anno-1',
+                showMarker: false,
+                type: 'overview',
+                detail: {
+                    feature: '租户从后台菜单进入推广联盟工具时，首先进入此介绍页。页面目的是让租户理解工具价值、降低使用门槛、引导开通。已开通的租户不再展示此页，直接进入推广员列表页。'
+                }
+            },
+            {
+                id: 2,
+                title: '顶部 Banner',
+                summary: '主标题 + 副标题 + 立即开启按钮，传递核心价值主张。',
+                target: '#anno-2',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '页面首屏核心区域，用一句话传达推广联盟的核心价值：让老用户帮你拉新用户。主按钮引导租户立即开通。',
+                    display: '主标题：让你的老用户帮你拉新用户\n副标题：零成本裂变，5分钟开启推广联盟\n主按钮：立即开启',
+                    interaction: '点击「立即开启」→ 开通推广联盟功能 → 跳转开通引导页'
+                }
+            },
+            {
+                id: 3,
+                title: '核心功能介绍',
+                summary: '3列布局展示推广联盟的三大核心功能模块。',
+                target: '#anno-3',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '用3张卡片展示推广联盟的核心功能，帮助租户快速了解工具能做什么。',
+                    display: '3列等宽布局，每张卡片包含：图标 + 功能名称 + 功能说明\n功能1：轻松管理推广员\n功能2：佣金自动结算\n功能3：全链路数据追踪',
+                    interaction: '纯展示，无交互。鼠标悬停卡片轻微上移。'
+                }
+            },
+            {
+                id: 4,
+                title: '预期收益展示',
+                summary: '用数据说话，展示推广联盟预期带来的效果提升。',
+                target: '#anno-4',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '用具体数字增强说服力，让租户对推广效果有明确预期。',
+                    display: '3个核心指标横向排列：\n- 注册提升：平均提升40%\n- 获客成本：降低60%\n- 转化率：高于传统渠道',
+                    interaction: '纯展示，数字使用主色调突出显示。'
+                }
+            },
+            {
+                id: 5,
+                title: '成功案例',
+                summary: '卡片轮播展示多个租户的成功案例数据。',
+                target: '#anno-5',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '展示真实或示例的成功案例，增强租户信心。采用卡片轮播方式，支持多条案例展示。',
+                    display: '单张卡片包含：\n- 租户名称 + 行业标签\n- 推广员数量\n- 新增订单数\n- 订单提升比例 / 新增利润 / 获客成本（任选展示）',
+                    interaction: '左右箭头切换案例\n底部圆点指示当前位置\n自动轮播（5秒切换，鼠标悬停暂停）\n支持手势滑动（移动端）'
+                }
+            },
+            {
+                id: 6,
+                title: '底部操作区',
+                summary: '页面底部的二次转化区域，放置立即开启按钮。',
+                target: '#anno-6',
+                showMarker: true,
+                type: 'area',
+                detail: {
+                    feature: '页面浏览到底部后的二次转化入口，用简洁的文案再次强调开通的便捷性。',
+                    display: '标题：准备好开始了吗？\n描述：5分钟配置完成，让老用户帮你带来新客户\n按钮：立即开启推广联盟\n提示：0技术基础 · 免费开通 · 按效果付费',
+                    interaction: '点击按钮 → 开通推广联盟功能 → 跳转开通引导页'
+                }
+            }
+        ];
+        
+        // 轮播控制
+        let currentCase = 0;
+        const totalCases = 3;
+        
+        function updateCarousel() {
+            const track = document.getElementById('casesTrack');
+            track.style.transform = `translateX(-${currentCase * 100}%)`;
+            
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentCase);
+            });
+        }
+        
+        function nextCase() {
+            currentCase = (currentCase + 1) % totalCases;
+            updateCarousel();
+        }
+        
+        function prevCase() {
+            currentCase = (currentCase - 1 + totalCases) % totalCases;
+            updateCarousel();
+        }
+        
+        function goToCase(index) {
+            currentCase = index;
+            updateCarousel();
+        }
+        
+        // 自动轮播
+        let autoPlay = setInterval(nextCase, 5000);
+        document.querySelector('.cases-carousel').addEventListener('mouseenter', () => clearInterval(autoPlay));
+        document.querySelector('.cases-carousel').addEventListener('mouseleave', () => {
+            autoPlay = setInterval(nextCase, 5000);
+        });
+        
+        // ===== 标注系统 =====
+        let panelCollapsed = localStorage.getItem('panel-collapsed') === 'true';
+        
+        function initPanel() {
+            if (panelCollapsed) {
+                document.getElementById('annotation-panel').classList.add('collapsed');
+                document.getElementById('panel-expand-btn').classList.add('show');
+            }
+            renderAnnotationList();
+        }
+        
+        function togglePanel() {
+            panelCollapsed = !panelCollapsed;
+            document.getElementById('annotation-panel').classList.toggle('collapsed');
+            document.getElementById('panel-expand-btn').classList.toggle('show');
+            localStorage.setItem('panel-collapsed', panelCollapsed);
+        }
+        
+        function renderAnnotationList() {
+            const list = document.getElementById('annotation-list');
+            list.innerHTML = annotations.map(anno => `
+                <div class="annotation-item" data-id="${anno.id}" onclick="showDetail(${anno.id})" onmouseenter="highlightMarker(${anno.id})" onmouseleave="unhighlightMarker(${anno.id})">
+                    <div class="annotation-title">
+                        ${anno.showMarker ? `<span class="annotation-badge">${anno.id}</span>` : ''}
+                        <span>${anno.title}</span>
+                    </div>
+                    <div class="annotation-summary">${anno.summary}</div>
+                </div>
+            `).join('');
+        }
+        
+        function highlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.add('highlight');
+        }
+        
+        function unhighlightMarker(id) {
+            const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+            if (marker) marker.classList.remove('highlight');
+        }
+        
+        function showDetail(id) {
+            const anno = annotations.find(a => a.id === id);
+            if (!anno) return;
+            
+            document.getElementById('modal-title').textContent = `${anno.showMarker ? anno.id + '. ' : ''}${anno.title}`;
+            
+            let html = '<table class="detail-table">';
+            if (anno.detail.feature) html += `<tr><th>功能说明</th><td>${anno.detail.feature}</td></tr>`;
+            if (anno.detail.display) html += `<tr><th>字段/展示</th><td>${anno.detail.display.replace(/\n/g, '<br>')}</td></tr>`;
+            if (anno.detail.interaction) html += `<tr><th>交互规则</th><td>${anno.detail.interaction.replace(/\n/g, '<br>')}</td></tr>`;
+            if (anno.detail.business) html += `<tr><th>业务规则</th><td>${anno.detail.business.replace(/\n/g, '<br>')}</td></tr>`;
+            html += '</table>';
+            
+            document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('detail-modal').classList.add('show');
+            
+            // 滚动到对应位置
+            const target = document.querySelector(anno.target);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+        
+        function openEditMode() {
+            alert('编辑标注功能（开发中）');
+        }
+        
+        // 点击遮罩关闭弹窗
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        // 角标悬停联动
+        document.querySelectorAll('.anno-marker').forEach(marker => {
+            marker.addEventListener('mouseenter', function() {
+                const id = this.dataset.id;
+                const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+                if (item) item.classList.add('active');
+            });
+            marker.addEventListener('mouseleave', function() {
+                const id = this.dataset.id;
+                const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+                if (item) item.classList.remove('active');
+            });
+            marker.addEventListener('click', function() {
+                showDetail(parseInt(this.dataset.id));
+            });
+        });
+        
+        // 初始化
+        initPanel();
+    </script>
+</body>
+</html>
