@@ -87,5 +87,256 @@
         ]
       }
     ]
+  },
+  {
+    "id": "saas-subscription",
+    "name": "SaaS 订阅系统",
+    "desc": "代购集运 SaaS 订阅模式，含运营侧 + 租户侧完整后台",
+    "docs": [
+      {
+        "name": "订阅系统文档",
+        "file": "docs/subscription-system-docs.html",
+        "icon": "📄"
+      },
+      {
+        "name": "飞书文档测试",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/Uci2dDOwloFVmbxO7BBcd0uxnic",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "运营侧",
+        "pages": [
+          {
+            "name": "运营后台首页",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "📋",
+            "anchor": "page-1"
+          },
+          {
+            "name": "租户管理",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "👥",
+            "anchor": "page-2"
+          },
+          {
+            "name": "订阅套餐配置",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "💰",
+            "anchor": "page-3"
+          },
+          {
+            "name": "物流供应商管理",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "🚚",
+            "anchor": "page-4"
+          },
+          {
+            "name": "线路报价管理",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "",
+            "anchor": "page-5"
+          },
+          {
+            "name": "充值与支付配置",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "💳",
+            "anchor": "page-6"
+          },
+          {
+            "name": "增值服务配置",
+            "file": "POKO%20SaaS%20运营后台%20-%20原型分享版.html",
+            "icon": "🔧",
+            "anchor": "page-7"
+          }
+        ]
+      },
+      {
+        "title": "租户侧",
+        "pages": [
+          {
+            "name": "租户后台首页",
+            "file": "POKO%20SaaS%20租户后台%20-%20原型分享版.html",
+            "icon": "🏠",
+            "anchor": "page-1"
+          },
+          {
+            "name": "线路管理",
+            "file": "POKO%20SaaS%20租户后台%20-%20原型分享版.html",
+            "icon": "🗺️",
+            "anchor": "page-2"
+          },
+          {
+            "name": "财务管理",
+            "file": "POKO%20SaaS%20租户后台%20-%20原型分享版.html",
+            "icon": "💵",
+            "anchor": "page-3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "parcel-module",
+    "name": "提包模块",
+    "desc": "包裹提交模块，含后台管理+PC端+APP端完整原型及PRD文档",
+    "docs": [
+      {
+        "name": "提包模块需求文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/wiki/TYXUwxCQ4iTMH2koUWjcnSFgnSt",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "🏢 平台侧",
+        "pages": [
+          {
+            "name": "提包单列表",
+            "file": "docs/parcel-list-admin-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "提包单详情",
+            "file": "docs/parcel-detail-admin-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "平台线路新增/编辑",
+            "file": "docs/platform-route-edit_v2.2.7.html",
+            "icon": "🗺️"
+          }
+        ]
+      },
+      {
+        "title": "🏪 租户侧",
+        "pages": [
+          {
+            "name": "租户线路管理",
+            "file": "docs/tenant-route-manage.html",
+            "icon": "🗺️"
+          },
+          {
+            "name": "租户线路详情",
+            "file": "docs/tenant-route-detail.html",
+            "icon": "🗺️"
+          }
+        ]
+      },
+      {
+        "title": "💻 PC用户端",
+        "pages": [
+          {
+            "name": "提交包裹",
+            "file": "docs/submit-parcel-web-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "我的包裹",
+            "file": "docs/my-parcels-web-annotated.html",
+            "icon": ""
+          },
+          {
+            "name": "包裹详情",
+            "file": "docs/parcel-detail-web-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "📱 APP用户端",
+        "pages": [
+          {
+            "name": "提交包裹",
+            "file": "docs/submit-parcel-app-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "我的包裹",
+            "file": "docs/my-parcels-app-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "包裹详情",
+            "file": "docs/parcel-detail-app-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "member-management",
+    "name": "会员管理模块",
+    "desc": "会员注册、列表、详情完整管理，含 9 个数据 Tab 和收货地址实名认证，以及 PC/APP 用户端登录注册流程",
+    "docs": [
+      {
+        "name": "会员管理模块 PRD",
+        "file": "https://zcn9mbpydspc.feishu.cn/wiki/AbabwGMgpiOxYxkQZNNc5B2anBe",
+        "icon": "📎"
+      }
+    ],
+    "groups": [
+      {
+        "title": "后台管理",
+        "pages": [
+          {
+            "name": "会员列表页",
+            "file": "docs/member-list-annotated.html",
+            "icon": "📋"
+          },
+          {
+            "name": "会员详情页",
+            "file": "docs/member-detail-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "💻 PC用户端",
+        "pages": [
+          {
+            "name": "登录注册（网页版标注）",
+            "file": "docs/member-login-web-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": " APP用户端",
+        "pages": [
+          {
+            "name": "登录注册（APP标注）",
+            "file": "docs/member-login-app-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sign-record",
+    "name": "无主件快递处理",
+    "desc": "仓库签收快递的识别码匹配机制，含签收记录管理和自动匹配流程",
+    "docs": [
+      {
+        "name": "无主件处理设计文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/CqizdIsQFo5z0AxrLK1clfdAn9A",
+        "icon": ""
+      }
+    ],
+    "groups": [
+      {
+        "title": "后台管理",
+        "pages": [
+          {
+            "name": "签收记录",
+            "file": "docs/sign-record-annotated.html",
+            "icon": "📦"
+          }
+        ]
+      }
+    ]
   }
 ]
