@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>仓库详情 - 增值服务融合</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f5f5; color: #333; max-width: 430px; margin: 0 auto; padding-bottom: 80px; }
+
+  .new-element { position: relative; }
+  .new-element::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border: 2px dashed #FF6B35; border-radius: 12px; pointer-events: none; z-index: 10; }
+  .new-badge { position: absolute; top: -10px; right: 8px; background: #FF6B35; color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 8px; z-index: 11; font-weight: 600; }
+
+  .header { background: #fff; padding: 14px 16px; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid #f0f0f0; }
+  .header-back { position: absolute; left: 16px; font-size: 20px; color: #333; }
+  .header-title { font-size: 17px; font-weight: 600; }
+
+  .status-bar { background: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; }
+  .status-label { font-size: 13px; color: #999; margin-bottom: 4px; }
+  .status-value { font-size: 18px; font-weight: 700; color: #FF6B35; }
+  .status-tag { background: #FFF3EE; color: #FF6B35; font-size: 11px; padding: 3px 10px; border-radius: 4px; border: 1px solid #FFD4C2; }
+
+  .card { background: #fff; margin: 10px 12px; border-radius: 12px; padding: 16px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 4px; height: 16px; background: #FF6B35; border-radius: 2px; }
+
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+  .info-label { color: #999; }
+  .info-value { color: #333; display: flex; align-items: center; gap: 6px; }
+  .copy-btn { color: #FF6B35; font-size: 12px; border: 1px solid #FFD4C2; padding: 2px 8px; border-radius: 4px; background: #FFF9F5; }
+  .green-text { color: #52C41A; font-weight: 500; }
+
+  .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .spec-item { text-align: center; padding: 12px; background: #FAFAFA; border-radius: 8px; }
+  .spec-value { font-size: 18px; font-weight: 700; color: #333; }
+  .spec-label { font-size: 12px; color: #999; margin-top: 4px; }
+  .spec-triple { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .spec-note { font-size: 11px; color: #bbb; margin-top: 10px; }
+
+  .product-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+  .product-img { width: 48px; height: 48px; background: #f0f0f0; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 12px; }
+  .product-info { flex: 1; }
+  .product-name { font-size: 14px; font-weight: 500; }
+  .product-qty { font-size: 13px; color: #999; }
+
+  /* 增值服务展示区域 */
+  .service-card { background: #fff; margin: 10px 12px; border-radius: 12px; padding: 16px; }
+  .svc-item { background: #FAFAFA; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .svc-item:last-child { margin-bottom: 0; }
+  .svc-main { display: flex; align-items: center; gap: 8px; }
+  .svc-icon { font-size: 16px; }
+  .svc-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .svc-price { font-size: 13px; color: #666; font-weight: 500; }
+  .svc-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .status-completed { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+  .status-processing { background: #FFFBE6; color: #FAAD14; border: 1px solid #FFE58F; }
+  .status-cancelled { background: #FFF1F0; color: #FF4D4F; border: 1px solid #FFA39E; }
+  .svc-refund { font-size: 11px; color: #FF4D4F; margin-left: 4px; }
+  .svc-entry { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #FF6B35; cursor: pointer; }
+  .svc-entry-arrow { color: #ccc; }
+  .svc-entry-photos { display: flex; gap: 8px; margin-top: 8px; }
+  .svc-thumb { width: 52px; height: 52px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+
+  /* 底部固定栏 */
+  .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); max-width: 430px; width: 100%; background: #fff; padding: 12px 16px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; z-index: 50; }
+  .bottom-btn { flex: 1; padding: 12px; text-align: center; border-radius: 24px; font-size: 15px; font-weight: 600; border: none; }
+  .bottom-btn-primary { background: #FF6B35; color: #fff; }
+
+  /* 底部弹窗 */
+  .sheet-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 100; }
+  .sheet-mask.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; bottom: 0; left: 0; right: 0; max-width: 430px; margin: 0 auto; background: #fff; border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform .25s; z-index: 101; max-height: 75vh; display: flex; flex-direction: column; }
+  .sheet.show { transform: translateY(0); }
+  .sheet-header { padding: 16px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .sheet-title { font-size: 16px; font-weight: 600; }
+  .sheet-close { font-size: 22px; color: #999; cursor: pointer; line-height: 1; }
+  .sheet-context { padding: 0 16px 12px; font-size: 12px; color: #999; border-bottom: 1px solid #f0f0f0; }
+  .sheet-body { padding: 14px 16px 24px; overflow-y: auto; }
+  .req-item { display: flex; gap: 10px; background: #FAFAFA; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+  .req-item:last-child { margin-bottom: 0; }
+  .req-num { color: #FF6B35; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .req-body { flex: 1; min-width: 0; }
+  .req-text { font-size: 13px; color: #333; line-height: 1.6; }
+  .sheet-section-title { font-size: 12px; color: #999; margin: 14px 0 8px; }
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .photo-grid-item { border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; }
+  .remark-text { font-size: 13px; color: #333; line-height: 1.7; background: #FAFAFA; border-radius: 10px; padding: 12px; }
+
+  /* 全屏照片查看器 */
+  .viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 200; display: none; flex-direction: column; }
+  .viewer.show { display: flex; }
+  .viewer-top { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+  .viewer-index { color: #fff; font-size: 13px; background: rgba(255,255,255,.15); padding: 3px 10px; border-radius: 10px; }
+  .viewer-close { color: #fff; font-size: 26px; cursor: pointer; line-height: 1; }
+  .viewer-scroll { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .viewer-scroll::-webkit-scrollbar { display: none; }
+  .viewer-photo { min-width: 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .viewer-photo-box { width: 100%; aspect-ratio: 3/4; max-height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 90px; }
+
+  /* 标注说明 */
+  .annotation-section { margin: 20px 12px; padding: 16px; background: #FFF9F0; border-radius: 12px; border: 1px solid #FFE7BA; }
+  .annotation-title { font-size: 14px; font-weight: 700; color: #D46B08; margin-bottom: 10px; }
+  .annotation-item { font-size: 12px; color: #AD6800; line-height: 1.8; padding-left: 16px; position: relative; margin-bottom: 2px; }
+  .annotation-item::before { content: ''; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; background: #FAAD14; border-radius: 50%; }
+
+  .version-toggle { display: flex; gap: 8px; margin: 10px 12px; }
+  .version-btn { flex: 1; padding: 10px; text-align: center; font-size: 13px; border-radius: 8px; border: 1px solid #e0e0e0; background: #fff; color: #666; cursor: pointer; }
+  .version-btn.active { border-color: #FF6B35; color: #FF6B35; background: #FFF5F0; font-weight: 600; }
+  .version-section { display: none; }
+  .version-section.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-back">←</span>
+  <span class="header-title">仓库详情</span>
+</div>
+
+<div class="status-bar">
+  <div>
+    <div class="status-label">当前状态</div>
+    <div class="status-value">已入库</div>
+  </div>
+  <span class="status-tag">转运</span>
+</div>
+
+<!-- 包裹信息 -->
+<div class="card">
+  <div class="card-title">包裹信息</div>
+  <div class="info-row"><span class="info-label">物流公司</span><span class="info-value">顺丰速运</span></div>
+  <div class="info-row"><span class="info-label">物流单号</span><span class="info-value">YT2610141513 <span class="copy-btn">复制</span></span></div>
+  <div class="info-row"><span class="info-label">WMS包裹号</span><span class="info-value">--</span></div>
+  <div class="info-row"><span class="info-label">仓库</span><span class="info-value">东莞仓</span></div>
+  <div class="info-row"><span class="info-label">签收时间</span><span class="info-value">--</span></div>
+  <div class="info-row"><span class="info-label">入库时间</span><span class="info-value">2026-10-14 15:47:43</span></div>
+  <div class="info-row"><span class="info-label">仓储期限</span><span class="info-value green-text">剩余180天</span></div>
+</div>
+
+<!-- 重量与体积 -->
+<div class="card">
+  <div class="card-title">重量与体积</div>
+  <div class="spec-grid">
+    <div class="spec-item"><div class="spec-value">2.2<span style="font-size:14px;font-weight:400">kg</span></div><div class="spec-label">重量</div></div>
+    <div class="spec-item"><div class="spec-value">3312.000<span style="font-size:14px;font-weight:400">cm³</span></div><div class="spec-label">体积</div></div>
+  </div>
+  <div class="spec-triple">
+    <div class="spec-item"><div class="spec-value" style="font-size:15px">12<span style="font-size:12px;font-weight:400">cm</span></div><div class="spec-label">长</div></div>
+    <div class="spec-item"><div class="spec-value" style="font-size:15px">12<span style="font-size:12px;font-weight:400">cm</span></div><div class="spec-label">宽</div></div>
+    <div class="spec-item"><div class="spec-value" style="font-size:15px">23<span style="font-size:12px;font-weight:400">cm</span></div><div class="spec-label">高</div></div>
+  </div>
+  <div class="spec-note">以上重量及体积为所摄物理包裹整体数据，不是单件商品实测值。</div>
+</div>
+
+<!-- 商品详情 -->
+<div class="card">
+  <div class="card-title">商品详情（2）</div>
+  <div class="product-item">
+    <div class="product-img">图</div>
+    <div class="product-info"><div class="product-name">测试2</div></div>
+    <span class="product-qty">×1</span>
+  </div>
+  <div class="product-item" style="border-bottom:none">
+    <div class="product-img">图</div>
+    <div class="product-info"><div class="product-name">测试商品A</div></div>
+    <span class="product-qty">×2</span>
+  </div>
+</div>
+
+<!-- 版本切换 -->
+<div class="version-toggle">
+  <div class="version-btn" onclick="switchVersion('a')">未购买</div>
+  <div class="version-btn active" onclick="switchVersion('b')">已购买</div>
+</div>
+
+<!-- 状态A：未购买 -->
+<div class="version-section" id="version-a">
+  <div style="margin:10px 12px;padding:20px;text-align:center;color:#bbb;font-size:13px;background:#fff;border-radius:12px">
+    未购买增值服务时，此区域不展示
+  </div>
+</div>
+
+<!-- 状态B：已购买 -->
+<div class="version-section active" id="version-b">
+  <div class="service-card new-element">
+    <span class="new-badge">新增</span>
+    <div class="card-title">增值服务（3）</div>
+
+    <div class="svc-item">
+      <div class="svc-main">
+        <span class="svc-icon">📷</span>
+        <span class="svc-name">拍照验货</span>
+        <span class="svc-price">¥5.00</span>
+        <span class="svc-status status-completed">已完成</span>
+      </div>
+      <div class="svc-entry-photos">
+        <div class="svc-thumb" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)" onclick="openViewer('photo-w1',0)">📦</div>
+        <div class="svc-thumb" style="background:linear-gradient(135deg,#F3E5F5,#E1BEE7)" onclick="openViewer('photo-w1',1)">🧾</div>
+      </div>
+      <div class="svc-entry" onclick="openSheet('photo-w1')">
+        <span>查看需求及照片（2）</span>
+        <span class="svc-entry-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="svc-item">
+      <div class="svc-main">
+        <span class="svc-icon">📦</span>
+        <span class="svc-name">加固包装</span>
+        <span class="svc-price">¥8.00</span>
+        <span class="svc-status status-processing">处理中</span>
+      </div>
+      <div class="svc-entry" onclick="openSheet('remark-w1')">
+        <span>查看备注</span>
+        <span class="svc-entry-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="svc-item">
+      <div class="svc-main">
+        <span class="svc-icon">🏷️</span>
+        <span class="svc-name">去除吊牌</span>
+        <span class="svc-price">¥2.00</span>
+        <span class="svc-status status-cancelled">已取消</span>
+      </div>
+      <div class="svc-entry" onclick="openSheet('remark-w2')">
+        <span>查看备注<span class="svc-refund">已退款¥2.00</span></span>
+        <span class="svc-entry-arrow">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部固定栏 - 新增 -->
+<div class="bottom-bar new-element">
+  <span class="new-badge">新增</span>
+  <button class="bottom-btn bottom-btn-primary" style="flex:1">购买增值服务</button>
+</div>
+
+<!-- 设计说明 -->
+<div class="annotation-section">
+  <div class="annotation-title">设计说明（不产出到正式页面）</div>
+  <div class="annotation-item">「购买增值服务」按钮固定在页面底部栏，无论是否已购买都展示</div>
+  <div class="annotation-item">点击按钮跳转至购买增值服务独立页（APP/H5），PC端为弹窗</div>
+  <div class="annotation-item">仅包裹状态为「待入库」「已入库」时展示底部购买按钮；已发出/已转运/已签收/已取消不展示</div>
+  <div class="annotation-item">已购买服务展示在商品详情下方，按包裹维度展示，与订单详情页交互一致：服务名称+实付金额+状态（处理中/已完成/已取消）</div>
+  <div class="annotation-item">按照片数量计费的服务：处理中展示「查看拍照需求（N条）」；已完成展示照片缩略图+「查看需求及照片（N）」；其他计费方式且已填备注：展示「查看备注」；未填备注则不展示入口</div>
+  <div class="annotation-item">仓库回传的照片无法区分属于哪条需求，照片与需求不建立对应关系；弹窗内分区展示：上方为拍照需求列表，下方为回传照片墙，点击照片进入全屏查看</div>
+  <div class="annotation-item">全屏查看器：左右滑动切换照片，左上角序号N/M，右上角关闭；服务行缩略图与弹窗照片墙均可点击进入</div>
+  <div class="annotation-item">不展示推送状态、操作日志、服务单号；已取消的服务在入口行展示退款金额，需求/备注内容仍可查看</div>
+  <div class="annotation-item">底部栏可与现有操作按钮（如转运、退货）并列排布</div>
+</div>
+
+<!-- 底部弹窗 -->
+<div class="sheet-mask" id="sheet-mask" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-header">
+    <span class="sheet-title" id="sheet-title">拍照需求</span>
+    <span class="sheet-close" onclick="closeSheet()">×</span>
+  </div>
+  <div class="sheet-context" id="sheet-context"></div>
+  <div class="sheet-body" id="sheet-body"></div>
+</div>
+
+<!-- 全屏照片查看器 -->
+<div class="viewer" id="viewer">
+  <div class="viewer-top">
+    <span class="viewer-index" id="viewer-index">1/2</span>
+    <span class="viewer-close" onclick="closeViewer()">×</span>
+  </div>
+  <div class="viewer-scroll" id="viewer-scroll"></div>
+</div>
+
+<script>
+var sheetData = {
+  'photo-w1': {
+    title: '拍照需求及照片（2）',
+    context: '拍照验货 · 包裹 YT2610141513',
+    items: [
+      '拍包裹外箱六面，确认无破损、无挤压',
+      '开箱拍内物，确认商品数量与清单一致'
+    ],
+    photos: [
+      { emoji: '📦', bg: 'linear-gradient(135deg,#E3F2FD,#BBDEFB)' },
+      { emoji: '🧾', bg: 'linear-gradient(135deg,#F3E5F5,#E1BEE7)' }
+    ]
+  },
+  'remark-w1': {
+    title: '服务备注',
+    context: '加固包装 · 包裹 YT2610141513',
+    text: '包裹内为玻璃制品，请用气泡膜缠绕2层以上后再装箱'
+  },
+  'remark-w2': {
+    title: '服务备注',
+    context: '去除吊牌 · 包裹 YT2610141513',
+    text: '吊牌去除后请放回包裹内，不要丢弃'
+  }
+};
+
+var numChars = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+
+function openSheet(key) {
+  var data = sheetData[key];
+  if (!data) return;
+  document.getElementById('sheet-title').textContent = data.title;
+  document.getElementById('sheet-context').textContent = data.context;
+  var body = document.getElementById('sheet-body');
+  if (data.items) {
+    var html = '';
+    data.items.forEach(function(item, i) {
+      html += '<div class="req-item"><span class="req-num">' + numChars[i] + '</span><div class="req-body"><div class="req-text">' + item + '</div></div></div>';
+    });
+    if (data.photos && data.photos.length > 0) {
+      html += '<div class="sheet-section-title">仓库回传照片（' + data.photos.length + '）</div><div class="photo-grid">';
+      data.photos.forEach(function(ph, pi) {
+        html += '<div class="photo-grid-item" style="background:' + ph.bg + '" onclick="openViewer(\'' + key + '\',' + pi + ')">' + ph.emoji + '</div>';
+      });
+      html += '</div>';
+    }
+    body.innerHTML = html;
+  } else {
+    body.innerHTML = '<div class="remark-text">' + data.text + '</div>';
+  }
+  document.getElementById('sheet-mask').classList.add('show');
+  document.getElementById('sheet').classList.add('show');
+}
+
+function closeSheet() {
+  document.getElementById('sheet-mask').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+}
+
+function openViewer(key, photoIdx) {
+  var data = sheetData[key];
+  if (!data || !data.photos || data.photos.length === 0) return;
+  var list = data.photos;
+  window._viewerList = list;
+  var scroller = document.getElementById('viewer-scroll');
+  var html = '';
+  list.forEach(function(p) {
+    html += '<div class="viewer-photo"><div class="viewer-photo-box" style="background:' + p.bg + '">' + p.emoji + '</div></div>';
+  });
+  scroller.innerHTML = html;
+  document.getElementById('viewer').classList.add('show');
+  requestAnimationFrame(function() {
+    scroller.scrollLeft = photoIdx * scroller.clientWidth;
+    updateViewerIndex(photoIdx);
+  });
+  scroller.onscroll = function() {
+    var pos = Math.round(scroller.scrollLeft / scroller.clientWidth);
+    updateViewerIndex(pos);
+  };
+}
+
+function updateViewerIndex(pos) {
+  var list = window._viewerList || [];
+  if (!list[pos]) return;
+  document.getElementById('viewer-index').textContent = (pos + 1) + '/' + list.length;
+}
+
+function closeViewer() {
+  document.getElementById('viewer').classList.remove('show');
+}
+
+function switchVersion(v) {
+  document.querySelectorAll('.version-section').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.version-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('version-' + v).classList.add('active');
+  event.target.classList.add('active');
+  closeSheet();
+  closeViewer();
+}
+</script>
+
+</body>
+</html>
