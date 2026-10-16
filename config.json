@@ -343,7 +343,13 @@
     "id": "value-added-service",
     "name": "反向代购增值服务",
     "desc": "代购订单增值服务全链路：平台服务与服务单管理、租户引用定价、用户购买与订单融合、服务合并推送集运",
-    "docs": [],
+    "docs": [
+      {
+        "name": "增值服务需求文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/GxzidG4jKorWtzxnglQcY2P8nkd",
+        "icon": "📄"
+      }
+    ],
     "groups": [
       {
         "title": "🏢 平台侧",
