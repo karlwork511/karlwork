@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代购订单详情·增值服务-店长后台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+.annotation-toolbar {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0; z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff;
+    border-radius: 4px; cursor: pointer; font-size: 13px; color: #333;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+.preview-area { flex: 1; min-width: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.annotation-panel {
+    width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED;
+    overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease;
+}
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header {
+    padding: 16px; font-size: 15px; font-weight: 600; color: #333;
+    border-bottom: 1px solid #E4E7ED; background: #F7F8FA;
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px; height: 24px; border: none; background: #E8EAED;
+    border-radius: 4px; cursor: pointer; font-size: 12px; color: #666;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+    width: 36px; height: 48px; background: #165DFF; color: #fff;
+    border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px;
+    z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px; border-bottom: 1px solid #E4E7ED;
+    cursor: pointer; transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+.anno-marker {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.5; transition: all 0.2s ease; cursor: pointer;
+    z-index: 9999; user-select: none;
+}
+.anno-marker.highlight, .anno-marker:hover {
+    opacity: 1; transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); display: none;
+    align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff; border-radius: 8px; width: 560px; max-height: 80vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px; border-bottom: 1px solid #E4E7ED;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px; border: none; background: transparent;
+    font-size: 20px; color: #999; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px; border-top: 1px solid #E4E7ED;
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA; width: 100px; padding: 12px 16px;
+    text-align: left; font-size: 13px; font-weight: 600; color: #666;
+    border: 1px solid #E4E7ED; vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px; font-size: 13px; color: #333;
+    border: 1px solid #E4E7ED; line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%; min-height: 80px; padding: 8px 12px;
+    border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px;
+    font-family: inherit; line-height: 1.6; resize: vertical; outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+.btn {
+    padding: 8px 16px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ===== 店长后台布局 ===== */
+.sidebar {
+    width: 210px; background: #001529; flex-shrink: 0;
+    display: flex; flex-direction: column; overflow-y: auto;
+}
+.logo { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo-icon {
+    width: 34px; height: 34px; border-radius: 8px; background: #00B42A;
+    color: #fff; font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.logo-name { color: #fff; font-size: 15px; font-weight: 600; }
+.logo-sub { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 2px; }
+.role-card { margin: 12px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; }
+.role-name { color: #fff; font-size: 13px; font-weight: 600; }
+.role-sub { color: #00B42A; font-size: 11px; margin-top: 3px; }
+.nav { padding: 4px 0 16px; }
+.nav-item {
+    padding: 10px 16px; color: rgba(255,255,255,0.65); font-size: 13px;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+}
+.nav-item:hover { color: #fff; }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; }
+.nav-arrow { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.4); }
+.nav-sub { padding: 2px 0; }
+.nav-sub .nav-item { padding-left: 42px; font-size: 13px; }
+.nav-active {
+    background: #00B42A; color: #fff !important; border-radius: 6px;
+    margin: 2px 10px; padding: 9px 14px !important; padding-left: 32px !important;
+    display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;
+}
+
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+    height: 56px; background: #fff; border-bottom: 1px solid #E4E7ED;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.collapse-btn { font-size: 16px; color: #666; cursor: pointer; }
+.page-name { font-size: 16px; font-weight: 600; color: #333; }
+.page-date { font-size: 12px; color: #999; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.tool-btn { font-size: 13px; color: #666; cursor: pointer; }
+.tool-btn.safe { color: #00B42A; }
+.tool-btn.exit { color: #00B42A; }
+.tool-avatar { padding: 5px 12px; background: #E8F7EE; color: #00B42A; border-radius: 14px; font-size: 13px; }
+.main-content { flex: 1; overflow-y: auto; padding: 20px 24px; background: #F5F7FA; }
+
+.page-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 18px; font-weight: 600; color: #333; }
+.btn-green {
+    padding: 8px 16px; background: #00B42A; color: #fff; border: none;
+    border-radius: 4px; font-size: 13px; cursor: pointer;
+}
+.btn-green:hover { background: #009A29; }
+.btn-outline {
+    padding: 8px 16px; background: #fff; color: #666; border: 1px solid #DCDFE6;
+    border-radius: 4px; font-size: 13px; cursor: pointer; margin-left: 10px;
+}
+.btn-outline:hover { border-color: #00B42A; color: #00B42A; }
+
+/* Tabs */
+.tabs-card { background: #fff; border-radius: 8px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid #E4E7ED; padding: 0 20px; }
+.tab-item {
+    padding: 13px 16px; font-size: 14px; color: #666; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s;
+}
+.tab-item:hover { color: #00B42A; }
+.tab-item.active { color: #00B42A; border-bottom-color: #00B42A; font-weight: 600; }
+.tab-body { padding: 16px 20px; }
+
+/* 信息分区 */
+.section {
+    border: 1px solid #E4E7ED; border-radius: 8px;
+    padding: 16px; margin-bottom: 16px; position: relative; background: #fff;
+}
+.section-title {
+    font-size: 14px; font-weight: 600; color: #333; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+}
+.section-title .refresh-btn {
+    margin-left: auto; font-size: 12px; color: #666; font-weight: 400;
+    border: 1px solid #DCDFE6; border-radius: 4px; padding: 4px 12px; cursor: pointer; background: #fff;
+}
+.info-flex { display: flex; gap: 16px; }
+.info-flex .section { margin-bottom: 0; }
+.desc-grid { display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 14px; column-gap: 24px; }
+.desc-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.desc-item { font-size: 13px; color: #333; display: flex; align-items: center; }
+.desc-item .label { color: #999; margin-right: 8px; white-space: nowrap; }
+
+/* 表格 */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th {
+    background: #FAFAFA; padding: 12px 14px; text-align: left;
+    font-size: 13px; font-weight: 600; color: #666;
+    border-bottom: 1px solid #E4E7ED; white-space: nowrap;
+}
+.data-table tbody td {
+    padding: 12px 14px; font-size: 13px; color: #333;
+    border-bottom: 1px solid #F0F0F0; vertical-align: middle;
+}
+.data-table tbody tr:hover { background: #F7F8FA; }
+.data-table tfoot td {
+    padding: 12px 14px; font-size: 13px; font-weight: 600; color: #333;
+    background: #FAFAFA; border-top: 1px solid #E4E7ED;
+}
+
+.status-tag {
+    display: inline-block; padding: 2px 10px; border-radius: 10px;
+    font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.tag-green { background: #E8F7EE; color: #00B42A; }
+.tag-red { background: #FFECE8; color: #F53F3F; }
+.tag-orange { background: #FFF3E8; color: #FF7D00; }
+.tag-blue { background: #E8F3FF; color: #165DFF; }
+.tag-purple { background: #F5E8FF; color: #A037F5; }
+.tag-gray { background: #F0F0F0; color: #999; }
+
+/* 商品单元格 */
+.prod-cell { display: flex; align-items: center; gap: 8px; }
+.prod-img {
+    width: 36px; height: 36px; border-radius: 4px; background: #F5F7FA;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0; border: 1px solid #E4E7ED;
+}
+.prod-name {
+    font-size: 12px; color: #333; line-height: 1.5; max-width: 240px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.prod-spec { font-size: 12px; color: #999; margin-top: 2px; }
+
+/* 增值服务相关 */
+.req-btn {
+    padding: 4px 10px; border: 1px solid #165DFF; color: #165DFF;
+    background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+.req-btn:hover { background: #E8F3FF; }
+.refund-tip { display: inline-block; margin-left: 6px; font-size: 12px; color: #FF7D00; white-space: nowrap; }
+.exception-text { color: #F53F3F; font-size: 12px; }
+
+/* 拍照需求弹窗 */
+.req-modal-box {
+    background: #fff; border-radius: 8px; width: 520px; max-height: 80vh;
+    display: flex; flex-direction: column; position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+}
+.req-header {
+    padding: 18px 24px; border-bottom: 1px solid #E4E7ED;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.req-title { font-size: 16px; font-weight: 600; color: #333; }
+.req-sub { padding: 12px 24px 0; font-size: 12px; color: #999; }
+.req-body { padding: 16px 24px 22px; overflow-y: auto; }
+.req-item {
+    display: flex; gap: 10px; padding: 12px 14px; background: #F7F8FA;
+    border-radius: 6px; margin-bottom: 10px; font-size: 13px; color: #333; line-height: 1.6;
+}
+.req-item:last-child { margin-bottom: 0; }
+.req-no { color: #165DFF; font-weight: 600; flex-shrink: 0; }
+
+/* 回传照片 */
+.photo-section { margin-top: 14px; border-top: 1px solid #E4E7ED; padding-top: 14px; }
+.photo-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 10px; }
+.photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.photo-item {
+    aspect-ratio: 1; background: linear-gradient(135deg, #E8EAED, #F5F7FA);
+    border: 1px solid #E4E7ED; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; cursor: zoom-in; transition: border-color 0.2s;
+}
+.photo-item:hover { border-color: #165DFF; }
+.photo-preview {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75); display: none;
+    align-items: center; justify-content: center; z-index: 2000; cursor: zoom-out;
+}
+.photo-preview.show { display: flex; }
+.photo-preview-box {
+    width: 420px; height: 420px; border-radius: 8px;
+    background: linear-gradient(135deg, #E8EAED, #F5F7FA);
+    display: flex; align-items: center; justify-content: center; font-size: 80px;
+}
+
+/* 金额信息 */
+.amount-table { width: 100%; border-collapse: collapse; }
+.amount-table th {
+    background: #FAFAFA; padding: 12px 14px; text-align: left;
+    font-size: 13px; font-weight: 400; color: #666; border-bottom: 1px solid #E4E7ED;
+}
+.amount-table td { padding: 14px; font-size: 14px; color: #333; font-weight: 500; }
+.amount-table td.green { color: #00B42A; font-weight: 700; }
+
+/* 流水红字 */
+.flow-amount { font-size: 13px; color: #333; }
+.flow-sub { font-size: 12px; color: #F53F3F; line-height: 1.6; }
+
+/* 客户沟通 */
+.chat-empty { text-align: center; color: #C0C4CC; padding: 28px 0 20px; font-size: 13px; }
+.chat-empty .chat-icon { font-size: 30px; margin-bottom: 6px; opacity: 0.5; }
+.chat-input-row { display: flex; gap: 10px; align-items: center; }
+.chat-select {
+    padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px;
+    font-size: 13px; background: #fff; color: #333; outline: none;
+}
+.chat-input-wrap { flex: 1; position: relative; }
+.chat-input {
+    width: 100%; padding: 8px 60px 8px 12px; border: 1px solid #DCDFE6;
+    border-radius: 4px; font-size: 13px; outline: none;
+}
+.chat-input:focus { border-color: #00B42A; }
+.chat-count { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #C0C4CC; }
+.chat-send {
+    padding: 8px 20px; background: #00B42A; color: #fff; border: none;
+    border-radius: 4px; font-size: 13px; cursor: pointer;
+}
+.chat-send:hover { background: #009A29; }
+
+/* 状态日志时间线 */
+.timeline { padding: 4px 0 4px 8px; }
+.tl-item {
+    position: relative; padding: 8px 0 8px 22px; margin-left: 6px;
+    border-left: 2px solid #E4E7ED; display: flex; gap: 16px; align-items: baseline;
+}
+.tl-item:last-child { border-left-color: transparent; }
+.tl-dot {
+    position: absolute; left: -6px; top: 14px; width: 10px; height: 10px;
+    border-radius: 50%; background: #00B42A; border: 2px solid #fff; box-shadow: 0 0 0 1px #E4E7ED;
+}
+.tl-dot.gray { background: #C0C4CC; }
+.tl-time { font-size: 12px; color: #999; width: 150px; flex-shrink: 0; }
+.tl-text { font-size: 13px; color: #333; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+    <div class="preview-area">
+        <div id="anno-1" style="display:flex;height:100%">
+            <!-- 侧边导航 -->
+            <div class="sidebar">
+                <div class="logo">
+                    <div class="logo-icon">S</div>
+                    <div>
+                        <div class="logo-name">SztBuy</div>
+                        <div class="logo-sub">统一管理端</div>
+                    </div>
+                </div>
+                <div class="role-card">
+                    <div class="role-name">店长后台</div>
+                    <div class="role-sub">● 角色权限驱动菜单</div>
+                </div>
+                <nav class="nav">
+                    <div class="nav-item"><span class="nav-icon">🛒</span>工作台<span class="nav-arrow">›</span></div>
+                    <div class="nav-item"><span class="nav-icon">⊞</span>订单中心<span class="nav-arrow">⌄</span></div>
+                    <div class="nav-sub">
+                        <div class="nav-active">▤ 代购订单</div>
+                        <div class="nav-item">▤ 转运订单</div>
+                        <div class="nav-item">▤ 代购采购单</div>
+                        <div class="nav-item">人工采购</div>
+                        <div class="nav-item">接口采购</div>
+                    </div>
+                    <div class="nav-item"><span class="nav-icon">📦</span>履约与售后<span class="nav-arrow">›</span></div>
+                    <div class="nav-item"><span class="nav-icon">👥</span>客户中心<span class="nav-arrow">›</span></div>
+                    <div class="nav-item"><span class="nav-icon">💰</span>资金中心<span class="nav-arrow">›</span></div>
+                    <div class="nav-item"><span class="nav-icon">📈</span>运营中心<span class="nav-arrow">›</span></div>
+                    <div class="nav-item"><span class="nav-icon">⚙️</span>店铺设置<span class="nav-arrow">›</span></div>
+                </nav>
+            </div>
+
+            <!-- 主区域 -->
+            <div class="main">
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <span class="collapse-btn">☰</span>
+                        <span class="page-name">订单详情</span>
+                        <span class="page-date">10/16周五 · 店长后台</span>
+                    </div>
+                    <div class="topbar-right">
+                        <span class="tool-btn">🌐 翻译工具</span>
+                        <span class="tool-btn safe">● 安全会话</span>
+                        <span class="tool-btn">中文 ⌄</span>
+                        <span class="tool-avatar">admin</span>
+                        <span class="tool-btn exit">退出登录</span>
+                    </div>
+                </div>
+
+                <div class="main-content">
+                    <div class="page-title-row">
+                        <div class="page-title">订单详情</div>
+                        <div>
+                            <button class="btn-green">🔗 链路追踪</button>
+                            <button class="btn-outline">返回列表</button>
+                        </div>
+                    </div>
+
+                    <div class="tabs-card">
+                        <div class="tabs">
+                            <div class="tab-item active" data-tab="order" onclick="switchTab('order')">订单信息</div>
+                            <div class="tab-item" data-tab="pay" onclick="switchTab('pay')">支付信息</div>
+                            <div class="tab-item" data-tab="log" onclick="switchTab('log')">状态日志</div>
+                        </div>
+
+                        <!-- ===== 订单信息 Tab ===== -->
+                        <div class="tab-body" id="tab-order">
+                            <div class="info-flex" style="margin-bottom:16px">
+                                <div class="section" style="flex:2">
+                                    <div class="section-title">📋 基本信息</div>
+                                    <div class="desc-grid">
+                                        <div class="desc-item"><span class="label">订单号：</span>HAAFDB261087008</div>
+                                        <div class="desc-item"><span class="label">订单状态：</span><span class="status-tag tag-green">已付款</span></div>
+                                        <div class="desc-item"><span class="label">下单时间：</span>2026-10-15 18:02:36</div>
+                                        <div class="desc-item"><span class="label">采购方式：</span><span class="status-tag tag-green">接口采购</span></div>
+                                        <div class="desc-item"><span class="label">仓库：</span>东莞仓</div>
+                                        <div class="desc-item"><span class="label">店铺：</span>超实惠纸品特价经营店</div>
+                                        <div class="desc-item"><span class="label">平台：</span>淘宝</div>
+                                    </div>
+                                </div>
+                                <div class="section" style="flex:1">
+                                    <div class="section-title">👤 用户信息</div>
+                                    <div class="desc-grid cols-2">
+                                        <div class="desc-item"><span class="label">用户名称：</span>304858609</div>
+                                        <div class="desc-item"><span class="label">用户ID：</span>M531915624</div>
+                                        <div class="desc-item"><span class="label">注册时间：</span>2026-09-30</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 商品信息 -->
+                            <div class="section">
+                                <div class="section-title">🛍️ 商品信息</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>商品图片</th>
+                                            <th>商品名称</th>
+                                            <th>规格</th>
+                                            <th>买手留言</th>
+                                            <th>数量</th>
+                                            <th>单价</th>
+                                            <th>小计</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><div class="prod-img">🧻</div></td>
+                                            <td><div class="prod-name" style="max-width:320px">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div></td>
+                                            <td>3层100抽X【1包】</td>
+                                            <td>—</td>
+                                            <td>1</td>
+                                            <td>￥2.10</td>
+                                            <td>￥2.10</td>
+                                        </tr>
+                                        <tr>
+                                            <td><div class="prod-img">🧻</div></td>
+                                            <td><div class="prod-name" style="max-width:320px">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div></td>
+                                            <td>3层100抽X【2包】</td>
+                                            <td>—</td>
+                                            <td>1</td>
+                                            <td>￥5.01</td>
+                                            <td>￥5.01</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 增值服务信息（新增） -->
+                            <div class="section" id="anno-2">
+                                <div class="anno-marker" data-id="2">2</div>
+                                <div class="section-title">💎 增值服务信息</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>所属商品</th>
+                                            <th>服务名称</th>
+                                            <th>基准成本</th>
+                                            <th>服务售价</th>
+                                            <th>购买数量</th>
+                                            <th>费用小计</th>
+                                            <th>服务状态</th>
+                                            <th>备注</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【1包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>拍照验货</td>
+                                            <td>￥1.00/张</td>
+                                            <td>￥2.00/张</td>
+                                            <td>3</td>
+                                            <td>￥6.00</td>
+                                            <td><span class="status-tag tag-green">已完成</span></td>
+                                            <td><button class="req-btn" onclick="openReqModal()">查看需求（3条）</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【1包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>开箱清点</td>
+                                            <td>￥0.50/件</td>
+                                            <td>￥1.00/件</td>
+                                            <td>1</td>
+                                            <td>￥1.00</td>
+                                            <td><span class="status-tag tag-gray">未推送</span></td>
+                                            <td>开箱后逐一清点数量并核对规格</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【2包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>加固包装</td>
+                                            <td>￥5.00/单</td>
+                                            <td>￥8.00/单</td>
+                                            <td>1</td>
+                                            <td>￥8.00</td>
+                                            <td><span class="status-tag tag-blue">已推送</span></td>
+                                            <td>外箱四角加护角，缠绕气泡膜加固</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【2包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>去除吊牌</td>
+                                            <td>￥1.00/件</td>
+                                            <td>￥2.00/件</td>
+                                            <td>1</td>
+                                            <td>￥2.00</td>
+                                            <td>
+                                                <span id="anno-3" style="position:relative;display:inline-block;padding-right:30px">
+                                                    <span class="status-tag tag-gray">已取消</span><span class="refund-tip">已退款￥2.00</span>
+                                                    <span class="anno-marker" data-id="3" style="top:-4px;right:0">3</span>
+                                                </span>
+                                            </td>
+                                            <td>—</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="8">增值服务费合计：¥17.00　｜　基准成本合计：¥9.50</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- 客户沟通 -->
+                            <div class="section">
+                                <div class="section-title">💬 客户沟通 <button class="refresh-btn">刷新</button></div>
+                                <div class="chat-empty">
+                                    <div class="chat-icon">📭</div>
+                                    <div>暂无订单留言</div>
+                                </div>
+                                <div class="chat-input-row">
+                                    <select class="chat-select"><option>普通留言</option></select>
+                                    <div class="chat-input-wrap">
+                                        <input class="chat-input" placeholder="输入给客户的订单留言">
+                                        <span class="chat-count">0 / 2000</span>
+                                    </div>
+                                    <button class="chat-send">发送</button>
+                                </div>
+                            </div>
+
+                            <!-- 采购单信息 -->
+                            <div class="section" style="margin-bottom:0">
+                                <div class="section-title">🛒 采购单信息</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>采购单号</th>
+                                            <th>商品信息</th>
+                                            <th>采购数量</th>
+                                            <th>采购单价</th>
+                                            <th>采购总价</th>
+                                            <th>实采金额</th>
+                                            <th>采购方式</th>
+                                            <th>状态</th>
+                                            <th>平台单号</th>
+                                            <th>物流单号</th>
+                                            <th>买手</th>
+                                            <th>售后单号</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>OD261087008001</td>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【1包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>×1</td>
+                                            <td>￥2.01</td>
+                                            <td>￥2.10</td>
+                                            <td>￥2.01</td>
+                                            <td><span class="status-tag tag-green">接口采购</span></td>
+                                            <td><span class="status-tag tag-gray">已关闭</span></td>
+                                            <td>200142270777</td>
+                                            <td>—</td>
+                                            <td>—</td>
+                                            <td>RO202610151803520001</td>
+                                        </tr>
+                                        <tr>
+                                            <td>OD261087008002</td>
+                                            <td>
+                                                <div class="prod-cell">
+                                                    <div class="prod-img">🧻</div>
+                                                    <div>
+                                                        <div class="prod-name">洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码</div>
+                                                        <div class="prod-spec">3层100抽X【2包】</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>×1</td>
+                                            <td>￥4.01</td>
+                                            <td>￥5.01</td>
+                                            <td>￥4.01</td>
+                                            <td><span class="status-tag tag-green">接口采购</span></td>
+                                            <td><span class="status-tag tag-gray">已关闭</span></td>
+                                            <td>200142270777</td>
+                                            <td>—</td>
+                                            <td>—</td>
+                                            <td>RO202610151804060002</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ===== 支付信息 Tab ===== -->
+                        <div class="tab-body" id="tab-pay" style="display:none">
+                            <div class="section" id="anno-5">
+                                <div class="anno-marker" data-id="5">5</div>
+                                <div class="section-title">💰 金额信息</div>
+                                <table class="amount-table">
+                                    <thead>
+                                        <tr>
+                                            <th>采购金额</th>
+                                            <th>服务费</th>
+                                            <th>增值服务费</th>
+                                            <th>运费</th>
+                                            <th>采购差额</th>
+                                            <th>退款金额</th>
+                                            <th>实付金额</th>
+                                            <th>总实采金额</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>¥7.11</td>
+                                            <td>¥1.42</td>
+                                            <td>¥17.00</td>
+                                            <td>¥0.00</td>
+                                            <td>—</td>
+                                            <td>¥2.00</td>
+                                            <td class="green">¥25.53</td>
+                                            <td class="green">¥6.02</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="section" id="anno-6" style="margin-bottom:0">
+                                <div class="anno-marker" data-id="6">6</div>
+                                <div class="section-title">🧾 流水记录</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>支付单号</th>
+                                            <th>支付类型</th>
+                                            <th>金额</th>
+                                            <th>支付方式</th>
+                                            <th>支付状态</th>
+                                            <th>交易流水号</th>
+                                            <th>支付时间</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>› PO20261015180236A122E67EC0</td>
+                                            <td><span class="status-tag tag-blue">首款支付</span></td>
+                                            <td>
+                                                <div class="flow-amount">￥25.53</div>
+                                                <div class="flow-sub">服务费 ￥1.42</div>
+                                                <div class="flow-sub">增值服务费 ￥17.00</div>
+                                            </td>
+                                            <td><span class="status-tag tag-blue">支付宝</span></td>
+                                            <td><span class="status-tag tag-blue">已支付</span></td>
+                                            <td>2026101523001422671410539838</td>
+                                            <td>2026-10-15 18:03:15</td>
+                                        </tr>
+                                        <tr>
+                                            <td>› RF20261015182000E52ECD5F69</td>
+                                            <td><span class="status-tag tag-purple">售后退款</span></td>
+                                            <td>
+                                                <div class="flow-amount">￥2.00</div>
+                                                <div class="flow-sub">增值服务退款 ￥2.00</div>
+                                            </td>
+                                            <td>—</td>
+                                            <td><span class="status-tag tag-gray">已退款</span></td>
+                                            <td>—</td>
+                                            <td>2026-10-15 18:20:00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ===== 状态日志 Tab ===== -->
+                        <div class="tab-body" id="tab-log" style="display:none">
+                            <div class="section" style="margin-bottom:0">
+                                <div class="section-title">🕒 状态日志</div>
+                                <div class="timeline">
+                                    <div class="tl-item">
+                                        <span class="tl-dot"></span>
+                                        <span class="tl-time">2026-10-15 18:02:36</span>
+                                        <span class="tl-text">订单创建</span>
+                                    </div>
+                                    <div class="tl-item">
+                                        <span class="tl-dot"></span>
+                                        <span class="tl-time">2026-10-15 18:03:15</span>
+                                        <span class="tl-text">首款支付成功 ￥25.53</span>
+                                    </div>
+                                    <div class="tl-item">
+                                        <span class="tl-dot"></span>
+                                        <span class="tl-time">2026-10-15 18:05:02</span>
+                                        <span class="tl-text">采购单 OD261087008001 / OD261087008002 创建</span>
+                                    </div>
+                                    <div class="tl-item">
+                                        <span class="tl-dot gray"></span>
+                                        <span class="tl-time">2026-10-15 18:20:00</span>
+                                        <span class="tl-text">增值服务「去除吊牌」取消，退款 ￥2.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    </div>
+</div>
+
+<!-- 拍照需求弹窗 -->
+<div class="modal-overlay" id="req-modal">
+    <div class="req-modal-box" id="anno-4">
+        <div class="anno-marker" data-id="4" style="top:16px;right:52px">4</div>
+        <div class="req-header">
+            <div class="req-title">拍照需求（3条）</div>
+            <button class="modal-close" onclick="closeReqModal()">×</button>
+        </div>
+        <div class="req-sub">拍照验货 · 洁柔抽纸无香100抽纸巾面巾纸餐巾纸抽纸可湿水批发整箱家用s码 · 3层100抽X【1包】</div>
+        <div class="req-body">
+            <div class="req-item">
+                <span class="req-no">①</span>
+                <span>整包拍照，确认外包装无破损、无污渍</span>
+            </div>
+            <div class="req-item">
+                <span class="req-no">②</span>
+                <span>拆开一包，拍抽纸层数和压花细节</span>
+            </div>
+            <div class="req-item">
+                <span class="req-no">③</span>
+                <span>拍外箱六面照片，确认封箱完好</span>
+            </div>
+            <div class="photo-section">
+                <div class="photo-title">回传照片（4张）</div>
+                <div class="photo-grid">
+                    <div class="photo-item" onclick="openPhotoPreview()">📷</div>
+                    <div class="photo-item" onclick="openPhotoPreview()">📷</div>
+                    <div class="photo-item" onclick="openPhotoPreview()">📷</div>
+                    <div class="photo-item" onclick="openPhotoPreview()">📷</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 照片放大预览 -->
+<div class="photo-preview" id="photo-preview" onclick="closePhotoPreview()">
+    <div class="photo-preview-box">📷</div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-admin-order-detail';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+const annotations = [
+    {
+        id: 1,
+        title: '代购订单详情·增值服务展示总说明',
+        summary: '订单信息新增增值服务信息卡片，支付信息同步展示增值服务费用；仅标注新增或修改内容。',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '本次迭代在店长后台代购订单详情页新增增值服务展示。「订单信息」标签页在商品信息下方新增「增值服务信息」卡片；「支付信息」标签页的金额信息与流水记录同步展示增值服务费用。',
+            business: '本页标注仅覆盖本次新增或修改的内容，页面其余部分（基本信息、商品信息、客户沟通、采购单信息、状态日志）维持现有逻辑不变。'
+        }
+    },
+    {
+        id: 2,
+        title: '增值服务信息卡片',
+        summary: '展示本订单商品关联的全部增值服务及费用汇总，位于商品信息卡片下方。',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示本订单全部商品关联的增值服务，位于商品信息卡片下方。订单未购买增值服务时，该卡片整体不展示。',
+            display: '所属商品：展示商品缩略图、商品名称与规格，与采购单信息表格的商品信息列口径一致。\n服务名称：增值服务名称。\n基准成本：平台向店铺收取的服务成本单价，单位口径随计费类型展示。\n服务售价：店铺向用户收取的服务单价，单位口径随计费类型展示。\n购买数量：按计费类型统计数量，按商品数量计费为商品件数，按照片数量计费为拍照张数，每单固定费用固定为1；列内仅展示数字，不展示单位。\n费用小计：服务售价 × 购买数量。\n服务状态：详见标注3。\n备注：非拍照类服务直接展示备注全文，未填写展示「—」；拍照类服务不直接展示备注，展示「查看需求（N条）」按钮，详见标注4。',
+            business: '表格底部汇总行展示「增值服务费合计」与「基准成本合计」，合计口径包含已取消的服务（已取消服务的费用随退款流程退回，在支付信息中体现）。'
+        }
+    },
+    {
+        id: 3,
+        title: '服务状态',
+        summary: '完整展示六态，已取消附退款金额提示；服务异常仅展示，不提供操作按钮。',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'state',
+        detail: {
+            state: '服务状态完整展示六态：未推送（灰）/ 推送中（橙）/ 已推送（蓝）/ 已完成（绿）/ 已取消（灰）/ 服务异常（红），后台展示真实状态，不做用户端的三态映射。\n已取消状态下，在状态旁补充展示「已退款￥X.XX」。\n服务异常状态下，在备注列展示异常原因。',
+            business: '服务异常在订单详情页仅展示，不提供「重新推送」操作按钮；重新推送统一在服务单列表页进行。'
+        }
+    },
+    {
+        id: 4,
+        title: '拍照需求弹窗',
+        summary: '点击「查看需求」弹出，按用户端录入格式逐条展示拍照需求，仅查看不可编辑。',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '拍照类增值服务的备注不直接展示在表格中，点击「查看需求（N条）」弹出本弹窗，展示用户下单时录入的拍照需求。',
+            display: '弹窗标题展示需求条数；副标题展示服务名称与所属商品（商品名称 + 规格）。\n需求内容按用户端录入格式逐条展示：序号①②③… + 需求文本，与用户下单时录入的内容和格式完全一致。\n回传照片：服务状态为已完成时，需求列表下方展示仓库回传的照片缩略图，平铺展示，点击可放大查看；照片与需求条目不建立一一对应关系。服务未完成时，不展示回传照片区域。',
+            interaction: '点击「查看需求（N条）」按钮打开弹窗；点击右上角「×」或遮罩区域关闭。弹窗仅支持查看，不支持编辑。'
+        }
+    },
+    {
+        id: 5,
+        title: '金额信息·增值服务费',
+        summary: '金额信息区在服务费后新增「增值服务费」字段，实付金额口径同步调整。',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'field',
+        detail: {
+            display: '金额信息区在「服务费」字段后新增「增值服务费」字段，展示本订单增值服务费合计金额；订单未购买增值服务时展示「—」。\n实付金额 = 采购金额 + 服务费 + 运费 + 增值服务费。\n退款金额包含增值服务退款金额。',
+            business: '增值服务取消产生退款时，退款金额计入「退款金额」字段；订单的采购金额、服务费等原有字段口径不变。'
+        }
+    },
+    {
+        id: 6,
+        title: '流水记录·增值服务构成',
+        summary: '首款支付流水红字补充增值服务费构成；增值服务退款在售后退款流水红字展示。',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'field',
+        detail: {
+            display: '首款支付流水：订单含增值服务费时，在金额下方红字「服务费 ￥X.XX」后追加一行红字「增值服务费 ￥X.XX」，样式与现有服务费说明保持一致。\n售后退款流水：增值服务取消产生退款时，在金额下方红字展示「增值服务退款 ￥X.XX」。',
+            business: '支付单金额始终为实际支付/退款总额，红字仅为费用构成说明，不改变原有流水的生成逻辑。'
+        }
+    }
+];
+
+const DETAIL_LABELS = { feature: '功能说明', display: '字段/展示规则', interaction: '交互规则', business: '业务规则', state: '状态说明', exception: '异常/边界', copywriting: '文案规范' };
+
+/* ===== 页面交互 ===== */
+function switchTab(tab) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-body').forEach(b => b.style.display = 'none');
+    document.querySelector('.tab-item[data-tab="' + tab + '"]').classList.add('active');
+    document.getElementById('tab-' + tab).style.display = 'block';
+}
+function openReqModal() { document.getElementById('req-modal').classList.add('show'); }
+function closeReqModal() { document.getElementById('req-modal').classList.remove('show'); }
+document.getElementById('req-modal').addEventListener('click', function(e) { if (e.target === this) closeReqModal(); });
+function openPhotoPreview() { document.getElementById('photo-preview').classList.add('show'); }
+function closePhotoPreview() { document.getElementById('photo-preview').classList.remove('show'); }
+
+/* ===== 标注系统 ===== */
+function loadCustomAnnotations() { try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) customAnnotations = JSON.parse(saved); } catch(e) {} }
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list'); const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>`).join('');
+}
+function highlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if(m) m.classList.add('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if(i) i.classList.add('active'); }
+function unhighlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if(m) m.classList.remove('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if(i) i.classList.remove('active'); }
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations(); const item = data.find(a => a.id === id); if (!item) return;
+    const target = document.querySelector(item.target); if (!target) return;
+    if (item.target === '#anno-4') { openReqModal(); }
+    else { try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {} }
+    target.classList.remove('anno-flash'); void target.offsetWidth; target.classList.add('anno-flash');
+    setTimeout(() => target.classList.remove('anno-flash'), 1500);
+}
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id); if (!item) return;
+    currentAnnotation = item; isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail; const rows = [];
+    ['feature','display','interaction','business','state','exception','copywriting'].forEach(key => { if (detail[key]) rows.push({ label: DETAIL_LABELS[key], value: detail[key], key }); });
+    const table = document.getElementById('detail-table');
+    if (isEditing) { table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td><textarea data-key="${r.key}">${r.value}</textarea></td></tr>`).join(''); }
+    else { table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join(''); }
+}
+function toggleEdit() { isEditing = !isEditing; renderDetailTable(currentAnnotation); document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex'; document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none'; }
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id); if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item; isEditing = false; renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex'; renderAnnotationList();
+    const btn = document.getElementById('save-btn'); const o = btn.textContent; btn.textContent = '已保存 ✓'; setTimeout(() => { btn.textContent = o; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？')) return;
+    localStorage.removeItem(STORAGE_KEY); customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original; isEditing = false; renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeModal(); closeReqModal(); closePhotoPreview(); } });
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() { try { if (localStorage.getItem(PANEL_STATE_KEY) === '1') { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {} }
+function togglePanel() { const p = document.getElementById('annotation-panel'); const b = document.getElementById('panel-expand-btn'); const c = p.classList.toggle('collapsed'); b.classList.toggle('show', c); try { localStorage.setItem(PANEL_STATE_KEY, c ? '1' : '0'); } catch(e) {} }
+function openEditMode() {
+    const data = getActiveAnnotations(); let h = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => { h += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})"><div class="annotation-badge">${item.id}</div><div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div><div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div></div>
+        <div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}</div></div>`; });
+    h += '</div>'; document.getElementById('manage-modal-body').innerHTML = h; document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations(); const item = data.find(a => a.id === id); if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id); customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); renderAnnotationList(); openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = { id: newId, title: '新标注 ' + newId, summary: '点击编辑修改标注内容...', target: '#anno-' + newId, showMarker: true, type: 'area', detail: { feature: '请填写功能说明...' } };
+    customAnnotations.push(newItem); localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); renderAnnotationList(); closeManageModal();
+    currentAnnotation = newItem; isEditing = true; document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`; renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none'; document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id); customAnnotations.forEach((item, i) => { item.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); closeModal(); renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations(); const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, ''); a.download = `${title}_${date}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn'); const o = btn.textContent; btn.textContent = '导出成功 ✓'; setTimeout(() => { btn.textContent = o; }, 2000);
+}
+loadCustomAnnotations(); renderAnnotationList(); initPanelState();
+</script>
+
+</body>
+</html>
