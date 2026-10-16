@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务单管理</title>
+    <style>
+        :root {
+            --primary: #165DFF; --primary-light: #E8F0FF; --primary-dark: #0E42D2;
+            --success: #00B42A; --success-light: #E8FFEA;
+            --warning: #FF7D00; --warning-light: #FFF7E8;
+            --danger: #F53F3F; --danger-light: #FFECE8;
+            --info: #722ED1; --info-light: #F5E8FF;
+            --gray-1: #F7F8FA; --gray-2: #F2F3F5; --gray-3: #E5E6EB;
+            --gray-4: #C9CDD4; --gray-5: #86909C; --gray-6: #4E5969; --gray-7: #1D2129;
+            --radius: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: var(--gray-1); color: var(--gray-7); line-height: 1.5; display: flex; min-height: 100vh; }
+        .main-content { flex: 1; padding: 20px 24px; min-width: 0; overflow: auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 18px; font-weight: 600; }
+        .filter-bar { background: #fff; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; border: 1px solid var(--gray-3); }
+        .filter-item { display: flex; align-items: center; gap: 6px; }
+        .filter-label { font-size: 13px; color: var(--gray-6); white-space: nowrap; }
+        .filter-input { padding: 7px 12px; border: 1px solid var(--gray-3); border-radius: 6px; font-size: 13px; width: 160px; }
+        .filter-input:focus { outline: none; border-color: var(--primary); }
+        .filter-select { padding: 7px 12px; border: 1px solid var(--gray-3); border-radius: 6px; font-size: 13px; background: #fff; min-width: 120px; }
+        .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-outline { background: #fff; border: 1px solid var(--gray-3); color: var(--gray-6); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .btn-text { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 13px; padding: 2px 6px; }
+        .btn-text:hover { text-decoration: underline; }
+        .btn-text.danger { color: var(--danger); }
+        .table-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--gray-3); overflow: hidden; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--gray-3); }
+        .table-title { font-size: 14px; font-weight: 600; }
+        .table-body { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 500; color: var(--gray-5); background: var(--gray-1); border-bottom: 1px solid var(--gray-3); white-space: nowrap; }
+        td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--gray-2); vertical-align: top; }
+        tr:hover td { background: var(--gray-1); }
+        .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; white-space: nowrap; }
+        .tag-blue { background: var(--primary-light); color: var(--primary); }
+        .tag-green { background: var(--success-light); color: var(--success); }
+        .tag-orange { background: var(--warning-light); color: var(--warning); }
+        .tag-red { background: var(--danger-light); color: var(--danger); }
+        .tag-gray { background: var(--gray-2); color: var(--gray-5); }
+        .tag-purple { background: var(--info-light); color: var(--info); }
+        .error-reason { font-size: 12px; color: var(--danger); margin-top: 4px; }
+        .price-sell { color: var(--primary); font-weight: 500; }
+        .price-cost { color: var(--warning); }
+
+        .annotation-panel { width: 340px; min-width: 340px; background: #fff; border-left: 1px solid var(--gray-3); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-3); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-size: 15px; font-weight: 600; }
+        .panel-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+        .anno-item { margin-bottom: 16px; border: 1px solid var(--gray-3); border-radius: 8px; overflow: hidden; }
+        .anno-item-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; cursor: pointer; background: var(--gray-1); }
+        .anno-item-header:hover { background: var(--gray-2); }
+        .anno-num { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+        .anno-item-title { font-size: 13px; font-weight: 500; flex: 1; }
+        .anno-item-body { padding: 12px 14px; font-size: 13px; color: var(--gray-6); display: none; line-height: 1.8; }
+        .anno-item.expanded .anno-item-body { display: block; }
+        .anno-item-body .section-label { font-weight: 600; color: var(--gray-7); margin: 8px 0 4px; font-size: 12px; }
+        .anno-item-body .section-label:first-child { margin-top: 0; }
+        .anno-item-body p { margin-bottom: 4px; }
+        .anno-marker { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; z-index: 10; box-shadow: 0 2px 6px rgba(22,93,255,.4); }
+        .anno-section { position: relative; }
+        @media (max-width: 1200px) { .annotation-panel { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="page-title anno-section" id="anno-1">服务单管理</div>
+        </div>
+
+        <div class="filter-bar anno-section" id="anno-2">
+            <div class="filter-item">
+                <span class="filter-label">服务单ID</span>
+                <input class="filter-input" placeholder="请输入服务单ID">
+            </div>
+            <div class="filter-item">
+                <span class="filter-label">服务名称</span>
+                <input class="filter-input" placeholder="请输入服务名称">
+            </div>
+            <div class="filter-item">
+                <span class="filter-label">服务单状态</span>
+                <select class="filter-select">
+                    <option>全部</option><option>未推送</option><option>推送中</option><option>已推送</option><option>已完成</option><option>已取消</option><option>服务异常</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <span class="filter-label">支付状态</span>
+                <select class="filter-select">
+                    <option>全部</option><option>未支付</option><option>已支付</option><option>部分退款</option><option>已退款</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <span class="filter-label">头程包裹</span>
+                <input class="filter-input" placeholder="快递单号/采购单号">
+            </div>
+            <button class="btn btn-primary btn-sm">查询</button>
+            <button class="btn btn-outline btn-sm">重置</button>
+            <div class="anno-marker" data-id="2" style="top:-8px;right:-8px;">2</div>
+        </div>
+
+        <div class="table-card anno-section" id="anno-3">
+            <div class="table-header"><div class="table-title">服务单列表</div></div>
+            <div class="table-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>服务单ID</th>
+                            <th>服务名称</th>
+                            <th>头程包裹</th>
+                            <th>服务售价</th>
+                            <th>基准成本</th>
+                            <th>服务单状态</th>
+                            <th>支付状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SO20261014001</td>
+                            <td>定制拍照</td>
+                            <td><div>PO20261013001</div><div style="font-size:12px;color:var(--gray-5);">采购单</div></td>
+                            <td class="price-sell">¥4.00</td>
+                            <td class="price-cost">¥3.00</td>
+                            <td><span class="status-tag tag-green">已完成</span></td>
+                            <td><span class="status-tag tag-blue">已支付</span></td>
+                            <td>2026-10-14 10:23</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014002</td>
+                            <td>加固包装</td>
+                            <td><div>YT2610141001</div><div style="font-size:12px;color:var(--gray-5);">头程包裹</div></td>
+                            <td class="price-sell">¥8.00</td>
+                            <td class="price-cost">¥5.00</td>
+                            <td><span class="status-tag tag-purple">推送中</span></td>
+                            <td><span class="status-tag tag-blue">已支付</span></td>
+                            <td>2026-10-14 11:05</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014003</td>
+                            <td>拍照验货</td>
+                            <td><div>YT2610141002</div><div style="font-size:12px;color:var(--gray-5);">头程包裹</div></td>
+                            <td class="price-sell">¥4.00</td>
+                            <td class="price-cost">¥3.00</td>
+                            <td>
+                                <span class="status-tag tag-red">服务异常</span>
+                                <div class="error-reason">集运服务ID不存在</div>
+                            </td>
+                            <td><span class="status-tag tag-blue">已支付</span></td>
+                            <td>2026-10-14 11:30</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014004</td>
+                            <td>去除吊牌</td>
+                            <td><div>PO20261013003</div><div style="font-size:12px;color:var(--gray-5);">采购单</div></td>
+                            <td class="price-sell">¥3.00</td>
+                            <td class="price-cost">¥2.00</td>
+                            <td><span class="status-tag tag-gray">未推送</span></td>
+                            <td><span class="status-tag tag-gray">未支付</span></td>
+                            <td>2026-10-14 14:02</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014005</td>
+                            <td>开箱清点</td>
+                            <td><div>YT2610141003</div><div style="font-size:12px;color:var(--gray-5);">头程包裹</div></td>
+                            <td class="price-sell">¥6.00</td>
+                            <td class="price-cost">¥4.00</td>
+                            <td><span class="status-tag tag-orange">已取消</span></td>
+                            <td><span class="status-tag tag-orange">已退款</span></td>
+                            <td>2026-10-14 15:10</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014006</td>
+                            <td>加固包装</td>
+                            <td><div>YT2610141004</div><div style="font-size:12px;color:var(--gray-5);">头程包裹</div></td>
+                            <td class="price-sell">¥8.00</td>
+                            <td class="price-cost">¥5.00</td>
+                            <td><span class="status-tag tag-blue">已推送</span></td>
+                            <td><span class="status-tag tag-blue">已支付</span></td>
+                            <td>2026-10-14 16:45</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>SO20261014007</td>
+                            <td>定制拍照</td>
+                            <td><div>PO20261013005</div><div style="font-size:12px;color:var(--gray-5);">采购单</div></td>
+                            <td class="price-sell">¥6.00</td>
+                            <td class="price-cost">¥4.50</td>
+                            <td><span class="status-tag tag-orange">已取消</span></td>
+                            <td><span class="status-tag tag-orange">部分退款</span></td>
+                            <td>2026-10-14 18:20</td>
+                            <td><button class="btn-text">详情</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="anno-marker" data-id="3" style="top:-8px;right:-8px;">3</div>
+        </div>
+    </div>
+
+    <div class="annotation-panel">
+        <div class="panel-header">
+            <div class="panel-title">标注说明</div>
+            <div class="panel-actions">
+                <button class="btn btn-outline btn-sm" onclick="expandAll()">全部展开</button>
+                <button class="btn btn-outline btn-sm" onclick="collapseAll()">全部收起</button>
+            </div>
+        </div>
+        <div class="panel-body" id="annoPanel"></div>
+    </div>
+
+<script>
+const annotations = [
+    {
+        id: 1,
+        title: '服务单管理（总说明）',
+        summary: '租户查看自己所有增值服务单的状态和费用信息。',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '租户查看名下所有增值服务单的列表页面。展示每笔服务单的状态、费用和关联信息，支持多条件筛选和查看详情。',
+            business: '服务单状态与平台侧一致：未推送/推送中/已推送/已完成/已取消/服务异常。\n服务售价为租户向用户收取的费用，基准成本为平台向租户收取的费用，差价为租户利润。\n异常状态的服务单需联系平台处理，租户端不提供重新推送操作。'
+        }
+    },
+    {
+        id: 2,
+        title: '筛选区',
+        summary: '支持按服务单ID、服务名称、服务单状态、支付状态、头程包裹筛选。',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'section',
+        detail: {
+            display: '服务单ID：精确搜索。\n服务名称：模糊搜索。\n服务单状态：下拉选择，枚举为全部/未推送/推送中/已推送/已完成/已取消/服务异常。\n支付状态：下拉选择，枚举为全部/未支付/已支付/部分退款/已退款。\n头程包裹：精确搜索，支持输入快递单号或采购单号。',
+            interaction: '点击「查询」按当前条件刷新列表。点击「重置」清空所有条件。'
+        }
+    },
+    {
+        id: 3,
+        title: '服务单列表',
+        summary: '展示租户名下所有服务单，含状态、费用和关联单据信息。',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'section',
+        detail: {
+            display: '服务单ID：平台生成，唯一标识。\n服务名称：对应的增值服务名称。\n头程包裹：采购服务单显示关联采购单号；包裹服务单显示头程快递单号。\n服务售价：向用户收取的费用（蓝色）。\n基准成本：平台向租户收取的成本（橙色）。\n服务单状态：未推送（灰）/推送中（紫）/已推送（蓝）/已完成（绿）/已取消（橙）/服务异常（红）。\n支付状态：未支付（灰）/已支付（蓝）/部分退款（橙）/已退款（橙）。\n异常原因：服务异常时红色显示。\n创建时间：服务单创建时间。',
+            business: '服务单由用户购买增值服务后自动创建。\n入库包裹服务单在包裹预报时自动推送至集运系统；增值采购服务单在商品发货预报时随包裹合并推送。\n服务异常场景：集运服务ID不存在、集运系统余额不足、集运系统连接超时、集运系统返回未知错误。\n异常时需联系平台管理员处理，处理完成后平台重新推送。',
+            interaction: '点击「详情」跳转到服务单详情页。'
+        }
+    }
+];
+
+function renderAnnotations() {
+    const panel = document.getElementById('annoPanel');
+    panel.innerHTML = annotations.map(a => `
+        <div class="anno-item" data-id="${a.id}">
+            <div class="anno-item-header" onclick="toggleAnno(${a.id})">
+                <div class="anno-num">${a.id}</div>
+                <div class="anno-item-title">${a.title}</div>
+            </div>
+            <div class="anno-item-body">
+                <p style="color:var(--gray-5);font-size:12px;margin-bottom:8px;">${a.summary}</p>
+                ${a.detail.feature ? `<div class="section-label">功能说明</div><p>${a.detail.feature.replace(/\n/g,'<br>')}</p>` : ''}
+                ${a.detail.display ? `<div class="section-label">字段说明</div><p>${a.detail.display.replace(/\n/g,'<br>')}</p>` : ''}
+                ${a.detail.interaction ? `<div class="section-label">交互说明</div><p>${a.detail.interaction.replace(/\n/g,'<br>')}</p>` : ''}
+                ${a.detail.business ? `<div class="section-label">业务规则</div><p>${a.detail.business.replace(/\n/g,'<br>')}</p>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleAnno(id) {
+    const item = document.querySelector(`.anno-item[data-id="${id}"]`);
+    item.classList.toggle('expanded');
+}
+
+function expandAll() { document.querySelectorAll('.anno-item').forEach(i => i.classList.add('expanded')); }
+function collapseAll() { document.querySelectorAll('.anno-item').forEach(i => i.classList.remove('expanded')); }
+
+document.addEventListener('click', function(e) {
+    const marker = e.target.closest('.anno-marker');
+    if (marker) {
+        const id = marker.dataset.id;
+        const item = document.querySelector(`.anno-item[data-id="${id}"]`);
+        if (item) { item.classList.add('expanded'); item.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }
+});
+
+renderAnnotations();
+</script>
+</body>
+</html>
