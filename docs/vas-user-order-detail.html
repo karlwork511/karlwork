@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>订单详情 - 增值服务融合</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f5f5f5; color: #333; max-width: 430px; margin: 0 auto; padding-bottom: 80px; }
+
+  .new-element { position: relative; }
+  .new-element::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border: 2px dashed #FF6B35; border-radius: 12px; pointer-events: none; z-index: 10; }
+  .new-badge { position: absolute; top: -10px; right: 8px; background: #FF6B35; color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 8px; z-index: 11; font-weight: 600; }
+
+  .header { background: #fff; padding: 14px 16px; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid #f0f0f0; }
+  .header-back { position: absolute; left: 16px; font-size: 20px; color: #333; }
+  .header-title { font-size: 17px; font-weight: 600; }
+
+  /* 演示切换工具（非页面内容） */
+  .demo-toggle { display: flex; gap: 8px; margin: 10px 12px; padding: 8px; background: #FFF9F0; border: 1px dashed #FAAD14; border-radius: 10px; }
+  .demo-btn { flex: 1; padding: 8px; text-align: center; font-size: 13px; border-radius: 8px; border: 1px solid #e0e0e0; background: #fff; color: #666; cursor: pointer; }
+  .demo-btn.active { border-color: #FF6B35; color: #FF6B35; background: #FFF5F0; font-weight: 600; }
+
+  /* 商品TAB横滑 */
+  .product-tabs { display: flex; gap: 10px; padding: 12px 12px 4px; overflow-x: auto; }
+  .product-tabs::-webkit-scrollbar { display: none; }
+  .product-tab { flex-shrink: 0; width: 200px; display: flex; gap: 8px; background: #fff; border-radius: 10px; padding: 10px; border: 1.5px solid transparent; cursor: pointer; }
+  .product-tab.active { border-color: #FF6B35; }
+  .tab-img { width: 48px; height: 48px; background: #f5f5f5; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .tab-info { flex: 1; min-width: 0; }
+  .tab-name { font-size: 12px; color: #333; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tab-spec { font-size: 11px; color: #999; margin-top: 4px; }
+
+  /* 订单编号栏 */
+  .order-id-bar { background: #fff; margin: 8px 12px 0; border-radius: 12px 12px 0 0; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f5f5f5; }
+  .order-id { font-size: 14px; color: #333; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .order-id-copy { font-size: 12px; color: #999; }
+  .order-status-tag { font-size: 13px; color: #FAAD14; font-weight: 500; }
+
+  /* 选中商品卡片 */
+  .product-detail-card { background: #fff; margin: 0 12px; border-radius: 0 0 12px 12px; padding: 12px 14px 14px; }
+  .product-card { display: flex; gap: 10px; }
+  .product-img { width: 72px; height: 72px; background: #f5f5f5; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+  .product-info { flex: 1; min-width: 0; }
+  .product-name { font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .product-spec { font-size: 12px; color: #999; margin-top: 4px; }
+  .product-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .product-price { font-size: 15px; font-weight: 700; color: #333; }
+  .product-qty { font-size: 13px; color: #999; }
+
+  /* 商品下的增值服务区块 */
+  .svc-block { margin-top: 12px; border-top: 1px dashed #f0f0f0; padding-top: 12px; display: none; }
+  body.has-svc .svc-block.has-services { display: block; }
+  .svc-block-title { font-size: 12px; color: #999; margin-bottom: 8px; }
+  .svc-item { background: #FAFAFA; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .svc-item:last-child { margin-bottom: 0; }
+  .svc-main { display: flex; align-items: center; gap: 8px; }
+  .svc-icon { font-size: 16px; }
+  .svc-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .svc-price { font-size: 13px; color: #666; font-weight: 500; }
+  .svc-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .status-completed { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+  .status-processing { background: #FFFBE6; color: #FAAD14; border: 1px solid #FFE58F; }
+  .status-cancelled { background: #FFF1F0; color: #FF4D4F; border: 1px solid #FFA39E; }
+  .svc-refund { font-size: 11px; color: #FF4D4F; margin-left: 4px; }
+  .svc-entry { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #FF6B35; cursor: pointer; }
+  .svc-entry-arrow { color: #ccc; }
+  .svc-entry-photos { display: flex; gap: 8px; margin-top: 8px; }
+  .svc-thumb { width: 52px; height: 52px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+
+  /* 无增值服务提示 */
+  .no-svc-tip { display: none; margin: 10px 12px; padding: 16px; text-align: center; color: #bbb; font-size: 12px; background: #fff; border-radius: 12px; }
+  body:not(.has-svc) .no-svc-tip { display: block; }
+
+  .card { background: #fff; margin: 10px 12px; border-radius: 12px; padding: 14px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: block; width: 4px; height: 14px; background: #FF6B35; border-radius: 2px; }
+
+  .buyer-note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .buyer-note-title { font-size: 14px; color: #333; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .buyer-note-title::before { content: ''; display: block; width: 4px; height: 14px; background: #FF6B35; border-radius: 2px; }
+  .buyer-note-refresh { font-size: 12px; color: #FF6B35; }
+  .buyer-note { background: #FAFAFA; border-radius: 8px; padding: 12px; }
+  .buyer-note-text { font-size: 12px; color: #999; line-height: 1.5; }
+  .buyer-note-input { display: flex; gap: 8px; margin-top: 10px; }
+  .buyer-note-input input { flex: 1; border: 1px solid #e0e0e0; border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; background: #FAFAFA; }
+  .buyer-note-input button { background: #FF6B35; color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+  .info-label { color: #999; }
+  .info-value { color: #333; display: flex; align-items: center; gap: 6px; }
+  .copy-btn { color: #999; font-size: 12px; }
+  .platform-tag { background: #FFF3EE; color: #FF6B35; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+
+  .fee-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+  .fee-label { color: #666; }
+  .fee-value { color: #333; font-weight: 500; }
+  .fee-svc { display: none; }
+  body.has-svc .fee-svc { display: flex; }
+  .fee-total { border-top: 1px solid #f0f0f0; margin-top: 8px; padding-top: 12px; }
+  .fee-total .fee-value { font-size: 16px; font-weight: 700; color: #FF6B35; }
+  .total-with-svc { display: none; }
+  body.has-svc .total-with-svc { display: inline; }
+  body.has-svc .total-no-svc { display: none; }
+
+  .after-sale-bar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 430px; margin: 0 auto; background: #fff; padding: 12px 16px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; }
+  .after-sale-btn { border: 1px solid #e0e0e0; background: #fff; color: #666; padding: 8px 20px; border-radius: 20px; font-size: 13px; }
+
+  /* 底部弹窗 */
+  .sheet-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 100; }
+  .sheet-mask.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; bottom: 0; left: 0; right: 0; max-width: 430px; margin: 0 auto; background: #fff; border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform .25s; z-index: 101; max-height: 75vh; display: flex; flex-direction: column; }
+  .sheet.show { transform: translateY(0); }
+  .sheet-header { padding: 16px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .sheet-title { font-size: 16px; font-weight: 600; }
+  .sheet-close { font-size: 22px; color: #999; cursor: pointer; line-height: 1; }
+  .sheet-context { padding: 0 16px 12px; font-size: 12px; color: #999; border-bottom: 1px solid #f0f0f0; }
+  .sheet-body { padding: 14px 16px 24px; overflow-y: auto; }
+  .req-item { display: flex; gap: 10px; background: #FAFAFA; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+  .req-item:last-child { margin-bottom: 0; }
+  .req-num { color: #FF6B35; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .req-body { flex: 1; min-width: 0; }
+  .req-text { font-size: 13px; color: #333; line-height: 1.6; }
+  .sheet-section-title { font-size: 12px; color: #999; margin: 14px 0 8px; }
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .photo-grid-item { border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; }
+  .remark-text { font-size: 13px; color: #333; line-height: 1.7; background: #FAFAFA; border-radius: 10px; padding: 12px; }
+
+  /* 全屏照片查看器 */
+  .viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 200; display: none; flex-direction: column; }
+  .viewer.show { display: flex; }
+  .viewer-top { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+  .viewer-index { color: #fff; font-size: 13px; background: rgba(255,255,255,.15); padding: 3px 10px; border-radius: 10px; }
+  .viewer-close { color: #fff; font-size: 26px; cursor: pointer; line-height: 1; }
+  .viewer-scroll { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
+  .viewer-scroll::-webkit-scrollbar { display: none; }
+  .viewer-photo { min-width: 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .viewer-photo-box { width: 100%; aspect-ratio: 3/4; max-height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 90px; }
+
+  .annotation-section { margin: 16px 12px; padding: 16px; background: #FFF9F0; border-radius: 12px; border: 1px solid #FFE7BA; }
+  .annotation-title { font-size: 14px; font-weight: 700; color: #D46B08; margin-bottom: 10px; }
+  .annotation-item { font-size: 12px; color: #AD6800; line-height: 1.8; padding-left: 16px; position: relative; margin-bottom: 2px; }
+  .annotation-item::before { content: ''; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; background: #FAAD14; border-radius: 50%; }
+</style>
+</head>
+<body class="has-svc">
+
+<div class="header">
+  <span class="header-back">←</span>
+  <span class="header-title">订单详情</span>
+</div>
+
+<!-- 演示切换工具（非页面内容） -->
+<div class="demo-toggle">
+  <div class="demo-btn active" id="btn-a" onclick="switchVersion(true)">含增值服务</div>
+  <div class="demo-btn" id="btn-b" onclick="switchVersion(false)">无增值服务</div>
+</div>
+
+<!-- 商品TAB横滑 -->
+<div class="product-tabs" id="product-tabs"></div>
+
+<!-- 订单编号栏 -->
+<div class="order-id-bar">
+  <div class="order-id">OD261087008001 <span class="order-id-copy">📋</span></div>
+  <span class="order-status-tag">采购中</span>
+</div>
+
+<!-- 选中商品卡片 + 增值服务区块 -->
+<div class="product-detail-card">
+  <div class="product-card" id="product-card"></div>
+  <div class="svc-block" id="svc-block"></div>
+</div>
+
+<!-- 无增值服务提示 -->
+<div class="no-svc-tip">当前订单未购买增值服务，商品卡片内不展示增值服务区块</div>
+
+<!-- 买手留言 -->
+<div class="card">
+  <div class="buyer-note-header">
+    <span class="buyer-note-title">买手留言</span>
+    <span class="buyer-note-refresh">刷新</span>
+  </div>
+  <div class="buyer-note">
+    <div class="buyer-note-text">非实时对话，请刷新查看回复</div>
+    <div class="buyer-note-text" style="margin-top:6px">暂无留言，如需沟通，可在这里给买手留言。</div>
+  </div>
+  <div class="buyer-note-input">
+    <input type="text" placeholder="输入给买手的留言">
+    <button>发送</button>
+  </div>
+</div>
+
+<!-- 订单信息 -->
+<div class="card">
+  <div class="card-title">订单信息</div>
+  <div class="info-row"><span class="info-label">订单编号</span><span class="info-value">HAAFDB261087008 <span class="copy-btn">复制</span></span></div>
+  <div class="info-row"><span class="info-label">订单类型</span><span class="info-value">代购订单</span></div>
+  <div class="info-row"><span class="info-label">订单状态</span><span class="info-value" style="color:#FAAD14">采购中</span></div>
+  <div class="info-row"><span class="info-label">平台</span><span class="info-value"><span class="platform-tag">淘宝</span></span></div>
+  <div class="info-row"><span class="info-label">店铺</span><span class="info-value">超实惠纸品特价经营店</span></div>
+  <div class="info-row"><span class="info-label">所在仓库</span><span class="info-value">东莞仓</span></div>
+  <div class="info-row"><span class="info-label">下单时间</span><span class="info-value">2026-10-15 18:02</span></div>
+  <div class="info-row"><span class="info-label">支付时间</span><span class="info-value">2026-10-15 18:03</span></div>
+</div>
+
+<!-- 费用明细 -->
+<div class="card">
+  <div class="card-title">费用明细</div>
+  <div class="fee-row"><span class="fee-label">商品金额</span><span class="fee-value">¥6.30</span></div>
+  <div class="fee-row"><span class="fee-label">国内运费</span><span class="fee-value">¥0.00</span></div>
+  <div class="fee-row"><span class="fee-label">服务费</span><span class="fee-value">¥1.42</span></div>
+  <div class="fee-row fee-svc new-element">
+    <span class="fee-label">增值服务费</span>
+    <span class="fee-value">¥9.00</span>
+  </div>
+  <div class="fee-row fee-total">
+    <span class="fee-label" style="font-weight:600">订单金额</span>
+    <span class="fee-value"><span class="total-with-svc">¥16.72</span><span class="total-no-svc">¥7.72</span></span>
+  </div>
+</div>
+
+<!-- 设计说明 -->
+<div class="annotation-section">
+  <div class="annotation-title">设计说明（不产出到正式页面）</div>
+  <div class="annotation-item">多商品订单顶部为商品TAB横滑切换，一个商品一个TAB；订单编号栏、买手留言、订单信息、费用明细为订单维度，不随TAB切换</div>
+  <div class="annotation-item">增值服务区块位于选中商品卡片内下方（截图红框位置），随TAB切换联动，仅展示该商品购买的增值服务；未购买则不展示</div>
+  <div class="annotation-item">服务行展示：服务名称、实付金额、用户状态（处理中/已完成/已取消）</div>
+  <div class="annotation-item">用户状态映射：待支付/待推送/已推送 → 处理中（黄）；已完成 → 已完成（绿）；已取消 → 已取消（红）</div>
+  <div class="annotation-item">按照片数量计费的服务：处理中展示「查看拍照需求（N条）」；已完成展示照片缩略图+「查看需求及照片（N）」；其他计费方式且用户填写了备注：展示「查看备注」；未填备注则不展示入口</div>
+  <div class="annotation-item">仓库回传的照片无法区分属于哪条需求，照片与需求不建立对应关系；弹窗内分区展示：上方为拍照需求列表（①②③），下方为仓库回传照片墙，点击照片进入全屏查看</div>
+  <div class="annotation-item">全屏查看器：左右滑动切换照片，左上角序号N/M，右上角关闭；服务行缩略图与弹窗照片墙均可点击进入（正式版支持双指放大）</div>
+  <div class="annotation-item">处理中/已取消的服务不展示照片；已取消服务的退款金额展示在入口行，需求/备注内容仍可查看</div>
+  <div class="annotation-item">本页仅展示增值采购服务（商品维度）；入库包裹服务在包裹详情页展示</div>
+  <div class="annotation-item">费用明细新增「增值服务费」行，为下单时实付的增值服务合计；服务取消后的退款在服务状态处展示，不回改订单金额</div>
+  <div class="annotation-item">本页只读展示，不提供购买/取消入口；购买在下单流程完成</div>
+</div>
+
+<!-- 申请售后 -->
+<div class="after-sale-bar">
+  <button class="after-sale-btn">申请售后</button>
+</div>
+
+<!-- 底部弹窗 -->
+<div class="sheet-mask" id="sheet-mask" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-header">
+    <span class="sheet-title" id="sheet-title">拍照需求</span>
+    <span class="sheet-close" onclick="closeSheet()">×</span>
+  </div>
+  <div class="sheet-context" id="sheet-context"></div>
+  <div class="sheet-body" id="sheet-body"></div>
+</div>
+
+<!-- 全屏照片查看器 -->
+<div class="viewer" id="viewer">
+  <div class="viewer-top">
+    <span class="viewer-index" id="viewer-index">1/2</span>
+    <span class="viewer-close" onclick="closeViewer()">×</span>
+  </div>
+  <div class="viewer-scroll" id="viewer-scroll"></div>
+</div>
+
+<script>
+var products = [
+  {
+    img: '🧻',
+    name: '洁柔抽纸无香100抽纸巾面巾纸餐巾纸',
+    spec: '3层100抽X【1包】',
+    qty: 1,
+    price: '2.10',
+    services: [
+      { icon: '📷', name: '拍照验货', price: '3.00', status: 'completed', statusText: '已完成',
+        thumbs: [
+          { emoji: '📦', bg: 'linear-gradient(135deg,#E3F2FD,#BBDEFB)' },
+          { emoji: '🧻', bg: 'linear-gradient(135deg,#FFF3E0,#FFE0B2)' }
+        ],
+        entry: { key: 'photo-1', text: '查看需求及照片（2）' } },
+      { icon: '🧮', name: '开箱清点', price: '1.00', status: 'processing', statusText: '处理中', entry: { key: 'remark-1', text: '查看备注' } }
+    ]
+  },
+  {
+    img: '🧻',
+    name: '洁柔抽纸无香100抽纸巾面巾纸餐巾纸',
+    spec: '3层100抽X【2包】',
+    qty: 1,
+    price: '4.20',
+    services: [
+      { icon: '📷', name: '拍照验货', price: '3.00', status: 'processing', statusText: '处理中', entry: { key: 'photo-2', text: '查看拍照需求（1条）' } },
+      { icon: '📦', name: '加固包装', price: '2.00', status: 'cancelled', statusText: '已取消', refund: '2.00', entry: { key: 'remark-2', text: '查看备注' } }
+    ]
+  }
+];
+
+var sheetData = {
+  'photo-1': {
+    title: '拍照需求及照片（2）',
+    context: '拍照验货 · 洁柔抽纸 3层100抽X【1包】',
+    items: [
+      '整包拍照，确认外包装无破损、无污渍',
+      '拆开一包拍抽纸层数和压花细节'
+    ],
+    photos: [
+      { emoji: '📦', bg: 'linear-gradient(135deg,#E3F2FD,#BBDEFB)' },
+      { emoji: '🧻', bg: 'linear-gradient(135deg,#FFF3E0,#FFE0B2)' }
+    ]
+  },
+  'remark-1': {
+    title: '服务备注',
+    context: '开箱清点 · 洁柔抽纸 3层100抽X【1包】',
+    text: '请清点抽纸包数与订单是否一致，如有缺包请在面单上备注'
+  },
+  'photo-2': {
+    title: '拍照需求（1条）',
+    context: '拍照验货 · 洁柔抽纸 3层100抽X【2包】',
+    items: [
+      '拍外箱六面照片，确认封箱完好'
+    ]
+  },
+  'remark-2': {
+    title: '服务备注',
+    context: '加固包装 · 洁柔抽纸 3层100抽X【2包】',
+    text: '抽纸为抛货易压损，请用加厚纸箱并填充缓冲材料'
+  }
+};
+
+var numChars = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+var currentProduct = 0;
+
+function renderTabs() {
+  var html = '';
+  products.forEach(function(p, i) {
+    html += '<div class="product-tab' + (i === currentProduct ? ' active' : '') + '" onclick="switchProduct(' + i + ')">'
+      + '<div class="tab-img">' + p.img + '</div>'
+      + '<div class="tab-info"><div class="tab-name">' + p.name + '</div><div class="tab-spec">' + p.spec + '</div></div>'
+      + '</div>';
+  });
+  document.getElementById('product-tabs').innerHTML = html;
+}
+
+function renderProduct() {
+  var p = products[currentProduct];
+  document.getElementById('product-card').innerHTML =
+    '<div class="product-img">' + p.img + '</div>'
+    + '<div class="product-info"><div class="product-name">' + p.name + '</div>'
+    + '<div class="product-spec">' + p.spec + '</div>'
+    + '<div class="product-price-row"><span class="product-qty">×' + p.qty + ' ¥' + p.price + '</span>'
+    + '<span class="product-price">¥' + p.price + '</span></div></div>';
+
+  var svcBlock = document.getElementById('svc-block');
+  if (!p.services || p.services.length === 0) {
+    svcBlock.className = 'svc-block';
+    svcBlock.innerHTML = '';
+    return;
+  }
+  svcBlock.className = 'svc-block has-services new-element';
+  var html = '<span class="new-badge">新增</span><div class="svc-block-title">增值服务（' + p.services.length + '）</div>';
+  p.services.forEach(function(s) {
+    html += '<div class="svc-item"><div class="svc-main">'
+      + '<span class="svc-icon">' + s.icon + '</span>'
+      + '<span class="svc-name">' + s.name + '</span>'
+      + '<span class="svc-price">¥' + s.price + '</span>'
+      + '<span class="svc-status status-' + s.status + '">' + s.statusText + '</span>'
+      + '</div>';
+    if (s.thumbs && s.thumbs.length > 0) {
+      html += '<div class="svc-entry-photos">';
+      s.thumbs.forEach(function(t, ti) {
+        html += '<div class="svc-thumb" style="background:' + t.bg + '" onclick="openViewer(\'' + s.entry.key + '\',' + ti + ')">' + t.emoji + '</div>';
+      });
+      html += '</div>';
+    }
+    if (s.entry) {
+      var refundHtml = s.refund ? '<span class="svc-refund">已退款¥' + s.refund + '</span>' : '';
+      html += '<div class="svc-entry" onclick="openSheet(\'' + s.entry.key + '\')">'
+        + '<span>' + s.entry.text + refundHtml + '</span>'
+        + '<span class="svc-entry-arrow">›</span></div>';
+    }
+    html += '</div>';
+  });
+  svcBlock.innerHTML = html;
+}
+
+function switchProduct(i) {
+  currentProduct = i;
+  renderTabs();
+  renderProduct();
+  closeSheet();
+}
+
+function openSheet(key) {
+  var data = sheetData[key];
+  if (!data) return;
+  document.getElementById('sheet-title').textContent = data.title;
+  document.getElementById('sheet-context').textContent = data.context;
+  var body = document.getElementById('sheet-body');
+  if (data.items) {
+    var html = '';
+    data.items.forEach(function(item, i) {
+      html += '<div class="req-item"><span class="req-num">' + numChars[i] + '</span><div class="req-body"><div class="req-text">' + item + '</div></div></div>';
+    });
+    if (data.photos && data.photos.length > 0) {
+      html += '<div class="sheet-section-title">仓库回传照片（' + data.photos.length + '）</div><div class="photo-grid">';
+      data.photos.forEach(function(ph, pi) {
+        html += '<div class="photo-grid-item" style="background:' + ph.bg + '" onclick="openViewer(\'' + key + '\',' + pi + ')">' + ph.emoji + '</div>';
+      });
+      html += '</div>';
+    }
+    body.innerHTML = html;
+  } else {
+    body.innerHTML = '<div class="remark-text">' + data.text + '</div>';
+  }
+  document.getElementById('sheet-mask').classList.add('show');
+  document.getElementById('sheet').classList.add('show');
+}
+
+function closeSheet() {
+  document.getElementById('sheet-mask').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+}
+
+function openViewer(key, photoIdx) {
+  var data = sheetData[key];
+  if (!data || !data.photos || data.photos.length === 0) return;
+  var list = data.photos;
+  window._viewerList = list;
+  var scroller = document.getElementById('viewer-scroll');
+  var html = '';
+  list.forEach(function(p) {
+    html += '<div class="viewer-photo"><div class="viewer-photo-box" style="background:' + p.bg + '">' + p.emoji + '</div></div>';
+  });
+  scroller.innerHTML = html;
+  document.getElementById('viewer').classList.add('show');
+  requestAnimationFrame(function() {
+    scroller.scrollLeft = photoIdx * scroller.clientWidth;
+    updateViewerIndex(photoIdx);
+  });
+  scroller.onscroll = function() {
+    var pos = Math.round(scroller.scrollLeft / scroller.clientWidth);
+    updateViewerIndex(pos);
+  };
+}
+
+function updateViewerIndex(pos) {
+  var list = window._viewerList || [];
+  if (!list[pos]) return;
+  document.getElementById('viewer-index').textContent = (pos + 1) + '/' + list.length;
+}
+
+function closeViewer() {
+  document.getElementById('viewer').classList.remove('show');
+}
+
+function switchVersion(hasSvc) {
+  if (hasSvc) {
+    document.body.classList.add('has-svc');
+  } else {
+    document.body.classList.remove('has-svc');
+  }
+  document.getElementById('btn-a').classList.toggle('active', hasSvc);
+  document.getElementById('btn-b').classList.toggle('active', !hasSvc);
+  closeSheet();
+  closeViewer();
+}
+
+renderTabs();
+renderProduct();
+</script>
+
+</body>
+</html>
