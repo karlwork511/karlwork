@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>购买增值服务页</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+.annotation-toolbar {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0; z-index: 100;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff;
+    border-radius: 4px; cursor: pointer; font-size: 13px; color: #333;
+    display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; }
+.annotation-panel {
+    width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED;
+    overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease;
+}
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header {
+    padding: 16px; font-size: 15px; font-weight: 600; color: #333;
+    border-bottom: 1px solid #E4E7ED; background: #F7F8FA;
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px; height: 24px; border: none; background: #E8EAED;
+    border-radius: 4px; cursor: pointer; font-size: 12px; color: #666;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+    width: 36px; height: 48px; background: #165DFF; color: #fff;
+    border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px;
+    z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px; border-bottom: 1px solid #E4E7ED;
+    cursor: pointer; transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+.anno-marker {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #165DFF;
+    color: #fff; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.5; transition: all 0.2s ease; cursor: pointer;
+    z-index: 9999; user-select: none;
+}
+.anno-marker.highlight, .anno-marker:hover {
+    opacity: 1; transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); display: none;
+    align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff; border-radius: 8px; width: 560px; max-height: 80vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px; border-bottom: 1px solid #E4E7ED;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px; border: none; background: transparent;
+    font-size: 20px; color: #999; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px; border-top: 1px solid #E4E7ED;
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA; width: 100px; padding: 12px 16px;
+    text-align: left; font-size: 13px; font-weight: 600; color: #666;
+    border: 1px solid #E4E7ED; vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px; font-size: 13px; color: #333;
+    border: 1px solid #E4E7ED; line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%; min-height: 80px; padding: 8px 12px;
+    border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px;
+    font-family: inherit; line-height: 1.6; resize: vertical; outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+.btn {
+    padding: 8px 16px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; border: 1px solid transparent;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ===== 左侧产品界面 ===== */
+.phone-frame {
+    max-width: 400px; margin: 0 auto; background: #f5f5f5;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    position: relative; min-height: 700px;
+    display: flex; flex-direction: column;
+}
+.page-header {
+    background: #fff; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
+}
+.page-header-back { position: absolute; left: 16px; font-size: 20px; color: #333; }
+.page-header-title { font-size: 17px; font-weight: 600; }
+.page-body { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+
+/* 版本切换 */
+.version-bar {
+    display: flex; background: #fff; border-bottom: 1px solid #f0f0f0;
+}
+.version-btn {
+    flex: 1; padding: 10px; text-align: center; font-size: 13px;
+    color: #999; cursor: pointer; border-bottom: 2px solid transparent;
+}
+.version-btn.active { color: #FF6B35; border-bottom-color: #FF6B35; font-weight: 600; }
+
+/* 包裹信息卡 */
+.pkg-card {
+    margin: 10px 12px; background: #fff; border-radius: 10px; padding: 14px;
+    position: relative;
+}
+.pkg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pkg-icon { font-size: 20px; }
+.pkg-title { font-size: 14px; font-weight: 600; }
+.pkg-status {
+    margin-left: auto; font-size: 11px; padding: 2px 8px;
+    border-radius: 8px; background: #E8F7EE; color: #00B42A; font-weight: 500;
+}
+.pkg-row { display: flex; justify-content: space-between; font-size: 12px; color: #666; padding: 3px 0; }
+.pkg-label { color: #999; }
+.pkg-value { font-weight: 500; }
+
+/* 服务列表 */
+.svc-section { margin: 10px 12px; position: relative; }
+.svc-section-title { font-size: 15px; font-weight: 600; padding: 4px 0 10px; }
+
+.svc-card {
+    background: #fff; border-radius: 10px; margin-bottom: 8px;
+    border: 2px solid transparent; transition: all 0.2s; overflow: hidden;
+}
+.svc-card.selected { border-color: #FF6B35; }
+
+.svc-main {
+    display: flex; align-items: flex-start; padding: 14px; cursor: pointer;
+    gap: 10px;
+}
+.svc-check {
+    width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ddd;
+    flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; transition: all 0.2s;
+}
+.svc-card.selected .svc-check { background: #FF6B35; border-color: #FF6B35; }
+.svc-info { flex: 1; min-width: 0; }
+.svc-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; }
+.svc-detail-link {
+    font-size: 12px; color: #165DFF; margin-left: 8px; cursor: pointer;
+    font-weight: 400; white-space: nowrap; display: none;
+}
+.svc-detail-link.visible { display: inline; }
+.svc-desc {
+    font-size: 12px; color: #999; margin-top: 4px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.svc-price { font-size: 16px; font-weight: 700; color: #FF6B35; white-space: nowrap; }
+.svc-price-unit { font-size: 11px; color: #999; font-weight: 400; }
+
+/* 照片需求配置区 */
+.photo-config {
+    border-top: 1px solid #f0f0f0; padding: 12px 14px; display: none;
+}
+.svc-card.selected .photo-config { display: block; }
+
+.svc-remark {
+    border-top: 1px solid #f0f0f0; padding: 12px 14px; display: none;
+}
+.svc-card.selected .svc-remark { display: block; }
+.svc-remark-title { font-size: 13px; font-weight: 500; color: #333; margin-bottom: 8px; }
+.svc-remark-input {
+    width: 100%; min-height: 60px; padding: 10px 12px; border: 1px solid #E5E5E5; border-radius: 8px;
+    font-size: 13px; resize: none; font-family: inherit; box-sizing: border-box;
+}
+.svc-remark-input:focus { outline: none; border-color: #FF6B35; }
+.svc-remark-count { text-align: right; font-size: 11px; color: #CCC; margin-top: 4px; }
+
+.photo-config-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.photo-config-title { font-size: 13px; font-weight: 500; color: #333; }
+
+.photo-slot {
+    background: #F7F8FA; border-radius: 8px; padding: 12px; margin-bottom: 8px;
+    display: flex; gap: 10px; align-items: flex-start;
+}
+.photo-slot-body { flex: 1; min-width: 0; }
+.photo-slot-input {
+    width: 100%; border: none; background: transparent; font-size: 13px;
+    color: #333; outline: none; resize: none; line-height: 1.5;
+    min-height: 80px;
+}
+.photo-slot-input::placeholder { color: #C9CDD4; }
+.photo-slot-bottom {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 6px;
+}
+.photo-slot-common {
+    font-size: 12px; color: #165DFF; cursor: pointer;
+    display: flex; align-items: center; gap: 2px;
+}
+.photo-slot-count { font-size: 11px; color: #C9CDD4; }
+.photo-slot-delete {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #999; font-size: 16px; flex-shrink: 0;
+}
+.photo-slot-delete:hover { color: #F53F3F; }
+
+.photo-add-btn {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    padding: 10px; border: 1px dashed #DCDFE6; border-radius: 8px;
+    color: #666; font-size: 13px; cursor: pointer; margin-top: 4px;
+    transition: all 0.2s;
+}
+.photo-add-btn:hover { border-color: #FF6B35; color: #FF6B35; }
+
+.photo-fee {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0 0; font-size: 13px; color: #666;
+}
+.photo-fee-amount { font-weight: 600; color: #FF6B35; }
+
+/* 常见要求底部弹层 */
+.common-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4); z-index: 200; display: none;
+    align-items: flex-end;
+}
+.common-overlay.show { display: flex; }
+.common-sheet {
+    background: #fff; border-radius: 16px 16px 0 0; width: 100%;
+    max-height: 60%; overflow-y: auto;
+}
+.common-item {
+    padding: 14px 20px; text-align: center; font-size: 15px; color: #333;
+    border-bottom: 1px solid #f0f0f0; cursor: pointer;
+}
+.common-item:hover { background: #F7F8FA; }
+.common-cancel {
+    padding: 14px 20px; text-align: center; font-size: 15px; color: #999;
+    border-top: 6px solid #f5f5f5; cursor: pointer;
+}
+
+/* 服务详情底部弹层 */
+.svc-detail-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4); z-index: 200; display: none;
+    align-items: flex-end;
+}
+.svc-detail-overlay.show { display: flex; }
+.svc-detail-sheet {
+    background: #fff; border-radius: 16px 16px 0 0; width: 100%;
+    max-height: 70%; overflow-y: auto; padding: 20px;
+}
+.svc-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.svc-detail-title { font-size: 16px; font-weight: 600; }
+.svc-detail-close { font-size: 22px; color: #999; cursor: pointer; background: none; border: none; }
+.svc-detail-price { font-size: 18px; font-weight: 700; color: #FF6B35; margin-bottom: 12px; }
+.svc-detail-body { font-size: 14px; color: #666; line-height: 1.8; }
+
+/* 底部结算栏 */
+.bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #fff; padding: 10px 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 50;
+}
+.bottom-total { font-size: 14px; }
+.bottom-total-num { font-size: 22px; font-weight: 700; color: #FF6B35; }
+.bottom-btn {
+    padding: 10px 32px; background: #FF6B35; color: #fff;
+    border: none; border-radius: 24px; font-size: 14px; font-weight: 600;
+}
+.bottom-btn.disabled { background: #C9CDD4; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+    <div class="preview-area">
+        <div class="phone-frame" id="anno-1">
+            <div class="page-header">
+                <span class="page-header-back">←</span>
+                <span class="page-header-title" id="page-title">购买增值服务</span>
+            </div>
+
+            <!-- 版本切换 -->
+            <div class="version-bar">
+                <div class="version-btn active" onclick="switchVersion(0)">场景A · 包裹加购</div>
+                <div class="version-btn" onclick="switchVersion(1)">场景B · 代购下单选购</div>
+            </div>
+
+            <div class="page-body" id="version-a">
+                <!-- 包裹信息卡 -->
+                <div class="pkg-card" id="anno-2" style="position:relative">
+                    <div class="anno-marker" data-id="2">2</div>
+                    <div class="pkg-header">
+                        <span class="pkg-icon">📦</span>
+                        <span class="pkg-title">包裹信息</span>
+                        <span class="pkg-status">已入库</span>
+                    </div>
+                    <div class="pkg-row"><span class="pkg-label">物流单号</span><span class="pkg-value">YT2610141513</span></div>
+                    <div class="pkg-row"><span class="pkg-label">所在仓库</span><span class="pkg-value">东莞仓</span></div>
+                    <div class="pkg-row"><span class="pkg-label">重量</span><span class="pkg-value">2.2kg</span></div>
+                    <div class="pkg-row"><span class="pkg-label">尺寸</span><span class="pkg-value">12×12×23cm</span></div>
+                </div>
+
+                <!-- 服务列表 -->
+                <div class="svc-section" id="anno-3" style="position:relative">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <div class="svc-section-title">可加购服务</div>
+
+                    <!-- 拍照验货（按照片数量） -->
+                    <div class="svc-card" id="svc-a-1">
+                        <div class="svc-main" onclick="toggleSvc('svc-a-1')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">拍照验货<span class="svc-detail-link visible" onclick="event.stopPropagation();openSvcDetail('拍照验货','¥1.50/张')">详情</span></div>
+                                <div class="svc-desc">包裹到仓后开箱拍照，上传商品实物照片供确认。支持自定义拍照要求，如测量尺寸、拍摄商标细节等。每张照片单独计费。</div>
+                            </div>
+                            <div class="svc-price">¥1.50<span class="svc-price-unit">/张</span></div>
+                        </div>
+                        <div class="photo-config" id="anno-4" style="position:relative">
+                            <div class="anno-marker" data-id="4">4</div>
+                            <div class="photo-config-header">
+                                <span class="photo-config-title">拍照需求（必填）</span>
+                            </div>
+                            <div class="photo-slots" id="slots-a-1">
+                                <div class="photo-slot">
+                                    <div class="photo-slot-body">
+                                        <textarea class="photo-slot-input" placeholder="选填，可填写您对商品的要求" rows="1" oninput="updateCount(this)"></textarea>
+                                        <div class="photo-slot-bottom">
+                                            <span class="photo-slot-common" onclick="openCommonReq(this)">≡ 常见要求</span>
+                                            <span class="photo-slot-count">0/100</span>
+                                        </div>
+                                    </div>
+                                    <div class="photo-slot-delete" onclick="removePhotoSlot(this)">🗑</div>
+                                </div>
+                            </div>
+                            <div class="photo-add-btn" onclick="addPhotoSlot('slots-a-1')">＋ 添加照片</div>
+                            <div class="photo-fee">
+                                <span>照片 <span class="photo-num">1</span> 张 × ¥1.50</span>
+                                <span class="photo-fee-amount">¥1.50</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 加固包装（每单固定费用） -->
+                    <div class="svc-card" id="svc-a-2">
+                        <div class="svc-main" onclick="toggleSvc('svc-a-2')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">加固包装</div>
+                                <div class="svc-desc">使用气泡膜、泡沫板等材料对包裹进行加固处理</div>
+                            </div>
+                            <div class="svc-price">¥5.00<span class="svc-price-unit">/单</span></div>
+                        </div>
+                        <div class="svc-remark">
+                            <div class="svc-remark-title">服务备注（选填）</div>
+                            <textarea class="svc-remark-input" placeholder="选填，可填写您对服务的要求" maxlength="100" oninput="updateRemarkCount(this)"></textarea>
+                            <div class="svc-remark-count">0/100</div>
+                        </div>
+                    </div>
+
+                    <!-- 开箱清点（按商品数量） -->
+                    <div class="svc-card" id="svc-a-3">
+                        <div class="svc-main" onclick="toggleSvc('svc-a-3')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">开箱清点</div>
+                                <div class="svc-desc">开箱清点商品数量，与订单核对是否一致</div>
+                            </div>
+                            <div class="svc-price">¥2.00<span class="svc-price-unit">/件</span></div>
+                        </div>
+                        <div class="svc-remark">
+                            <div class="svc-remark-title">服务备注（选填）</div>
+                            <textarea class="svc-remark-input" placeholder="选填，可填写您对服务的要求" maxlength="100" oninput="updateRemarkCount(this)"></textarea>
+                            <div class="svc-remark-count">0/100</div>
+                        </div>
+                    </div>
+
+                    <!-- 去除吊牌（每单固定费用） -->
+                    <div class="svc-card" id="svc-a-4">
+                        <div class="svc-main" onclick="toggleSvc('svc-a-4')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">去除吊牌</div>
+                                <div class="svc-desc">去除商品吊牌、价格标签</div>
+                            </div>
+                            <div class="svc-price">¥2.00<span class="svc-price-unit">/单</span></div>
+                        </div>
+                        <div class="svc-remark">
+                            <div class="svc-remark-title">服务备注（选填）</div>
+                            <textarea class="svc-remark-input" placeholder="选填，可填写您对服务的要求" maxlength="100" oninput="updateRemarkCount(this)"></textarea>
+                            <div class="svc-remark-count">0/100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景B：代购下单选购 -->
+            <div class="page-body" id="version-b" style="display:none">
+                <div class="svc-section" id="anno-5" style="position:relative">
+                    <div class="anno-marker" data-id="5">5</div>
+                    <div class="svc-section-title">选择增值服务</div>
+
+                    <!-- 定制拍照（按照片数量） -->
+                    <div class="svc-card" id="svc-b-1">
+                        <div class="svc-main" onclick="toggleSvc('svc-b-1')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">定制拍照<span class="svc-detail-link visible" onclick="event.stopPropagation();openSvcDetail('定制拍照','¥1.00/张')">详情</span></div>
+                                <div class="svc-desc">定制拍照，每个订单免费2张。支持自定义拍照要求，如测量尺寸、拍摄商标细节等。超出免费张数后每张单独计费。</div>
+                            </div>
+                            <div class="svc-price">¥1.00<span class="svc-price-unit">/张</span></div>
+                        </div>
+                        <div class="photo-config">
+                            <div class="photo-config-header">
+                                <span class="photo-config-title">拍照需求（必填）</span>
+                            </div>
+                            <div class="photo-slots" id="slots-b-1">
+                                <div class="photo-slot">
+                                    <div class="photo-slot-body">
+                                        <textarea class="photo-slot-input" placeholder="选填，可填写您对商品的要求" rows="1" oninput="updateCount(this)"></textarea>
+                                        <div class="photo-slot-bottom">
+                                            <span class="photo-slot-common" onclick="openCommonReq(this)">≡ 常见要求</span>
+                                            <span class="photo-slot-count">0/100</span>
+                                        </div>
+                                    </div>
+                                    <div class="photo-slot-delete" onclick="removePhotoSlot(this)">🗑</div>
+                                </div>
+                            </div>
+                            <div class="photo-add-btn" onclick="addPhotoSlot('slots-b-1')">＋ 添加照片</div>
+                            <div class="photo-fee">
+                                <span>照片 <span class="photo-num">1</span> 张 × ¥1.00</span>
+                                <span class="photo-fee-amount">¥1.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 验货清点（按商品数量） -->
+                    <div class="svc-card" id="svc-b-2">
+                        <div class="svc-main" onclick="toggleSvc('svc-b-2')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">验货清点</div>
+                                <div class="svc-desc">订单商品验货清点服务</div>
+                            </div>
+                            <div class="svc-price">¥3.00<span class="svc-price-unit">/件</span></div>
+                        </div>
+                        <div class="svc-remark">
+                            <div class="svc-remark-title">服务备注（选填）</div>
+                            <textarea class="svc-remark-input" placeholder="选填，可填写您对服务的要求" maxlength="100" oninput="updateRemarkCount(this)"></textarea>
+                            <div class="svc-remark-count">0/100</div>
+                        </div>
+                    </div>
+
+                    <!-- 去除吊牌（每单固定费用） -->
+                    <div class="svc-card" id="svc-b-3">
+                        <div class="svc-main" onclick="toggleSvc('svc-b-3')">
+                            <div class="svc-check">✓</div>
+                            <div class="svc-info">
+                                <div class="svc-name">去除吊牌</div>
+                                <div class="svc-desc">去除商品吊牌、价格标签</div>
+                            </div>
+                            <div class="svc-price">¥2.00<span class="svc-price-unit">/单</span></div>
+                        </div>
+                        <div class="svc-remark">
+                            <div class="svc-remark-title">服务备注（选填）</div>
+                            <textarea class="svc-remark-input" placeholder="选填，可填写您对服务的要求" maxlength="100" oninput="updateRemarkCount(this)"></textarea>
+                            <div class="svc-remark-count">0/100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部结算栏 -->
+            <div class="bottom-bar" id="anno-6" style="position:relative">
+                <div class="anno-marker" data-id="6">6</div>
+                <div>
+                    <div style="font-size:12px;color:#999">已选 <span id="selected-count">0</span> 项</div>
+                    <div class="bottom-total">合计: <span class="bottom-total-num" id="total-price">¥0.00</span></div>
+                </div>
+                <button class="bottom-btn disabled" id="confirm-btn">确认购买</button>
+            </div>
+
+            <!-- 服务详情底部弹层 -->
+            <div class="svc-detail-overlay" id="svc-detail-overlay" onclick="if(event.target===this)closeSvcDetail()">
+                <div class="svc-detail-sheet">
+                    <div class="svc-detail-header">
+                        <span class="svc-detail-title" id="svc-detail-name"></span>
+                        <button class="svc-detail-close" onclick="closeSvcDetail()">×</button>
+                    </div>
+                    <div class="svc-detail-price" id="svc-detail-price"></div>
+                    <div class="svc-detail-body" id="svc-detail-body"></div>
+                </div>
+            </div>
+
+            <!-- 常见要求底部弹层 -->
+            <div class="common-overlay" id="common-overlay" onclick="if(event.target===this)closeCommonReq()">
+                <div class="common-sheet">
+                    <div class="common-item" onclick="selectCommonReq(this)">测量鞋子的长度</div>
+                    <div class="common-item" onclick="selectCommonReq(this)">商标细节</div>
+                    <div class="common-item" onclick="selectCommonReq(this)">测量裤子的长度</div>
+                    <div class="common-item" onclick="selectCommonReq(this)">测量裤子裤脚的宽度</div>
+                    <div class="common-item" onclick="selectCommonReq(this)">测量衣服的胸围</div>
+                    <div class="common-item" onclick="selectCommonReq(this)">测量衣服长度</div>
+                    <div class="common-cancel" onclick="closeCommonReq()">取消</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-purchase-svc-v3';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+let currentCommonTarget = null;
+
+const annotations = [
+    {
+        id: 1,
+        title: '购买增值服务页总说明',
+        summary: '用户为包裹或代购订单选购增值服务，支持三种计费类型，按照片数量的服务需配置拍照需求。',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '用户购买/选择增值服务的独立页面（APP/H5）。分两个场景：\n场景A「包裹加购」：从仓库包裹详情页进入，展示包裹信息卡，确认购买后跳转收银台。\n场景B「代购下单选购」：从确认订单页进入，无包裹信息，确认选择后返回下单页。\n\n服务按计费类型分三种展示形态：\n按商品数量/每单固定费用：勾选即选，费用固定，下方展开服务备注输入框（选填，限100字）。\n按照片数量：勾选后展开照片需求配置区，用户可添加照片并填写拍照要求（必填）。'
+        }
+    },
+    {
+        id: 2,
+        title: '包裹信息卡（场景A）',
+        summary: '展示当前包裹的基本信息，确认用户在为哪个包裹购买服务。',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '场景A专属，展示当前包裹的基本信息，帮助用户确认在为哪个包裹购买服务。场景B不展示此卡片。',
+            display: '展示：物流单号、所在仓库、重量、尺寸、入库状态标签。'
+        }
+    },
+    {
+        id: 3,
+        title: '可加购服务列表（场景A）',
+        summary: '展示当前购买节点下可购买的服务，点击卡片勾选/取消。',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示入库包裹服务节点下可购买的服务列表。不同计费类型的服务展示不同：按商品数量和每单固定费用的服务勾选即选，下方展开服务备注（选填）；按照片数量的服务勾选后展开照片需求配置区（必填）。',
+            display: '每项服务展示：勾选圆圈、服务名称、服务说明（最多2行截断）、价格（含单位后缀如/张、/件、/单）。「详情」链接仅在说明超过2行时展示。\n非拍照服务勾选后下方展开「服务备注（选填）」输入框，限100字。',
+            interaction: '点击卡片切换选中/取消。按照片数量的服务选中后自动展开照片配置区，取消选中后收起。非拍照服务选中后自动展开备注输入框。',
+            business: '服务列表及价格由租户后台配置，价格含单位后缀与计费类型对应。'
+        }
+    },
+    {
+        id: 4,
+        title: '照片需求配置区',
+        summary: '按照片数量计费的服务勾选后展开，用户可添加照片槽位并填写拍照要求。',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '当用户勾选按照片数量计费的服务时，在服务卡片下方展开照片需求配置区。用户可以为每张照片填写拍照要求，也可以从常见要求中快速选择。',
+            display: '每个照片槽位包含：要求文本输入框（限100字）、「常见要求」快捷选择入口、删除按钮。\n底部展示「+ 添加照片」按钮和费用计算（照片张数 × 单价 = 费用）。',
+            interaction: '点击「+ 添加照片」新增一个照片槽位。点击删除按钮移除对应槽位。点击「常见要求」弹出底部选项列表，选择后自动填入输入框。费用随照片数量实时更新。',
+            business: '照片数量决定服务费用。默认展示1个槽位。至少保留1个槽位，最后一个不可删除。不需要用户上传图片，用户只需描述拍照要求，由仓库人员按要求拍摄。\n拍照需求为必填项，确认购买/确认选择时校验是否已填写，未填写则提示并阻止提交。',
+            exception: '取消勾选服务时，已填写的拍照需求内容清空，配置区收起。'
+        }
+    },
+    {
+        id: 5,
+        title: '服务列表（场景B）',
+        summary: '代购下单场景的服务选择，展示增值采购服务节点下的服务。',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '场景B展示增值采购服务节点下的服务列表，针对代购下单的商品。交互逻辑与场景A一致，但不展示包裹信息卡。',
+            display: '与场景A相同，按照片数量的服务勾选后同样展开照片需求配置区。可展示「当月剩余免费照片数」等增值信息。',
+            business: '场景B的服务挂在商品维度，不同商品可选购不同的服务组合。确认选择后返回确认订单页。'
+        }
+    },
+    {
+        id: 6,
+        title: '底部结算栏',
+        summary: '展示已选服务数量和合计金额，按照片计费的服务按实际照片数计算。',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '底部固定结算栏，展示已选服务数量和合计金额。',
+            display: '已选数量：勾选的服务项数。合计金额：所有已选服务费用之和，按照片计费的按实际照片数量计算。',
+            interaction: '场景A：点击「确认购买」跳转收银台。场景B：点击「确认选择」返回确认订单页，服务费随订单一起支付。未选任何服务时按钮置灰不可点。\n点击确认时校验：按照片数量计费的服务，拍照需求为必填项，未填写则提示并阻止提交。非拍照服务的服务备注为选填，不校验。'
+        }
+    }
+];
+
+const DETAIL_LABELS = { feature: '功能说明', display: '字段/展示规则', interaction: '交互规则', business: '业务规则', state: '状态说明', exception: '异常/边界', copywriting: '文案规范' };
+
+function loadCustomAnnotations() { try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) customAnnotations = JSON.parse(saved); } catch(e) {} }
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list'); const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>`).join('');
+}
+function highlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if(m) m.classList.add('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if(i) i.classList.add('active'); }
+function unhighlightMarker(id) { const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if(m) m.classList.remove('highlight'); const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if(i) i.classList.remove('active'); }
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations(); const item = data.find(a => a.id === id); if (!item) return;
+    const target = document.querySelector(item.target); const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) { const t = target.offsetTop - 20; previewArea.scrollTo({ top: t, behavior: 'smooth' }); target.classList.remove('anno-flash'); void target.offsetWidth; target.classList.add('anno-flash'); setTimeout(() => target.classList.remove('anno-flash'), 1500); }
+}
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id); if (!item) return;
+    currentAnnotation = item; isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail; const rows = [];
+    ['feature','display','interaction','business','state','exception','copywriting'].forEach(key => { if (detail[key]) rows.push({ label: DETAIL_LABELS[key], value: detail[key], key }); });
+    const table = document.getElementById('detail-table');
+    if (isEditing) { table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td><textarea data-key="${r.key}">${r.value}</textarea></td></tr>`).join(''); }
+    else { table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join(''); }
+}
+function toggleEdit() { isEditing = !isEditing; renderDetailTable(currentAnnotation); document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex'; document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none'; }
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id); if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item; isEditing = false; renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex'; renderAnnotationList();
+    const btn = document.getElementById('save-btn'); const o = btn.textContent; btn.textContent = '已保存 ✓'; setTimeout(() => { btn.textContent = o; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置吗？')) return;
+    localStorage.removeItem(STORAGE_KEY); customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original; isEditing = false; renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex'; document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() { try { if (localStorage.getItem(PANEL_STATE_KEY) === '1') { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {} }
+function togglePanel() { const p = document.getElementById('annotation-panel'); const b = document.getElementById('panel-expand-btn'); const c = p.classList.toggle('collapsed'); b.classList.toggle('show', c); try { localStorage.setItem(PANEL_STATE_KEY, c ? '1' : '0'); } catch(e) {} }
+function openEditMode() {
+    const data = getActiveAnnotations(); let h = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => { h += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})"><div class="annotation-badge">${item.id}</div><div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div><div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div></div>
+        <div style="display:flex;gap:8px;flex-shrink:0;"><button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}</div></div>`; });
+    h += '</div>'; document.getElementById('manage-modal-body').innerHTML = h; document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations(); const item = data.find(a => a.id === id); if (!item || item.id === 1) return;
+    if (!confirm(`确定删除？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id); customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); renderAnnotationList(); openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = { id: newId, title: '新标注 ' + newId, summary: '点击编辑...', target: '#anno-' + newId, showMarker: true, type: 'area', detail: { feature: '请填写...' } };
+    customAnnotations.push(newItem); localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); renderAnnotationList(); closeManageModal();
+    currentAnnotation = newItem; isEditing = true; document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`; renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none'; document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none'; document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定删除？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id); customAnnotations.forEach((item, i) => { item.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations)); closeModal(); renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations(); const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, ''); a.download = `${title}_${date}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn'); const o = btn.textContent; btn.textContent = '导出成功 ✓'; setTimeout(() => { btn.textContent = o; }, 2000);
+}
+
+// ===== 业务交互 =====
+function switchVersion(idx) {
+    const btns = document.querySelectorAll('.version-btn');
+    btns.forEach(b => b.classList.remove('active'));
+    btns[idx].classList.add('active');
+    document.getElementById('version-a').style.display = idx === 0 ? 'block' : 'none';
+    document.getElementById('version-b').style.display = idx === 1 ? 'block' : 'none';
+    document.getElementById('page-title').textContent = idx === 0 ? '购买增值服务' : '选择增值服务';
+    document.getElementById('confirm-btn').textContent = idx === 0 ? '确认购买' : '确认选择';
+    updateTotal();
+}
+
+function toggleSvc(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('selected');
+    updateTotal();
+}
+
+function updateTotal() {
+    let count = 0, total = 0;
+    document.querySelectorAll('.svc-card.selected').forEach(card => {
+        if (card.offsetParent === null) return;
+        count++;
+        const priceEl = card.querySelector('.svc-price');
+        if (priceEl) {
+            const text = priceEl.textContent;
+            const match = text.match(/[\d.]+/);
+            if (match) {
+                const price = parseFloat(match[0]);
+                const slots = card.querySelectorAll('.photo-slot');
+                if (slots.length > 0 && card.querySelector('.photo-config')) {
+                    total += price * slots.length;
+                } else {
+                    total += price;
+                }
+            }
+        }
+    });
+    document.getElementById('selected-count').textContent = count;
+    document.getElementById('total-price').textContent = '¥' + total.toFixed(2);
+    const btn = document.getElementById('confirm-btn');
+    btn.classList.toggle('disabled', count === 0);
+}
+
+// 确认按钮校验
+document.getElementById('confirm-btn').addEventListener('click', function() {
+    if (this.classList.contains('disabled')) return;
+    // 校验按照片数量计费的服务：拍照需求必填
+    let valid = true;
+    let errorMsg = '';
+    document.querySelectorAll('.svc-card.selected').forEach(card => {
+        if (card.offsetParent === null) return;
+        const photoConfig = card.querySelector('.photo-config');
+        if (photoConfig) {
+            const slots = card.querySelectorAll('.photo-slot-input');
+            let hasEmpty = false;
+            slots.forEach(input => { if (!input.value.trim()) hasEmpty = true; });
+            if (hasEmpty) {
+                valid = false;
+                const svcName = card.querySelector('.svc-name').textContent.trim();
+                errorMsg = '「' + svcName + '」的拍照需求为必填项，请填写每张照片的要求';
+            }
+        }
+    });
+    if (!valid) { alert(errorMsg); return; }
+    // 校验通过
+    const isA = document.getElementById('version-a').style.display !== 'none';
+    alert(isA ? '跳转收银台（演示）' : '返回确认订单页（演示）');
+});
+
+function addPhotoSlot(containerId) {
+    const container = document.getElementById(containerId);
+    const slot = document.createElement('div');
+    slot.className = 'photo-slot';
+    slot.innerHTML = `
+        <div class="photo-slot-body">
+            <textarea class="photo-slot-input" placeholder="选填，可填写您对商品的要求" rows="1" oninput="updateCount(this)"></textarea>
+            <div class="photo-slot-bottom">
+                <span class="photo-slot-common" onclick="openCommonReq(this)">≡ 常见要求</span>
+                <span class="photo-slot-count">0/100</span>
+            </div>
+        </div>
+        <div class="photo-slot-delete" onclick="removePhotoSlot(this)">🗑</div>
+    `;
+    container.appendChild(slot);
+    updatePhotoFee(container);
+    updateTotal();
+}
+
+function removePhotoSlot(btn) {
+    const slot = btn.closest('.photo-slot');
+    const container = slot.parentElement;
+    if (container.children.length <= 1) { alert('至少保留一个照片槽位'); return; }
+    slot.remove();
+    updatePhotoFee(container);
+    updateTotal();
+}
+
+function updatePhotoFee(container) {
+    const config = container.closest('.photo-config');
+    if (!config) return;
+    const num = container.children.length;
+    const numEl = config.querySelector('.photo-num');
+    const feeEl = config.querySelector('.photo-fee-amount');
+    const card = container.closest('.svc-card');
+    const priceEl = card.querySelector('.svc-price');
+    if (priceEl) {
+        const match = priceEl.textContent.match(/[\d.]+/);
+        if (match) {
+            const price = parseFloat(match[0]);
+            if (feeEl) feeEl.textContent = '¥' + (price * num).toFixed(2);
+        }
+    }
+    if (numEl) numEl.textContent = num;
+}
+
+function updateRemarkCount(textarea) {
+    const countEl = textarea.parentElement.querySelector('.svc-remark-count');
+    if (countEl) countEl.textContent = textarea.value.length + '/100';
+}
+
+function updateCount(textarea) {
+    const countEl = textarea.closest('.photo-slot-body').querySelector('.photo-slot-count');
+    const len = textarea.value.length;
+    if (len > 100) { textarea.value = textarea.value.substring(0, 100); }
+    countEl.textContent = Math.min(len, 100) + '/100';
+}
+
+function openCommonReq(el) {
+    currentCommonTarget = el;
+    document.getElementById('common-overlay').classList.add('show');
+}
+function closeCommonReq() {
+    document.getElementById('common-overlay').classList.remove('show');
+    currentCommonTarget = null;
+}
+function selectCommonReq(el) {
+    if (currentCommonTarget) {
+        const textarea = currentCommonTarget.closest('.photo-slot-body').querySelector('.photo-slot-input');
+        textarea.value = el.textContent;
+        updateCount(textarea);
+    }
+    closeCommonReq();
+}
+
+function openSvcDetail(name, price) {
+    document.getElementById('svc-detail-name').textContent = name;
+    document.getElementById('svc-detail-price').textContent = price;
+    document.getElementById('svc-detail-body').textContent = '这里展示服务的完整说明内容，包含服务内容、注意事项、退费规则等详细信息。';
+    document.getElementById('svc-detail-overlay').classList.add('show');
+}
+function closeSvcDetail() {
+    document.getElementById('svc-detail-overlay').classList.remove('show');
+}
+
+// 检测服务说明是否超过2行
+function checkDescOverflow() {
+    document.querySelectorAll('.svc-card').forEach(card => {
+        const desc = card.querySelector('.svc-desc');
+        const link = card.querySelector('.svc-detail-link');
+        if (desc && link) {
+            if (desc.scrollHeight > desc.clientHeight) { link.classList.add('visible'); }
+            else { link.classList.remove('visible'); }
+        }
+    });
+}
+checkDescOverflow();
+
+loadCustomAnnotations(); renderAnnotationList(); initPanelState();
+</script>
+
+</body>
+</html>
