@@ -338,5 +338,83 @@
         ]
       }
     ]
+  },
+  {
+    "id": "value-added-service",
+    "name": "反向代购增值服务",
+    "desc": "代购订单增值服务全链路：平台服务与服务单管理、租户引用定价、用户购买与订单融合、服务合并推送集运",
+    "docs": [],
+    "groups": [
+      {
+        "title": "🏢 平台侧",
+        "pages": [
+          {
+            "name": "增值服务列表页",
+            "file": "docs/vas-service-list.html",
+            "icon": "📋"
+          },
+          {
+            "name": "服务单列表页",
+            "file": "docs/vas-order-list.html",
+            "icon": "📋"
+          },
+          {
+            "name": "服务单详情页",
+            "file": "docs/vas-order-detail.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "🏪 租户侧",
+        "pages": [
+          {
+            "name": "我的增值服务页",
+            "file": "docs/vas-tenant-services.html",
+            "icon": "📋"
+          },
+          {
+            "name": "服务单列表页",
+            "file": "docs/vas-tenant-order-list.html",
+            "icon": "📋"
+          },
+          {
+            "name": "服务单详情页",
+            "file": "docs/vas-tenant-order-detail.html",
+            "icon": "📋"
+          },
+          {
+            "name": "代购订单详情",
+            "file": "docs/vas-tenant-order-info.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "💻 PC用户端",
+        "pages": [
+          {
+            "name": "购买增值服务页",
+            "file": "docs/vas-purchase.html",
+            "icon": "📋"
+          },
+          {
+            "name": "确认订单（融合）",
+            "file": "docs/vas-checkout.html",
+            "icon": "📋"
+          },
+          {
+            "name": "订单详情（融合）",
+            "file": "docs/vas-user-order-detail.html",
+            "icon": "📋"
+          },
+          {
+            "name": "仓库详情（融合）",
+            "file": "docs/vas-warehouse-detail.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   }
 ]
