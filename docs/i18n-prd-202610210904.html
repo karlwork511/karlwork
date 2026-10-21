@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际化（多语言多币种）PRD - POKO文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
+.doc-header { background: #1a1a2e; padding: 10px 24px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.doc-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.doc-header .meta { font-size: 11px; color: rgba(255,255,255,0.4); }
+.doc-header .actions { display: flex; gap: 6px; margin-left: auto; }
+.btn { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; }
+.btn:hover { background: rgba(255,255,255,0.15); }
+.btn.primary { background: #3b82f6; border-color: #3b82f6; }
+.btn.green { background: #10b941; border-color: #10b941; }
+.btn.green:hover { background: #059669; }
+.doc-body { max-width: 900px; margin: 16px auto; padding: 0 24px; }
+.doc-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 50vh; }
+.doc-content[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.doc-content h2 { font-size: 18px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+.doc-content h3 { font-size: 15px; margin: 20px 0 8px 0; }
+.doc-content p { margin: 8px 0; color: #444; }
+.doc-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.doc-content th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e5e5e5; font-weight: 600; }
+.doc-content td { padding: 10px 12px; border: 1px solid #e5e5e5; }
+.doc-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+.doc-content .placeholder { color: #aaa; text-align: center; padding: 60px 20px; }
+.doc-content .placeholder .icon { font-size: 40px; margin-bottom: 12px; }
+.doc-content .placeholder .title { font-size: 16px; color: #888; }
+.doc-content .placeholder .hint { font-size: 13px; margin-top: 8px; }
+.doc-footer { text-align: center; padding: 24px; color: #aaa; font-size: 12px; }
+#toast { position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>国际化（多语言多币种）PRD</h1>
+        <span class="meta">POKO SaaS</span>
+        <div class="actions">
+            <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">
+            <button class="btn green" id="imgBtn" onclick="document.getElementById('imgInput').click()" style="display:none">🖼️ 插入图片</button>
+            <button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button>
+        </div>
+    </div>
+    <div class="doc-body">
+        <div class="doc-content" id="docContent"><h2>文档信息</h2>
+<table>
+<tr><th>文档版本</th><td>v1.5（2026-10-21）</td></tr>
+<tr><th>产品负责人</th><td>karl</td></tr>
+<tr><th>适用范围</th><td>用户端（APP / H5 / PC）+ 店长后台 + 通知系统</td></tr>
+<tr><th>前置条件</th><td>语种、币种、汇率范围已支持后台配置（已具备）</td></tr>
+<tr><th>完整 PRD</th><td>项目「增值服务需求」目录《PRD_国际化多语言多币种_v1.0.md》（文件名沿用 v1.0，内容版本 v1.5）</td></tr>
+</table>
+
+<h2>需求概述</h2>
+<p>用户<strong>初次打开</strong> APP / H5 / PC 端时，系统按「设备语言优先、归属地补充」自动判定最合适的界面语言与展示币种；判定结果持久化存储，之后按用户偏好展示，不再自动切换。界面语言与账号通知语言为两套独立数据。</p>
+
+<h2>核心规则</h2>
+
+<h3>1. 两套数据分离</h3>
+<table>
+<tr><th>数据</th><th>存储</th><th>用途</th><th>谁来改</th></tr>
+<tr><td>界面展示语言（含展示币种）</td><td>当前端本地记住</td><td>当前端的界面展示</td><td>初次自动判定；用户在端内手动切换</td></tr>
+<tr><td>通知语言</td><td>账号（用户表独立字段）</td><td>系统发送邮件、短信、站内信、推送时的模板语种</td><td>初始值取注册成功那一刻当前端生效语言（自动回填）；用户在个人信息中独立修改</td></tr>
+<tr><td>币种偏好</td><td>账号（用户表独立字段）</td><td>记录用户注册时的展示币种（初始化记录，不驱动界面展示）</td><td>初始值取注册成功那一刻当前端生效币种（自动回填）；之后用户在个人信息中修改</td></tr>
+</table>
+
+<h3>2. 初次自动判定链</h3>
+<p>设备语言精确匹配 → 主语言匹配（如 zh-HK → 繁体中文）→ IP 归属地目的国映射 → 全局默认。<strong>币种只看归属地，不看设备语言。</strong>判定只在端内无记忆时执行一次。</p>
+
+<h3>3. 两级兜底</h3>
+<p>国家级映射（目的国规则页逐国配置，正式推广的目的国必配）→ 全局默认（后台可配，推荐初值英语 + 美元）。任何情况下不允许出现无语言可展示的空态。</p>
+
+<h3>4. 注册时刻自动回填（v1.5 修订）</h3>
+<p>原「选择语言及币种」页确认不存在（PC 端亦无此设计）。<strong>注册成功那一刻</strong>，系统自动以当前端正在生效的语言/币种回填账号通知语言与币种偏好初始值；无确认页面、无额外交互；注册发生在哪一端就取哪一端当时的生效值。存量用户（功能上线前已注册）账号字段为空 → 通知按全局默认兜底，可在个人信息自行补录。</p>
+
+<h3>5. 单向同步边界</h3>
+<ul>
+<li>个人信息修改语言/币种 → 账号字段更新，<strong>且当前端展示同步切换</strong>（写端内记忆，立即生效）</li>
+<li>端内切换语言/币种 → 只写端内记忆，<strong>不回写</strong>账号字段</li>
+<li>登录/登出 → 不触发任何切换，也不读写任何语言字段</li>
+<li>同步仅限当前端，不做跨端同步</li>
+</ul>
+
+<h3>6. 通知语言取值</h3>
+<ul>
+<li>注册验证码 → 按当前操作界面的语言发送（账号尚未创建，无值可查）</li>
+<li>其余所有通知（登录/找回/换绑验证码、订单/物流/售后/营销等）→ 统一查账号通知语言</li>
+<li>账号通知语言为空 → 按全局默认语言发送，不允许因空值导致发送失败</li>
+</ul>
+
+<h2>功能清单</h2>
+<table>
+<tr><th>编号</th><th>功能</th><th>说明</th></tr>
+<tr><td>FR-01</td><td>用户端初次打开自动判定语种与币种</td><td>判定链四种顺序全覆盖，判定一次后记住</td></tr>
+<tr><td>FR-02</td><td>用户端语言/币种切换</td><td>立即生效并记住，不影响账号字段与其他端</td></tr>
+<tr><td>FR-03</td><td>个人信息-语言与币种管理</td><td>单向同步：保存后账号更新 + 当前端同步切换</td></tr>
+<tr><td>FR-04</td><td>通知发送语言确定（系统行为）</td><td>注册验证码用界面语言，其余查账号语言，空值用全局默认</td></tr>
+<tr><td>FR-05</td><td>管理后台-全局默认语种/币种配置</td><td>后台可配，推荐初值英语 + 美元（配置落点待定）</td></tr>
+<tr><td>FR-06</td><td>目的国规则页迭代</td><td>列表 + 弹窗新增默认语言/默认币种，必填，存量补录前按全局默认</td></tr>
+<tr><td>FR-07</td><td>注册时刻自动回填账号初始值（系统行为，无页面）</td><td>注册成功那一刻以当前端生效值回填，之后不再回写</td></tr>
+<tr><td>FR-08</td><td>会员详情页迭代</td><td>基础资料新增默认语言（只读，= 账号通知语言）</td></tr>
+</table>
+
+<h2>边界与不做</h2>
+<ul>
+<li>PRD 只约束业务要求，技术实现由开发自行设计</li>
+<li>多币种仅展示层按汇率换算，不做真实多币种结算</li>
+<li>不做初次打开提示条；不做跨端同步</li>
+</ul>
+
+<h2>版本记录</h2>
+<table>
+<tr><th>版本</th><th>日期</th><th>变更</th></tr>
+<tr><td>v1.0</td><td>2026-10-21</td><td>初稿：判定链、两套数据分离、登录不切换、两级兜底、通知取值规则全部确认</td></tr>
+<tr><td>v1.1</td><td>2026-10-21</td><td>曾衔接「选择语言及币种」页作为账号初始值来源（后于 v1.5 取消）</td></tr>
+<tr><td>v1.2</td><td>2026-10-21</td><td>个人信息修改改为单向同步：账号更新且当前端展示同步切换</td></tr>
+<tr><td>v1.3</td><td>2026-10-21</td><td>目的国规则页迭代确认，标注原型交付</td></tr>
+<tr><td>v1.4</td><td>2026-10-21</td><td>会员详情新增默认语言只读字段，新增 FR-08，标注原型交付</td></tr>
+<tr><td>v1.5</td><td>2026-10-21</td><td>选择页确认不存在：改为注册成功那一刻自动回填账号初始值，FR-07 改写为系统行为</td></tr>
+</table>
+
+        </div>
+    </div>
+    <div class="doc-footer">POKO 文档 · Powered by GitHub Pages</div>
+    <script>
+    var REPO = 'karlwork511/karlwork';
+    var FILE = 'docs/i18n-prd-202610210904.html';
+    var editing = false;
+
+    function toggleEdit() {
+        var c = document.getElementById('docContent');
+        var ph = document.getElementById('placeholder');
+        var eb = document.getElementById('editBtn');
+        var sb = document.getElementById('saveBtn');
+        var ib = document.getElementById('imgBtn');
+        if (!editing) {
+            if (ph) ph.remove();
+            c.contentEditable = 'true';
+            c.focus();
+            eb.textContent = '退出编辑';
+            sb.style.display = 'inline-block';
+            ib.style.display = 'inline-block';
+            editing = true;
+        } else {
+            c.contentEditable = 'false';
+            eb.textContent = '\u270f\ufe0f 编辑';
+            sb.style.display = 'none';
+            ib.style.display = 'none';
+            editing = false;
+        }
+    }
+
+    async function insertImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) === -1) ext = 'png';
+        var fn = 'img-' + Date.now() + '.' + ext;
+        showToast('正在上传图片...', '#3b82f6');
+        try {
+            var token = localStorage.getItem('github_token');
+            if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+            var base64 = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var path = 'images/' + fn;
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Upload ' + fn, content: base64 })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'Upload failed'); }
+            var data = await resp.json();
+            var imgUrl = data.content.download_url;
+            var docContent = document.getElementById('docContent');
+            var sel = window.getSelection();
+            if (sel.rangeCount > 0 && docContent.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                range.deleteContents();
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                docContent.appendChild(img);
+            }
+            showToast('\u2705 图片已插入', '#10b941');
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+        }
+        input.value = '';
+    }
+
+    async function savePage() {
+        var sb = document.getElementById('saveBtn');
+        var eb = document.getElementById('editBtn');
+        var ib = document.getElementById('imgBtn');
+        var token = localStorage.getItem('github_token');
+        if (!token) { token = prompt('请输入 GitHub Token（只会保存在你的浏览器）：'); if (!token) return; localStorage.setItem('github_token', token); }
+        document.getElementById('docContent').contentEditable = 'false';
+        eb.textContent = '\u270f\ufe0f 编辑';
+        sb.style.display = 'none';
+        ib.style.display = 'none';
+        sb.textContent = '\u23f3 保存中...';
+        editing = false;
+        var html = document.getElementById('docContent').innerHTML;
+        var page = buildPage(html);
+        try {
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                headers: { 'Authorization': 'token ' + token }
+            });
+            var data = await resp.json();
+            var sha = data.sha;
+            var encoded = btoa(unescape(encodeURIComponent(page)));
+            var putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'update', content: encoded, sha: sha })
+            });
+            if (!putResp.ok) { var e2 = await putResp.json(); throw new Error(e2.message); }
+            showToast('\u2705 已保存', '#10b981');
+            sb.textContent = '\ud83d\udcc1 保存';
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+            sb.textContent = '\ud83d\udcc1 保存';
+        }
+    }
+
+    function buildPage(c) {
+        return '<!DOCTYPE html><html><head><meta charset=UTF-8><title>doc</title></head><body>' + c + '</body></html>';
+    }
+
+    function showToast(m, c2) {
+        var t = document.getElementById('toast');
+        if (t) t.remove();
+        var d = document.createElement('div');
+        d.id = 'toast';
+        d.textContent = m;
+        d.style.background = c2;
+        document.body.appendChild(d);
+        setTimeout(function() { d.remove(); }, 3000);
+    }
+</script>
+</body>
+</html>
