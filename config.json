@@ -10,7 +10,18 @@
         "icon": "📄"
       }
     ],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "目的国规则（新增默认语言/币种）",
+            "file": "docs/i18n-country-rule.html",
+            "icon": "🏪"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "promotion-alliance",
