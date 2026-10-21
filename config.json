@@ -3,7 +3,13 @@
     "id": "internationalization",
     "name": "国际化（多语言多币种）",
     "desc": "用户端初次打开按设备语言+归属地自动判定语种与币种；含后台目的国规则、会员详情迭代标注原型",
-    "docs": [],
+    "docs": [
+      {
+        "name": "国际化PRD（多语言多币种）",
+        "file": "docs/i18n-prd-202610210904.html",
+        "icon": "📄"
+      }
+    ],
     "groups": []
   },
   {
