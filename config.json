@@ -20,6 +20,16 @@
             "icon": "📋"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "配置租户报价",
+            "file": "docs/tenant-quote-province-markup-v1.html",
+            "icon": "📋"
+          }
+        ]
       }
     ]
   },
