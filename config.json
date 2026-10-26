@@ -10,7 +10,18 @@
         "icon": "📄"
       }
     ],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "编辑物流线路",
+            "file": "docs/logistics-line-province-pricing-v1.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "internationalization",
