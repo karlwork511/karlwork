@@ -12,20 +12,20 @@
     ],
     "groups": [
       {
-        "title": "原型",
+        "title": "平台管理中心",
         "pages": [
           {
-            "name": "编辑物流线路",
+            "name": "编辑物流线路（省/州收费标准 · 选择省/州弹窗 · 报价试算）",
             "file": "docs/logistics-line-province-pricing-v1.html",
             "icon": "📋"
           }
         ]
       },
       {
-        "title": "原型",
+        "title": "店长后台",
         "pages": [
           {
-            "name": "配置租户报价",
+            "name": "配置租户报价（省/州价格组加价）",
             "file": "docs/tenant-quote-province-markup-v1.html",
             "icon": "📋"
           }
