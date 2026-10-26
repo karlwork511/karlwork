@@ -3,7 +3,13 @@
     "id": "logistics-province-pricing",
     "name": "物流线路省/州计费",
     "desc": "线路新增省/州级差异收费，平台配置价格组、租户加价引用、命中按组价未命中国家级兜底",
-    "docs": [],
+    "docs": [
+      {
+        "name": "需求说明",
+        "file": "docs/doc-202610260633.html",
+        "icon": "📄"
+      }
+    ],
     "groups": []
   },
   {
