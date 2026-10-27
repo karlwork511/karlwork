@@ -508,7 +508,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                                 </div>
                                 <div class="qc-actions" id="anno-3">
                                     <div class="anno-marker" data-id="3">3</div>
-                                    <button class="qc-action-btn" onclick="downloadPhotos()" title="下载全部质检照片">⬇</button>
+                                    <button class="qc-action-btn" onclick="downloadPhotos()" title="逐张下载全部质检照片">⬇</button>
                                     <button class="qc-action-btn" onclick="sharePhotos()" title="分享质检照片">🔗</button>
                                 </div>
                             </div>
@@ -623,7 +623,7 @@ const annotations = [
         showMarker: false,
         type: 'overview',
         detail: {
-            feature: '本页为PC端订单详情页，在原有商品信息区的基础上，为已入库商品增加「质检照片」模块。用户在商品完成入库质检后，可在此查看仓库实拍的质检照片，确认商品实物状态。配套提供全屏查看器（放大、左右切换）、照片打包下载和外部分享能力。本期范围不含质检异常（破损、少件、多件等）的标识与提示，异常场景后续单独迭代。'
+            feature: '本页为PC端订单详情页，在原有商品信息区的基础上，为已入库商品增加「质检照片」模块。用户在商品完成入库质检后，可在此查看仓库实拍的质检照片，确认商品实物状态。配套提供全屏查看器（放大、左右切换）、照片逐张下载（过程显示下载进度）和外部分享能力。本期范围不含质检异常（破损、少件、多件等）的标识与提示，异常场景后续单独迭代。'
         }
     },
     {
@@ -643,13 +643,13 @@ const annotations = [
     {
         id: 3,
         title: '下载与分享',
-        summary: '质检照片右侧操作入口：打包下载全部照片到本地、弹出分享面板（链接长期有效，可随时关闭）。',
+        summary: '质检照片右侧操作入口：逐张下载全部照片到本地（过程显示下载进度）、弹出分享面板（链接长期有效，可随时关闭）。',
         target: '#anno-3',
         showMarker: true,
         type: 'field',
         detail: {
             feature: '提供质检照片的导出能力。下载用于将照片保存到本地存档；分享用于把照片发给他人查看，适用于售后沟通、向亲友确认实物等场景，同时支撑后续「分享商品得奖励」的营销传播动作。',
-            interaction: '点击下载图标，将该商品的全部质检照片打包为一个压缩包直接下载；点击分享图标，弹出分享面板，支持复制链接及LINE、Facebook快捷分享。',
+            interaction: '点击下载图标，将该商品的全部质检照片逐张依次下载到本地，过程中toast提示当前下载进度（第几张/共几张），全部完成后提示下载完成；点击分享图标，弹出分享面板，支持复制链接及LINE、Facebook快捷分享。',
             business: '分享链接长期有效，以支撑后续营销传播场景；链接无需登录即可访问，落地页仅展示质检照片与质检时间，不包含订单信息和个人信息；链接预留分享归因参数，为后续营销奖励功能储备数据。',
             exception: '照片尚未回传或回传失败时，下载与分享图标置灰不可点击。'
         }
@@ -1001,14 +1001,37 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('anno-4').addEventListener('click', function(e) {
     if (e.target === this) closeLightbox();
 });
+let toastTimer = null;
 function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 2200);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2200);
 }
 function downloadPhotos() {
-    showToast('正在打包 5 张质检照片，即将开始下载压缩包');
+    // 逐张下载全部质检照片，过程显示下载进度
+    const total = QC_PHOTOS.length;
+    let i = 0;
+    showToast('开始下载第1张，共' + total + '张');
+    function step() {
+        const a = document.createElement('a');
+        a.href = QC_PHOTOS[i];
+        a.download = '质检照片_' + (i + 1) + '.jpg';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        i++;
+        if (i < total) {
+            setTimeout(function() {
+                showToast('开始下载第' + (i + 1) + '张，共' + total + '张');
+                step();
+            }, 900);
+        } else {
+            setTimeout(function() { showToast('全部' + total + '张质检照片下载完成'); }, 900);
+        }
+    }
+    setTimeout(step, 900);
 }
 function sharePhotos() {
     document.getElementById('share-pop').classList.add('show');
