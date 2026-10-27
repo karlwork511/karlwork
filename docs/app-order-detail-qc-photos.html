@@ -446,7 +446,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
                 <div class="qc-sheet" style="position:relative">
                     <div class="anno-marker" data-id="5">5</div>
                     <div class="qc-sheet-title">质检照片（共5张）</div>
-                    <button class="qc-sheet-btn" onclick="downloadAllQc()">下载图片</button>
+                    <button class="qc-sheet-btn" onclick="downloadCurrentQc()">下载当前照片</button>
                     <button class="qc-sheet-btn" onclick="shareQcLink()">分享链接</button>
                     <button class="qc-sheet-btn cancel" onclick="closeQcActions()">取消</button>
                 </div>
@@ -566,13 +566,13 @@ const annotations = [
     {
         id: 5,
         title: '质检照片操作菜单',
-        summary: '大图浏览时点击右上角省略号或长按图片弹出，提供下载图片与分享链接。',
+        summary: '大图浏览时点击右上角省略号或长按图片弹出，提供下载当前照片与分享链接。',
         target: '#anno-5',
         showMarker: true,
         type: 'interaction',
         detail: {
             feature: '底部弹起的操作菜单，承接质检照片的下载与分享能力，是APP端唯一的下载/分享入口。',
-            interaction: '点击「下载图片」，将全部质检照片打包为一个压缩包下载到本地；点击「分享链接」，复制质检照片分享落地页链接；点击「取消」或点击遮罩关闭菜单。',
+            interaction: '点击「下载当前照片」，将查看器当前展示的那一张照片下载到本地；点击「分享链接」，复制质检照片分享落地页链接；点击「取消」或点击遮罩关闭菜单。',
             business: '分享链接打开即质检照片分享落地页（移动端H5，免登录），链接长期有效；链接预留分享归因参数，为后续「分享得奖励」营销功能储备数据。',
             copywriting: '复制成功提示：「链接已复制，好友打开即可查看质检照片」。'
         }
@@ -954,9 +954,17 @@ function closeQcActions() {
 document.getElementById('anno-5').addEventListener('click', function(e) {
     if (e.target === this) closeQcActions();
 });
-function downloadAllQc() {
+function downloadCurrentQc() {
     closeQcActions();
-    showAppToast('正在打包下载全部质检照片（共' + QC_PHOTOS.length + '张）…');
+    // 下载查看器当前展示的那一张照片
+    const n = lbIndex + 1;
+    const a = document.createElement('a');
+    a.href = QC_PHOTOS[lbIndex];
+    a.download = '质检照片_' + n + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showAppToast('已开始下载第' + n + '张照片（共' + QC_PHOTOS.length + '张）');
 }
 function shareQcLink() {
     closeQcActions();
