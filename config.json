@@ -1,5 +1,64 @@
 [
   {
+    "id": "qc-photo-display",
+    "name": "入库质检照片展示",
+    "desc": "用户端（PC/APP）订单与仓库页面展示入库质检照片，支持打包下载与长期有效的分享链接；分享落地页免登录纯查看",
+    "docs": [
+      {
+        "name": "需求文档",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/UT4pdDO90oQb87xOuG9cRDdRnHh",
+        "icon": "📄"
+      }
+    ],
+    "groups": [
+      {
+        "title": "💻 PC用户端",
+        "pages": [
+          {
+            "name": "订单详情页（质检照片）",
+            "file": "docs/pc-order-detail-qc-photos.html",
+            "icon": "📋"
+          },
+          {
+            "name": "我的仓库页（质检照片）",
+            "file": "docs/pc-warehouse-qc-photos.html",
+            "icon": "📋"
+          }
+        ]
+      },
+      {
+        "title": "📱 APP用户端",
+        "pages": [
+          {
+            "name": "订单详情页（质检照片）",
+            "file": "docs/app-order-detail-qc-photos.html",
+            "icon": "📱"
+          },
+          {
+            "name": "仓库详情页（质检照片）",
+            "file": "docs/app-warehouse-detail-qc-photos.html",
+            "icon": "📱"
+          }
+        ]
+      },
+      {
+        "title": "🔗 分享落地页",
+        "pages": [
+          {
+            "name": "移动端H5",
+            "file": "docs/share-landing-qc-h5.html",
+            "icon": "🔗"
+          },
+          {
+            "name": "PC版",
+            "file": "docs/share-landing-qc-pc.html",
+            "icon": "🖥️"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "logistics-province-pricing",
     "name": "物流线路省/州计费",
     "desc": "线路新增省/州级差异收费，平台配置价格组、租户加价引用、命中按组价未命中国家级兜底",
