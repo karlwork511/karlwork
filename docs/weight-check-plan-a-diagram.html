@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代购系统 × 集运系统 核重补差对接说明图（方案一） v1.4</title>
+<style>
+  :root {
+    --dg: #00897B;          /* 代购系统 */
+    --dg-bg: #E0F5F2;
+    --jy: #E65100;          /* 集运系统 */
+    --jy-bg: #FFF1E3;
+    --user: #455A64;        /* 用户 */
+    --user-bg: #ECEFF1;
+    --ink: #1A2332;
+    --ink-2: #4A5568;
+    --ink-3: #8A94A6;
+    --line: #E4E7ED;
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --green: #2E7D32;
+    --green-bg: #E8F5E9;
+    --blue: #1565C0;
+    --blue-bg: #E3F2FD;
+    --red: #C62828;
+    --red-bg: #FFEBEE;
+    --radius: 14px;
+    --focus: #00897B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 32px) 40px; }
+
+  /* ===== 头部 ===== */
+  header { text-align: center; margin-bottom: 30px; }
+  .badge {
+    display: inline-block; padding: 4px 14px; border-radius: 999px;
+    background: var(--dg-bg); color: var(--dg);
+    font-size: 13px; font-weight: 600; letter-spacing: 1px; margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 700; letter-spacing: 0.5px; }
+  .subtitle { margin-top: 10px; font-size: 15px; color: var(--ink-2); max-width: 860px; margin-left: auto; margin-right: auto; }
+  .subtitle strong { color: var(--dg); }
+  .principle {
+    margin: 18px auto 0; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+  .principle span {
+    font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+  }
+  .principle span b { font-weight: 700; }
+  .principle .p-dg b { color: var(--dg); }
+  .principle .p-jy b { color: var(--jy); }
+  .principle .p-hl { background: var(--dg); border-color: var(--dg); color: #fff; }
+
+  /* ===== 页内导航 ===== */
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 34px;
+  }
+  nav.toc a {
+    font-size: 13px; color: var(--ink-2); text-decoration: none;
+    padding: 6px 13px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+  }
+  nav.toc a:hover { color: var(--dg); border-color: var(--dg); }
+  nav.toc a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  section { margin-bottom: 34px; }
+  .sec-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; margin-bottom: 14px;
+  }
+  .sec-title .no {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--ink);
+    color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ===== 职责对比 ===== */
+  .duo { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+  .duo-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px;
+  }
+  .duo-card.dg { border-top: 4px solid var(--dg); }
+  .duo-card.jy { border-top: 4px solid var(--jy); }
+  .duo-card h3 { font-size: 16px; margin-bottom: 2px; }
+  .duo-card.dg h3 { color: var(--dg); }
+  .duo-card.jy h3 { color: var(--jy); }
+  .duo-card .role { font-size: 13px; color: var(--ink-3); margin-bottom: 10px; }
+  .duo-card ul { list-style: none; }
+  .duo-card li {
+    font-size: 13.5px; color: var(--ink-2); padding: 7px 0 7px 18px; position: relative;
+    border-top: 1px dashed var(--line);
+  }
+  .duo-card li::before { content: "•"; position: absolute; left: 2px; font-weight: 700; }
+  .duo-card.dg li::before { color: var(--dg); }
+  .duo-card.jy li::before { color: var(--jy); }
+  .vs {
+    align-self: center; width: 46px; height: 46px; border-radius: 50%;
+    background: var(--ink); color: #fff; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; letter-spacing: 1px;
+  }
+
+  /* ===== 时序图 ===== */
+  .fig-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 18px 10px;
+  }
+  .svg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .svg-scroll svg { display: block; min-width: 960px; width: 100%; height: auto; }
+  .fig-cap { font-size: 12.5px; color: var(--ink-3); padding: 10px 6px 8px; }
+  .fig-cap b { color: var(--ink-2); }
+
+  /* ===== 场景分支 ===== */
+  .branch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .branch-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 18px 16px; display: flex; flex-direction: column;
+  }
+  .branch-card.a { border-top: 4px solid var(--green); }
+  .branch-card.b { border-top: 4px solid var(--blue); }
+  .branch-card.c { border-top: 4px solid var(--red); }
+  .branch-card h3 { font-size: 15px; margin-bottom: 2px; }
+  .branch-card.a h3 { color: var(--green); }
+  .branch-card.b h3 { color: var(--blue); }
+  .branch-card.c h3 { color: var(--red); }
+  .branch-card .cond { font-size: 12.5px; color: var(--ink-3); margin-bottom: 12px; }
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .stp {
+    position: relative; font-size: 13px; color: var(--ink-2);
+    padding: 7px 0 7px 26px; line-height: 1.5;
+  }
+  .stp::before {
+    content: ""; position: absolute; left: 8px; top: 14px; width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor;
+  }
+  .stp:not(:last-child)::after {
+    content: ""; position: absolute; left: 11px; top: 22px; bottom: -6px; width: 1.5px;
+    background: var(--line);
+  }
+  .branch-card.a .stp::before { background: var(--green); }
+  .branch-card.b .stp::before { background: var(--blue); }
+  .branch-card.c .stp::before { background: var(--red); }
+  .stp b { color: var(--ink); font-weight: 600; }
+  .stp .tag {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 4px;
+    margin-right: 4px; vertical-align: 1px;
+  }
+  .tag.io { background: var(--jy-bg); color: var(--jy); }
+  .tag.oi { background: var(--dg-bg); color: var(--dg); }
+  .tag.user-tag { background: var(--user-bg); color: var(--user); }
+  .branch-note {
+    margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  .sub-branches { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .sub {
+    font-size: 12px; padding: 7px 10px; border-radius: 8px; line-height: 1.5;
+  }
+  .sub b { font-weight: 700; }
+  .sub.gray { background: var(--bg); color: var(--ink-2); }
+  .sub.red { background: var(--red-bg); color: var(--red); }
+
+  /* ===== 接口表格 ===== */
+  .tbl-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  }
+  .tbl-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 860px; }
+  caption { text-align: left; font-size: 13px; color: var(--ink-3); padding: 14px 18px 0; }
+  th, td { text-align: left; padding: 11px 14px; font-size: 13px; vertical-align: top; }
+  thead th {
+    background: var(--bg); color: var(--ink); font-weight: 700; font-size: 12.5px;
+    border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  tbody td { border-bottom: 1px solid var(--line); color: var(--ink-2); line-height: 1.55; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .dir {
+    display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .dir.oi { background: var(--dg-bg); color: var(--dg); }
+  .dir.io { background: var(--jy-bg); color: var(--jy); }
+  td .api-name { font-weight: 700; color: var(--ink); display: block; margin-bottom: 2px; }
+  .api-no {
+    display: inline-flex; width: 22px; height: 22px; border-radius: 6px; background: var(--ink); color: #fff;
+    font-size: 12px; font-weight: 700; align-items: center; justify-content: center;
+  }
+  td.key-cell b { color: var(--ink); }
+  .st { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+  .st.exist { background: var(--green-bg); color: var(--green); }
+  .st.new { background: var(--dg-bg); color: var(--dg); }
+  .st.sug { background: var(--blue-bg); color: var(--blue); }
+
+  /* 方案对比表 */
+  th.hl, td.hl { background: var(--dg-bg); }
+  th.hl { color: var(--dg); }
+  td.dim { font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+  /* ===== 建议卡片 ===== */
+  .alert-card {
+    background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--green);
+    border-radius: var(--radius); padding: 20px 22px;
+  }
+  .alert-card h3 { font-size: 15px; color: var(--green); margin-bottom: 6px; }
+  .alert-card > p { font-size: 13.5px; color: var(--ink-2); margin-bottom: 14px; }
+  .alert-card > p b { color: var(--ink); }
+  .mini-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .mini-flow .m {
+    font-size: 12.5px; font-weight: 600; padding: 8px 13px; border-radius: 9px;
+    background: var(--bg); border: 1px solid var(--line); color: var(--ink-2);
+  }
+  .mini-flow .m.hot { background: var(--red-bg); border-color: #F2B8BC; color: var(--red); }
+  .mini-flow .m.ok { background: var(--green-bg); border-color: #A5D6A7; color: var(--green); }
+  .mini-flow .arr { color: var(--ink-3); font-weight: 700; }
+  .alert-foot { margin-top: 12px; font-size: 12.5px; color: var(--ink-3); }
+  .alert-foot b { color: var(--ink-2); }
+
+  /* ===== 资金联动 ===== */
+  .money-note { font-size: 12.5px; color: var(--ink-3); padding: 12px 18px 14px; }
+
+  /* ===== 换线兜底 ===== */
+  .rescue-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px;
+  }
+  .rescue-card .why {
+    font-size: 13px; color: var(--ink-2); background: var(--bg); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 16px;
+  }
+  .rescue-card .why b { color: var(--ink); }
+  .rescue-steps { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+  .rstep {
+    flex: 1 1 150px; min-width: 150px; position: relative;
+    background: var(--bg); border-radius: 10px; padding: 12px 14px; margin: 4px 22px 4px 0;
+  }
+  .rstep:last-child { margin-right: 0; }
+  .rstep:not(:last-child)::after {
+    content: "→"; position: absolute; right: -19px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-3); font-size: 16px; font-weight: 700;
+  }
+  .rstep .who { font-size: 11px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.5px; }
+  .rstep .who.jy { color: var(--jy); }
+  .rstep .who.dg { color: var(--dg); }
+  .rstep .who.us { color: var(--user); }
+  .rstep .t { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .rstep .d { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .rescue-note { margin-top: 14px; font-size: 12.5px; color: var(--ink-3); }
+  .rescue-note b { color: var(--ink-2); }
+
+  footer {
+    text-align: center; font-size: 12.5px; color: var(--ink-3);
+    padding-top: 22px; border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 900px) {
+    .duo { grid-template-columns: 1fr; }
+    .vs { margin: 0 auto; }
+    .branch { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    nav.toc { display: none; }
+    .fig-card, .branch-card, .tbl-card, .alert-card, .rescue-card, .duo-card { break-inside: avoid; }
+    .svg-scroll { overflow-x: visible; }
+    .svg-scroll svg { min-width: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="badge">方案一 · 对接说明图 · v1.4</span>
+    <h1>代购系统 × 集运系统 核重补差对接说明（方案一）</h1>
+    <p class="subtitle">用户支付预估运费后，仓库打包<strong>核重</strong>，代购系统<strong>重算运费、多退少补</strong>，需补款时<strong>指令拦截发货</strong>，建议发货前<strong>拦截确认</strong>收口</p>
+    <div class="principle">
+      <span class="p-hl"><b>指令拦截</b> + 发货前确认</span>
+      <span class="p-dg"><b>判定与资金</b> 在代购系统</span>
+      <span class="p-jy"><b>仓内执行</b> 在集运系统</span>
+      <span><b>集运系统</b> 不做费用判断，只执行指令</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="页内导航">
+    <a href="#sec-role">职责分工</a>
+    <a href="#sec-seq">交互时序图</a>
+    <a href="#sec-branch">三种判定结果</a>
+    <a href="#sec-api">接口清单</a>
+    <a href="#sec-fail">发货前确认建议</a>
+    <a href="#sec-money">资金联动</a>
+    <a href="#sec-rescue">拒补换线兜底</a>
+    <a href="#sec-vs">方案一 vs 方案二</a>
+  </nav>
+
+  <main>
+
+  <!-- 1. 职责分工 -->
+  <section id="sec-role" aria-labelledby="t-role">
+    <h2 class="sec-title" id="t-role"><span class="no">1</span>两系统职责分工</h2>
+    <div class="duo">
+      <div class="duo-card dg">
+        <h3>代购系统</h3>
+        <p class="role">大脑：算钱、判定、收钱退钱、发指令</p>
+        <ul>
+          <li>下单时收取用户<b>预估运费</b></li>
+          <li>接收实际重量/体积，<b>重算运费</b></li>
+          <li>按续重单位<b>判定</b>：放行 / 多退 / 少补拦截</li>
+          <li>退款：差额退用户余额，<b>租户基准成本联动退回</b></li>
+          <li>补款：生成补款单、通知用户、确认到账</li>
+          <li>下发指令：拦截 / 放行 / 取消拦截</li>
+          <li>应答<b>发货前拦截确认</b>（可发货 / 拦截中）</li>
+        </ul>
+      </div>
+      <div class="vs" aria-hidden="true">对接</div>
+      <div class="duo-card jy">
+        <h3>集运系统（仓库 / WMS）</h3>
+        <p class="role">手脚：打包、称重、拦包裹、回传状态</p>
+        <ul>
+          <li>拣货、打包、<b>核重测量</b>（实际重量/体积）</li>
+          <li>打包完成后<b>实时回传核重结果</b>（现有能力）</li>
+          <li>执行拦截：被拦截包裹<b>仓内禁止出库</b>（新增）</li>
+          <li>执行取消拦截，恢复正常发货（新增）</li>
+          <li>发货后<b>及时通知代购系统</b>（已发货 · 现有能力）</li>
+          <li>建议：<b>发货前拦截确认</b>，确认可发货才交接物流</li>
+          <li>换线兜底：重赋快递单号、无主件识别入库</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 交互时序图 -->
+  <section id="sec-seq" aria-labelledby="t-seq">
+    <h2 class="sec-title" id="t-seq"><span class="no">2</span>核心交互时序（主干流程）</h2>
+    <figure class="fig-card">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1160 570" role="img" aria-labelledby="seq-title seq-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="seq-title">代购系统与集运系统核重补差交互时序图（方案一：指令拦截）</title>
+        <desc id="seq-desc">用户提交包裹并支付预估运费后，代购系统下发打包任务；集运系统拣货打包核重后回传实际重量体积；代购系统重算运费并判定：无差额或多退则放行，少补则拦截并通知用户补款；建议所有包裹出库发货前发起发货前拦截确认。</desc>
+        <defs>
+          <marker id="ar-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#455A64"></path>
+          </marker>
+          <marker id="ar-dg" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#00897B"></path>
+          </marker>
+          <marker id="ar-jy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#E65100"></path>
+          </marker>
+          <marker id="ar-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#2E7D32"></path>
+          </marker>
+          <marker id="ar-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#1565C0"></path>
+          </marker>
+          <marker id="ar-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#C62828"></path>
+          </marker>
+        </defs>
+
+        <!-- 泳道头 -->
+        <rect x="40" y="14" width="180" height="48" rx="10" fill="#ECEFF1" stroke="#90A4AE"></rect>
+        <text x="130" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#37474F">用户</text>
+        <text x="130" y="52" text-anchor="middle" font-size="10.5" fill="#78909C">提交 / 支付 / 补款</text>
+
+        <rect x="440" y="14" width="280" height="48" rx="10" fill="#E0F5F2" stroke="#00897B" stroke-width="1.5"></rect>
+        <text x="580" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#00695C">代购系统</text>
+        <text x="580" y="52" text-anchor="middle" font-size="10.5" fill="#4DB6AC">重算 · 判定 · 资金 · 指令</text>
+
+        <rect x="880" y="14" width="250" height="48" rx="10" fill="#FFF1E3" stroke="#E65100" stroke-width="1.5"></rect>
+        <text x="1005" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#D84315">集运系统（仓库/WMS）</text>
+        <text x="1005" y="52" text-anchor="middle" font-size="10.5" fill="#FF8A65">打包 · 核重 · 执行拦截</text>
+
+        <!-- 生命线 -->
+        <line x1="130" y1="66" x2="130" y2="540" stroke="#B0BEC5" stroke-width="1.5" stroke-dasharray="4 4"></line>
+        <line x1="580" y1="66" x2="580" y2="540" stroke="#80CBC4" stroke-width="1.5" stroke-dasharray="4 4"></line>
+        <line x1="1005" y1="66" x2="1005" y2="540" stroke="#FFCC80" stroke-width="1.5" stroke-dasharray="4 4"></line>
+
+        <!-- 1 支付 -->
+        <line x1="138" y1="110" x2="572" y2="110" stroke="#455A64" stroke-width="1.8" marker-end="url(#ar-gray)"></line>
+        <text x="355" y="100" text-anchor="middle" font-size="12.5" fill="#37474F">提交包裹，支付<tspan font-weight="700">预估运费</tspan></text>
+
+        <!-- 2 打包任务下发 -->
+        <line x1="588" y1="162" x2="997" y2="162" stroke="#00897B" stroke-width="1.8" marker-end="url(#ar-dg)"></line>
+        <text x="792" y="152" text-anchor="middle" font-size="12.5" fill="#00695C">打包任务下发<tspan font-size="11" fill="#4DB6AC">（支付成功后 · 已有能力）</tspan></text>
+
+        <!-- 3 仓内处理 -->
+        <rect x="918" y="188" width="174" height="66" rx="9" fill="#FFF8F0" stroke="#E65100" stroke-width="1.5"></rect>
+        <text x="1005" y="212" text-anchor="middle" font-size="12.5" font-weight="700" fill="#D84315">拣货 → 打包 → 核重</text>
+        <text x="1005" y="231" text-anchor="middle" font-size="11" fill="#EF6C00">产生实际重量 / 体积</text>
+
+        <!-- 4 核重回传 -->
+        <line x1="997" y1="288" x2="588" y2="288" stroke="#E65100" stroke-width="1.8" marker-end="url(#ar-jy)"></line>
+        <text x="792" y="278" text-anchor="middle" font-size="12.5" font-weight="700" fill="#D84315">① 核重结果回传：实际重量 / 体积 <tspan font-size="11" font-weight="400" fill="#8A94A6">（现有）</tspan></text>
+
+        <!-- 5 判定 -->
+        <rect x="446" y="318" width="268" height="78" rx="10" fill="#E0F5F2" stroke="#00897B" stroke-width="1.8"></rect>
+        <text x="580" y="347" text-anchor="middle" font-size="13" font-weight="700" fill="#00695C">运费重算 + 差额判定</text>
+        <text x="580" y="366" text-anchor="middle" font-size="11" fill="#00796B">按续重单位：增量不足一档，不补款</text>
+        <text x="580" y="383" text-anchor="middle" font-size="11" fill="#00796B">需补款时金额 ≥ 一个续重档位价</text>
+
+        <!-- 分支连接线 -->
+        <line x1="580" y1="396" x2="580" y2="424" stroke="#8A94A6" stroke-width="1.5"></line>
+        <line x1="300" y1="424" x2="860" y2="424" stroke="#8A94A6" stroke-width="1.5"></line>
+        <line x1="300" y1="424" x2="300" y2="440" stroke="#2E7D32" stroke-width="1.5" marker-end="url(#ar-green)"></line>
+        <line x1="580" y1="424" x2="580" y2="440" stroke="#1565C0" stroke-width="1.5" marker-end="url(#ar-blue)"></line>
+        <line x1="860" y1="424" x2="860" y2="440" stroke="#C62828" stroke-width="1.5" marker-end="url(#ar-red)"></line>
+
+        <!-- 分支框 -->
+        <rect x="200" y="446" width="200" height="58" rx="9" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.5"></rect>
+        <text x="300" y="470" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1B5E20">A · 无需补差</text>
+        <text x="300" y="489" text-anchor="middle" font-size="11" fill="#388E3C">无差额 / 增量不足一档</text>
+
+        <rect x="480" y="446" width="200" height="58" rx="9" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"></rect>
+        <text x="580" y="470" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0D47A1">B · 多退</text>
+        <text x="580" y="489" text-anchor="middle" font-size="11" fill="#1976D2">差额退用户余额</text>
+
+        <rect x="760" y="446" width="200" height="58" rx="9" fill="#FFEBEE" stroke="#C62828" stroke-width="1.5"></rect>
+        <text x="860" y="470" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B71C1C">C · 少补</text>
+        <text x="860" y="489" text-anchor="middle" font-size="11" fill="#E53935">拦截包裹 + 通知补款</text>
+
+        <!-- 发货前确认条带 -->
+        <rect x="180" y="518" width="800" height="32" rx="9" fill="#F4F6F8" stroke="#90A4AE" stroke-width="1" stroke-dasharray="4 3"></rect>
+        <text x="580" y="534" text-anchor="middle" font-size="11.5" fill="#4A5568">发货前最后关口（全场景通用 · 建议新增）：⑤ 集运系统向代购系统发起「发货前拦截确认」→ 返回<tspan font-weight="700">可发货</tspan>才交接物流出库</text>
+      </svg>
+      </div>
+      <figcaption class="fig-cap"><b>读图：</b>箭头方向代表系统间调用方向；①~⑤ 为接口编号，与第 4 节接口清单对应；判定在代购系统内部完成，集运系统只接收处理结果指令并执行。</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3. 三种判定结果 -->
+  <section id="sec-branch" aria-labelledby="t-branch">
+    <h2 class="sec-title" id="t-branch"><span class="no">3</span>三种判定结果 · 后续指令交互</h2>
+    <div class="branch">
+      <div class="branch-card a">
+        <h3>A · 无需补差</h3>
+        <p class="cond">无差额，或实际重量增量不足一个续重单位</p>
+        <div class="steps">
+          <div class="stp">代购系统判定：计费结果不变，<b>不触发补款</b>（补款状态：无需补款）</div>
+          <div class="stp"><span class="tag oi">代购→集运</span><b>② 处理结果指令：放行</b></div>
+          <div class="stp"><span class="tag io">集运</span>正常流转，发货</div>
+        </div>
+        <p class="branch-note">用户全程无感知。</p>
+      </div>
+
+      <div class="branch-card b">
+        <h3>B · 多退</h3>
+        <p class="cond">实际运费 ＜ 已收预估运费</p>
+        <div class="steps">
+          <div class="stp">代购系统判定多退，<b>差额退至用户余额</b>（补款状态：无需补款）</div>
+          <div class="stp">资金联动：<b>租户运费基准成本按差额同步退回</b></div>
+          <div class="stp"><span class="tag oi">代购→集运</span><b>② 处理结果指令：放行</b></div>
+          <div class="stp"><span class="tag io">集运</span>正常流转，发货</div>
+        </div>
+        <p class="branch-note">用户收到退款到账通知，无需任何操作。</p>
+      </div>
+
+      <div class="branch-card c">
+        <h3>C · 少补（拦截）</h3>
+        <p class="cond">增量 ≥ 1 个续重单位，实际运费 ＞ 已收运费</p>
+        <div class="steps">
+          <div class="stp">生成补款单（金额 = 超出档数 × 续重价）</div>
+          <div class="stp"><span class="tag oi">代购→集运</span><b>② 处理结果指令：拦截</b>（先拦截，再通知）</div>
+          <div class="stp"><span class="tag io">集运</span>包裹留置暂停发货；提包单保持「待发货 + 待补款」</div>
+          <div class="stp"><span class="tag user-tag">用户</span>收到补款通知，完成补款</div>
+          <div class="stp">确认到账，补款状态→<b>已补款</b>，<b>补扣租户基准成本差额</b></div>
+          <div class="stp"><span class="tag oi">代购→集运</span><b>③ 取消拦截指令</b></div>
+          <div class="stp"><span class="tag io">集运</span>解除拦截，恢复发货</div>
+        </div>
+        <div class="sub-branches">
+          <p class="sub gray"><b>C2 长期不补：</b>无有效期、不自动取消，客服线下联系</p>
+          <p class="sub gray"><b>C3 拒补换线：</b>走人工兜底流程（见第 7 节）</p>
+          <p class="sub red"><b>C4 误发兜底：</b>待补款包裹被误发（已发货+待补款）→ 代购内部人工追偿，无需集运配合</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 接口清单 -->
+  <section id="sec-api" aria-labelledby="t-api">
+    <h2 class="sec-title" id="t-api"><span class="no">4</span>两系统接口清单（调用场景）</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>技术形式（API / 消息等）由两系统技术对接时确定；打包任务下发为已有能力，不重复列出。①④ 为现有能力直接复用；集运侧新增开发仅 ②③，⑤ 为建议新增。</caption>
+        <thead>
+          <tr>
+            <th scope="col">编号</th>
+            <th scope="col">接口</th>
+            <th scope="col">方向</th>
+            <th scope="col">调用时机</th>
+            <th scope="col">关键数据</th>
+            <th scope="col">结果识别</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="api-no">①</span></td>
+            <td><span class="api-name">核重结果回传</span><span class="st exist">现有 · 复用</span></td>
+            <td><span class="dir io">集运 → 代购</span></td>
+            <td class="key-cell">打包、核重测量完成后<b>实时回传</b></td>
+            <td>提包单号、包裹编号、实际重量、实际体积（长宽高）、核重时间</td>
+            <td>代购应答接收成功/失败，失败重推；二次核重以<b>最新一次</b>为准</td>
+          </tr>
+          <tr>
+            <td><span class="api-no">②</span></td>
+            <td><span class="api-name">处理结果指令</span><span class="st new">新增 · 必须</span></td>
+            <td><span class="dir oi">代购 → 集运</span></td>
+            <td class="key-cell">运费重算与差额判定完成后<b>实时下发</b></td>
+            <td>放行；或拦截：提包单号、补款单号、补款金额、拦截原因（待补运费）</td>
+            <td>集运<b>不单独应答执行结果</b></td>
+          </tr>
+          <tr>
+            <td><span class="api-no">③</span></td>
+            <td><span class="api-name">取消拦截指令</span><span class="st new">新增 · 必须</span></td>
+            <td><span class="dir oi">代购 → 集运</span></td>
+            <td class="key-cell">用户补款<b>到账确认后实时下发</b></td>
+            <td>提包单号、补款单号、补款金额、到账时间</td>
+            <td>解除拦截后包裹恢复正常发货流转</td>
+          </tr>
+          <tr>
+            <td><span class="api-no">④</span></td>
+            <td><span class="api-name">提包单状态通知</span><span class="st exist">现有 · 复用</span></td>
+            <td><span class="dir io">集运 → 代购</span></td>
+            <td class="key-cell">提包单状态变更时通知；<b>「已发货」必须通知</b>，其余状态按需</td>
+            <td>提包单号、变更后状态、变更时间</td>
+            <td>代购同步提包状态；支持主动查询补偿、定期对账</td>
+          </tr>
+          <tr>
+            <td><span class="api-no">⑤</span></td>
+            <td><span class="api-name">发货前拦截确认</span><span class="st sug">建议新增</span></td>
+            <td><span class="dir io">集运 → 代购</span></td>
+            <td class="key-cell">包裹<b>出库发货前</b>（交接物流前最后关口）发起确认</td>
+            <td>提包单号</td>
+            <td>代购返回<b>可发货 / 不可发货（拦截中·待补款）</b>；不可发货则禁止出库</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="money-note">统一要求：指令带唯一编号、可追踪可重发；同一指令重复下发幂等处理；以集运系统回传状态为准，定期对账保证两侧状态一致。</p>
+    </div>
+  </section>
+
+  <!-- 5. 发货前拦截确认 -->
+  <section id="sec-fail" aria-labelledby="t-fail">
+    <h2 class="sec-title" id="t-fail"><span class="no">5</span>发货前拦截确认（核心建议）</h2>
+    <div class="alert-card">
+      <h3>出库前最后关口确认，彻底避免待补款包裹误发</h3>
+      <p>拦截指令是异步下发的，仅靠指令存在时间窗口（核重回传 → 代购判定 → 拦截指令到达期间，包裹可能已流转发货）。建议集运系统在包裹<b>出库发货前向代购系统发起确认（接口⑤）</b>，返回「拦截中（待补款）」则禁止出库——拦截生效点收敛到出库前最后一刻。</p>
+      <div class="mini-flow">
+        <span class="m">包裹出库发货前</span>
+        <span class="arr">→</span>
+        <span class="m">⑤ 集运 → 代购：确认是否可发货</span>
+        <span class="arr">→</span>
+        <span class="m ok">可发货 → 交接物流</span>
+        <span class="m hot">拦截中（待补款）→ 禁止出库</span>
+      </div>
+      <p class="alert-foot"><b>实现形式由集运自行决定</b>：实时确认（推荐），或本地拦截标识发货前强制校验。接口超时/失败时建议默认不放行或有限重试后转人工确认，避免「确认失败=放行」的漏洞。若仍发生误发（已发货 + 待补款），由代购系统内部走人工追偿，无需集运配合。</p>
+    </div>
+  </section>
+
+  <!-- 6. 资金联动 -->
+  <section id="sec-money" aria-labelledby="t-money">
+    <h2 class="sec-title" id="t-money"><span class="no">6</span>资金联动规则</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>用户侧与租户侧（运费基准成本）的资金对应关系；本链路不涉及技术服务费。资金处理为代购系统内部逻辑，供参考。</caption>
+        <thead>
+          <tr>
+            <th scope="col">场景</th>
+            <th scope="col">用户侧</th>
+            <th scope="col">租户侧（运费基准成本）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="key-cell"><b>下单支付</b></td>
+            <td>收取预估运费</td>
+            <td>按预估运费扣除租户运费基准成本</td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>多退</b></td>
+            <td>差额退至用户余额</td>
+            <td>已扣基准成本按差额<b>退回租户</b></td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>少补</b></td>
+            <td>用户支付补款</td>
+            <td>补款到账后，基准成本差额<b>补扣租户</b></td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>拒补换线（人工关闭）</b></td>
+            <td>已付预估运费<b>全额退至余额</b></td>
+            <td>已扣基准成本<b>全额退回租户</b></td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>拦截失败已发货</b></td>
+            <td>补款单保留，人工追款</td>
+            <td>追回后按少补规则入账，补扣基准成本差额</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 拒补换线兜底 -->
+  <section id="sec-rescue" aria-labelledby="t-rescue">
+    <h2 class="sec-title" id="t-rescue"><span class="no">7</span>特殊场景：用户拒补换线路（人工兜底）</h2>
+    <div class="rescue-card">
+      <p class="why"><b>触发：</b>提包单已核重判定需补款、处于「待发货 + 待补款」（拦截中），用户不愿补款，希望换一条物流线路重新发货。由客服发起，<b>全程人工操作，两系统不新增接口</b>。</p>
+      <div class="rescue-steps">
+        <div class="rstep">
+          <p class="who us">用户 / 客服</p>
+          <p class="t">拒补，申请换线</p>
+          <p class="d">客服确认换线方案，通知仓库处理</p>
+        </div>
+        <div class="rstep">
+          <p class="who jy">集运系统</p>
+          <p class="t">重赋新快递单号</p>
+          <p class="d">已打包包裹赋予新的快递单号</p>
+        </div>
+        <div class="rstep">
+          <p class="who jy">集运系统</p>
+          <p class="t">无主件识别入库</p>
+          <p class="d">按无主件流程重新入库</p>
+        </div>
+        <div class="rstep">
+          <p class="who dg">代购系统</p>
+          <p class="t">手动建单关联</p>
+          <p class="d">后台手动创建订单，关联新单号，包裹归属用户（已入库）</p>
+        </div>
+        <div class="rstep">
+          <p class="who dg">代购系统</p>
+          <p class="t">原单收尾</p>
+          <p class="d">原提包单关闭（提包状态→已取消）+全额退款、补款单作废、原代购订单手动完成</p>
+        </div>
+        <div class="rstep">
+          <p class="who us">用户</p>
+          <p class="t">重新发起提包</p>
+          <p class="d">对已入库包裹选新线路，重新支付预估运费，走正常流程</p>
+        </div>
+      </div>
+      <p class="rescue-note"><b>说明：</b>全程复用已有无主件识别与包裹入库能力；人工操作须留完整日志（谁关闭、谁退款、谁建单、谁关联）；新提包单与原提包单互不影响。</p>
+    </div>
+  </section>
+
+  <!-- 8. 方案对比 -->
+  <section id="sec-vs" aria-labelledby="t-vs">
+    <h2 class="sec-title" id="t-vs"><span class="no">8</span>方案一 vs 方案二</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>两方案独立可选，解决同一业务问题（核重多退少补、少补拦截发货）。方案二详见《代购集运_核重补差系统交互方案二》。</caption>
+        <thead>
+          <tr>
+            <th scope="col">维度</th>
+            <th scope="col" class="hl">方案一（指令拦截 · 本方案）</th>
+            <th scope="col">方案二（支付控制）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dim">拦截抓手</td>
+            <td class="hl">新增拦截/取消拦截指令，建议发货前确认</td>
+            <td>利用集运单「未支付不发货」现状，天然拦截</td>
+          </tr>
+          <tr>
+            <td class="dim">集运侧改造</td>
+            <td class="hl">新增接口②③（必须）+ ⑤（建议）</td>
+            <td><b>零新增开发</b>，①④与支付接口全为现有能力</td>
+          </tr>
+          <tr>
+            <td class="dim">代购侧改造</td>
+            <td class="hl">拦截指令下发、状态监听</td>
+            <td>台湾开关、收货地址识别、调支付接口</td>
+          </tr>
+          <tr>
+            <td class="dim">台湾/中国件</td>
+            <td class="hl">与其他线路一致走拦截</td>
+            <td><b>放弃少补</b>（开关控制），只多退</td>
+          </tr>
+          <tr>
+            <td class="dim">拦截可靠性</td>
+            <td class="hl">异步指令有时间窗口，靠发货前确认收口</td>
+            <td>天然拦截，无时间窗口</td>
+          </tr>
+          <tr>
+            <td class="dim">发货时效</td>
+            <td class="hl">无额外环节</td>
+            <td>所有国际件发货前多一步支付接口调用</td>
+          </tr>
+          <tr>
+            <td class="dim">长期不补款</td>
+            <td class="hl">包裹拦截压仓，客服线下联系</td>
+            <td>集运单未支付压仓（集运无自动处理规则），客服线下联系</td>
+          </tr>
+          <tr>
+            <td class="dim">拒补换线</td>
+            <td class="hl">重赋单号 + 无主件 + 原单关闭</td>
+            <td>同上，另需手动作废原集运单（集运现有流程）</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer>
+    代购系统 × 集运系统 核重补差对接说明图（方案一） v1.4 ｜ 基于《代购集运_核重补差系统交互方案 v1.8》 ｜ 2026-11-03
+  </footer>
+</div>
+
+<script>
+(function () {
+  try {
+    document.querySelectorAll('nav.toc a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href').slice(1);
+        var target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  } catch (err) { /* 静态内容不受影响 */ }
+})();
+</script>
+</body>
+</html>
