@@ -10,7 +10,18 @@
         "icon": "📄"
       }
     ],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "方案一对接说明图（v1.4）",
+            "file": "docs/weight-check-plan-a-diagram.html",
+            "icon": "📐"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "qc-photo-display",
