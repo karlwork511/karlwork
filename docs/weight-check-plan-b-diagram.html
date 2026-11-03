@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代购系统 × 集运系统 核重补差对接说明图（方案二） v1.0</title>
+<style>
+  :root {
+    --dg: #00897B;          /* 代购系统 */
+    --dg-bg: #E0F5F2;
+    --jy: #E65100;          /* 集运系统 */
+    --jy-bg: #FFF1E3;
+    --user: #455A64;        /* 用户 */
+    --user-bg: #ECEFF1;
+    --amber: #B26A00;       /* 台湾/中国件 */
+    --amber-bg: #FFF6E0;
+    --ink: #1A2332;
+    --ink-2: #4A5568;
+    --ink-3: #8A94A6;
+    --line: #E4E7ED;
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --green: #2E7D32;
+    --green-bg: #E8F5E9;
+    --blue: #1565C0;
+    --blue-bg: #E3F2FD;
+    --red: #C62828;
+    --red-bg: #FFEBEE;
+    --radius: 14px;
+    --focus: #00897B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 32px) 40px; }
+
+  /* ===== 头部 ===== */
+  header { text-align: center; margin-bottom: 30px; }
+  .badge {
+    display: inline-block; padding: 4px 14px; border-radius: 999px;
+    background: var(--dg-bg); color: var(--dg);
+    font-size: 13px; font-weight: 600; letter-spacing: 1px; margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 700; letter-spacing: 0.5px; }
+  .subtitle { margin-top: 10px; font-size: 15px; color: var(--ink-2); max-width: 860px; margin-left: auto; margin-right: auto; }
+  .subtitle strong { color: var(--dg); }
+  .principle {
+    margin: 18px auto 0; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+  .principle span {
+    font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+  }
+  .principle span b { font-weight: 700; }
+  .principle .p-dg b { color: var(--dg); }
+  .principle .p-jy b { color: var(--jy); }
+  .principle .p-hl { background: var(--dg); border-color: var(--dg); color: #fff; }
+
+  /* ===== 页内导航 ===== */
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 34px;
+  }
+  nav.toc a {
+    font-size: 13px; color: var(--ink-2); text-decoration: none;
+    padding: 6px 13px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+  }
+  nav.toc a:hover { color: var(--dg); border-color: var(--dg); }
+  nav.toc a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  section { margin-bottom: 34px; }
+  .sec-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; margin-bottom: 14px;
+  }
+  .sec-title .no {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--ink);
+    color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ===== 核心思路 ===== */
+  .idea { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .idea-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px;
+  }
+  .idea-card.pay { border-top: 4px solid var(--dg); }
+  .idea-card.tw { border-top: 4px solid var(--amber); }
+  .idea-card h3 { font-size: 15px; margin-bottom: 2px; }
+  .idea-card.pay h3 { color: var(--dg); }
+  .idea-card.tw h3 { color: var(--amber); }
+  .idea-card .tagline { font-size: 12.5px; color: var(--ink-3); margin-bottom: 10px; }
+  .idea-card p { font-size: 13.5px; color: var(--ink-2); }
+  .idea-card p b { color: var(--ink); }
+  .idea-result {
+    margin-top: 14px; background: var(--dg); color: #fff; border-radius: var(--radius);
+    padding: 14px 22px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; justify-content: center;
+  }
+  .idea-result .big { font-size: 16px; font-weight: 700; }
+  .idea-result .sub { font-size: 12.5px; opacity: 0.92; }
+
+  /* ===== 时序图 ===== */
+  .fig-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 18px 10px;
+  }
+  .svg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .svg-scroll svg { display: block; min-width: 960px; width: 100%; height: auto; }
+  .fig-cap { font-size: 12.5px; color: var(--ink-3); padding: 10px 6px 8px; }
+  .fig-cap b { color: var(--ink-2); }
+
+  /* ===== 开关卡 / 提示卡 ===== */
+  .alert-card {
+    background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--amber);
+    border-radius: var(--radius); padding: 18px 22px; margin-top: 14px;
+  }
+  .alert-card h3 { font-size: 15px; color: var(--amber); margin-bottom: 6px; }
+  .alert-card > p { font-size: 13.5px; color: var(--ink-2); }
+  .alert-card > p b { color: var(--ink); }
+
+  /* ===== 表格 ===== */
+  .tbl-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  }
+  .tbl-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 860px; }
+  caption { text-align: left; font-size: 13px; color: var(--ink-3); padding: 14px 18px 0; }
+  th, td { text-align: left; padding: 11px 14px; font-size: 13px; vertical-align: top; }
+  thead th {
+    background: var(--bg); color: var(--ink); font-weight: 700; font-size: 12.5px;
+    border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  tbody td { border-bottom: 1px solid var(--line); color: var(--ink-2); line-height: 1.55; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .dir {
+    display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .dir.oi { background: var(--dg-bg); color: var(--dg); }
+  .dir.io { background: var(--jy-bg); color: var(--jy); }
+  td .api-name { font-weight: 700; color: var(--ink); display: block; margin-bottom: 2px; }
+  .api-no {
+    display: inline-flex; width: 22px; height: 22px; border-radius: 6px; background: var(--ink); color: #fff;
+    font-size: 12px; font-weight: 700; align-items: center; justify-content: center;
+  }
+  td.key-cell b { color: var(--ink); }
+  .st { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+  .st.exist { background: var(--green-bg); color: var(--green); }
+  .st.scene { background: var(--dg-bg); color: var(--dg); }
+  .money-note { font-size: 12.5px; color: var(--ink-3); padding: 12px 18px 14px; }
+  .money-note b { color: var(--ink-2); }
+
+  /* 线路规则表 */
+  .lane-tw { background: var(--amber-bg); }
+  .lane-gj { background: var(--dg-bg); }
+  .lane-name { font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+  /* 方案对比表 */
+  th.hl, td.hl { background: var(--dg-bg); }
+  th.hl { color: var(--dg); }
+  td.dim { font-weight: 700; color: var(--ink); white-space: nowrap; }
+
+  /* ===== 拒补换线 ===== */
+  .rescue-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px;
+  }
+  .rescue-card .why {
+    font-size: 13px; color: var(--ink-2); background: var(--bg); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 16px;
+  }
+  .rescue-card .why b { color: var(--ink); }
+  .rescue-steps { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+  .rstep {
+    flex: 1 1 140px; min-width: 140px; position: relative;
+    background: var(--bg); border-radius: 10px; padding: 12px 14px; margin: 4px 22px 4px 0;
+  }
+  .rstep:last-child { margin-right: 0; }
+  .rstep:not(:last-child)::after {
+    content: "→"; position: absolute; right: -19px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-3); font-size: 16px; font-weight: 700;
+  }
+  .rstep .who { font-size: 11px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.5px; }
+  .rstep .who.jy { color: var(--jy); }
+  .rstep .who.dg { color: var(--dg); }
+  .rstep .who.us { color: var(--user); }
+  .rstep .t { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .rstep .d { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .rstep.hot { background: var(--jy-bg); }
+  .rescue-note { margin-top: 14px; font-size: 12.5px; color: var(--ink-3); }
+  .rescue-note b { color: var(--ink-2); }
+
+  footer {
+    text-align: center; font-size: 12.5px; color: var(--ink-3);
+    padding-top: 22px; border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 900px) {
+    .idea { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    nav.toc { display: none; }
+    .fig-card, .tbl-card, .alert-card, .rescue-card, .idea-card, .idea-result { break-inside: avoid; }
+    .svg-scroll { overflow-x: visible; }
+    .svg-scroll svg { min-width: 0; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="badge">方案二 · 对接说明图 · v1.0</span>
+    <h1>代购系统 × 集运系统 核重补差对接说明（方案二）</h1>
+    <p class="subtitle">利用集运系统现状实现<strong>「支付控制」天然拦截</strong>：国际件集运单默认未支付，补款到账后才支付集运单放行发货；台湾/中国件由开关控制放弃少补——<strong>集运侧零新增开发</strong></p>
+    <div class="principle">
+      <span class="p-hl"><b>集运侧零新增开发</b></span>
+      <span class="p-dg"><b>判定与资金</b> 在代购系统</span>
+      <span class="p-jy"><b>拦截抓手</b> = 集运单「未支付不发货」</span>
+      <span><b>台湾/中国件</b> 开关控制放弃少补</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="页内导航">
+    <a href="#sec-idea">核心思路</a>
+    <a href="#sec-lane">分线路规则</a>
+    <a href="#sec-seq">交互时序图</a>
+    <a href="#sec-api">接口清单</a>
+    <a href="#sec-money">资金联动</a>
+    <a href="#sec-rescue">拒补换线兜底</a>
+    <a href="#sec-vs">方案一 vs 方案二</a>
+  </nav>
+
+  <main>
+
+  <!-- 1. 核心思路 -->
+  <section id="sec-idea" aria-labelledby="t-idea">
+    <h2 class="sec-title" id="t-idea"><span class="no">1</span>核心思路：借集运现状做拦截，零改造</h2>
+    <div class="idea">
+      <div class="idea-card pay">
+        <h3>现状一 · 国际件集运单默认「未支付」</h3>
+        <p class="tagline">收货地址为其他国家（国际件）</p>
+        <p>集运系统打完包后，集运单需<b>支付后才发货</b>——代购系统不调支付接口，包裹就天然发不出去。<b>「未支付」本身就是拦截</b>，无需集运新增任何拦截能力。</p>
+      </div>
+      <div class="idea-card tw">
+        <h3>现状二 · 台湾线路不触发拦截</h3>
+        <p class="tagline">收货地址为台湾 / 中国</p>
+        <p>集运系统对台湾线路<b>现状没有拦截抓手</b>——方案二对此类件<b>放弃少补</b>（只多退），由代购系统在 SAAS 平台端新增开关控制，少补差额不再向用户收取。</p>
+      </div>
+    </div>
+    <div class="idea-result">
+      <span class="big">集运侧零新增开发</span>
+      <span class="sub">核重回传 ✔ 已发货通知 ✔ 集运单支付接口 ✔ —— 全部为现有能力，仅「集运单支付」新增调用场景</span>
+    </div>
+  </section>
+
+  <!-- 2. 分线路处理规则 -->
+  <section id="sec-lane" aria-labelledby="t-lane">
+    <h2 class="sec-title" id="t-lane"><span class="no">2</span>分线路处理规则（核心）</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>代购系统收到核重结果后，先识别收货地址，再按线路走不同规则。</caption>
+        <thead>
+          <tr>
+            <th scope="col">收货地址</th>
+            <th scope="col">多退</th>
+            <th scope="col">少补</th>
+            <th scope="col">拦截方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lane-tw lane-name">台湾 / 中国</td>
+            <td>正常退差额至用户余额</td>
+            <td><b>放弃补款</b>：不变更补款状态，仅记录核实重量/体积，包裹正常流转发货（<b>无金额上限</b>）</td>
+            <td>不拦截（集运现状不支持）</td>
+          </tr>
+          <tr>
+            <td class="lane-gj lane-name">其他国家</td>
+            <td>正常退差额，判定后调集运单支付接口放行</td>
+            <td>生成补款单，<b>集运单保持未支付（天然拦截）</b>；用户补款到账后调集运单支付接口完成支付，放行发货</td>
+            <td>集运单未支付 · 天然拦截</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <div class="alert-card">
+      <h3>「台湾地区不进行补款」开关（SAAS 平台端）</h3>
+      <p>代购系统新增<b>平台级总开关</b>。<b>开启时</b>（当前业务决策）：台湾/中国件少补直接放弃；<b>关闭时</b>：恢复补款判定逻辑——但集运台湾线路无拦截能力，补款拦截无法生效，<b>需谨慎关闭</b>。</p>
+    </div>
+  </section>
+
+  <!-- 3. 交互时序图 -->
+  <section id="sec-seq" aria-labelledby="t-seq">
+    <h2 class="sec-title" id="t-seq"><span class="no">3</span>核心交互时序（主干流程）</h2>
+    <figure class="fig-card">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1160 660" role="img" aria-labelledby="seq-title seq-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="seq-title">方案二：代购系统与集运系统核重补差交互时序图（支付控制）</title>
+        <desc id="seq-desc">用户提交包裹并支付预估运费后，集运系统拣货打包核重并生成默认未支付的集运单；核重结果回传代购系统后，按收货地址分线路处理：台湾/中国件放弃少补正常流转；其他国家件无差额或多退时直接调集运单支付接口放行，少补时集运单保持未支付形成天然拦截，用户补款到账后再支付放行。</desc>
+        <defs>
+          <marker id="ar-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#455A64"></path>
+          </marker>
+          <marker id="ar-dg" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#00897B"></path>
+          </marker>
+          <marker id="ar-jy" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#E65100"></path>
+          </marker>
+          <marker id="ar-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#B26A00"></path>
+          </marker>
+        </defs>
+
+        <!-- 泳道头 -->
+        <rect x="40" y="14" width="180" height="48" rx="10" fill="#ECEFF1" stroke="#90A4AE"></rect>
+        <text x="130" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#37474F">用户</text>
+        <text x="130" y="52" text-anchor="middle" font-size="10.5" fill="#78909C">提交 / 支付 / 补款</text>
+
+        <rect x="440" y="14" width="280" height="48" rx="10" fill="#E0F5F2" stroke="#00897B" stroke-width="1.5"></rect>
+        <text x="580" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#00695C">代购系统</text>
+        <text x="580" y="52" text-anchor="middle" font-size="10.5" fill="#4DB6AC">重算 · 地址识别 · 判定 · 支付控制</text>
+
+        <rect x="880" y="14" width="250" height="48" rx="10" fill="#FFF1E3" stroke="#E65100" stroke-width="1.5"></rect>
+        <text x="1005" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#D84315">集运系统（仓库/WMS）</text>
+        <text x="1005" y="52" text-anchor="middle" font-size="10.5" fill="#FF8A65">打包 · 核重 · 集运单发货</text>
+
+        <!-- 生命线 -->
+        <line x1="130" y1="66" x2="130" y2="628" stroke="#B0BEC5" stroke-width="1.5" stroke-dasharray="4 4"></line>
+        <line x1="580" y1="66" x2="580" y2="628" stroke="#80CBC4" stroke-width="1.5" stroke-dasharray="4 4"></line>
+        <line x1="1005" y1="66" x2="1005" y2="628" stroke="#FFCC80" stroke-width="1.5" stroke-dasharray="4 4"></line>
+
+        <!-- 1 支付 -->
+        <line x1="138" y1="110" x2="572" y2="110" stroke="#455A64" stroke-width="1.8" marker-end="url(#ar-gray)"></line>
+        <text x="355" y="100" text-anchor="middle" font-size="12.5" fill="#37474F">提交包裹，支付<tspan font-weight="700">预估运费</tspan></text>
+
+        <!-- 2 打包任务下发 -->
+        <line x1="588" y1="158" x2="997" y2="158" stroke="#00897B" stroke-width="1.8" marker-end="url(#ar-dg)"></line>
+        <text x="792" y="148" text-anchor="middle" font-size="12.5" fill="#00695C">打包任务下发<tspan font-size="11" fill="#4DB6AC">（支付成功后 · 已有能力）</tspan></text>
+
+        <!-- 3 仓内处理 -->
+        <rect x="900" y="184" width="210" height="86" rx="9" fill="#FFF8F0" stroke="#E65100" stroke-width="1.5"></rect>
+        <text x="1005" y="208" text-anchor="middle" font-size="12.5" font-weight="700" fill="#D84315">拣货 → 打包 → 核重</text>
+        <text x="1005" y="227" text-anchor="middle" font-size="11" fill="#EF6C00">产生实际重量 / 体积</text>
+        <text x="1005" y="248" text-anchor="middle" font-size="11" font-weight="700" fill="#D84315">生成集运单：默认「未支付」（国际件）</text>
+
+        <!-- 4 核重回传 -->
+        <line x1="997" y1="302" x2="588" y2="302" stroke="#E65100" stroke-width="1.8" marker-end="url(#ar-jy)"></line>
+        <text x="792" y="292" text-anchor="middle" font-size="12.5" font-weight="700" fill="#D84315">① 核重结果回传：实际重量 / 体积 <tspan font-size="11" font-weight="400" fill="#8A94A6">（现有）</tspan></text>
+
+        <!-- 5 判定 -->
+        <rect x="446" y="330" width="268" height="84" rx="10" fill="#E0F5F2" stroke="#00897B" stroke-width="1.8"></rect>
+        <text x="580" y="358" text-anchor="middle" font-size="13" font-weight="700" fill="#00695C">运费重算 + 收货地址识别</text>
+        <text x="580" y="377" text-anchor="middle" font-size="11" fill="#00796B">按续重单位判定差额</text>
+        <text x="580" y="394" text-anchor="middle" font-size="11" fill="#00796B">按线路分派处理规则</text>
+
+        <!-- 分支连接线 -->
+        <line x1="580" y1="414" x2="580" y2="436" stroke="#8A94A6" stroke-width="1.5"></line>
+        <line x1="320" y1="436" x2="840" y2="436" stroke="#8A94A6" stroke-width="1.5"></line>
+        <line x1="320" y1="436" x2="320" y2="452" stroke="#B26A00" stroke-width="1.5" marker-end="url(#ar-amber)"></line>
+        <line x1="840" y1="436" x2="840" y2="452" stroke="#00897B" stroke-width="1.5" marker-end="url(#ar-dg)"></line>
+
+        <!-- 台湾件卡 -->
+        <rect x="110" y="458" width="420" height="112" rx="10" fill="#FFF6E0" stroke="#B26A00" stroke-width="1.5"></rect>
+        <text x="320" y="483" text-anchor="middle" font-size="12.5" font-weight="700" fill="#B26A00">台湾 / 中国件 · 开关控制放弃少补</text>
+        <text x="320" y="506" text-anchor="middle" font-size="11.5" fill="#6d4b1f">无差额 / 多退：正常流转（多退退用户余额）</text>
+        <text x="320" y="528" text-anchor="middle" font-size="11.5" fill="#6d4b1f">少补：<tspan font-weight="700">放弃补款</tspan>，记录核实重量，正常流转</text>
+        <text x="320" y="550" text-anchor="middle" font-size="11" fill="#9a7b4f">不拦截（集运台湾线路现状不支持）</text>
+
+        <!-- 其他国家件卡 -->
+        <rect x="570" y="458" width="480" height="144" rx="10" fill="#F0FAF8" stroke="#00897B" stroke-width="1.5"></rect>
+        <text x="810" y="483" text-anchor="middle" font-size="12.5" font-weight="700" fill="#00695C">其他国家件 · 支付控制</text>
+        <text x="810" y="506" text-anchor="middle" font-size="11.5" fill="#1B5E20">无差额 / 多退 → ② 调集运单支付接口，支付放行</text>
+        <text x="810" y="528" text-anchor="middle" font-size="11.5" fill="#B71C1C">少补 → 生成补款单，集运单保持<tspan font-weight="700">未支付（天然拦截）</tspan></text>
+        <text x="810" y="550" text-anchor="middle" font-size="11.5" fill="#4A5568">→ 通知用户补款 → 补款到账 → ② 支付集运单 → 发货</text>
+        <text x="810" y="572" text-anchor="middle" font-size="11" fill="#8A94A6">补款无有效期；长期不补客服线下联系；拒补走换线兜底</text>
+
+        <!-- 已发货条带 -->
+        <rect x="180" y="616" width="800" height="32" rx="9" fill="#F4F6F8" stroke="#90A4AE" stroke-width="1" stroke-dasharray="4 3"></rect>
+        <text x="580" y="632" text-anchor="middle" font-size="11.5" fill="#4A5568">发货后：④ 集运 → 代购「已发货通知」<tspan font-weight="400" fill="#8A94A6">（现有）</tspan>，代购同步提包状态为已发货</text>
+      </svg>
+      </div>
+      <figcaption class="fig-cap"><b>读图：</b>箭头方向代表系统间调用方向；①②④ 为接口编号，与第 4 节接口清单对应；方案二的「拦截」不是指令动作，而是集运单「未支付」状态——代购系统支付集运单，包裹才能发货。</figcaption>
+    </figure>
+  </section>
+
+  <!-- 4. 接口清单 -->
+  <section id="sec-api" aria-labelledby="t-api">
+    <h2 class="sec-title" id="t-api"><span class="no">4</span>两系统接口清单（全部现有能力）</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>仅 3 个接口，全部为集运系统现有能力，零新增开发；仅「集运单支付」新增调用场景。与方案一对应：①④ 相同，「支付控制」替代方案一的拦截指令②③与发货前确认⑤。</caption>
+        <thead>
+          <tr>
+            <th scope="col">编号</th>
+            <th scope="col">接口</th>
+            <th scope="col">方向</th>
+            <th scope="col">调用时机</th>
+            <th scope="col">关键数据</th>
+            <th scope="col">结果识别</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="api-no">①</span></td>
+            <td><span class="api-name">核重结果回传</span><span class="st exist">现有</span></td>
+            <td><span class="dir io">集运 → 代购</span></td>
+            <td class="key-cell">打包、核重测量完成后<b>实时回传</b></td>
+            <td>提包单号、包裹编号、实际重量、实际体积（长宽高）、核重时间</td>
+            <td>触发代购重算、地址识别、分线路判定；二次核重以<b>最新一次</b>为准</td>
+          </tr>
+          <tr>
+            <td><span class="api-no">②</span></td>
+            <td><span class="api-name">集运单支付接口</span><span class="st exist">现有</span> <span class="st scene">新调用场景</span></td>
+            <td><span class="dir oi">代购 → 集运</span></td>
+            <td class="key-cell">无差额/多退：判定后<b>直接调用</b>；少补：用户补款<b>到账确认后调用</b></td>
+            <td>集运单号 / 提包单号</td>
+            <td>集运单置为已支付，集运安排发货；超时/失败自动重试，多次失败告警转人工</td>
+          </tr>
+          <tr>
+            <td><span class="api-no">④</span></td>
+            <td><span class="api-name">提包单状态通知</span><span class="st exist">现有</span></td>
+            <td><span class="dir io">集运 → 代购</span></td>
+            <td class="key-cell">提包单状态变更时通知；<b>「已发货」必须通知</b></td>
+            <td>提包单号、变更后状态、变更时间</td>
+            <td>代购同步提包状态；支持主动查询补偿、定期对账</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="money-note"><b>说明：</b>集运单支付为平台与集运系统之间的结算确认动作；平台与集运之间的实际资金为<b>线下结算</b>，与系统交互无关。补款已到账但支付未成功期间，提包单保持「待发货 + 已补款」。</p>
+    </div>
+  </section>
+
+  <!-- 5. 资金联动 -->
+  <section id="sec-money" aria-labelledby="t-money">
+    <h2 class="sec-title" id="t-money"><span class="no">5</span>资金联动规则</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>用户侧与租户侧（运费基准成本）的资金对应关系；平台与集运之间的结算走线下。资金处理为代购系统内部逻辑，供参考。</caption>
+        <thead>
+          <tr>
+            <th scope="col">场景</th>
+            <th scope="col">用户侧</th>
+            <th scope="col">租户侧（运费基准成本）</th>
+            <th scope="col">平台 ↔ 集运</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="key-cell"><b>下单支付</b></td>
+            <td>收取预估运费</td>
+            <td>按预估运费扣除租户基准成本</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>多退</b></td>
+            <td>差额退至用户余额</td>
+            <td>已扣基准成本按差额<b>退回租户</b></td>
+            <td>按实际核重支付集运单</td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>少补（其他国家件）</b></td>
+            <td>用户补<b>提包单运费差价</b></td>
+            <td>补款到账后，从租户余额<b>补扣基准成本差额</b></td>
+            <td>补款到账后支付集运单</td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>台湾/中国件 · 少补</b></td>
+            <td><b>不补款</b></td>
+            <td>基准成本按实际核重核算</td>
+            <td>按实际核重支付集运单；少补差额不再向用户收取</td>
+          </tr>
+          <tr>
+            <td class="key-cell"><b>拒补换线（人工关闭）</b></td>
+            <td>已付预估运费<b>全额退至余额</b></td>
+            <td>已扣基准成本<b>全额退回租户</b></td>
+            <td>原集运单（未支付）手动作废</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 拒补换线兜底 -->
+  <section id="sec-rescue" aria-labelledby="t-rescue">
+    <h2 class="sec-title" id="t-rescue"><span class="no">6</span>特殊场景：用户拒补换线路（人工兜底）</h2>
+    <div class="rescue-card">
+      <p class="why"><b>触发：</b>其他国家件判定需补款、集运单处于「未支付」（天然拦截中），用户不愿补款，希望换一条物流线路重新发货。由客服发起，<b>全程人工操作，两系统不新增接口</b>。与方案一一致，仅多一步「原集运单手动作废」。</p>
+      <div class="rescue-steps">
+        <div class="rstep">
+          <p class="who us">用户 / 客服</p>
+          <p class="t">拒补，申请换线</p>
+          <p class="d">客服确认换线方案，通知仓库处理</p>
+        </div>
+        <div class="rstep">
+          <p class="who jy">集运系统</p>
+          <p class="t">重赋新快递单号</p>
+          <p class="d">已打包包裹赋予新的快递单号</p>
+        </div>
+        <div class="rstep">
+          <p class="who jy">集运系统</p>
+          <p class="t">无主件识别入库</p>
+          <p class="d">按无主件流程重新入库</p>
+        </div>
+        <div class="rstep hot">
+          <p class="who jy">集运系统</p>
+          <p class="t">原集运单手动作废</p>
+          <p class="d">未支付状态集运单作废（集运现有流程）· 方案二新增步骤</p>
+        </div>
+        <div class="rstep">
+          <p class="who dg">代购系统</p>
+          <p class="t">手动建单关联</p>
+          <p class="d">后台手动创建订单，关联新单号，包裹归属用户（已入库）</p>
+        </div>
+        <div class="rstep">
+          <p class="who dg">代购系统</p>
+          <p class="t">原单收尾</p>
+          <p class="d">原提包单关闭（→已取消）+全额退款、补款单作废、原代购订单手动完成</p>
+        </div>
+        <div class="rstep">
+          <p class="who us">用户</p>
+          <p class="t">重新发起提包</p>
+          <p class="d">对已入库包裹选新线路，重新支付预估运费，走正常流程</p>
+        </div>
+      </div>
+      <p class="rescue-note"><b>说明：</b>全程复用已有无主件识别、包裹入库与集运单作废能力；人工操作须留完整日志；新提包单与原提包单互不影响。</p>
+    </div>
+  </section>
+
+  <!-- 7. 方案对比 -->
+  <section id="sec-vs" aria-labelledby="t-vs">
+    <h2 class="sec-title" id="t-vs"><span class="no">7</span>方案一 vs 方案二</h2>
+    <div class="tbl-card">
+      <div class="tbl-scroll">
+      <table>
+        <caption>两方案独立可选，解决同一业务问题（核重多退少补、少补拦截发货）。</caption>
+        <thead>
+          <tr>
+            <th scope="col">维度</th>
+            <th scope="col">方案一（指令拦截）</th>
+            <th scope="col" class="hl">方案二（支付控制 · 本方案）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dim">拦截抓手</td>
+            <td>新增拦截/取消拦截指令，建议发货前确认</td>
+            <td class="hl">利用集运单「未支付不发货」现状，天然拦截</td>
+          </tr>
+          <tr>
+            <td class="dim">集运侧改造</td>
+            <td>新增接口②③（必须）+ ⑤（建议）</td>
+            <td class="hl"><b>零新增开发</b>，①④与支付接口全为现有能力</td>
+          </tr>
+          <tr>
+            <td class="dim">代购侧改造</td>
+            <td>拦截指令下发、状态监听</td>
+            <td class="hl">台湾开关、收货地址识别、调支付接口</td>
+          </tr>
+          <tr>
+            <td class="dim">台湾/中国件</td>
+            <td>与其他线路一致走拦截</td>
+            <td class="hl"><b>放弃少补</b>（开关控制），只多退</td>
+          </tr>
+          <tr>
+            <td class="dim">拦截可靠性</td>
+            <td>异步指令有时间窗口，靠发货前确认收口</td>
+            <td class="hl">天然拦截，无时间窗口</td>
+          </tr>
+          <tr>
+            <td class="dim">发货时效</td>
+            <td>无额外环节</td>
+            <td class="hl">所有国际件发货前多一步支付接口调用</td>
+          </tr>
+          <tr>
+            <td class="dim">长期不补款</td>
+            <td>包裹拦截压仓，客服线下联系</td>
+            <td class="hl">集运单未支付压仓（集运无自动处理规则），客服线下联系</td>
+          </tr>
+          <tr>
+            <td class="dim">拒补换线</td>
+            <td>重赋单号 + 无主件 + 原单关闭</td>
+            <td class="hl">同上，另需手动作废原集运单（集运现有流程）</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer>
+    代购系统 × 集运系统 核重补差对接说明图（方案二） v1.0 ｜ 基于《代购集运_核重补差系统交互方案二 v1.0》 ｜ 2026-11-03
+  </footer>
+</div>
+
+<script>
+(function () {
+  try {
+    document.querySelectorAll('nav.toc a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href').slice(1);
+        var target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  } catch (err) { /* 静态内容不受影响 */ }
+})();
+</script>
+</body>
+</html>
