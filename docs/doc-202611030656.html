@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>核重补差交互方案（方案二：支付控制） - POKO文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
+.doc-header { background: #1a1a2e; padding: 10px 24px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.doc-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.doc-header .meta { font-size: 11px; color: rgba(255,255,255,0.4); }
+.doc-header .actions { display: flex; gap: 6px; margin-left: auto; }
+.btn { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; }
+.btn:hover { background: rgba(255,255,255,0.15); }
+.btn.primary { background: #3b82f6; border-color: #3b82f6; }
+.btn.green { background: #10b941; border-color: #10b941; }
+.btn.green:hover { background: #059669; }
+.doc-body { max-width: 900px; margin: 16px auto; padding: 0 24px; }
+.doc-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 50vh; }
+.doc-content[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.doc-content h2 { font-size: 18px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+.doc-content h3 { font-size: 15px; margin: 20px 0 8px 0; }
+.doc-content p { margin: 8px 0; color: #444; }
+.doc-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.doc-content th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e5e5e5; font-weight: 600; }
+.doc-content td { padding: 10px 12px; border: 1px solid #e5e5e5; }
+.doc-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+.doc-content .placeholder { color: #aaa; text-align: center; padding: 60px 20px; }
+.doc-content .placeholder .icon { font-size: 40px; margin-bottom: 12px; }
+.doc-content .placeholder .title { font-size: 16px; color: #888; }
+.doc-content .placeholder .hint { font-size: 13px; margin-top: 8px; }
+.doc-footer { text-align: center; padding: 24px; color: #aaa; font-size: 12px; }
+#toast { position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>核重补差交互方案（方案二：支付控制）</h1>
+        <span class="meta">POKO SaaS</span>
+        <div class="actions">
+            <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">
+            <button class="btn green" id="imgBtn" onclick="document.getElementById('imgInput').click()" style="display:none">🖼️ 插入图片</button>
+            <button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button>
+        </div>
+    </div>
+    <div class="doc-body">
+        <div class="doc-content" id="docContent"><h1 id="代购系统--集运系统-核重补差交互方案二-v10">代购系统 × 集运系统 核重补差交互方案二 v1.0</h1><blockquote><p><strong>版本</strong>：v1.0（2026-11-03） <strong>定位</strong>：面向集运系统团队的对接沟通文档。方案二与方案一解决同一业务问题（核重多退少补、少补拦截发货），是另一种实现路径：<strong>利用集运系统现有「集运单未支付不发货」机制实现天然拦截，集运侧零新增开发</strong>。 <strong>与方案一的关系</strong>：两方案独立可选，对比见第七节。</p></blockquote><hr /><h2 id="一核心思路">一、核心思路</h2><p>方案一靠「新增拦截指令」让集运系统主动拦包裹；方案二不新增任何拦截能力，改用<strong>集运单支付控制</strong>作为拦截抓手，基于集运系统两个现状：</p><ol><li><strong>国际件集运单默认「未支付」</strong>：打完包后需支付集运单才发货——代购系统不调支付接口，包裹就天然发不出去，这就是拦截；</li><li><strong>台湾线路不触发拦截</strong>：收货地址为台湾/中国的件，集运系统现状没有拦截抓手——方案二对此类件<strong>放弃少补</strong>（只多退），由代购系统 SAAS 平台端开关控制。</li></ol><p><strong>集运侧改造量</strong>：<strong>零新增开发</strong>。核重回传、已发货通知、集运单支付接口均为现有能力。</p><hr /><h2 id="二分线路处理规则核心">二、分线路处理规则（核心）</h2><p>代购系统收到核重结果后，先识别收货地址，再按线路走不同规则：</p><table><thead><tr class="header"><th>收货地址</th><th>多退</th><th>少补</th><th>拦截方式</th></tr></thead><tbody><tr class="odd"><td><strong>台湾 / 中国</strong></td><td>正常退差额至用户余额</td><td><strong>放弃补款</strong>：不变更补款状态，仅记录核实重量/体积，包裹正常流转发货（无金额上限）</td><td>不拦截（集运现状不支持）</td></tr><tr class="even"><td><strong>其他国家</strong></td><td>正常退差额，判定后调集运单支付接口放行</td><td>生成补款单，<strong>集运单保持未支付（天然拦截）</strong>；用户补款到账后，代购调集运单支付接口完成支付，放行发货</td><td>集运单未支付天然拦截</td></tr></tbody></table><p><strong>台湾地区不进行补款开关</strong>：</p><ul><li>代购系统在 SAAS 平台端新增<strong>平台级总开关</strong>「台湾地区不进行补款」；</li><li><strong>开启时</strong>（当前业务决策）：台湾/中国件少补直接放弃；</li><li><strong>关闭时</strong>：台湾/中国件恢复补款判定逻辑——但集运台湾线路无拦截能力，补款拦截无法生效，<strong>需谨慎关闭</strong>。</li></ul><hr /><h2 id="三主流程时序">三、主流程时序</h2><pre><code>用户            代购系统                        集运系统（仓库）
+ │ 提交包裹+支付预估运费
+ │───────────────▶│
+ │                │ 打包任务下发（已有能力）
+ │                │─────────────────────────────▶│
+ │                │                               │ 拣货 / 打包 / 核重测量
+ │                │                               │ 生成集运单：默认「未支付」（国际件）
+ │                │ ① 核重结果回传（实际重量/体积）【现有】
+ │                │◀─────────────────────────────│
+ │                │ 重算运费 + 识别收货地址，分线路判定
+ │  ┌─────────────┤
+ │  │ 台湾/中国件  ├─ 无差额/增量不足一档：正常流转
+ │  │             ├─ 多退：差额退余额，正常流转
+ │  │             └─ 少补：放弃补款，记录核实重量，正常流转
+ │  └─────────────┤
+ │    其他国家件   ├─ 无差额/多退 ──▶ ② 调集运单支付接口，支付放行
+ │                └─ 少补：生成补款单，集运单保持未支付（天然拦截）
+ │ 补款通知        │
+ │◀───────────────│
+ │ 支付补款        │
+ │───────────────▶│ 确认到账
+ │                │ ② 调集运单支付接口，支付集运单 ▶│ 集运单已支付，安排发货
+ │                │                               │ 发货
+ │                │ ④ 已发货通知【现有】            │
+ │                │◀─────────────────────────────│
+</code></pre><hr /><h2 id="四接口调用场景">四、接口调用场景</h2><blockquote><p>仅 3 个接口，<strong>全部为集运系统现有能力</strong>，无新增开发。</p></blockquote><h3 id="接口①-核重结果回传集运系统--代购系统现有">接口① 核重结果回传（集运系统 → 代购系统）【现有】</h3><ul><li><strong>时机</strong>：包裹打包、核重测量完成后实时回传；</li><li><strong>数据</strong>：提包单号、包裹编号、实际重量、实际体积（长宽高）、核重时间；</li><li><strong>代购侧处理</strong>：触发运费重算、识别收货地址、分线路判定；二次核重以最新一次为准。</li></ul><h3 id="接口②-集运单支付接口代购系统--集运系统现有能力新调用场景">接口② 集运单支付接口（代购系统 → 集运系统）【现有能力，新调用场景】</h3><ul><li><strong>时机</strong>（其他国家件）：<ul><li>判定无差额 / 多退 → 判定完成后<strong>直接调用</strong>，支付放行；</li><li>判定少补 → 用户补款<strong>到账确认后调用</strong>；</li></ul></li><li><strong>数据</strong>：集运单号 / 提包单号；</li><li><strong>期望</strong>：集运单置为已支付，集运系统安排发货；</li><li><strong>代购侧兜底</strong>：调用超时 / 失败时自动重试，多次失败告警转人工；补款已到账但支付未成功期间，提包单保持「待发货 + 已补款」，不流失。</li><li><strong>说明</strong>：集运单支付为平台与集运系统之间的结算确认动作；平台与集运之间的实际资金为<strong>线下结算</strong>，与系统交互无关。</li></ul><h3 id="接口④-提包单状态通知集运系统--代购系统现有">接口④ 提包单状态通知（集运系统 → 代购系统）【现有】</h3><ul><li><strong>必须覆盖</strong>：<strong>已发货</strong>——代购系统据此同步提包状态；</li><li><strong>数据</strong>：提包单号、变更后状态、变更时间。</li></ul><blockquote><p>与方案一接口编号对应：①④ 同方案一；方案二<strong>不再需要</strong>方案一的拦截/取消拦截指令（②③）与发货前拦截确认（⑤），新增「集运单支付」调用场景。</p></blockquote><hr /><h2 id="五代购系统侧处理背景参考">五、代购系统侧处理（背景参考）</h2><blockquote><p>以下为代购系统内部处理逻辑，供集运团队理解全貌，不需要集运系统配合改造。</p></blockquote><h3 id="51-状态模型不新增提包状态">5.1 状态模型（不新增提包状态）</h3><table><thead><tr class="header"><th>场景</th><th>提包状态</th><th>补款状态</th><th>说明</th></tr></thead><tbody><tr class="odd"><td>台湾/中国件·少补</td><td>正常流转（待发货→已发货）</td><td>无需补款（不变更）</td><td>提包单<strong>记录核实重量/体积</strong></td></tr><tr class="even"><td>其他国家件·少补（拦截中）</td><td>待发货（卡住不动）</td><td>待补款</td><td>集运单未支付天然拦截</td></tr><tr class="odd"><td>其他国家件·补款到账</td><td>待发货</td><td>已补款</td><td>调支付接口放行</td></tr><tr class="even"><td>正常发货</td><td>已发货</td><td>无需补款 / 已补款</td><td>—</td></tr><tr class="odd"><td>拒补换线（人工关闭）</td><td>已取消</td><td>—（补款单作废）</td><td>见第六节</td></tr></tbody></table><p><strong>「放弃补款」单据的区分口径</strong>：补款状态保持「无需补款」，与真正无差额的单共存；可通过「核实重量 ＞ 预估重量 + 补款状态=无需补款 + 收货地址=台湾/中国」组合筛选，用于对账与亏损统计。</p><h3 id="52-资金联动">5.2 资金联动</h3><table><thead><tr class="header"><th>场景</th><th>用户侧</th><th>租户侧（运费基准成本）</th><th>平台 ↔︎ 集运</th></tr></thead><tbody><tr class="odd"><td>下单支付</td><td>收取预估运费</td><td>按预估运费扣除租户基准成本</td><td>—</td></tr><tr class="even"><td>多退</td><td>差额退至用户余额</td><td>基准成本按差额退回租户</td><td>按实际核重支付集运单</td></tr><tr class="odd"><td>少补（其他国家件）</td><td>用户补提包单运费差价</td><td>补款到账后，从租户余额补扣基准成本差额</td><td>补款到账后支付集运单</td></tr><tr class="even"><td>台湾/中国件·少补</td><td><strong>不补款</strong></td><td>基准成本按实际核重核算</td><td>按实际核重支付集运单；少补差额不再向用户收取</td></tr><tr class="odd"><td>拒补换线（人工关闭）</td><td>预估运费全额退余额</td><td>基准成本全额退回租户</td><td>原集运单手动作废</td></tr></tbody></table><h3 id="53-补款单规则">5.3 补款单规则</h3><ul><li>补款<strong>无有效期</strong>，待补款提包单<strong>不自动取消</strong>，用户侧只有「补款」一个动作；</li><li>集运系统对超期未支付的集运单<strong>无自动处理规则</strong>（已确认），包裹长期压仓不构成系统异常，「无有效期」成立；</li><li>用户长期不补 → 客服线下联系；拒补换线 → 人工兜底（第六节）。</li></ul><hr /><h2 id="六特殊场景用户拒补换线路人工兜底">六、特殊场景：用户拒补换线路（人工兜底）</h2><p>与方案一一致，仅一处差异：</p><pre><code>用户拒补申请换线
+  → 集运系统：已打包包裹重赋新快递单号 → 无主件识别重新入库
+  → 集运系统：原集运单（未支付状态）手动作废 ←—— 方案二新增步骤，集运现有流程
+  → 代购系统：后台手动创建订单、关联新快递单号
+  → 代购系统：原提包单关闭（→已取消）+ 全额退款 + 补款单作废 + 原代购订单手动完成
+  → 用户针对已入库包裹重新发起提包单
+</code></pre><hr /><h2 id="七方案一-vs-方案二对比">七、方案一 vs 方案二对比</h2><table><thead><tr class="header"><th>维度</th><th>方案一（指令拦截）</th><th>方案二（支付控制）</th></tr></thead><tbody><tr class="odd"><td>拦截抓手</td><td>新增拦截/取消拦截指令，建议发货前确认</td><td>利用集运单「未支付不发货」现状，天然拦截</td></tr><tr class="even"><td><strong>集运侧改造</strong></td><td>新增接口②③（必须）+ ⑤（建议）</td><td><strong>零新增开发</strong>，①④与支付接口全为现有能力</td></tr><tr class="odd"><td>代购侧改造</td><td>拦截指令下发、状态监听</td><td>台湾开关、收货地址识别、调支付接口</td></tr><tr class="even"><td>台湾/中国件</td><td>与其他线路一致走拦截</td><td><strong>放弃少补</strong>（开关控制），只多退</td></tr><tr class="odd"><td>拦截可靠性</td><td>异步指令有时间窗口，靠发货前确认收口</td><td>天然拦截，无时间窗口</td></tr><tr class="even"><td>发货时效</td><td>无额外环节</td><td>所有国际件发货前多一步支付接口调用</td></tr><tr class="odd"><td>长期不补款</td><td>包裹拦截压仓，客服线下联系</td><td>集运单未支付压仓（集运无自动处理规则），客服线下联系</td></tr><tr class="even"><td>拒补换线</td><td>重赋单号+无主件+原单关闭</td><td>同上，另需手动作废原集运单（集运现有流程）</td></tr></tbody></table><hr /><h2 id="八边界说明">八、边界说明</h2><ul><li>本文覆盖：方案二下代购系统的业务背景、对集运系统的<strong>接口调用场景</strong>（全部现有能力）；</li><li>集运单支付的触发与异常重试为代购系统内部实现；平台与集运之间的资金结算走线下，与系统交互无关；</li><li>代购系统内部实现（开关、地址识别、状态、资金、后台页面）仅作背景参考，不要求集运系统配合。</li></ul>
+
+        </div>
+    </div>
+    <div class="doc-footer">POKO 文档 · Powered by GitHub Pages</div>
+    <script>
+    var REPO = 'karlwork511/karlwork';
+    var FILE = 'docs/doc-202611030656.html';
+    var editing = false;
+
+    function toggleEdit() {
+        var c = document.getElementById('docContent');
+        var ph = document.getElementById('placeholder');
+        var eb = document.getElementById('editBtn');
+        var sb = document.getElementById('saveBtn');
+        var ib = document.getElementById('imgBtn');
+        if (!editing) {
+            if (ph) ph.remove();
+            c.contentEditable = 'true';
+            c.focus();
+            eb.textContent = '退出编辑';
+            sb.style.display = 'inline-block';
+            ib.style.display = 'inline-block';
+            editing = true;
+        } else {
+            c.contentEditable = 'false';
+            eb.textContent = '\u270f\ufe0f 编辑';
+            sb.style.display = 'none';
+            ib.style.display = 'none';
+            editing = false;
+        }
+    }
+
+    async function insertImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) === -1) ext = 'png';
+        var fn = 'img-' + Date.now() + '.' + ext;
+        showToast('正在上传图片...', '#3b82f6');
+        try {
+            var token = localStorage.getItem('github_token');
+            if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+            var base64 = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var path = 'images/' + fn;
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Upload ' + fn, content: base64 })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'Upload failed'); }
+            var data = await resp.json();
+            var imgUrl = data.content.download_url;
+            var docContent = document.getElementById('docContent');
+            var sel = window.getSelection();
+            if (sel.rangeCount > 0 && docContent.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                range.deleteContents();
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                docContent.appendChild(img);
+            }
+            showToast('\u2705 图片已插入', '#10b941');
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+        }
+        input.value = '';
+    }
+
+    async function savePage() {
+        var sb = document.getElementById('saveBtn');
+        var eb = document.getElementById('editBtn');
+        var ib = document.getElementById('imgBtn');
+        var token = localStorage.getItem('github_token');
+        if (!token) { token = prompt('请输入 GitHub Token（只会保存在你的浏览器）：'); if (!token) return; localStorage.setItem('github_token', token); }
+        document.getElementById('docContent').contentEditable = 'false';
+        eb.textContent = '\u270f\ufe0f 编辑';
+        sb.style.display = 'none';
+        ib.style.display = 'none';
+        sb.textContent = '\u23f3 保存中...';
+        editing = false;
+        var html = document.getElementById('docContent').innerHTML;
+        var page = buildPage(html);
+        try {
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                headers: { 'Authorization': 'token ' + token }
+            });
+            var data = await resp.json();
+            var sha = data.sha;
+            var encoded = btoa(unescape(encodeURIComponent(page)));
+            var putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'update', content: encoded, sha: sha })
+            });
+            if (!putResp.ok) { var e2 = await putResp.json(); throw new Error(e2.message); }
+            showToast('\u2705 已保存', '#10b981');
+            sb.textContent = '\ud83d\udcc1 保存';
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+            sb.textContent = '\ud83d\udcc1 保存';
+        }
+    }
+
+    function buildPage(c) {
+        return '<!DOCTYPE html><html><head><meta charset=UTF-8><title>doc</title></head><body>' + c + '</body></html>';
+    }
+
+    function showToast(m, c2) {
+        var t = document.getElementById('toast');
+        if (t) t.remove();
+        var d = document.createElement('div');
+        d.id = 'toast';
+        d.textContent = m;
+        d.style.background = c2;
+        document.body.appendChild(d);
+        setTimeout(function() { d.remove(); }, 3000);
+    }
+</script>
+</body>
+</html>
