@@ -20,6 +20,16 @@
             "icon": "📐"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "方案二对接说明图（v1.0）",
+            "file": "docs/weight-check-plan-b-diagram.html",
+            "icon": "📐"
+          }
+        ]
       }
     ]
   },
