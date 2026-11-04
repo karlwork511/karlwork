@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>充值赠金使用限制-需求说明①总览</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#E9EDF2; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; color:#333; }
+.sheet { width:1000px; margin:24px auto; background:#fff; border-radius:16px; padding:40px 44px; box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+.head { border-bottom:2px solid #F0F2F5; padding-bottom:18px; margin-bottom:26px; }
+.head h1 { font-size:24px; color:#1A1A1A; }
+.head h1 .tag { display:inline-block; background:#FF7A00; color:#fff; font-size:12px; padding:3px 10px; border-radius:12px; vertical-align:middle; margin-left:10px; font-weight:400; }
+.head .sub { font-size:13px; color:#999; margin-top:8px; }
+h2 { font-size:17px; color:#1A1A1A; margin:28px 0 14px; padding-left:12px; border-left:4px solid #FF7A00; line-height:1.2; }
+.bg-list { font-size:14px; line-height:2; color:#444; }
+.bg-list b { color:#D46A00; }
+.example { background:#FFF7EE; border:1px solid #FFD9A8; border-radius:10px; padding:14px 18px; font-size:13px; color:#8a5410; line-height:1.9; margin-top:12px; }
+.plan-cards { display:flex; gap:16px; flex-wrap:wrap; }
+.plan-card { flex:1 1 45%; border:1px solid #EBEEF2; border-radius:12px; padding:18px 20px; }
+.plan-card .pt { font-size:15px; font-weight:700; margin-bottom:10px; }
+.plan-card .pt .chip { font-size:11px; font-weight:400; padding:2px 8px; border-radius:10px; margin-left:8px; vertical-align:middle; }
+.chip-a { background:#E8F3FF; color:#165DFF; }
+.chip-b { background:#FFF1E8; color:#F53F3F; }
+.chip-must { background:#E8FFF0; color:#00B42A; }
+.chip-off { background:#F2F3F5; color:#909399; }
+.plan-card .pd { font-size:13px; color:#555; line-height:1.9; }
+.flow { margin-top:6px; }
+.step { display:flex; gap:14px; position:relative; padding-bottom:22px; }
+.step:last-child { padding-bottom:0; }
+.step::before { content:''; position:absolute; left:17px; top:38px; bottom:0; width:2px; background:#E4E7ED; }
+.step:last-child::before { display:none; }
+.step .num { width:36px; height:36px; border-radius:50%; background:#FF7A00; color:#fff; font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; z-index:1; }
+.step .num.gray { background:#909399; }
+.step .num.blue { background:#165DFF; }
+.step .body { padding-top:4px; }
+.step .st { font-size:15px; font-weight:700; color:#1A1A1A; }
+.step .st .s-chip { font-size:11px; font-weight:400; padding:2px 8px; border-radius:10px; margin-left:8px; vertical-align:middle; }
+.step .sd { font-size:13px; color:#555; line-height:1.9; margin-top:6px; }
+.foot { margin-top:28px; background:#F7F8FA; border-radius:10px; padding:14px 18px; font-size:12px; color:#777; line-height:1.9; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="head">
+    <h1>充值赠送金额使用限制 · 需求说明<span class="tag" style="background:#00B42A">已定稿</span></h1>
+    <div class="sub">① 需求总览（背景 / 方案构成 / 全链路流程）　·　2026-11-03</div>
+  </div>
+
+  <h2>一、需求背景</h2>
+  <div class="bg-list">
+    · 集运业务长期运营「充值送余额」活动，例：充值 500 元送 15 元；<br>
+    · 原活动规则：用户充值的<b>余额及赠送金额仅限集运业务</b>使用；<br>
+    · 现状变化：上线代购业务后，用户可将余额（含赠金）直接用于代购采购；<br>
+    · 当前处理：财务人工查数，手动扣除「已获赠金且拿余额代购」用户的赠金，效率低、易遗漏。
+  </div>
+  <div class="example">
+    <b>套利示例：</b>用户充值 500 元送 15 元 → 用 500 元支付代购订单 → 送的 15 元拿去集运 → 相当于白拿赠金。因赠金到账即与本金合并、无有效期，系统层面无法区分用户花的是本金还是赠金，只能按「获得过赠金 + 用余额代购」的行为口径识别。
+  </div>
+
+  <h2>二、需求方案构成</h2>
+  <div class="plan-cards">
+    <div class="plan-card">
+      <div class="pt">方案A · 弱提示<span class="chip chip-a">已定 · 实施</span></div>
+      <div class="pd">钱包页新增常驻提示条，并在充值说明中新增赠金限制条款。用户在充值前即可见规则，作为后续扣款的规则依据。</div>
+    </div>
+    <div class="plan-card">
+      <div class="pt">方案B · 强提示<span class="chip chip-b">已定 · 实施</span></div>
+      <div class="pd">提交代购订单选择余额支付时校验：180 天内存在赠送流水且未通知过的用户，弹窗二次确认后方可继续支付。</div>
+    </div>
+    <div class="plan-card">
+      <div class="pt">通知方式 · 后台核实工单<span class="chip chip-must">已定方案（业务已确认）</span></div>
+      <div class="pd">命中条件的订单支付成功后，管理后台生成核实工单；一个工单可对应多笔赠金记录（合并带出）。财务在线标记「已扣款 / 无需扣款」，状态留痕可追溯。</div>
+    </div>
+    <div class="plan-card">
+      <div class="pt">企微群推送<span class="chip chip-off">已确认不采用</span></div>
+      <div class="pd">原设计的企微群通知工单，业务已确认不采用；保留为后续可选扩展。</div>
+    </div>
+  </div>
+
+  <h2>三、全链路流程</h2>
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="st">用户充值</div>
+        <div class="sd">参与充值送活动，本金与赠金合并到账为账户余额（系统不区分、无有效期），充值即视为同意赠金限制规则（需方案A文案支撑）。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num blue">2</div>
+      <div class="body">
+        <div class="st">钱包页弱提示<span class="s-chip chip-a">方案A · 已定</span></div>
+        <div class="sd">常驻提示条 + 充值说明新增条款，告知「赠送金额仅限集运，用于代购将被扣除」。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="st">提交代购订单</div>
+        <div class="sd">用户选择「集运余额」作为支付方式，点击提交订单。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num blue">4</div>
+      <div class="body">
+        <div class="st">支付前校验弹窗<span class="s-chip chip-b">方案B · 已定</span></div>
+        <div class="sd">同时满足三个条件才弹窗：① 集运余额支付；② 180 天内存在赠送流水；③ 该流水未触发过通知。用户确认后继续支付，取消则不提交订单。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <div class="st">余额支付成功</div>
+        <div class="sd">余额扣款、订单生成。支付失败 / 校验接口异常时不触发后续通知，不阻塞下单。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num blue">6</div>
+      <div class="body">
+        <div class="st">管理后台生成核实工单<span class="s-chip chip-must">已定方案</span></div>
+        <div class="sd">命中后生成「赠金扣除核实」工单；一个工单可对应多笔赠金记录：该用户所有未通知过的赠送流水合并入单（含每笔流水编码 / 金额 / 时间及合计），以赠送流水编码为粒度去重，进过工单的流水不再重复生成。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num gray">7</div>
+      <div class="body">
+        <div class="st">财务人工核实并扣款</div>
+        <div class="sd">扣不扣、扣多少、余额不足如何处理，均由财务人工决策并手动执行，<b>系统不自动扣款</b>；处理结果在后台工单标记「已扣款 / 无需扣款」，形成闭环留痕。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    统一文案口径：所有用户侧提示均使用「平台核實後將扣除對應贈送金額」，不承诺具体扣款金额与时间；弱提示（方案A）与强提示（方案B）均已确认实施；通知方式已确认为后台核实工单（2026-11-03 业务确认），企微群推送不采用。
+  </div>
+</div>
+</body>
+</html>
