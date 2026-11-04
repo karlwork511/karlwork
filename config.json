@@ -3,7 +3,13 @@
     "id": "gift-deduction",
     "name": "充值赠金扣回",
     "desc": "充值送余额仅限集运使用：代购余额支付命中赠金时，用户端钱包页弱提示+支付前强提示双管齐下，后台自动生成核实工单，财务人工核实扣款闭环。PRD v1.6 定稿",
-    "docs": [],
+    "docs": [
+      {
+        "name": "充值赠金扣回 PRD v1.6（飞书）",
+        "file": "https://zcn9mbpydspc.feishu.cn/docx/YXL1dL4IWo95HAxpK4tc532snPf",
+        "icon": "📄"
+      }
+    ],
     "groups": []
   },
   {
