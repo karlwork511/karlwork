@@ -10,7 +10,18 @@
         "icon": "📄"
       }
     ],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "需求总览说明图",
+            "file": "docs/gift-overview.html",
+            "icon": "📐"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "weight-check",
