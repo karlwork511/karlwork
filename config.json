@@ -35,6 +35,16 @@
             "icon": "💳"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "赠金扣除核实工单",
+            "file": "docs/gift-audit-admin-annotated.html",
+            "icon": "🖥️"
+          }
+        ]
       }
     ]
   },
