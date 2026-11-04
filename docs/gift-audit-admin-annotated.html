@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台-赠金扣除核实工单</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-wrap: wrap; height: 100vh; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+    width: 100%;
+    height: 47px;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; height: calc(100vh - 47px); }
+
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    height: calc(100vh - 47px);
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ========== 左侧产品界面样式（POKO 管理后台） ========== */
+.scheme-banner {
+    max-width: 1180px;
+    margin: 0 auto 14px;
+    background: #00B42A;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.admin-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    position: relative;
+    min-height: 720px;
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 200px;
+    background: #1D2129;
+    color: #A9AEB8;
+    flex-shrink: 0;
+    padding: 0 0 20px;
+}
+.side-logo {
+    padding: 18px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.side-group { padding: 10px 8px 4px; font-size: 12px; color: #6B7280; }
+.side-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.side-item:hover { color: #fff; }
+.side-sub {
+    padding: 9px 16px 9px 34px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.side-sub:hover { color: #fff; }
+.side-sub.active {
+    color: #fff;
+    background: rgba(22,93,255,0.25);
+    border-right: 3px solid #165DFF;
+}
+.menu-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #F53F3F;
+    color: #fff;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+/* 主内容区 */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #F5F7FA; }
+.topbar {
+    height: 52px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+}
+.crumb { font-size: 13px; color: #999; }
+.crumb b { color: #333; font-weight: 600; }
+.admin-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
+.admin-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #165DFF, #0E42D2);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+}
+.content { padding: 16px 20px 30px; }
+.page-title { font-size: 18px; font-weight: 700; color: #222; margin-bottom: 14px; }
+
+/* 状态页签 */
+.tabs {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    padding: 0 16px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #E4E7ED;
+    border-bottom: none;
+    position: relative;
+}
+.tab {
+    padding: 13px 16px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tab.active { color: #165DFF; font-weight: 600; }
+.tab.active::after {
+    content: '';
+    position: absolute;
+    left: 12px; right: 12px; bottom: -1px;
+    height: 2px;
+    background: #165DFF;
+}
+.tab-count {
+    min-width: 18px; height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #F53F3F;
+    color: #fff;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 筛选区 */
+.filter-bar {
+    background: #fff;
+    padding: 14px 16px;
+    border-left: 1px solid #E4E7ED;
+    border-right: 1px solid #E4E7ED;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.filter-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #666; }
+.filter-input {
+    height: 30px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    padding: 0 10px;
+    font-size: 13px;
+    color: #333;
+    width: 140px;
+    outline: none;
+    background: #fff;
+}
+.filter-input:focus { border-color: #165DFF; }
+.filter-btn {
+    height: 30px;
+    padding: 0 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+.filter-btn.primary { background: #165DFF; color: #fff; }
+.filter-btn.plain { background: #fff; border-color: #DCDFE6; color: #666; }
+
+/* 工单表格 */
+.table-card {
+    background: #fff;
+    border: 1px solid #E4E7ED;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 4px 16px 16px;
+    position: relative;
+    overflow-x: auto;
+}
+table.worktable td.amt, table.worktable th.amt { text-align: right; }
+table.worktable td .hl-red { color: #F53F3F; font-weight: 600; }
+table.worktable { width: 100%; border-collapse: collapse; }
+table.worktable th {
+    text-align: left;
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+    padding: 12px 8px;
+    border-bottom: 1px solid #E4E7ED;
+    white-space: nowrap;
+}
+table.worktable td {
+    font-size: 13px;
+    color: #333;
+    padding: 13px 8px;
+    border-bottom: 1px solid #F2F3F5;
+    vertical-align: middle;
+}
+.mono { font-family: "SF Mono", Consolas, monospace; font-size: 12px; color: #555; }
+.amount { font-weight: 700; color: #222; }
+.cnt-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: #FFF3E8;
+    color: #FF7A00;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+.st-pend { color: #FF7A00; font-weight: 600; }
+.st-done { color: #00B42A; font-weight: 600; }
+.st-none { color: #909399; font-weight: 600; }
+.op-link { color: #165DFF; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.op-link:hover { text-decoration: underline; }
+.op-link.disabled { color: #C0C4CC; cursor: default; text-decoration: none; }
+
+/* 分页 */
+.pager {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    padding-top: 14px;
+    font-size: 13px;
+    color: #666;
+}
+.pager .pg {
+    min-width: 28px; height: 28px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #fff;
+}
+.pager .pg.on { border-color: #165DFF; color: #165DFF; }
+
+/* 核实处理弹窗（演示态） */
+.audit-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    border-radius: 12px;
+}
+.audit-modal {
+    width: 620px;
+    max-height: 92%;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    position: relative;
+}
+.audit-modal .am-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.audit-modal .am-title { font-size: 16px; font-weight: 700; color: #222; }
+.audit-modal .am-close { font-size: 20px; color: #999; cursor: pointer; }
+.audit-modal .am-body { padding: 18px 22px; }
+.am-section { margin-bottom: 18px; }
+.am-section .am-sec-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.am-sec-title::before {
+    content: '';
+    width: 3px; height: 13px;
+    background: #165DFF;
+    border-radius: 2px;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 20px;
+    background: #F7F8FA;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.info-grid .ig-item { font-size: 13px; color: #333; display: flex; gap: 8px; }
+.info-grid .ig-item .k { color: #999; flex-shrink: 0; }
+table.bonus-detail { width: 100%; border-collapse: collapse; }
+table.bonus-detail th {
+    background: #F7F8FA;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    padding: 9px 12px;
+    text-align: left;
+    border: 1px solid #E4E7ED;
+}
+table.bonus-detail td {
+    font-size: 13px;
+    color: #333;
+    padding: 9px 12px;
+    border: 1px solid #E4E7ED;
+}
+table.bonus-detail .sum-row td { background: #FFFCF5; font-weight: 700; }
+.sec-sub { font-size: 11px; color: #999; font-weight: 400; margin-left: 8px; }
+.fund-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.fund-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.fg-group-label { font-size: 11px; color: #999; margin: 10px 0 6px; }
+.fg-group-label:first-child { margin-top: 0; }
+.fund-grid .fg-item {
+    background: #F7F8FA;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.fg-item .fg-k { font-size: 12px; color: #999; margin-bottom: 4px; }
+.fg-item .fg-v { font-size: 15px; font-weight: 700; color: #222; }
+.fg-item .fg-v.hl { color: #F53F3F; }
+.result-options { display: flex; gap: 14px; }
+.result-opt {
+    flex: 1;
+    border: 1px solid #DCDFE6;
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.result-opt.sel { border-color: #165DFF; background: #F0F5FF; }
+.result-opt .dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid #C0C4CC;
+    flex-shrink: 0;
+    position: relative;
+}
+.result-opt.sel .dot { border: 5px solid #165DFF; }
+.result-opt .opt-sub { font-size: 12px; color: #999; display: block; margin-top: 3px; }
+.remark-box {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid #DCDFE6;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+}
+.remark-box:focus { border-color: #165DFF; }
+.am-footer {
+    padding: 14px 22px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <!-- 左侧原型区 -->
+    <div class="preview-area">
+        <div class="page-container" id="anno-1" style="position: relative;">
+            <div class="scheme-banner">已定方案｜后台核实工单：余额支付代购订单成功后，管理后台自动生成核实工单，财务人工核实处理。一个工单可对应多笔赠金记录。2026-11-03 业务已确认采用本方案（企微群推送不采用）。弹窗为演示态，点击遮罩可关闭查看列表。</div>
+            <div class="admin-shell">
+                <!-- 侧边栏 -->
+                <div class="sidebar" id="anno-2" style="position: relative;">
+                    <div class="anno-marker" data-id="2">2</div>
+                    <div class="side-logo">🅿️ POKO 后台</div>
+                    <div class="side-group">业务管理</div>
+                    <div class="side-item">📊 首页</div>
+                    <div class="side-item">👤 用户管理</div>
+                    <div class="side-item">📦 订单管理</div>
+                    <div class="side-item">🚚 包裹管理</div>
+                    <div class="side-group">财务中心</div>
+                    <div class="side-item">💰 财务管理</div>
+                    <div class="side-sub">充值管理</div>
+                    <div class="side-sub">余额明细</div>
+                    <div class="side-sub">手动扣款</div>
+                    <div class="side-sub active">赠金扣除核实<span class="menu-badge">3</span></div>
+                    <div class="side-group">其他</div>
+                    <div class="side-item">📣 营销管理</div>
+                    <div class="side-item">⚙️ 系统设置</div>
+                </div>
+
+                <!-- 主内容 -->
+                <div class="main">
+                    <div class="topbar">
+                        <div class="crumb">财务管理 / <b>赠金扣除核实</b></div>
+                        <div class="admin-user"><span class="admin-avatar">财</span>财务-小陈</div>
+                    </div>
+                    <div class="content">
+                        <div class="page-title">赠金扣除核实</div>
+
+                        <!-- 状态页签 -->
+                        <div class="tabs" id="anno-3" style="position: relative;">
+                            <div class="anno-marker" data-id="3">3</div>
+                            <div class="tab active">待核实<span class="tab-count">3</span></div>
+                            <div class="tab">已处理</div>
+                            <div class="tab">全部</div>
+                        </div>
+
+                        <!-- 筛选区 -->
+                        <div class="filter-bar">
+                            <div class="filter-item">工单号<input class="filter-input" placeholder="请输入"></div>
+                            <div class="filter-item">代购订单号<input class="filter-input" placeholder="请输入"></div>
+                            <div class="filter-item">用户ID<input class="filter-input" placeholder="请输入"></div>
+                            <div class="filter-item">所属店铺
+                                <select class="filter-input">
+                                    <option>全部</option>
+                                    <option>雷神集运</option>
+                                    <option selected>天馬集運</option>
+                                    <option>大发集运</option>
+                                    <option>集運先生</option>
+                                    <option>poko</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">生成时间<input class="filter-input" placeholder="开始日期 ~ 结束日期" style="width:180px;"></div>
+                            <button class="filter-btn primary">查询</button>
+                            <button class="filter-btn plain">重置</button>
+                        </div>
+
+                        <!-- 工单表格 -->
+                        <div class="table-card" id="anno-4" style="position: relative;">
+                            <div class="anno-marker" data-id="4">4</div>
+                            <table class="worktable">
+                                <thead>
+                                    <tr>
+                                        <th>工单号</th>
+                                        <th>代购订单号</th>
+                                        <th>用户ID</th>
+                                        <th>所属店铺</th>
+                                        <th class="amt">涉及赠金</th>
+                                        <th class="amt">含赠金充值</th>
+                                        <th class="amt">累计赠送</th>
+                                        <th class="amt">线下扣除</th>
+                                        <th class="amt">代购净支出</th>
+                                        <th class="amt">集运消费</th>
+                                        <th>生成时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="mono">GD1102001</td>
+                                        <td class="mono">DG20261102015301</td>
+                                        <td>U102455</td>
+                                        <td>天馬集運</td>
+                                        <td class="amt"><span class="amount">¥45.00</span><span class="cnt-badge">2笔</span></td>
+                                        <td class="amt">¥4,000.00</td>
+                                        <td class="amt">¥120.00</td>
+                                        <td class="amt"><span class="hl-red">¥30.00</span></td>
+                                        <td class="amt">¥3,900.00</td>
+                                        <td class="amt">¥180.00</td>
+                                        <td>2026-11-02 15:31</td>
+                                        <td class="st-pend">待核实</td>
+                                        <td><span class="op-link" onclick="openAuditModal()">核实处理</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">GD1102002</td>
+                                        <td class="mono">DG20261102093217</td>
+                                        <td>U103188</td>
+                                        <td>雷神集运</td>
+                                        <td class="amt"><span class="amount">¥20.00</span><span class="cnt-badge">1笔</span></td>
+                                        <td class="amt">¥500.00</td>
+                                        <td class="amt">¥20.00</td>
+                                        <td class="amt">¥0.00</td>
+                                        <td class="amt">¥480.00</td>
+                                        <td class="amt">¥15.00</td>
+                                        <td>2026-11-02 09:33</td>
+                                        <td class="st-pend">待核实</td>
+                                        <td><span class="op-link" onclick="openAuditModal()">核实处理</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">GD1102003</td>
+                                        <td class="mono">DG20261102171208</td>
+                                        <td>U100872</td>
+                                        <td>poko</td>
+                                        <td class="amt"><span class="amount">¥60.00</span><span class="cnt-badge">3笔</span></td>
+                                        <td class="amt">¥2,200.00</td>
+                                        <td class="amt">¥85.00</td>
+                                        <td class="amt"><span class="hl-red">¥85.00</span></td>
+                                        <td class="amt">¥2,100.00</td>
+                                        <td class="amt">¥60.00</td>
+                                        <td>2026-11-02 17:12</td>
+                                        <td class="st-pend">待核实</td>
+                                        <td><span class="op-link" onclick="openAuditModal()">核实处理</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">GD1031018</td>
+                                        <td class="mono">DG20261031095542</td>
+                                        <td>U102455</td>
+                                        <td>天馬集運</td>
+                                        <td class="amt"><span class="amount">¥15.00</span><span class="cnt-badge">1笔</span></td>
+                                        <td class="amt">¥4,000.00</td>
+                                        <td class="amt">¥120.00</td>
+                                        <td class="amt"><span class="hl-red">¥30.00</span></td>
+                                        <td class="amt">¥3,900.00</td>
+                                        <td class="amt">¥180.00</td>
+                                        <td>2026-10-31 09:56</td>
+                                        <td class="st-done">已扣款</td>
+                                        <td><span class="op-link">查看</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">GD1031017</td>
+                                        <td class="mono">DG20261031081211</td>
+                                        <td>U100233</td>
+                                        <td>大发集运</td>
+                                        <td class="amt"><span class="amount">¥30.00</span><span class="cnt-badge">2笔</span></td>
+                                        <td class="amt">¥1,500.00</td>
+                                        <td class="amt">¥45.00</td>
+                                        <td class="amt">¥0.00</td>
+                                        <td class="amt">¥200.00</td>
+                                        <td class="amt">¥1,200.00</td>
+                                        <td>2026-10-31 08:13</td>
+                                        <td class="st-none">无需扣款</td>
+                                        <td><span class="op-link">查看</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="pager">
+                                <span>共 24 条</span>
+                                <span class="pg">‹</span>
+                                <span class="pg on">1</span>
+                                <span class="pg">2</span>
+                                <span class="pg">3</span>
+                                <span class="pg">4</span>
+                                <span class="pg">›</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 核实处理弹窗（演示态，默认展示） -->
+                <div class="audit-mask" id="audit-modal" onclick="maskClose(event)">
+                    <div class="audit-modal" id="anno-5" style="position: relative;">
+                        <div class="anno-marker" data-id="5">5</div>
+                        <div class="am-header">
+                            <div class="am-title">核实处理</div>
+                            <div class="am-close" onclick="closeAuditModal()">×</div>
+                        </div>
+                        <div class="am-body">
+                            <div class="am-section">
+                                <div class="am-sec-title">工单信息</div>
+                                <div class="info-grid">
+                                    <div class="ig-item"><span class="k">工单号</span><span class="mono">GD1102001</span></div>
+                                    <div class="ig-item"><span class="k">代购订单号</span><span class="mono">DG20261102015301</span></div>
+                                    <div class="ig-item"><span class="k">用户ID</span><span>U102455</span></div>
+                                    <div class="ig-item"><span class="k">所属店铺</span><span>天馬集運</span></div>
+                                    <div class="ig-item"><span class="k">订单支付金额</span><span>¥515.00</span></div>
+                                    <div class="ig-item"><span class="k">用户当前余额</span><span>¥128.50</span></div>
+                                    <div class="ig-item"><span class="k">生成时间</span><span>2026-11-02 15:31</span></div>
+                                </div>
+                            </div>
+                            <div class="am-section">
+                                <div class="am-sec-title">赠金明细（2 笔）</div>
+                                <table class="bonus-detail">
+                                    <thead>
+                                        <tr><th>赠送流水编码</th><th>赠送金额</th><th>赠送时间</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="mono">ZS20261018001</td><td>¥15.00</td><td>2026-10-18 14:22</td></tr>
+                                        <tr><td class="mono">ZS20261025002</td><td>¥30.00</td><td>2026-10-25 09:41</td></tr>
+                                        <tr class="sum-row"><td>合计</td><td>¥45.00</td><td>共 2 笔</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="am-section">
+                                <div class="am-sec-title">用户资金统计<span class="sec-sub">统计区间：近 180 天（2026-05-06 ~ 2026-11-02）</span></div>
+                                <div id="anno-6" style="position: relative;">
+                                    <div class="anno-marker" data-id="6">6</div>
+                                    <div class="fg-group-label">充值与赠金（仅统计产生了赠送的充值）</div>
+                                    <div class="fund-grid">
+                                        <div class="fg-item"><div class="fg-k">含赠金充值</div><div class="fg-v">¥4,000.00</div></div>
+                                        <div class="fg-item"><div class="fg-k">累计赠送</div><div class="fg-v hl">¥120.00</div></div>
+                                        <div class="fg-item"><div class="fg-k">线下扣除</div><div class="fg-v hl">¥30.00</div></div>
+                                    </div>
+                                    <div class="fg-group-label">资金去向</div>
+                                    <div class="fund-grid cols-4">
+                                        <div class="fg-item"><div class="fg-k">代购支出</div><div class="fg-v">¥3,950.00</div></div>
+                                        <div class="fg-item"><div class="fg-k">代购退回</div><div class="fg-v">¥50.00</div></div>
+                                        <div class="fg-item"><div class="fg-k">代购净支出</div><div class="fg-v hl">¥3,900.00</div></div>
+                                        <div class="fg-item"><div class="fg-k">集运消费</div><div class="fg-v">¥180.00</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="am-section">
+                                <div class="am-sec-title">处理结果</div>
+                                <div class="result-options">
+                                    <div class="result-opt sel">
+                                        <span class="dot"></span>
+                                        <span>已扣款<span class="opt-sub">已使用手动扣款功能完成扣除</span></span>
+                                    </div>
+                                    <div class="result-opt">
+                                        <span class="dot"></span>
+                                        <span>无需扣款<span class="opt-sub">核实后无需扣除（备注必填）</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="am-section" style="margin-bottom:0;">
+                                <div class="am-sec-title">处理备注</div>
+                                <textarea class="remark-box" placeholder="记录核实结论，多笔赠金处理不一致时逐笔说明">10-18赠送的15元已用于集运发货不扣；10-25赠送的30元已扣。</textarea>
+                            </div>
+                        </div>
+                        <div class="am-footer">
+                            <button class="btn btn-default" onclick="closeAuditModal()">取消</button>
+                            <button class="btn btn-primary" onclick="closeAuditModal()">确认提交</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-admin-bonus-audit';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '已定方案：财务在管理后台核实处理赠金工单，一个工单可对应多笔赠金记录，2026-11-03 业务已确认。',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '本页为管理后台"赠金扣除核实"工单页，是本次需求已确认采用的财务通知方式（企微群推送方案已确认不采用）。用户使用集运余额支付代购订单成功后，系统命中条件即自动生成核实工单；财务在本页查看工单与用户资金统计、人工核实并通过现有"手动扣款"功能完成扣款后，回到本页标记处理结果，形成闭环留痕。扣款决策由财务人工做出，系统不自动扣款。',
+            business: '工单生成条件与用户端提示一致：余额支付代购订单成功、用户存在追责窗口内的充值赠送流水、该流水未进入过任何工单。追责窗口天数为可配置参数。一个工单对应同一用户同一支付事件命中的全部赠送流水（一单多赠金）。',
+            exception: '支付失败或订单取消不生成工单；扣款金额超过用户当前余额导致扣款失败时，工单保持待核实状态，由财务择期再次处理。'
+        }
+    },
+    {
+        id: 2,
+        title: '菜单入口与待办角标',
+        summary: '财务管理下新增"赠金扣除核实"菜单，角标实时展示待核实工单数。',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '在后台财务管理菜单组下新增"赠金扣除核实"入口，财务从该入口进入工单列表处理待办。',
+            display: '菜单名称右侧展示待核实工单数量角标；有待办时展示，无待办时不展示。',
+            interaction: '点击菜单进入工单列表，默认定位到"待核实"页签。',
+            business: '菜单仅对财务角色及管理员可见，权限沿用后台现有角色权限体系配置。'
+        }
+    },
+    {
+        id: 3,
+        title: '状态页签与筛选区',
+        summary: '按处理状态分页签查看，支持工单号、代购订单号、用户ID、所属店铺、生成时间筛选。',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '帮助财务快速定位待办工单与追溯历史工单。',
+            display: '页签分：待核实（带数量角标）、已处理、全部；筛选条件：工单号、代购订单号、用户ID、所属店铺（下拉单选，含全部选项，店铺范围与后台店铺列表一致）、生成时间范围。',
+            interaction: '切换页签即时刷新列表；"查询"按条件过滤，"重置"清空条件恢复默认。进入页面默认选中"待核实"。',
+            state: '待核实：生成后未处理；已处理：包含已扣款与无需扣款两种终态。终态不可逆，不可再次编辑。'
+        }
+    },
+    {
+        id: 4,
+        title: '工单列表与资金统计',
+        summary: '列表展示工单主信息，并平铺用户资金统计（含赠金充值/累计赠送/线下扣除/代购净支出/集运消费），不再展示赠金明细展开行。',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '工单列表展示每条工单的核心信息，并直接平铺该用户的资金统计，财务在列表页即可完成初步分诊（判断哪笔赠金未扣、哪类用户套取代购），无需展开或翻余额明细；逐笔赠金明细在核实处理弹窗中查看。',
+            display: '列：工单号、代购订单号、用户ID、所属店铺、涉及赠金（合计金额+笔数标识）、含赠金充值、累计赠送、线下扣除、代购净支出、集运消费、生成时间、状态、操作。5个资金统计列口径与核实处理弹窗的用户资金统计一致（见标注6），实时汇总；列表按生成时间倒序，分页加载，列宽超出时横向滚动。',
+            interaction: '点击"核实处理"打开核实处理弹窗（待核实工单，弹窗内展示赠金明细与完整资金统计）；已处理工单操作列为"查看"，只读展示处理结果与备注。',
+            business: '去重以赠送流水编码为粒度：同一笔赠送流水只会进入一次工单；用户再次获得新赠金并用余额支付代购时，按新流水生成新工单，与历史工单互不影响。同一用户多条工单的资金统计列取值相同（均为该用户当前实时统计）。'
+        }
+    },
+    {
+        id: 5,
+        title: '核实处理弹窗（新增）',
+        summary: '财务核实入口：查看工单与赠金明细，选择已扣款/无需扣款并填写备注，提交后工单转终态。',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '财务处理工单的载体。集中展示工单信息（工单号、代购订单号、用户ID、所属店铺、订单支付金额、用户当前余额、生成时间）、赠金明细（逐笔流水+合计）与用户资金统计（见标注6），财务据此判断是否扣款，扣款动作在"手动扣款"功能中另行完成。',
+            display: '处理结果二选一：已扣款、无需扣款；处理备注为文本框，选择"无需扣款"时备注必填；多笔赠金处理不一致时在备注中逐笔说明。',
+            interaction: '确认提交后工单转入对应终态（已扣款/无需扣款），弹窗关闭并刷新列表；取消则不做任何变更。',
+            business: '提交时记录处理人、处理时间、处理结果与备注，全程留痕可查；默认按工单整体处理，不逐笔标记明细状态。系统不自动扣款，"已扣款"仅代表财务确认已在手动扣款功能完成扣除。',
+            exception: '提交时校验：未选择处理结果或"无需扣款"未填备注时不允许提交，并给出提示。'
+        }
+    },
+    {
+        id: 6,
+        title: '用户资金统计（新增）',
+        summary: '工单内直接展示该用户含赠金充值、赠送、线下扣除及资金去向合计，财务无需再翻余额明细手工统计。',
+        target: '#anno-6',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '在核实处理弹窗内集中展示用户资金全貌，替代财务前往"用户余额明细"逐页统计的动作，辅助判断赠金是否被套用于代购。分两组：充值与赠金（含赠金充值、累计赠送、线下扣除）、资金去向（代购支出、代购退回、代购净支出、集运消费）。',
+            display: '含赠金充值：仅统计产生了赠送的充值流水（每笔赠送流水带关联单号，关联到对应充值流水；无赠送的普通充值不计入）；累计赠送：上述充值对应的赠送合计；线下扣除：财务核实后通过手动扣款线下扣除赠金产生的流水合计，用于判断赠金是否已扣过；代购净支出=代购支出−代购退回。统计区间默认近180天，与追责窗口一致。',
+            business: '统计按余额流水的交易类型汇总：交易类型"充值"且被赠送流水关联单号指向的计入含赠金充值；"赠送"计入累计赠送；"线下扣除"计入线下扣除（与工单涉及赠金对照即可判断已扣进度）；"转入App代付余额"计入代购支出；"App代付余额转入"计入代购退回；"订单支付"计入集运消费。仅统计已生效流水，冲正退款按对应类型抵扣。',
+            exception: '统计接口异常时该区块展示加载失败并提供重试，不影响工单信息与处理提交。是否需要提供全部历史统计，待业务确认后扩展。'
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+
+// ===== 页面演示交互（核实处理弹窗） =====
+function openAuditModal() {
+    document.getElementById('audit-modal').style.display = 'flex';
+}
+function closeAuditModal() {
+    document.getElementById('audit-modal').style.display = 'none';
+}
+function maskClose(e) {
+    if (e.target.id === 'audit-modal') closeAuditModal();
+}
+</script>
+</body>
+</html>
