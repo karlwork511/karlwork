@@ -28,6 +28,11 @@
             "name": "钱包页赠金规则提示（弱提示）",
             "file": "docs/gift-wallet-tip-annotated.html",
             "icon": "📱"
+          },
+          {
+            "name": "代购余额支付弹窗（强提示）",
+            "file": "docs/gift-payment-dialog-annotated.html",
+            "icon": "💳"
           }
         ]
       }
