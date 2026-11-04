@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代购订单页-余额支付弹窗（已定·强提示）</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-wrap: wrap; height: 100vh; }
+
+/* 顶部标注工具栏 */
+.annotation-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #E4E7ED;
+    flex-shrink: 0;
+    z-index: 100;
+    width: 100%;
+    height: 47px;
+}
+.toolbar-edit-btn {
+    padding: 6px 14px;
+    border: 1px solid #DCDFE6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.preview-area { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; position: relative; height: calc(100vh - 47px); }
+
+/* 右侧标注面板 */
+.annotation-panel {
+    width: 300px;
+    background: #F7F8FA;
+    border-left: 1px solid #E4E7ED;
+    overflow-y: auto;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    height: calc(100vh - 47px);
+}
+.annotation-panel.collapsed {
+    width: 0;
+    border-left: none;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #E4E7ED;
+    background: #F7F8FA;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-toggle-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #E8EAED;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 48px;
+    background: #165DFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 999;
+    display: none;
+    box-shadow: -2px 2px 8px rgba(0,0,0,0.15);
+}
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+/* 数字角标 */
+.anno-marker {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #165DFF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 9999;
+    user-select: none;
+}
+.anno-marker.highlight,
+.anno-marker:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4);
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E4E7ED;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close {
+    width: 28px; height: 28px;
+    border: none; background: transparent;
+    font-size: 20px; color: #999;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid #E4E7ED;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 详情表格 */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th {
+    background: #FAFAFA;
+    width: 100px;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border: 1px solid #E4E7ED;
+    vertical-align: top;
+}
+.detail-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    border: 1px solid #E4E7ED;
+    line-height: 1.7;
+}
+.detail-table textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+}
+.detail-table textarea:focus { border-color: #165DFF; }
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+/* 滚动定位闪烁动画 */
+.anno-flash {
+    animation: flashHighlight 1.5s ease-out;
+}
+@keyframes flashHighlight {
+    0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); }
+    100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); }
+}
+
+/* ========== 左侧产品界面样式（代购确认订单页） ========== */
+.phone {
+    width: 375px;
+    margin: 0 auto;
+    background: #F5F5F5;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    position: relative;
+}
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    background: #fff;
+}
+.status-icons { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #222;
+    background: #fff;
+}
+.nav-back { font-size: 20px; color: #222; width: 24px; }
+.nav-title { flex: 1; text-align: center; }
+.nav-right { font-size: 18px; }
+
+/* 商品卡片 */
+.goods-card {
+    background: #fff;
+    margin-top: 2px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+}
+.goods-img {
+    width: 88px;
+    height: 88px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FFE9D2, #FFD2A8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    flex-shrink: 0;
+}
+.goods-info { flex: 1; min-width: 0; }
+.goods-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.goods-spec { font-size: 12px; color: #999; margin-top: 5px; }
+.goods-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.goods-price { font-size: 16px; font-weight: 700; color: #FF7A00; }
+.qty-box { display: flex; align-items: center; border: 1px solid #E5E5E5; border-radius: 4px; }
+.qty-box span { padding: 3px 10px; font-size: 13px; color: #333; }
+.qty-box .qty-num { border-left: 1px solid #E5E5E5; border-right: 1px solid #E5E5E5; }
+
+/* 留言 */
+.msg-row {
+    background: #fff;
+    margin-top: 2px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+.msg-row .k { color: #222; font-weight: 600; }
+.msg-row .v { color: #999; }
+
+/* 小计区 */
+.subtotal-card { background: #fff; margin-top: 10px; padding: 6px 14px; }
+.sub-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #222;
+}
+.sub-row + .sub-row { border-top: 1px solid #F2F2F2; }
+
+/* 价格明细 */
+.price-card { background: #fff; margin-top: 10px; padding: 6px 14px 12px; }
+.price-card .pc-title { font-size: 15px; font-weight: 700; padding: 12px 0 6px; color: #222; }
+
+/* 支付方式 */
+.pay-section { background: #fff; margin-top: 10px; padding: 6px 14px 14px; position: relative; }
+.pay-section .ps-title { font-size: 15px; font-weight: 700; padding: 12px 0; color: #222; }
+.pay-item {
+    border: 2px solid #FF7A00;
+    background: #FFF8F0;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+.pay-item .wallet-icon {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF9E2C, #FF7A00);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+.pay-item .pay-name { font-size: 15px; font-weight: 700; color: #222; }
+.pay-item .pay-balance { font-size: 12px; color: #999; margin-top: 3px; display: flex; gap: 10px; align-items: center; }
+.recharge-link {
+    color: #999;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    padding-right: 8px;
+}
+.radio-on {
+    margin-left: auto;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 6px solid #FF7A00;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+/* 协议 */
+.agreement {
+    padding: 14px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    margin-top: 2px;
+}
+.agreement .ck {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #FF7A00;
+    color: #fff;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.agreement a { color: #4A7DFF; text-decoration: none; }
+
+/* 底部提交栏（随内容流展示，便于长截图） */
+.bottom-bar {
+    background: #fff;
+    margin-top: 2px;
+    padding: 12px 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.bottom-info { font-size: 12px; color: #999; line-height: 1.5; }
+.bottom-info .total-line { font-size: 14px; color: #222; }
+.bottom-info .total-line b { color: #FF7A00; font-size: 20px; }
+.submit-order-btn {
+    background: linear-gradient(135deg, #FF9E2C 0%, #FF7A00 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 30px;
+    border-radius: 24px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* 已定方案标识条 */
+.scheme-banner {
+    max-width: 375px;
+    margin: 0 auto 14px;
+    background: #165DFF;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* 新增：赠金提示弹窗（演示态） */
+.demo-modal-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+}
+.bonus-modal {
+    width: 300px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px 20px 0;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.bonus-modal .bm-title { font-size: 16px; font-weight: 700; color: #222; text-align: center; }
+.bonus-modal .bm-body { font-size: 14px; color: #555; line-height: 1.8; margin: 14px 0 20px; }
+.bonus-modal .bm-btns { display: flex; border-top: 1px solid #F0F0F0; }
+.bonus-modal .bm-btn {
+    flex: 1;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 15px;
+    cursor: pointer;
+}
+.bonus-modal .bm-btn.cancel { color: #666; border-right: 1px solid #F0F0F0; }
+.bonus-modal .bm-btn.confirm { color: #FF7A00; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 顶部标注工具栏 -->
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+    <!-- 左侧原型区 -->
+    <div class="preview-area">
+        <div class="page-container" id="anno-1">
+            <div class="scheme-banner">已定方案｜强提示：使用余额支付代购订单时，命中条件的用户弹窗二次确认，支付成功后管理后台生成核实工单。2026-11-03 业务确认<b>弱提示与强提示均实施</b>，弱提示见钱包页。</div>
+            <div class="phone">
+                <!-- 状态栏 -->
+                <div class="status-bar">
+                    <span>14:53</span>
+                    <span class="status-icons">📶 🛜 🔋66</span>
+                </div>
+                <!-- 导航栏 -->
+                <div class="nav-bar">
+                    <span class="nav-back">‹</span>
+                    <span class="nav-title">確定訂單</span>
+                    <span class="nav-right">🛒</span>
+                </div>
+
+                <!-- 商品卡片 -->
+                <div class="goods-card">
+                    <div class="goods-img">📻</div>
+                    <div class="goods-info">
+                        <div class="goods-title">送閨蜜禾伙人生日禮物女生同擔</div>
+                        <div class="goods-spec">米黃色，【原盒】王一珩立牌＋小卡＋賀卡</div>
+                        <div class="goods-price-row">
+                            <span class="goods-price">¥62.6</span>
+                            <span class="qty-box"><span>−</span><span class="qty-num">1</span><span>＋</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 留言 -->
+                <div class="msg-row">
+                    <span class="k">留言</span>
+                    <span class="v">可備註您的購買需求</span>
+                </div>
+
+                <!-- 小计 -->
+                <div class="subtotal-card">
+                    <div class="sub-row"><span>小計</span><span>¥62.6</span></div>
+                    <div class="sub-row"><span>國內運費</span><span>¥0</span></div>
+                </div>
+
+                <!-- 价格明细 -->
+                <div class="price-card">
+                    <div class="pc-title">價格明細</div>
+                    <div class="sub-row"><span>商品總價</span><span>¥62.6</span></div>
+                    <div class="sub-row"><span>國內運費</span><span>¥0</span></div>
+                    <div class="sub-row"><span>服務費</span><span>¥0（0.00%）</span></div>
+                    <div class="sub-row"><span>總計</span><span>¥62.6</span></div>
+                </div>
+
+                <!-- 支付方式 -->
+                <div class="pay-section" id="anno-2">
+                    <div class="anno-marker" data-id="2">2</div>
+                    <div class="ps-title">支付方式</div>
+                    <div class="pay-item">
+                        <span class="wallet-icon">👛</span>
+                        <span>
+                            <div class="pay-name">集運餘額</div>
+                            <div class="pay-balance">
+                                <span>0 ¥</span>
+                                <span class="recharge-link" id="anno-3">
+                                    <div class="anno-marker" data-id="3">3</div>
+                                    充值 ›
+                                </span>
+                            </div>
+                        </span>
+                        <span class="radio-on"></span>
+                    </div>
+                </div>
+
+                <!-- 协议 -->
+                <div class="agreement">
+                    <span class="ck">✓</span>
+                    <span>我已閱讀與同意<a>《免責聲明》</a><a>《禁運商品須知》</a></span>
+                </div>
+
+                <!-- 底部提交栏 -->
+                <div class="bottom-bar">
+                    <div class="bottom-info">
+                        <div class="total-line">共1款1件　總計：<b>¥62.6</b></div>
+                        <div>不含國際運費 ⓘ</div>
+                    </div>
+                    <div class="submit-order-btn" id="anno-4" onclick="openBonusModal()">
+                        <div class="anno-marker" data-id="4">4</div>
+                        提交訂單
+                    </div>
+                </div>
+
+                <!-- 新增：赠金提示弹窗（演示态，默认展示） -->
+                <div class="demo-modal-mask" id="bonus-modal">
+                    <div class="bonus-modal" id="anno-5">
+                        <div class="anno-marker" data-id="5">5</div>
+                        <div class="bm-title">餘額支付提示</div>
+                        <div class="bm-body">檢測到您的賬戶獲得過充值贈送金額。贈送金額僅限用於集運業務，若使用餘額支付代購訂單，平台核實後將扣除對應贈送金額。是否繼續使用餘額支付？</div>
+                        <div class="bm-btns">
+                            <div class="bm-btn cancel" onclick="closeBonusModal()">取消</div>
+                            <div class="bm-btn confirm" onclick="closeBonusModal()">已知悉並支付</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 右侧标注面板 -->
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    <!-- 折叠态悬浮按钮 -->
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <table class="detail-table" id="detail-table"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注管理弹窗 -->
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'annotated-prototype-daigou-order-bonus-modal';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+// ===== 标注数据 =====
+const annotations = [
+    {
+        id: 1,
+        title: '页面总说明',
+        summary: '已定方案（强提示）：余额支付代购订单时弹窗二次确认，与钱包页弱提示同步实施。',
+        target: '#anno-1',
+        showMarker: false,
+        type: 'overview',
+        detail: {
+            feature: '本页为代购订单余额支付强提示弹窗（已定方案：2026-11-03 业务确认弱提示与强提示均实施）。代购确认订单页是用户确认商品、费用并选择支付方式后提交订单的页面。本方案在使用集运余额支付代购订单时增加赠金强提示校验——命中条件的用户需确认知悉赠金限制规则后才能继续支付；支付成功后系统在管理后台生成核实工单。扣款动作由财务人工执行，不在本需求范围。',
+            business: '弹窗触发需同时满足三个条件：1、支付方式为集运余额；2、用户180天内存在充值赠送流水；3、该用户未确认过赠金规则提示。任一不满足则直接走正常支付。180天为可配置参数，由业务侧调整。用户确认一次后永久不再弹出（用户粒度去重），但新获赠金再代购仍会在后台生成核实工单（流水粒度去重），两件事相互独立。',
+            exception: '校验接口或确认状态查询异常/超时时，按不弹窗放行支付，避免阻塞用户下单；后台工单照常生成；异常记录日志由技术排查。'
+        }
+    },
+    {
+        id: 2,
+        title: '支付方式区',
+        summary: '当前仅集运余额一种支付方式，展示余额并提供充值入口。',
+        target: '#anno-2',
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '展示并选择订单支付方式。当前仅支持集运余额支付，默认选中。余额为充值本金与赠送金额的合并值，不分开显示。',
+            display: '展示当前账户余额；余额不足支付本单时展示"充值"入口。',
+            business: '只有选中集运余额支付时才触发赠金校验；后续若新增在线支付等其他支付方式，其他方式不触发该校验。',
+            state: '余额充足：可直接提交订单支付；余额不足：引导用户先充值，沿用原有逻辑不变。'
+        }
+    },
+    {
+        id: 3,
+        title: '充值入口',
+        summary: '余额不足时引导用户跳转钱包页充值。',
+        target: '#anno-3',
+        showMarker: true,
+        type: 'field',
+        detail: {
+            feature: '余额不足支付本单时展示的引导入口，点击跳转钱包充值页，充值完成后返回本页继续下单。',
+            interaction: '点击跳转钱包页；钱包页含本次新增的赠金规则弱提示，用户在充值前可见赠金限制规则。',
+            business: '跳转与返回沿用原有逻辑不变；用户从该入口进入钱包充值，同样视为已阅读赠金限制条款。'
+        }
+    },
+    {
+        id: 4,
+        title: '提交订单按钮',
+        summary: '点击后先执行赠金校验：未命中直接支付，命中则弹出赠金提示弹窗。',
+        target: '#anno-4',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '用户确认订单信息与支付方式后，点击提交订单并发起余额支付。',
+            interaction: '点击后先由服务端执行赠金校验：未命中条件，直接进入余额扣款支付流程；命中条件，弹出赠金提示弹窗，用户点"已知悉並支付"后继续余额扣款支付，点"取消"关闭弹窗并停留在本页、不生成订单。',
+            business: '校验在提交订单时发起，是否命中及确认状态以服务端返回为准；用户确认后服务端写入用户粒度确认记录（用户ID、确认时间、协议文案版本），作为弹窗去重与扣款纠纷举证依据，持久保存。',
+            exception: '校验接口或确认状态查询异常/超时时按不弹窗放行，直接支付，避免阻塞下单。'
+        }
+    },
+    {
+        id: 5,
+        title: '赠金提示弹窗（新增）',
+        summary: '强提示弹窗：告知赠金限集运规则，用户确认后继续支付；确认一次后永久不再弹出。',
+        target: '#anno-5',
+        showMarker: true,
+        type: 'interaction',
+        detail: {
+            feature: '强提示弹窗。对180天内获得过充值赠送金额且未确认过本提示的用户，在使用余额支付代购订单前进行规则告知与二次确认；用户确认一次后，后续任何代购订单均不再弹出。',
+            display: '标题：餘額支付提示；正文：檢測到您的賬戶獲得過充值贈送金額。贈送金額僅限用於集運業務，若使用餘額支付代購訂單，平台核實後將扣除對應贈送金額。是否繼續使用餘額支付？；按钮：取消／已知悉並支付。',
+            interaction: '点"取消"：关闭弹窗，不提交订单；点"已知悉並支付"：服务端写入确认记录，关闭弹窗并继续余额支付流程，后续不再弹出（本地缓存仅作加速，以服务端记录为准）。',
+            business: '支付成功后，系统在管理后台生成"赠金扣除核实工单"：工单主信息含代购订单号、用户ID、支付金额、用户当前余额，赠金明细含逐笔赠送流水编码、赠送金额、赠送时间。去重以赠送流水编码为粒度，同一流水只进一次工单；同一支付事件命中多笔流水时合并为一个工单。用户点确认不代表系统承诺扣款，扣不扣、扣多少由财务人工决策。',
+            copywriting: '文案统一使用"平台核實後將扣除對應贈送金額"口径，不出现具体扣款金额与扣款时间；文案不写死天数，180天窗口调整时无需改文案。',
+            exception: '支付失败或超时：不生成工单，只有支付成功才生成；确认记录写入失败时记录日志并提示重试，不阻塞支付。'
+        }
+    }
+];
+
+// ===== 标注模块标签映射 =====
+const DETAIL_LABELS = {
+    feature: '功能说明',
+    display: '字段/展示规则',
+    interaction: '交互规则',
+    business: '业务规则',
+    state: '状态说明',
+    exception: '异常/边界',
+    copywriting: '文案规范'
+};
+
+// ===== 下方代码不要修改 =====
+
+function loadCustomAnnotations() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) customAnnotations = JSON.parse(saved);
+    } catch(e) {}
+}
+function getActiveAnnotations() {
+    return customAnnotations || annotations;
+}
+function renderAnnotationList() {
+    const list = document.getElementById('annotation-list');
+    const data = getActiveAnnotations();
+    list.innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header">
+                <div class="annotation-badge">${item.id}</div>
+                <div class="annotation-title">${item.title}</div>
+            </div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>
+    `).join('');
+}
+function highlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.add('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const marker = document.querySelector(`.anno-marker[data-id="${id}"]`);
+    if (marker) marker.classList.remove('highlight');
+    const item = document.querySelector(`.annotation-item[data-id="${id}"]`);
+    if (item) item.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+
+function handleAnnotationClick(id) {
+    scrollToAnnotation(id);
+    setTimeout(() => showDetail(id), 300);
+}
+
+function scrollToAnnotation(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item) return;
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const targetTop = target.offsetTop - 20;
+        previewArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+        target.classList.remove('anno-flash');
+        void target.offsetWidth;
+        target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item;
+    isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const detail = item.detail;
+    const rows = [];
+    const moduleOrder = ['feature', 'display', 'interaction', 'business', 'state', 'exception', 'copywriting'];
+    moduleOrder.forEach(key => {
+        if (detail[key]) {
+            rows.push({ label: DETAIL_LABELS[key], value: detail[key], key: key });
+        }
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td><textarea data-key="${row.key}">${row.value}</textarea></td></tr>
+        `).join('');
+    } else {
+        table.innerHTML = rows.map(row => `
+            <tr><th>${row.label}</th><td>${row.value.replace(/\n/g, '<br>')}</td></tr>
+        `).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const textareas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    textareas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item;
+    isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+    const btn = document.getElementById('save-btn');
+    const original = btn.textContent;
+    btn.textContent = '已保存 ✓';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original;
+    isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() {
+    document.getElementById('detail-modal').classList.remove('show');
+}
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        const collapsed = localStorage.getItem(PANEL_STATE_KEY) === '1';
+        if (collapsed) {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const expandBtn = document.getElementById('panel-expand-btn');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    expandBtn.classList.toggle('show', isCollapsed);
+    try {
+        localStorage.setItem(PANEL_STATE_KEY, isCollapsed ? '1' : '0');
+    } catch(e) {}
+}
+
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let listHtml = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        listHtml += `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    listHtml += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = listHtml;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() {
+    document.getElementById('manage-modal').classList.remove('show');
+}
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = {
+        id: newId,
+        title: '新标注 ' + newId,
+        summary: '点击编辑修改标注内容...',
+        target: '#anno-' + newId,
+        showMarker: true,
+        type: 'area',
+        detail: {
+            feature: '请填写功能说明...',
+        }
+    };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList();
+    closeManageModal();
+    currentAnnotation = newItem;
+    isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((item, index) => { item.id = index + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal();
+    renderAnnotationList();
+}
+
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(activeData, null, 2);
+    const replacement = 'const annotations = ' + dataStr + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = document.title || '带标注原型';
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    a.download = `${title}_${date}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const btn = document.getElementById('export-btn');
+    const original = btn.textContent;
+    btn.textContent = '导出成功 ✓';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+}
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+
+// ===== 页面演示交互（赠金弹窗） =====
+function openBonusModal() {
+    document.getElementById('bonus-modal').style.display = 'flex';
+}
+function closeBonusModal() {
+    document.getElementById('bonus-modal').style.display = 'none';
+}
+</script>
+</body>
+</html>
