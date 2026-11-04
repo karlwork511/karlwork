@@ -7,12 +7,12 @@
       {
         "name": "充值赠金扣回 PRD v1.6（飞书）",
         "file": "https://zcn9mbpydspc.feishu.cn/docx/YXL1dL4IWo95HAxpK4tc532snPf",
-        "icon": "📄"
+        "icon": "📎"
       }
     ],
     "groups": [
       {
-        "title": "原型",
+        "title": "需求说明",
         "pages": [
           {
             "name": "需求总览说明图",
@@ -22,7 +22,7 @@
         ]
       },
       {
-        "title": "原型",
+        "title": "用户端",
         "pages": [
           {
             "name": "钱包页赠金规则提示（弱提示）",
@@ -37,7 +37,7 @@
         ]
       },
       {
-        "title": "原型",
+        "title": "管理后台",
         "pages": [
           {
             "name": "赠金扣除核实工单",
