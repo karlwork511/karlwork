@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>核重补差（方案二）· 开发说明图 v1.4</title>
+<style>
+  :root{
+    --ink:#1f2a33; --ink-2:#44555f; --ink-3:#7a8a94;
+    --line:#dde5ea; --paper:#ffffff; --bg:#f4f6f8;
+    --teal:#0f766e; --teal-bg:#effaf8; --teal-line:#99ddd4;
+    --orange:#c2410c; --orange-bg:#fff4ec; --orange-line:#f3c5a8;
+    --amber:#b45309; --amber-bg:#fdf6ea; --amber-line:#ecd3ac;
+    --red:#b42318; --red-bg:#fef3f2;
+    --green:#067647; --green-bg:#ecfdf3;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;font-size:15px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 64px}
+
+  /* ===== 页头 ===== */
+  header.page{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px 28px;margin-bottom:20px}
+  .kicker{font-size:13px;color:var(--teal);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+  h1{font-size:26px;line-height:1.35;font-weight:800}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:#fafcfd}
+  .tag b{font-weight:700}
+  .tag.dev{color:var(--orange);border-color:var(--orange-line);background:var(--orange-bg)}
+  .tag.src{color:var(--ink-3);font-weight:500}
+  .essence{margin-top:16px;padding:14px 16px;border-radius:8px;background:var(--teal-bg);border:1px solid var(--teal-line);font-size:15px;color:#0b4f4a}
+  .essence b{color:var(--teal)}
+
+  /* ===== 章节 ===== */
+  section{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:24px 28px;margin-bottom:20px}
+  h2{font-size:18px;font-weight:800;margin-bottom:4px;display:flex;align-items:baseline;gap:10px}
+  h2 .no{font-size:13px;color:var(--paper);background:var(--ink);border-radius:6px;padding:2px 8px;font-weight:700}
+  .sub{font-size:13.5px;color:var(--ink-3);margin-bottom:18px}
+
+  /* ===== 主流程 ===== */
+  .flow-main{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-bottom:6px}
+  .fnode{border:2px solid var(--teal);background:var(--teal-bg);border-radius:9px;padding:10px 14px;font-weight:700;font-size:14px;color:#0b4f4a;display:flex;flex-direction:column;justify-content:center;min-width:118px}
+  .fnode small{font-weight:500;font-size:12px;color:var(--ink-2);margin-top:2px}
+  .fnode.jy{border-color:var(--orange);background:var(--orange-bg);color:#7c2d12}
+  .farrow{align-self:center;padding:0 10px;color:var(--ink-3);font-size:20px;font-weight:700}
+  .branches{display:grid;grid-template-columns:1fr 1.35fr;gap:14px;margin-top:14px}
+  .branch{border-radius:var(--radius);padding:16px 18px;border:1.5px solid}
+  .branch.tw{border-color:var(--amber-line);background:var(--amber-bg)}
+  .branch.intl{border-color:var(--orange-line);background:var(--orange-bg)}
+  .branch h3{font-size:15px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .branch.tw h3{color:var(--amber)}
+  .branch.intl h3{color:var(--orange)}
+  .branch h3 .cfg{font-size:11.5px;font-weight:700;color:var(--amber);background:#fff;border:1px solid var(--amber-line);border-radius:5px;padding:1px 7px}
+  .branch .cond{font-size:12.5px;color:var(--ink-2);margin-bottom:12px}
+  .case{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px dashed rgba(0,0,0,.12)}
+  .case:first-of-type{border-top:none}
+  .case .k{flex:none;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:1px;white-space:nowrap}
+  .case .k.ret{background:#e6f4ea;color:#1e6b3a}
+  .case .k.add{background:#fdeaea;color:var(--red)}
+  .case .k.eq{background:#eef2f5;color:var(--ink-2)}
+  .case p{font-size:13.5px;color:var(--ink)}
+  .case p b{color:inherit}
+  .case .step{display:inline-block;font-size:12px;color:var(--ink-2)}
+  .hl-lock{color:var(--red);font-weight:700}
+  .hl-pass{color:var(--green);font-weight:700}
+  .hl-plat{color:var(--amber);font-weight:700}
+
+  /* ===== 表格 ===== */
+  .tbl-scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+  caption{text-align:left;font-size:12.5px;color:var(--ink-3);padding-bottom:8px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  thead th{background:#f0f4f7;font-weight:700;color:var(--ink-2);white-space:nowrap}
+  tbody th{font-weight:700;white-space:nowrap;background:#fafcfd}
+  td .mono{font-variant-numeric:tabular-nums}
+
+  /* ===== 优先级徽标 ===== */
+  .pri{display:inline-block;font-size:11.5px;font-weight:800;padding:1px 7px;border-radius:5px;white-space:nowrap}
+  .pri.p0{background:#fdeaea;color:var(--red)}
+  .pri.p1{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-line)}
+  .pri.p2{background:#eef2f5;color:var(--ink-2)}
+  .new-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--green-bg);color:var(--green);margin-left:6px;white-space:nowrap}
+  .chg-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:#eef4ff;color:#175cd3;margin-left:6px;white-space:nowrap}
+  .dep-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--orange-bg);color:var(--orange);margin-left:6px;white-space:nowrap;border:1px solid var(--orange-line)}
+
+  /* ===== 配置表 ===== */
+  .cfg-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:start}
+  .cfg-card{border:1px solid var(--line);border-radius:9px;padding:14px 16px}
+  .cfg-card h4{font-size:13.5px;font-weight:800;margin-bottom:8px;color:var(--ink)}
+  .cfg-card .mini{width:100%;font-size:12.5px;min-width:0}
+  .cfg-card .mini th,.cfg-card .mini td{padding:6px 8px}
+  .cfg-card ul{font-size:12.5px;color:var(--ink-2);margin-left:18px}
+  .cfg-card ul li{padding:2px 0}
+  .on{color:var(--green);font-weight:700}
+  .off{color:var(--ink-3)}
+
+  /* ===== 手动关闭 ===== */
+  .close-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .close-flow{border:1px solid var(--line);border-radius:9px;padding:14px 16px}
+  .close-flow ol{margin-left:20px;font-size:13.5px}
+  .close-flow ol li{padding:3px 0}
+  .confirm-box{border:1.5px solid var(--red);background:var(--red-bg);border-radius:9px;padding:14px 16px}
+  .confirm-box h4{font-size:13.5px;color:var(--red);font-weight:800;margin-bottom:8px}
+  .confirm-box .dialog-mock{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--ink-2)}
+  .confirm-box .dialog-mock .t{font-weight:800;color:var(--ink);margin-bottom:6px;font-size:13.5px}
+  .confirm-box .dialog-mock ul{margin-left:18px}
+  .confirm-box .dialog-mock .btns{margin-top:10px;display:flex;gap:8px;justify-content:flex-end}
+  .confirm-box .dialog-mock .btn{font-size:12px;padding:3px 12px;border-radius:6px;border:1px solid var(--line);color:var(--ink-2)}
+  .confirm-box .dialog-mock .btn.danger{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+
+  /* ===== 接口 ===== */
+  .if-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .if-card{border:1px solid var(--line);border-left:4px solid var(--green);border-radius:9px;padding:14px 16px;background:#fdfefe}
+  .if-card.dev{border-left-color:var(--orange);background:var(--orange-bg)}
+  .if-card h4{font-size:14px;font-weight:800;margin-bottom:2px}
+  .if-card .dir{font-size:12px;color:var(--ink-3);margin-bottom:8px}
+  .if-card p{font-size:13px;color:var(--ink-2)}
+  .if-card .exist{display:inline-block;font-size:11px;font-weight:800;color:var(--green);background:var(--green-bg);border-radius:5px;padding:1px 7px;margin-bottom:8px}
+  .if-card .need{display:inline-block;font-size:11px;font-weight:800;color:var(--orange);background:#fff;border:1px solid var(--orange-line);border-radius:5px;padding:1px 7px;margin-bottom:8px}
+
+  /* ===== 规则注 ===== */
+  .notes{font-size:12.5px;color:var(--ink-3);margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+  .notes li{margin-left:18px;padding:2px 0}
+
+  footer{color:var(--ink-3);font-size:12.5px;text-align:center;padding:8px 0 0}
+
+  @media (max-width:900px){
+    .branches{grid-template-columns:1fr}
+    .close-grid{grid-template-columns:1fr}
+    .if-grid{grid-template-columns:1fr}
+    .cfg-grid{grid-template-columns:1fr}
+    h1{font-size:21px}
+    section,header.page{padding:18px 16px}
+    .fnode{min-width:0;flex:1 1 40%}
+    .farrow{padding:0 4px;font-size:16px}
+  }
+  @media print{
+    body{background:#fff;font-size:12px}
+    .wrap{max-width:none;padding:0}
+    section,header.page{border-color:#bbb;break-inside:avoid;margin-bottom:12px}
+    a{color:inherit;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <p class="kicker">POKO 代购系统 × 集运系统</p>
+  <h1>核重补差（方案二：集运单支付控制）· 开发说明图</h1>
+  <div class="meta-row">
+    <span class="tag dev"><b>集运侧仅 1 个接口开发：②集运单支付</b>（①④现有）</span>
+    <span class="tag"><b>不补款地区数据库可配置</b>（当前仅台湾、中国）</span>
+    <span class="tag">版本 <b>v1.4</b></span>
+    <span class="tag">2026-11-12</span>
+    <span class="tag src">依据：方案二 v1.0 ＋ 改造清单 v1.9 ＋ PRD v1.5</span>
+  </div>
+  <p class="essence"><b>一句话本质：</b>国际件集运单默认「未支付」，未支付不发货——这就是天然拦截。代购侧核重判定后，<b>无需补款就直接支付集运单放行；需要补款就等用户补款到账后再支付放行</b>。支付动作即放行关卡。</p>
+</header>
+
+<!-- ========== 1 主判定流程 ========== -->
+<section id="flow">
+  <h2><span class="no">1</span>主判定流程（服务端一条链）</h2>
+  <p class="sub">核重回传①触发 → 重算 → 地址识别 → <b>匹配不补款地区配置</b> → 按差额处理。teal=代购系统动作，橙=集运系统动作/状态，琥珀=命中配置分支。</p>
+
+  <div class="flow-main">
+    <div class="fnode jy">① 核重回传<small>集运 → 代购 · 现有接口</small></div>
+    <span class="farrow">→</span>
+    <div class="fnode">重算运费<small>复用现有引擎</small></div>
+    <span class="farrow">→</span>
+    <div class="fnode">地址识别<small>国家/地区 · 已具备</small></div>
+    <span class="farrow">→</span>
+    <div class="fnode">匹配地区配置<small>N2 · 新增</small></div>
+  </div>
+
+  <div class="branches">
+    <div class="branch tw">
+      <h3>命中配置地区<span class="cfg">当前：台湾、中国</span></h3>
+      <p class="cond">判定依据：收货地址国家/地区<b>命中「不补款地区配置」列表</b>（N1 · 数据库可配置）。集运这些地区无拦截能力，故<b>不拦截</b>。</p>
+      <div class="case"><span class="k ret">多退</span><p>差额退用户余额，租户基准成本同差额退回 → <span class="hl-pass">正常发货</span></p></div>
+      <div class="case"><span class="k add">少补</span><p><b>放弃补款</b>：不生成补款单、补款状态不变更，记录核实重量/体积（字段已有）→ <span class="hl-pass">正常发货</span><br><span class="step">N3 · 无金额上限 · 用户不补、租户基准成本不重核（维持预估口径），<span class="hl-plat">差额由平台承担</span></span></p></div>
+      <div class="case"><span class="k eq">无差额</span><p><span class="hl-pass">正常流转发货</span>（含增量不足一个续重单位）</p></div>
+    </div>
+    <div class="branch intl">
+      <h3>未命中配置地区<span class="cfg" style="color:var(--orange);border-color:var(--orange-line)">其他国家 / 地区</span></h3>
+      <p class="cond">集运单默认「未支付」→ 未支付不发货 = <b>天然拦截</b>。放行 = 调集运单支付接口②（集运侧需开发）。</p>
+      <div class="case"><span class="k ret">多退</span><p>退差额至用户余额 → <b>直接调②支付集运单</b> → <span class="hl-pass">发货④</span></p></div>
+      <div class="case"><span class="k eq">无差额</span><p>直接调②支付集运单 → <span class="hl-pass">发货④</span></p></div>
+      <div class="case"><span class="k add">少补</span><p>生成补款单，<span class="hl-lock">集运单保持未支付（拦截中）</span>→ 通知用户补款 → <b>补款到账</b>（现有闭环：关提示、待补款→已补款）→ <b>串联调②支付集运单</b>（N5）→ <span class="hl-pass">发货④</span></p></div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li>续重判定：实际重量增量不足一个续重单位 → 不补款直接放行；≥1 个续重单位按超出档数 × 续重单价补款。</li>
+    <li>补款无有效期，待补款提包单不自动取消（集运对超期未支付无自动处理规则，已确认）。</li>
+    <li>二次核重：以最新一次回传为准，已退/已补差额按最新结果冲正。</li>
+    <li>支付接口调用幂等（重复调用不重复支付）。</li>
+    <li>地址无法识别国家/地区时，按「未命中配置」处理并记录告警日志。</li>
+  </ul>
+</section>
+
+<!-- ========== 2 地区配置（N1） ========== -->
+<section id="config">
+  <h2><span class="no">2</span>不补款地区配置（N1 · 数据库可配置）</h2>
+  <p class="sub">地区列表落库，平台运营在后台自行新增 / 停用，判定实时读取最新配置——<b>新增地区无需发版</b>。</p>
+  <div class="cfg-grid">
+    <div class="cfg-card">
+      <h4>配置表字段</h4>
+      <table class="mini">
+        <caption>表 2-1 · 不补款地区配置表（新增）</caption>
+        <thead><tr><th scope="col">字段</th><th scope="col">说明</th></tr></thead>
+        <tbody>
+          <tr><td>地区标识</td><td>国家/地区编码，与地址识别结果对应</td></tr>
+          <tr><td>地区名称</td><td>用于后台展示</td></tr>
+          <tr><td>是否启用</td><td>启用=命中即放弃少补；停用=该地区恢复补款判定</td></tr>
+          <tr><td>操作人 / 操作时间</td><td>变更留痕</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li>初始数据：台湾、中国两条，均为启用</li>
+        <li>停用须二次确认 + 风险提示（该地区集运无拦截能力）</li>
+        <li>本期仅平台级统一配置，不做租户级差异化</li>
+      </ul>
+    </div>
+    <div class="cfg-card">
+      <h4>判定读取方式</h4>
+      <ul>
+        <li>核重判定时以收货地址国家/地区匹配「启用状态」的地区条目</li>
+        <li>命中 → 走放弃少补分支（少补不生成补款单，记录核实重量）</li>
+        <li>未命中 → 走支付控制分支（少补卡「待发货 + 待补款」）</li>
+        <li>配置变更后判定即时跟随，避免长缓存导致滞后</li>
+        <li>配置地区少补的资金口径：用户不补、租户基准成本不重核，<b>差额平台承担</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 3 状态速查 ========== -->
+<section id="status">
+  <h2><span class="no">3</span>状态速查</h2>
+  <p class="sub">拦截不新增状态，用现有字段组合表达；<b>整个方案唯一新增的状态枚举是「已关闭」</b>（仅手动关闭出口）。</p>
+  <div class="tbl-scroll">
+    <table>
+      <caption>表 3-1 · 提包单状态组合</caption>
+      <thead><tr><th scope="col">场景</th><th scope="col">提包状态</th><th scope="col">补款状态</th><th scope="col">说明</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">配置地区 · 少补</th><td>正常流转（待发货→已发货）</td><td>无需补款（不变更）</td><td>记录核实重量/体积后正常发货</td></tr>
+        <tr><th scope="row">未配置地区 · 少补（拦截中）</th><td>待发货（卡住）</td><td>待补款</td><td>集运单未支付，等待用户补款</td></tr>
+        <tr><th scope="row">未配置地区 · 补款到账</th><td>待发货</td><td>已补款</td><td>自动调②支付集运单，恢复流转</td></tr>
+        <tr><th scope="row">正常发货</th><td>已发货</td><td>无需补款 / 已补款</td><td>④已发货通知同步</td></tr>
+        <tr><th scope="row">手动关闭（拒补换线等）</th><td><b>已关闭（新增）</b></td><td>—（补款单作废）</td><td>全额退款；关联商品不释放、无法二次提包</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 4 改造任务清单 ========== -->
+<section id="tasks">
+  <h2><span class="no">4</span>改造任务清单（代购侧 8 项 ＋ 集运侧 1 项）</h2>
+  <p class="sub">编号对应《功能改造清单 v1.9》。N=新增，M=改造。现有补款闭环、消息通知、地址识别、核实重量字段均直接复用。</p>
+  <div class="tbl-scroll">
+    <table>
+      <caption>表 4-1 · 按优先级排期</caption>
+      <thead><tr><th scope="col">优先级</th><th scope="col">编号</th><th scope="col">位置</th><th scope="col">做什么</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pri p0">P0</span></td><td>N1</td><td>平台端 · 配置管理</td><td>不补款地区配置：<b>配置表 + 维护界面</b>，支持新增/停用地区（当前台湾、中国）；停用需二次确认＋风险提示<span class="new-tag">新增</span></td></tr>
+        <tr><td><span class="pri p0">P0</span></td><td>N2</td><td>服务端</td><td>分线路判定：核重回传后按地址<b>匹配地区配置表</b>分「命中 / 未命中」两支处理<span class="new-tag">新增</span></td></tr>
+        <tr><td><span class="pri p0">P0</span></td><td>N4</td><td>服务端</td><td>集运单支付调用模块：对接集运侧支付接口，幂等防重复支付<span class="new-tag">新增</span><span class="dep-tag">依赖集运侧接口开发</span></td></tr>
+        <tr><td><span class="pri p0">P0</span></td><td>N5</td><td>服务端</td><td>补款到账串联：现有到账动作（关提示、→已补款）之后，自动调②支付集运单放行<span class="new-tag">新增</span></td></tr>
+        <tr><td><span class="pri p0">P0</span></td><td>M4＋M5</td><td>服务端</td><td>资金联动：用户侧多退/少补 与 租户基准成本 <b>同方向同差额</b>（多退→同退；补款到账→补扣基准成本差额）；<b>配置地区少补为例外：租户基准成本不重核，差额平台承担</b><span class="chg-tag">改造</span></td></tr>
+        <tr><td><span class="pri p0">P0</span></td><td>M1</td><td>服务端</td><td>核重回传处理：在现有重算后接入地址匹配与分线路判定<span class="chg-tag">改造</span></td></tr>
+        <tr><td><span class="pri p1">P1</span></td><td>N3</td><td>服务端</td><td>放弃少补记录：命中配置地区少补不变更补款状态，写核实重量/体积（字段已有）；用户不补、租户基准成本不重核，差额平台承担<span class="new-tag">新增</span></td></tr>
+        <tr><td><span class="pri p2">P2</span></td><td>N7</td><td>租户端 · 提包单详情</td><td>手动关闭入口（见第 6 节）<span class="new-tag">新增</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 5 资金联动 ========== -->
+<section id="money">
+  <h2><span class="no">5</span>资金联动规则</h2>
+  <p class="sub">铁律：用户侧与租户基准成本<b>同方向、同差额</b>，均生成流水并单向通知租户——<b>唯一例外是命中配置地区少补：用户不补、租户基准成本不重核，差额由平台承担</b>。平台↔集运为线下结算，与系统无关。</p>
+  <div class="tbl-scroll">
+    <table>
+      <caption>表 5-1 · 分场景资金动作</caption>
+      <thead><tr><th scope="col">场景</th><th scope="col">用户侧</th><th scope="col">租户侧（基准成本）</th><th scope="col">平台 ↔ 集运</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">下单支付</th><td>收取预估运费</td><td>按预估运费扣基准成本（现有冻结/扣减骨架）</td><td>—</td></tr>
+        <tr><th scope="row">核重多退</th><td>差额退用户余额</td><td>基准成本按差额退回租户</td><td>按实际核重支付集运单</td></tr>
+        <tr><th scope="row">少补（未配置地区）</th><td>用户补提包单运费差价</td><td>补款到账后从租户余额补扣差额</td><td>补款到账后支付集运单</td></tr>
+        <tr><th scope="row">少补（配置地区）</th><td>不补款</td><td><b>基准成本不重新核算，维持预估口径</b></td><td>按实际核重支付集运单；<b>差额由平台承担</b></td></tr>
+        <tr><th scope="row">手动关闭</th><td>预估运费全额退余额</td><td>基准成本全额退回</td><td>原集运单手动作废（集运现有流程）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ========== 6 手动关闭 ========== -->
+<section id="manual-close">
+  <h2><span class="no">6</span>手动关闭（拒补换线兜底 · N7）</h2>
+  <p class="sub">罕见场景，最简实现。入口在<b>提包单详情页</b>，动作不可逆，必须二次确认。</p>
+  <div class="close-grid">
+    <div class="close-flow">
+      <ol>
+        <li>提包单状态 → <b>「已关闭」（新增状态，区别于已取消）</b></li>
+        <li>预估运费全额退余额</li>
+        <li>补款单作废</li>
+        <li><b>关联商品不释放，无法二次提包</b>（规则固定，不做可选项）</li>
+        <li>操作留痕（操作人 / 时间 / 原因）</li>
+      </ol>
+      <ul class="notes">
+        <li>与拒补换线天然吻合：集运重赋新单号＋无主件入库＋手动作废原集运单 → 代购手动建单关联 → 关闭原提包单 → 用户对<b>新包裹</b>重新提包，旧商品记录锁死即闭环。</li>
+      </ul>
+    </div>
+    <div class="confirm-box">
+      <h4>二次确认弹窗（文案须明示三项后果）</h4>
+      <div class="dialog-mock" role="img" aria-label="二次确认弹窗示意">
+        <p class="t">确认关闭该提包单？</p>
+        <ul>
+          <li>关闭后提包单将关闭，不可恢复</li>
+          <li>已支付运费将全额退款</li>
+          <li>关联商品将无法二次提包</li>
+        </ul>
+        <div class="btns"><span class="btn">取消</span><span class="btn danger">确认关闭</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 7 接口与联调 ========== -->
+<section id="api">
+  <h2><span class="no">7</span>接口与联调（①④现有 · ②需集运侧开发）</h2>
+  <p class="sub">方案一②③拦截指令与⑤发货前确认全部取消。②为方案二唯一外部开发依赖，需提前与集运对齐排期与字段契约。</p>
+  <div class="if-grid">
+    <div class="if-card">
+      <span class="exist">现有能力</span>
+      <h4>① 核重结果回传</h4>
+      <p class="dir">集运 → 代购</p>
+      <p>提包单号、包裹编号、实际重量、实际体积、核重时间。对接时确认字段完整性。</p>
+    </div>
+    <div class="if-card dev">
+      <span class="need">需开发 · 集运侧</span>
+      <h4>② 集运单支付接口</h4>
+      <p class="dir">代购 → 集运</p>
+      <p>集运单号/提包单号。支付后集运单置为已支付并安排发货。接口须支持幂等。</p>
+    </div>
+    <div class="if-card">
+      <span class="exist">现有能力</span>
+      <h4>④ 提包单状态通知</h4>
+      <p class="dir">集运 → 代购</p>
+      <p>必须覆盖「已发货」：提包单号、变更后状态、变更时间。</p>
+    </div>
+  </div>
+</section>
+
+<footer>核重补差 · 方案二开发说明图 v1.4 ｜ 2026-11-12 ｜ 追溯：方案二 v1.0 · 改造清单 v1.9 · PRD v1.5</footer>
+
+</div>
+</body>
+</html>
