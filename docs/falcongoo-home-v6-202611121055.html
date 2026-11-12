@@ -175,10 +175,6 @@
   /* 商品推荐 */
   .rec-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap}
   .rec-title{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0}
-  .src-switch{display:inline-flex;align-items:center;gap:2px;padding:4px;background:#f2f3f5;border-radius:99px;flex:none}
-  .src-tab{border:0;background:transparent;border-radius:99px;padding:7px 22px;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:background .16s,color .16s,box-shadow .16s}
-  .src-tab:hover{color:var(--ink)}
-  .src-tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(20,16,60,.14)}
   .cat-pills{display:flex;gap:10px;margin-bottom:22px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
   .cat-pills::-webkit-scrollbar{display:none}
   .cat-pill{flex:none;border:0;border-radius:99px;padding:9px 22px;font-size:14px;color:var(--ink-2);background:#f2f3f5;white-space:nowrap;transition:background .16s,color .16s,box-shadow .16s}
@@ -448,7 +444,7 @@
 <!-- ==================== 首屏搜索 ==================== -->
 <section class="hero">
   <div class="container">
-    <h1 class="hero-title">FalconGoo｜免费代购，全球寄送</h1>
+    <h1 class="hero-title">免费代购，全球寄送</h1>
     <p class="hero-sub">贴链接即可下单，到仓免费质检，180 天免费仓储</p>
 
     <div class="hero-search-wrap" id="heroSearchRow">
@@ -578,14 +574,13 @@
   <div class="container">
     <div class="rec-head">
       <h2 class="rec-title">大家都在买</h2>
-      <div class="src-switch" id="srcTabs" role="tablist" aria-label="货源切换"></div>
     </div>
 
     <div class="cat-pills" id="catTabs" role="tablist" aria-label="品类筛选"></div>
     <div class="products" id="products"></div>
 
     <div class="more-row">
-      <button class="btn-ghost" id="loadMore">加载更多</button>
+      <button class="btn-ghost" id="loadMore">查看更多</button>
     </div>
   </div>
 </section>
@@ -820,7 +815,6 @@
 
   /* ---------- 商品推荐 ---------- */
   var CATS = ['推荐','男装','女装','母婴','美妆','日用品','穿搭','运动'];
-  var SOURCES = ['1688','淘宝'];
 
   var POOL = {
     '推荐': ['秋冬加厚连帽卫衣 男女同款','韩版宽松直筒牛仔裤 高腰显瘦','简约风帆布托特包 大容量','无线蓝牙耳机 入耳式降噪','多功能桌面收纳盒 三层','不锈钢保温杯 500ml'],
@@ -842,10 +836,10 @@
     'linear-gradient(135deg,#e9f6fb,#d2ebf4)'
   ];
 
-  var state = {cat:'推荐', src:'1688', page:1};
+  var state = {cat:'推荐', page:1};
   var PAGE_SIZE = 10;
 
-  function makeProduct(cat, src, i){
+  function makeProduct(cat, i){
     var titles = POOL[cat] || POOL['推荐'];
     var base = titles[i % titles.length];
     var suffix = i >= titles.length ? ' ' + (Math.floor(i / titles.length) + 1) + ' 号款' : '';
@@ -855,7 +849,7 @@
       title: base + suffix,
       price: price.toFixed(1),
       old: hasOld ? (price * 1.7).toFixed(1) : null,
-      src: src,
+      src: (i % 2 === 0 ? '1688' : '淘宝'),
       grad: GRADS[(i + cat.length) % GRADS.length],
       label: cat
     };
@@ -874,23 +868,10 @@
     });
   }
 
-  function renderSrcTabs(){
-    document.getElementById('srcTabs').innerHTML = SOURCES.map(function(s){
-      return '<button class="src-tab'+(s===state.src?' on':'')+'" data-src="'+s+'" role="tab" aria-selected="'+(s===state.src)+'">'+s+'</button>';
-    }).join('');
-    document.querySelectorAll('[data-src]').forEach(function(b){
-      b.addEventListener('click', function(){
-        state.src = b.getAttribute('data-src');
-        state.page = 1;
-        renderSrcTabs(); renderProducts();
-      });
-    });
-  }
-
   function renderProducts(){
     var total = PAGE_SIZE * state.page;
     var list = [];
-    for(var i = 0; i < total; i++){ list.push(makeProduct(state.cat, state.src, i)); }
+    for(var i = 0; i < total; i++){ list.push(makeProduct(state.cat, i)); }
 
     var el = document.getElementById('products');
     el.innerHTML = list.map(function(p){
@@ -917,7 +898,6 @@
   });
 
   renderCatTabs();
-  renderSrcTabs();
   renderProducts();
 
   /* ---------- 假二维码 ---------- */
