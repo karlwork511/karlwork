@@ -155,8 +155,30 @@
   .sec-hd a{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:2px}
   .sec-hd a svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
+  /* ==================== 公告栏 ==================== */
+  .notice{
+    display:flex;align-items:center;gap:8px;
+    margin:0 14px;padding:0 12px;height:36px;border-radius:10px;
+    background:linear-gradient(90deg,#f6f3ff,#faf9ff);
+  }
+  .nt-ico{flex:none;width:15px;height:15px;color:var(--brand)}
+  .nt-ico svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .nt-body{flex:1;min-width:0;height:36px;overflow:hidden}
+  .nt-track{transition:transform .42s cubic-bezier(.4,0,.2,1)}
+  .nt-item{
+    height:36px;display:flex;align-items:center;
+    font-size:12.5px;color:#4a4f5a;font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .nt-item b{color:var(--brand);font-weight:700}
+  .nt-more{
+    flex:none;display:flex;align-items:center;gap:1px;
+    font-size:11.5px;font-weight:600;color:#9aa1ab;
+  }
+  .nt-more svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
   /* ==================== Banner ==================== */
-  .bn{margin-top:18px;position:relative}
+  .bn{margin-top:12px;position:relative}
   .bn-track{
     display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
     padding:0 14px 8px;scrollbar-width:none;
@@ -260,6 +282,61 @@
     display:flex;align-items:center;justify-content:center;line-height:1;
     box-shadow:0 2px 5px rgba(255,77,79,.4);
   }
+
+  /* ==================== 规格加购弹窗 ==================== */
+  .sku-mask{
+    position:fixed;inset:0;z-index:240;background:rgba(12,10,30,.45);
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .sku-mask.show{display:flex;animation:fadeIn .2s ease-out}
+  .sku-sheet{
+    position:relative;width:100%;max-width:440px;max-height:88vh;
+    background:#fff;border-radius:20px 20px 0 0;
+    display:flex;flex-direction:column;
+    animation:sheetUp .28s cubic-bezier(.2,.8,.3,1);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes sheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+  .sku-x{
+    position:absolute;top:14px;right:14px;z-index:2;
+    width:26px;height:26px;border-radius:50%;background:#f2f3f6;color:#8a9099;
+    display:grid;place-items:center;
+  }
+  .sku-x svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+  .sku-body{flex:1;overflow-y:auto;padding:18px 18px 4px;-webkit-overflow-scrolling:touch}
+  .sku-top{display:flex;align-items:center;gap:11px;padding-right:34px}
+  .sku-thumb{flex:none;width:52px;height:52px;border-radius:9px;background:#f2f3f6}
+  .sku-info{min-width:0}
+  .sku-price{font-size:21px;font-weight:800;color:#ff3b30;letter-spacing:-.02em;line-height:1.1}
+  .sku-price small{font-size:13px;font-weight:700;margin-right:2px}
+  .sku-sel{font-size:11.5px;color:#9aa1ab;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sku-title{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.45;margin-top:14px}
+  .sku-grp{margin-top:18px}
+  .sku-grp h4{font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:9px}
+  .sku-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sku-opt{
+    padding:9px 11px;border-radius:9px;background:#f5f6f8;text-align:left;
+    font-size:13px;font-weight:700;color:#2a2f3a;
+    border:1.4px solid transparent;transition:background .15s,border-color .15s,color .15s;
+  }
+  .sku-opt em{display:block;font-style:normal;font-size:10.5px;font-weight:500;color:#9aa1ab;margin-top:2px}
+  .sku-opt.on{background:#f4f0ff;border-color:#6a4df5;color:var(--brand)}
+  .sku-opt.on em{color:#7b6bd8}
+  .sku-grp.qty{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .sku-grp.qty h4{margin:0}
+  .stepper{display:flex;align-items:center;background:#f5f6f8;border-radius:9px;height:34px}
+  .stepper button{width:34px;height:34px;font-size:16px;font-weight:600;color:#5c626c;display:grid;place-items:center}
+  .stepper button:active{background:#e9ebef;border-radius:9px}
+  .stepper span{min-width:32px;text-align:center;font-size:14px;font-weight:800;color:var(--ink)}
+  .sku-add{
+    flex:none;margin:14px 18px 14px;height:48px;border-radius:99px;
+    background:var(--brand);color:#fff;font-size:15px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    box-shadow:0 6px 18px rgba(75,47,240,.32);transition:background .16s;
+  }
+  .sku-add:active{background:var(--brand-d)}
+  .sku-add svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
   /* ==================== 语言弹层 ==================== */
   .sheet-mask{
@@ -375,6 +452,21 @@
     </div>
   </div>
 
+  <!-- ==================== 公告栏 ==================== -->
+  <div class="notice">
+    <span class="nt-ico" aria-hidden="true">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 10v4h3.5L12 18.5v-13L6.5 10H3Z"/><path d="M16 8.5a5 5 0 0 1 0 7"/><path d="M18.8 5.8a8.6 8.6 0 0 1 0 12.4"/></svg>
+    </span>
+    <div class="nt-body">
+      <div class="nt-track" id="ntTrack">
+        <div class="nt-item"><b>双十一</b>　全场代购服务费 5 折，11.11 截止</div>
+        <div class="nt-item"><b>线路</b>　美国专线恢复发货，平均 7 天到门</div>
+        <div class="nt-item"><b>公告</b>　深圳仓 11.15 盘点，当日入库顺延一天</div>
+      </div>
+    </div>
+    <button class="nt-more" id="ntMore">更多<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+  </div>
+
   <!-- ==================== Banner ==================== -->
   <section class="bn">
     <div class="bn-track" id="bnTrack">
@@ -451,6 +543,57 @@
   </nav>
 </div>
 
+<!-- ==================== 规格加购弹窗 ==================== -->
+<div class="sku-mask" id="skuMask" aria-hidden="true">
+  <div class="sku-sheet" role="dialog" aria-modal="true" aria-labelledby="skuTitle">
+    <button class="sku-x" id="skuClose" aria-label="关闭">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="sku-body">
+      <div class="sku-top">
+        <div class="sku-thumb" id="skuThumb" aria-hidden="true"></div>
+        <div class="sku-info">
+          <p class="sku-price" id="skuPrice"><small>¥</small>0.0</p>
+          <p class="sku-sel" id="skuSel">已选：M · 水洗黑【加绒款】</p>
+        </div>
+      </div>
+      <h3 class="sku-title" id="skuTitle">商品名称</h3>
+
+      <div class="sku-grp">
+        <h4>尺码</h4>
+        <div class="sku-opts" id="skuSize">
+          <button class="sku-opt on" data-v="M">M<em>建议80-115斤</em></button>
+          <button class="sku-opt" data-v="L">L<em>建议115-135斤</em></button>
+          <button class="sku-opt" data-v="XL">XL<em>建议135-155斤</em></button>
+          <button class="sku-opt" data-v="2XL">2XL<em>建议155-180斤</em></button>
+          <button class="sku-opt" data-v="3XL">3XL<em>建议180-210斤</em></button>
+        </div>
+      </div>
+
+      <div class="sku-grp">
+        <h4>颜色</h4>
+        <div class="sku-opts" id="skuColor">
+          <button class="sku-opt on" data-v="水洗黑【加绒款】">水洗黑【加绒款】</button>
+          <button class="sku-opt" data-v="水洗黑【常规款】">水洗黑【常规款】</button>
+        </div>
+      </div>
+
+      <div class="sku-grp qty">
+        <h4>数量</h4>
+        <div class="stepper">
+          <button id="qtyMinus" aria-label="减少数量">−</button>
+          <span id="qtyVal">1</span>
+          <button id="qtyPlus" aria-label="增加数量">+</button>
+        </div>
+      </div>
+    </div>
+    <button class="sku-add" id="skuAdd">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+      加入购物车
+    </button>
+  </div>
+</div>
+
 <!-- ==================== 语言/币种弹层 ==================== -->
 <div class="sheet-mask" id="langMask" aria-hidden="true">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="langTitle">
@@ -501,6 +644,17 @@
   window.addEventListener('scroll', function(){
     wrap.classList.toggle('stuck', window.scrollY > 6);
   }, {passive:true});
+
+  /* ---------- 公告栏轮播 ---------- */
+  var ntTrack = document.getElementById('ntTrack');
+  if(ntTrack && ntTrack.children.length > 1){
+    var ntIdx = 0;
+    setInterval(function(){
+      ntIdx = (ntIdx + 1) % ntTrack.children.length;
+      ntTrack.style.transform = 'translateY(-' + (ntIdx * 36) + 'px)';
+    }, 3200);
+  }
+  document.getElementById('ntMore').addEventListener('click', function(){ toast('公告列表页开发中'); });
 
   /* ---------- Banner 圆点 ---------- */
   var track = document.getElementById('bnTrack');
@@ -554,6 +708,7 @@
     var total = PAGE * state.page;
     var list = [];
     for(var i = 0; i < total; i++){ list.push(makeProduct(state.cat, i)); }
+    window.__LIST = list;
     document.getElementById('grid').innerHTML = list.map(function(p, i){
       return '<article class="card">'
         + '<div class="c-img" style="background:' + p.grad + '">'
@@ -588,8 +743,68 @@
 
   document.getElementById('grid').addEventListener('click', function(e){
     var b = e.target.closest('.c-add');
-    if(b){ toast('已加入购物车'); return; }
+    if(b){
+      var idx = parseInt(b.getAttribute('data-i'), 10);
+      openSku(window.__LIST && window.__LIST[idx]);
+      return;
+    }
     if(e.target.closest('.card')){ toast('商品详情页开发中'); }
+  });
+
+  /* ---------- 规格加购弹窗 ---------- */
+  var skuMask = document.getElementById('skuMask');
+  var skuState = {size:'M', color:'水洗黑【加绒款】', qty:1};
+
+  function syncSel(){
+    document.getElementById('skuSel').textContent = '已选：' + skuState.size + ' · ' + skuState.color;
+  }
+  function openSku(p){
+    if(!p){ p = {title:'商品', price:'0.0', grad:'linear-gradient(135deg,#eef0f4,#e2e5ec)'}; }
+    document.getElementById('skuThumb').style.background = p.grad;
+    document.getElementById('skuPrice').innerHTML = '<small>¥</small>' + p.price;
+    document.getElementById('skuTitle').textContent = p.title;
+    skuState.qty = 1;
+    document.getElementById('qtyVal').textContent = '1';
+    syncSel();
+    skuMask.classList.add('show');
+    skuMask.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSku(){
+    skuMask.classList.remove('show');
+    skuMask.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('skuClose').addEventListener('click', closeSku);
+  skuMask.addEventListener('click', function(e){
+    if(e.target === skuMask){ closeSku(); return; }
+    var opt = e.target.closest('.sku-opt');
+    if(!opt) return;
+    var grp = opt.parentNode;
+    Array.prototype.forEach.call(grp.children, function(c){ c.classList.remove('on'); });
+    opt.classList.add('on');
+    if(grp.id === 'skuSize'){ skuState.size = opt.getAttribute('data-v'); }
+    else { skuState.color = opt.getAttribute('data-v'); }
+    syncSel();
+  });
+  document.getElementById('qtyMinus').addEventListener('click', function(){
+    if(skuState.qty <= 1) return;
+    skuState.qty--;
+    document.getElementById('qtyVal').textContent = String(skuState.qty);
+  });
+  document.getElementById('qtyPlus').addEventListener('click', function(){
+    if(skuState.qty >= 99) return;
+    skuState.qty++;
+    document.getElementById('qtyVal').textContent = String(skuState.qty);
+  });
+  document.getElementById('skuAdd').addEventListener('click', function(){
+    var badge = document.querySelector('.tabbar .badge');
+    if(badge){
+      var n = (parseInt(badge.textContent, 10) || 0) + skuState.qty;
+      badge.textContent = String(n);
+    }
+    closeSku();
+    toast('已加入购物车 · ' + skuState.size + ' · ' + skuState.color + ' × ' + skuState.qty);
   });
 
   /* 滚动到底自动加载 */
