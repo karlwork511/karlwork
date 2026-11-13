@@ -526,9 +526,10 @@
   }
 
   /* ==================== 在线客服聊天弹窗 ==================== */
-  .cs-mask{position:fixed;inset:0;z-index:260;background:rgba(12,10,30,.42);display:none;align-items:center;justify-content:center;padding:24px}
-  .cs-mask.show{display:flex;animation:qcFade .2s ease-out}
-  .cs-panel{width:min(420px,100%);height:min(620px,88vh);background:#fff;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(12,10,30,.28);animation:qcPop .26s cubic-bezier(.2,.8,.3,1)}
+  .cs-mask{position:fixed;inset:0;z-index:260;background:transparent;display:none}
+  .cs-mask.show{display:block}
+  .cs-panel{position:fixed;right:96px;top:0;width:400px;height:min(560px,86vh);background:#fff;border:1px solid #f0f1f6;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(20,22,27,.22),0 4px 14px rgba(20,22,27,.08);transform-origin:right center;opacity:0;transform:translateX(18px) scale(.95);pointer-events:none;transition:opacity .2s ease,transform .28s cubic-bezier(.2,.8,.3,1)}
+  .cs-mask.show .cs-panel{opacity:1;transform:none;pointer-events:auto}
   .cs-head{display:flex;align-items:center;gap:11px;padding:13px 14px;border-bottom:1px solid #f1f2f6;flex:none}
   .cs-close{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#8a9099;background:none;border:0;cursor:pointer;flex:none;transition:background .15s,color .15s}
   .cs-close:hover{background:#f5f6f9;color:var(--ink)}
@@ -1772,17 +1773,34 @@
     });
   }
 
+  var panel = mask.querySelector('.cs-panel');
+  var fnService = document.getElementById('fnService');
+
+  function place(){
+    if(!panel || !fnService) return;
+    var r = fnService.getBoundingClientRect();
+    var h = panel.offsetHeight || 0;
+    var top = r.top + r.height / 2 - h / 2;
+    top = Math.max(12, Math.min(window.innerHeight - h - 12, top));
+    panel.style.top = top + 'px';
+    panel.style.right = (window.innerWidth - r.left + 12) + 'px';
+  }
+
   function open(){
     mask.classList.add('show');
     mask.setAttribute('aria-hidden','false');
+    place();
     document.body.style.overflow = 'hidden';
-    setTimeout(function(){ input.focus(); scrollBottom(); }, 120);
+    setTimeout(function(){ place(); input.focus(); scrollBottom(); }, 60);
   }
   function close(){
     mask.classList.remove('show');
     mask.setAttribute('aria-hidden','true');
     document.body.style.overflow = '';
   }
+  window.addEventListener('resize', function(){
+    if(mask.classList.contains('show')) place();
+  });
 
   window.__openServiceChat = open;
 
