@@ -469,6 +469,68 @@
     .why-card.collapsed .why-collapse{position:static;transform:none}
   }
 
+
+  /* ==================== 右侧悬浮导航 ==================== */
+  .float-nav{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:190;width:60px;background:#fff;border:1px solid #f0f1f6;border-radius:16px;padding:8px 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 12px 34px rgba(20,22,27,.12),0 2px 8px rgba(20,22,27,.05);transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
+  .float-nav.hidden{transform:translateY(-50%) translateX(calc(100% + 44px));opacity:0;pointer-events:none}
+  .fn-item{position:relative;width:60px;height:54px;display:flex;align-items:center;justify-content:center;color:#3c414a;cursor:pointer;transition:color .16s ease,background .16s ease}
+  .fn-item:hover{color:var(--brand);background:#f8f6ff}
+  .fn-item svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .fn-line{width:24px;height:1px;background:#eef0f4;margin:3px 0}
+  .fn-badge{position:absolute;top:8px;right:12px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#ff4d4f;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 2px 6px rgba(255,77,79,.4)}
+  .fn-close svg{width:17px;height:17px;stroke-width:1.9}
+  .fn-top{width:60px;height:0;overflow:hidden;opacity:0;transition:height .32s cubic-bezier(.4,0,.2,1),opacity .26s ease}
+  .fn-top.show{height:54px;opacity:1}
+
+  .fn-expand{position:fixed;right:0;top:50%;z-index:189;width:34px;height:66px;transform:translateY(-50%) translateX(110%);opacity:0;pointer-events:none;background:#fff;border:1px solid #f0f1f6;border-right:0;border-radius:12px 0 0 12px;display:flex;align-items:center;justify-content:center;color:#5b6169;font-size:19px;line-height:1;box-shadow:-6px 8px 24px rgba(20,22,27,.1);transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .3s ease,color .16s}
+  .fn-expand.show{transform:translateY(-50%) translateX(0);opacity:1;pointer-events:auto}
+  .fn-expand:hover{color:var(--brand)}
+
+  .fn-pop{position:fixed;right:96px;z-index:191;background:#fff;border:1px solid #f0f1f6;border-radius:16px;box-shadow:0 20px 50px rgba(20,22,27,.16);opacity:0;transform:translateX(10px) scale(.985);pointer-events:none;transition:opacity .2s ease,transform .2s cubic-bezier(.2,.7,.3,1)}
+  .fn-pop.show{opacity:1;transform:none;pointer-events:auto}
+  .fn-pop::after{content:"";position:absolute;right:-6px;top:var(--arrow,50%);width:11px;height:11px;background:#fff;border-right:1px solid #f0f1f6;border-top:1px solid #f0f1f6;transform:rotate(45deg) translateY(-50%);border-radius:2px}
+
+  .cart-pop{width:332px;padding-top:15px}
+  .cart-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px;font-size:14px;font-weight:800}
+  .cart-head span{font-size:12px;color:#9aa0a8;font-weight:500}
+  .cart-list{max-height:250px;overflow-y:auto;padding:0 16px}
+  .cart-list::-webkit-scrollbar{width:5px}
+  .cart-list::-webkit-scrollbar-thumb{background:#dcdfe6;border-radius:3px}
+  .cart-item{display:flex;gap:11px;padding:12px 0;border-top:1px solid #f3f4f8}
+  .ci-thumb{width:54px;height:54px;border-radius:10px;flex:none;border:1px solid #f2f3f7}
+  .ci-main{flex:1;min-width:0}
+  .ci-title{font-size:12.5px;line-height:1.45;height:36px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:#22252b}
+  .ci-spec{font-size:11px;color:#a8adb6;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ci-price{font-size:13px;font-weight:800;margin-top:5px;letter-spacing:-.01em}
+  .ci-del{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#c2c6cd;flex:none;transition:all .15s;background:none;border:0;cursor:pointer}
+  .ci-del:hover{background:#fff1f0;color:#e5484d}
+  .ci-del svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+  .cart-foot{padding:13px 16px 16px;border-top:1px solid #f3f4f8;margin-top:3px}
+  .cart-sub{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px;font-size:13px;color:#5b6169}
+  .cart-sub b{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+  .cart-go{width:100%;height:42px;border-radius:11px;background:var(--brand);color:#fff;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .16s;border:0;cursor:pointer}
+  .cart-go:hover{background:var(--brand-d)}
+  .cart-go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2}
+  .cart-empty{padding:34px 0 26px;text-align:center;font-size:13px;color:#b6bbc4}
+
+  .app-pop{width:226px;padding:18px 18px 20px;text-align:center}
+  .qr{position:relative;width:152px;height:152px;margin:0 auto;padding:7px;background:#fff;border:1px solid #f0f1f6;border-radius:13px}
+  .qr svg{width:100%;height:100%;display:block}
+  .qr-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:9px;background:var(--brand);border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(75,47,240,.3)}
+  .qr-logo svg{width:15px;height:15px}
+  .app-pop h4{margin:13px 0 4px;font-size:13.5px;font-weight:800}
+  .app-pop p{margin:0;font-size:11.5px;color:#9aa0a8;line-height:1.6}
+
+  .service-pop{width:252px;padding:18px}
+  .service-pop h4{margin:0;font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px}
+  .service-pop h4 i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.16)}
+  .service-pop p{margin:8px 0 0;font-size:12px;color:#8b919b;line-height:1.7}
+  .service-pop .sbtn{margin-top:13px;width:100%;height:38px;border-radius:10px;background:#f5f3ff;color:var(--brand);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .16s;border:0;cursor:pointer}
+  .service-pop .sbtn:hover{background:#ece7ff}
+
+  @media (max-width:1120px){
+    .float-nav,.fn-expand,.fn-pop{display:none}
+  }
 </style>
 </head>
 <body id="top">
@@ -498,7 +560,7 @@
       </button>
       <button class="icon-btn" aria-label="购物车" data-tip="购物车">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
-        <span class="badge">3</span>
+        <span class="badge" id="cartBadge">3</span>
       </button>
       <button class="icon-btn" aria-label="运费预估" data-tip="运费预估">
         <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M7 9h3M7 12.5h3M7 16h3"/><path d="M14.5 9h3.5M14.5 12.5h3.5M14.5 16h3.5"/></svg>
@@ -682,6 +744,60 @@
     </button>
     <button class="fs-btn">搜索</button>
   </div>
+</div>
+
+<!-- ==================== 右侧悬浮导航 ==================== -->
+<div class="float-nav" id="floatNav">
+  <div class="fn-item" data-pop="cart" aria-label="购物车">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+    <span class="fn-badge" id="fnCartBadge">3</span>
+  </div>
+  <div class="fn-line"></div>
+  <div class="fn-item" data-pop="app" aria-label="APP 下载">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.6"/><path d="M10.4 18.6h3.2"/></svg>
+  </div>
+  <div class="fn-line"></div>
+  <div class="fn-item" data-pop="service" aria-label="在线客服">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4.2 13.5v-1.2a7.8 7.8 0 0 1 15.6 0v1.2"/><rect x="2.6" y="13" width="4" height="6.2" rx="2"/><rect x="17.4" y="13" width="4" height="6.2" rx="2"/><path d="M19.4 19.2a3 3 0 0 1-3 2.6h-2.6"/></svg>
+  </div>
+  <div class="fn-line"></div>
+  <div class="fn-item fn-close" id="fnClose" aria-label="收起导航" title="收起">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </div>
+  <div class="fn-top" id="fnTop" aria-label="回到顶部" title="回到顶部">
+    <div class="fn-item">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l7-7 7 7M12 5v15"/></svg>
+    </div>
+  </div>
+</div>
+<button class="fn-expand" id="fnExpand" aria-label="展开导航" title="展开">‹</button>
+
+<div class="fn-pop cart-pop" id="popCart">
+  <div class="cart-head">购物车 <span id="cartCountTxt">3 件商品</span></div>
+  <div class="cart-list" id="cartList"></div>
+  <div class="cart-foot">
+    <div class="cart-sub"><span>小计</span><b id="cartSubtotal">¥0.00</b></div>
+    <button class="cart-go" id="cartGo">
+      去购物车结算
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="fn-pop app-pop" id="popApp">
+  <div class="qr" id="qrBox">
+    <span class="qr-logo">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 13.5 20.5 4l-6.2 8.6 2.3 7.4-4.6-4.2L8 20l.4-4.6L3 13.5Z" fill="#fff"/></svg>
+    </span>
+  </div>
+  <h4>扫码下载 FalconGoo App</h4>
+  <p>iOS / Android 通用<br>手机端代购、查物流更方便</p>
+</div>
+
+<div class="fn-pop service-pop" id="popService">
+  <h4><i></i>在线客服</h4>
+  <p>服务时间 9:00 - 22:00（北京时间）<br>代购、转运、售后问题都可以问</p>
+  <button class="sbtn" id="serviceBtn">开始咨询</button>
 </div>
 
 <!-- ==================== 快捷加购弹窗 ==================== -->
@@ -1303,6 +1419,162 @@
       if(txt){ txt.style.display = collapsed ? 'none' : ''; }
     });
   })();
+
+/* ==================== 右侧悬浮导航 ==================== */
+(function(){
+  var floatNav = document.getElementById('floatNav');
+  var fnExpand = document.getElementById('fnExpand');
+  if(!floatNav || !fnExpand) return;
+
+  var cart = [
+    {title:'不锈钢保温杯 500ml 便携大容量', spec:'颜色分类：奶白 · 500ml', cny:230.9, grad:'linear-gradient(135deg,#fde8ef,#f6cfe0)'},
+    {title:'秋冬加厚连帽卫衣 男女同款宽松', spec:'颜色分类：黑色 · L', cny:267.9, grad:'linear-gradient(135deg,#e6f6ec,#cfeada)'},
+    {title:'法式复古碎花吊带连衣裙 收腰显瘦', spec:'颜色分类：藏蓝 · 均码', cny:128.0, grad:'linear-gradient(135deg,#eef0f4,#dfe3ea)'}
+  ];
+
+  var toastEl = document.getElementById('toast');
+  var tTimer = null;
+  function showToast(msg){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(tTimer);
+    tTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2000);
+  }
+
+  function renderCart(){
+    var list = document.getElementById('cartList');
+    if(!list) return;
+    if(!cart.length){
+      list.innerHTML = '<div class="cart-empty">购物车还是空的，去逛逛吧</div>';
+    } else {
+      list.innerHTML = cart.map(function(it,i){
+        return '<div class="cart-item">'
+          + '<div class="ci-thumb" style="background:'+it.grad+'"></div>'
+          + '<div class="ci-main">'
+          +   '<div class="ci-title">'+it.title+'</div>'
+          +   '<div class="ci-spec">'+it.spec+'</div>'
+          +   '<div class="ci-price">¥'+it.cny.toFixed(2)+'</div>'
+          + '</div>'
+          + '<button class="ci-del" data-del="'+i+'" aria-label="删除">'
+          +   '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V5.2h5V7M6.5 7l.9 12.2h9.2L17.5 7M10.5 11v5M13.5 11v5"/></svg>'
+          + '</button>'
+          + '</div>';
+      }).join('');
+    }
+    var sum = cart.reduce(function(a,b){ return a + b.cny; }, 0);
+    var sub = document.getElementById('cartSubtotal');
+    if(sub) sub.textContent = '¥' + sum.toFixed(2);
+    var cnt = document.getElementById('cartCountTxt');
+    if(cnt) cnt.textContent = cart.length + ' 件商品';
+    var badge = document.getElementById('fnCartBadge');
+    if(badge){ badge.textContent = cart.length; badge.style.display = cart.length ? 'flex' : 'none'; }
+    var hbadge = document.getElementById('cartBadge');
+    if(hbadge){ hbadge.textContent = cart.length; }
+    Array.prototype.forEach.call(list.querySelectorAll('[data-del]'), function(b){
+      b.addEventListener('click', function(e){
+        e.stopPropagation();
+        cart.splice(Number(b.getAttribute('data-del')), 1);
+        renderCart();
+        showToast('已从购物车移除');
+      });
+    });
+  }
+  renderCart();
+
+  (function buildQR(){
+    var n = 25, cell = 6, size = n * cell, seed = 20261113;
+    function rnd(){ seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+    function inFinder(x,y){ return (x < 8 && y < 8) || (x >= n-8 && y < 8) || (x < 8 && y >= n-8); }
+    function inCenter(x,y){ return Math.abs(x-(n-1)/2) < 4.5 && Math.abs(y-(n-1)/2) < 4.5; }
+    var rects = '';
+    for(var y = 0; y < n; y++){
+      for(var x = 0; x < n; x++){
+        if(inFinder(x,y) || inCenter(x,y)) continue;
+        if(rnd() > 0.52) rects += '<rect x="'+(x*cell)+'" y="'+(y*cell)+'" width="'+cell+'" height="'+cell+'"/>';
+      }
+    }
+    function finder(ox,oy){
+      return '<rect x="'+(ox*cell)+'" y="'+(oy*cell)+'" width="'+(7*cell)+'" height="'+(7*cell)+'"/>'
+        + '<rect x="'+((ox+1)*cell)+'" y="'+((oy+1)*cell)+'" width="'+(5*cell)+'" height="'+(5*cell)+'" fill="#fff"/>'
+        + '<rect x="'+((ox+2)*cell)+'" y="'+((oy+2)*cell)+'" width="'+(3*cell)+'" height="'+(3*cell)+'"/>';
+    }
+    var box = document.getElementById('qrBox');
+    if(box) box.insertAdjacentHTML('afterbegin', '<svg aria-hidden="true" viewBox="0 0 '+size+' '+size+'" fill="#14161b">' + rects + finder(0,0) + finder(n-7,0) + finder(0,n-7) + '</svg>');
+  })();
+
+  var popTimer = null, activePop = null;
+  var POP_MAP = {cart:'popCart', app:'popApp', service:'popService'};
+
+  function openPop(kind, el){
+    clearTimeout(popTimer);
+    var pop = document.getElementById(POP_MAP[kind]);
+    if(!pop) return;
+    if(activePop && activePop !== pop) activePop.classList.remove('show');
+    pop.classList.add('show');
+    var r = el.getBoundingClientRect();
+    var ph = pop.offsetHeight;
+    var top = r.top + r.height / 2 - ph / 2;
+    top = Math.max(14, Math.min(window.innerHeight - ph - 14, top));
+    pop.style.top = top + 'px';
+    var arrowY = Math.max(18, Math.min(ph - 18, r.top + r.height / 2 - top));
+    pop.style.setProperty('--arrow', arrowY + 'px');
+    activePop = pop;
+  }
+  function closePopLater(){
+    clearTimeout(popTimer);
+    popTimer = setTimeout(function(){
+      if(activePop){ activePop.classList.remove('show'); activePop = null; }
+    }, 170);
+  }
+  function closePopNow(){
+    clearTimeout(popTimer);
+    if(activePop){ activePop.classList.remove('show'); activePop = null; }
+  }
+
+  var hoverTimer = null;
+  Array.prototype.forEach.call(document.querySelectorAll('.fn-item[data-pop]'), function(el){
+    el.addEventListener('mouseenter', function(){
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(function(){ openPop(el.getAttribute('data-pop'), el); }, 110);
+    });
+    el.addEventListener('mouseleave', function(){ clearTimeout(hoverTimer); closePopLater(); });
+    el.addEventListener('click', function(){ clearTimeout(hoverTimer); openPop(el.getAttribute('data-pop'), el); });
+  });
+  Object.keys(POP_MAP).forEach(function(k){
+    var pop = document.getElementById(POP_MAP[k]);
+    if(!pop) return;
+    pop.addEventListener('mouseenter', function(){ clearTimeout(popTimer); });
+    pop.addEventListener('mouseleave', closePopLater);
+  });
+
+  document.getElementById('fnClose').addEventListener('click', function(e){
+    e.stopPropagation();
+    closePopNow();
+    floatNav.classList.add('hidden');
+    setTimeout(function(){ fnExpand.classList.add('show'); }, 120);
+  });
+  fnExpand.addEventListener('click', function(){
+    fnExpand.classList.remove('show');
+    setTimeout(function(){ floatNav.classList.remove('hidden'); }, 80);
+  });
+
+  var fnTop = document.getElementById('fnTop');
+  window.addEventListener('scroll', function(){
+    fnTop.classList.toggle('show', window.scrollY > 420);
+  });
+  fnTop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  document.getElementById('cartGo').addEventListener('click', function(){
+    showToast('购物车页面开发中，后续版本上线');
+  });
+  document.getElementById('serviceBtn').addEventListener('click', function(){
+    showToast('正在接入在线客服…');
+  });
+})();
+
 </script>
 </body>
 </html>
