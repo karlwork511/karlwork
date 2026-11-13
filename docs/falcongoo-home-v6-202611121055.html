@@ -196,6 +196,78 @@
   .p-now{font-size:17px;font-weight:800;color:var(--brand);letter-spacing:-.02em}
   .p-now small{font-size:12px;font-weight:700;margin-right:1px}
   .p-old{font-size:12px;color:#b0b5bd;text-decoration:line-through}
+  /* ============ 快捷加购弹窗 ============ */
+  .qc-mask{position:fixed;inset:0;z-index:200;background:rgba(12,10,30,.45);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .22s ease}
+  .qc-mask.show{opacity:1;pointer-events:auto}
+  .qc-modal{position:relative;width:min(920px,100%);max-height:calc(100vh - 48px);overflow-y:auto;background:#fff;border-radius:20px;padding:26px 30px 24px;box-shadow:0 30px 80px rgba(12,10,30,.28);transform:translateY(12px) scale(.985);transition:transform .24s ease}
+  .qc-mask.show .qc-modal{transform:none}
+  .qc-close{position:absolute;right:18px;top:18px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#8a9099;transition:background .15s,color .15s}
+  .qc-close:hover{background:#f2f3f5;color:var(--ink)}
+  .qc-close svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  .qc-title{font-size:20px;font-weight:800;margin:0 0 18px;letter-spacing:-.01em;padding-right:44px}
+
+  .qc-steps{display:flex;align-items:flex-start;gap:6px;background:#f7f7fa;border-radius:14px;padding:16px 18px;margin-bottom:22px}
+  .qc-step{flex:1;min-width:0}
+  .qc-step-h{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .qc-idx{font-size:12px;font-weight:700;color:#9aa0aa;flex:none}
+  .qc-sname{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qc-sdesc{font-size:12px;color:var(--ink-3);margin:0;line-height:1.45}
+  .qc-step.on .qc-idx,.qc-step.on .qc-sname{color:var(--brand)}
+  .qc-sep{flex:none;color:#c8ccd4;font-size:17px;line-height:1;padding-top:1px}
+
+  .qc-body{display:flex;gap:24px;align-items:flex-start}
+  .qc-media{position:relative;flex:none;width:220px;height:220px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:12px;color:rgba(20,22,27,.32);font-weight:600;overflow:hidden}
+  .qc-shop{position:absolute;left:10px;top:10px;font-size:10.5px;font-weight:600;color:#fff;background:rgba(20,22,27,.55);padding:3px 8px;border-radius:6px}
+  .qc-info{flex:1;min-width:0}
+  .qc-name-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+  .qc-pname{font-size:16.5px;font-weight:700;line-height:1.5;color:var(--ink);margin:0;flex:1}
+  .qc-detail{flex:none;display:inline-flex;align-items:center;gap:2px;font-size:13px;color:var(--brand);font-weight:600;white-space:nowrap;padding:2px 0}
+  .qc-detail:hover{text-decoration:underline}
+  .qc-detail svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .qc-price{font-size:22px;font-weight:800;color:var(--brand);letter-spacing:-.02em;margin-bottom:18px}
+  .qc-price small{font-size:13px;font-weight:700;margin-right:2px}
+
+  .qc-field{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+  .qc-label{flex:none;width:36px;font-size:13px;color:var(--ink-3);padding-top:9px}
+  .qc-opts{display:flex;flex-wrap:wrap;gap:8px}
+  .qc-opt{border:1px solid #dfe2e8;border-radius:9px;padding:8px 15px;font-size:13px;color:var(--ink-2);background:#fff;transition:border-color .15s,color .15s,background .15s}
+  .qc-opt:hover{border-color:#c9c2f5}
+  .qc-opt.on{border-color:var(--brand);background:#f5f2ff;color:var(--brand);font-weight:600}
+  .qc-swatches{display:flex;flex-wrap:wrap;gap:8px}
+  .qc-sw{position:relative;width:42px;height:42px;border-radius:9px;border:2px solid transparent;overflow:hidden;padding:0;transition:border-color .15s}
+  .qc-sw:hover{border-color:#c9c2f5}
+  .qc-sw.on{border-color:var(--brand)}
+  .qc-sw.on::after{content:"";position:absolute;right:0;bottom:0;border-left:12px solid transparent;border-bottom:12px solid var(--brand)}
+  .qc-qty{display:inline-flex;align-items:center;border:1px solid #dfe2e8;border-radius:9px;overflow:hidden;height:38px}
+  .qc-qty button{width:36px;height:100%;font-size:16px;color:var(--ink-2);transition:background .15s}
+  .qc-qty button:hover{background:#f4f4f7}
+  .qc-qty input{width:52px;height:100%;border:0;border-left:1px solid #eceef2;border-right:1px solid #eceef2;text-align:center;font-size:14px;font-family:inherit;color:var(--ink);outline:0}
+
+  .qc-foot{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
+  .qc-btn{border-radius:10px;padding:12px 34px;font-size:14.5px;font-weight:600;transition:background .15s,border-color .15s}
+  .qc-btn-ghost{border:1px solid var(--brand);color:var(--brand);background:#fff}
+  .qc-btn-ghost:hover{background:#f5f2ff}
+  .qc-btn-primary{background:var(--brand);color:#fff}
+  .qc-btn-primary:hover{background:var(--brand-d)}
+
+  .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(10px);z-index:300;background:rgba(20,22,27,.92);color:#fff;font-size:13.5px;padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:760px){
+    .qc-modal{padding:22px 18px 20px}
+    .qc-steps{flex-wrap:wrap;gap:12px}
+    .qc-step{flex:1 1 44%}
+    .qc-sep{display:none}
+    .qc-body{flex-direction:column}
+    .qc-media{width:100%;height:200px}
+    .qc-foot{flex-direction:column-reverse}
+    .qc-btn{width:100%}
+    .toast{white-space:normal;max-width:80vw;text-align:center}
+  }
+  @media (hover:none){
+    .p-add{opacity:1;transform:none}
+  }
+
   .more-row{text-align:center;margin-top:32px}
   .btn-ghost{display:inline-flex;align-items:center;gap:6px;border:1px solid #dfe2e8;border-radius:99px;padding:11px 30px;font-size:14px;color:var(--ink-2);background:#fff;transition:all .15s}
   .btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
@@ -597,6 +669,97 @@
   </div>
 </div>
 
+<!-- ==================== 快捷加购弹窗 ==================== -->
+<div class="qc-mask" id="qcMask" aria-hidden="true">
+  <div class="qc-modal" role="dialog" aria-modal="true" aria-labelledby="qcTitle">
+    <button class="qc-close" id="qcClose" aria-label="关闭弹窗">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h2 class="qc-title" id="qcTitle">添加商品到购物车</h2>
+
+    <div class="qc-steps">
+      <div class="qc-step on">
+        <div class="qc-step-h"><span class="qc-idx">01</span><span class="qc-sname">支付商品货款</span></div>
+        <p class="qc-sdesc">提交代购订单</p>
+      </div>
+      <span class="qc-sep" aria-hidden="true">›</span>
+      <div class="qc-step">
+        <div class="qc-step-h"><span class="qc-idx">02</span><span class="qc-sname">FalconGoo 采购与质检</span></div>
+        <p class="qc-sdesc">采购并质检入库</p>
+      </div>
+      <span class="qc-sep" aria-hidden="true">›</span>
+      <div class="qc-step">
+        <div class="qc-step-h"><span class="qc-idx">03</span><span class="qc-sname">支付国际运费</span></div>
+        <p class="qc-sdesc">提交包裹并支付运费</p>
+      </div>
+      <span class="qc-sep" aria-hidden="true">›</span>
+      <div class="qc-step">
+        <div class="qc-step-h"><span class="qc-idx">04</span><span class="qc-sname">签收包裹</span></div>
+        <p class="qc-sdesc">打包发出全球配送</p>
+      </div>
+    </div>
+
+    <div class="qc-body">
+      <div class="qc-media" id="qcMedia" role="img" aria-label="商品主图">
+        <span class="qc-shop">货源店铺</span>
+        <span>商品图</span>
+      </div>
+
+      <div class="qc-info">
+        <div class="qc-name-row">
+          <h3 class="qc-pname" id="qcPname">商品名称</h3>
+          <button class="qc-detail" id="qcDetail">
+            查看详情
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="qc-price" id="qcPrice"><small>¥</small>0.0</div>
+
+        <div class="qc-field">
+          <span class="qc-label">尺码</span>
+          <div class="qc-opts" id="qcSizes" role="group" aria-label="选择尺码">
+            <button class="qc-opt on">L 100—140斤</button>
+            <button class="qc-opt">XL 130—170斤</button>
+            <button class="qc-opt">2XL 160—200斤</button>
+          </div>
+        </div>
+
+        <div class="qc-field">
+          <span class="qc-label">颜色</span>
+          <div class="qc-swatches" id="qcColors" role="group" aria-label="选择颜色">
+            <button class="qc-sw on" style="background:linear-gradient(135deg,#2f3136,#4b4f57)" aria-label="颜色 1"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#3a2b1f,#6b4a2e)" aria-label="颜色 2"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#5a4632,#8a6b46)" aria-label="颜色 3"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#8d8478,#b8b0a4)" aria-label="颜色 4"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#e6e2dc,#c9c3ba)" aria-label="颜色 5"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#1e293b,#334155)" aria-label="颜色 6"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#4a2f2a,#7a4a3f)" aria-label="颜色 7"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#2d3b2a,#4d6146)" aria-label="颜色 8"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#3b2f4a,#5e4a75)" aria-label="颜色 9"></button>
+            <button class="qc-sw" style="background:linear-gradient(135deg,#6b3b3b,#9c5a5a)" aria-label="颜色 10"></button>
+          </div>
+        </div>
+
+        <div class="qc-field">
+          <span class="qc-label">数量</span>
+          <div class="qc-qty">
+            <button id="qcMinus" aria-label="减少数量">−</button>
+            <input type="text" id="qcQty" value="1" inputmode="numeric" aria-label="购买数量">
+            <button id="qcPlus" aria-label="增加数量">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qc-foot">
+      <button class="qc-btn qc-btn-ghost" id="qcAddCart">加入购物车</button>
+      <button class="qc-btn qc-btn-primary" id="qcBuyNow">立即购买</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <!-- ==================== 页脚 ==================== -->
 <footer class="site-footer">
   <div class="container">
@@ -873,6 +1036,7 @@
     var list = [];
     for(var i = 0; i < total; i++){ list.push(makeProduct(state.cat, i)); }
 
+    window.__PRODUCTS = list;
     var el = document.getElementById('products');
     el.innerHTML = list.map(function(p){
       var srcCls = p.src === '淘宝' ? 'tb' : 'al';
@@ -880,7 +1044,7 @@
         + '<div class="p-img" style="background:'+p.grad+'">'
         +   '<span class="p-src '+srcCls+'">'+p.src+'</span>'
         +   p.label
-        +   '<div class="p-add">加入购物车</div>'
+        +   '<div class="p-add" data-i="'+i+'">加入购物车</div>'
         + '</div>'
         + '<div class="p-body">'
         +   '<p class="p-title">'+p.title+'</p>'
@@ -899,6 +1063,95 @@
 
   renderCatTabs();
   renderProducts();
+
+  /* ---------- 快捷加购弹窗 ---------- */
+  (function(){
+    var mask = document.getElementById('qcMask');
+    if(!mask) return;
+    var media = document.getElementById('qcMedia');
+    var pname = document.getElementById('qcPname');
+    var price = document.getElementById('qcPrice');
+    var qty   = document.getElementById('qcQty');
+    var toastEl = document.getElementById('toast');
+    var lastFocus = null, toastTimer = null;
+
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2000);
+    }
+
+    function open(p){
+      if(!p) return;
+      pname.textContent = p.title;
+      price.innerHTML = '<small>¥</small>' + p.price;
+      media.style.background = p.grad;
+      media.setAttribute('aria-label', p.title);
+      qty.value = 1;
+      lastFocus = document.activeElement;
+      mask.classList.add('show');
+      mask.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function(){ document.getElementById('qcClose').focus(); }, 80);
+    }
+    function close(){
+      mask.classList.remove('show');
+      mask.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      if(lastFocus && lastFocus.focus){ lastFocus.focus(); }
+    }
+
+    document.getElementById('products').addEventListener('click', function(e){
+      var btn = e.target.closest('.p-add');
+      if(!btn) return;
+      var i = +btn.getAttribute('data-i');
+      open(window.__PRODUCTS && window.__PRODUCTS[i]);
+    });
+
+    document.getElementById('qcClose').addEventListener('click', close);
+    mask.addEventListener('click', function(e){ if(e.target === mask){ close(); } });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && mask.classList.contains('show')){ close(); }
+    });
+
+    ['qcSizes','qcColors'].forEach(function(id){
+      var box = document.getElementById(id);
+      if(!box) return;
+      box.addEventListener('click', function(e){
+        var b = e.target.closest('.qc-opt, .qc-sw');
+        if(!b || !box.contains(b)) return;
+        box.querySelectorAll('.qc-opt, .qc-sw').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+
+    document.getElementById('qcMinus').addEventListener('click', function(){
+      var v = parseInt(qty.value, 10) || 1;
+      qty.value = Math.max(1, v - 1);
+    });
+    document.getElementById('qcPlus').addEventListener('click', function(){
+      var v = parseInt(qty.value, 10) || 1;
+      qty.value = Math.min(999, v + 1);
+    });
+    qty.addEventListener('blur', function(){
+      var v = parseInt(qty.value, 10);
+      qty.value = (!v || v < 1) ? 1 : Math.min(999, v);
+    });
+
+    document.getElementById('qcDetail').addEventListener('click', function(){
+      toast('商品详情页开发中，后续版本上线');
+    });
+
+    document.getElementById('qcAddCart').addEventListener('click', function(){
+      close();
+      toast('已加入购物车');
+    });
+    document.getElementById('qcBuyNow').addEventListener('click', function(){
+      close();
+      toast('已进入结算流程');
+    });
+  })();
 
   /* ---------- 假二维码 ---------- */
   function fakeQR(seed){
