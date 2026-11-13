@@ -397,6 +397,11 @@
   .why-body{display:grid;grid-template-columns:1.12fr .88fr;gap:20px}
   .howto,.video-card{background:rgba(255,255,255,.88);border-radius:22px;padding:22px 24px 24px}
   .card-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;margin:0 0 18px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .card-head .card-title{margin:0}
+  .guide-btn{display:inline-flex;align-items:center;gap:3px;flex:none;font-size:13px;font-weight:600;color:var(--brand);padding:6px 13px;border-radius:99px;background:#f2eeff;transition:background .15s}
+  .guide-btn:hover{background:#e6dfff}
+  .guide-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   .card-ico{width:26px;height:26px;border-radius:7px;background:var(--brand);display:grid;place-items:center;flex-shrink:0}
   .card-ico svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .howto-inner{display:grid;grid-template-columns:auto minmax(150px,1fr) minmax(150px,.95fr);gap:20px;align-items:center}
@@ -478,6 +483,7 @@
       <a href="#top" class="active">首页</a>
       <a href="#top">代购</a>
       <a href="#top">转运</a>
+      <a href="#top">手工下单</a>
     </nav>
 
     <div class="header-tools">
@@ -490,9 +496,6 @@
       </button>
       <button class="icon-btn" aria-label="运费预估" data-tip="运费预估">
         <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M7 9h3M7 12.5h3M7 16h3"/><path d="M14.5 9h3.5M14.5 12.5h3.5M14.5 16h3.5"/></svg>
-      </button>
-      <button class="icon-btn" aria-label="手工下单" data-tip="手工下单">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
       </button>
       <button class="icon-btn" aria-label="消息" data-tip="消息">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.3 9.3 0 0 1-3.8-.8L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>
@@ -577,10 +580,16 @@
 
       <div class="why-body">
         <div class="howto">
-          <h3 class="card-title">
-            <span class="card-ico" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h11v14H4z"/><path d="M15 9h5v10h-5"/></svg></span>
-            如何购买
-          </h3>
+          <div class="card-head">
+            <h3 class="card-title">
+              <span class="card-ico" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h11v14H4z"/><path d="M15 9h5v10h-5"/></svg></span>
+              如何购买
+            </h3>
+            <a class="guide-btn" href="https://karlwork.top/docs/falcongoo-buying-guide.html" target="_blank" rel="noopener noreferrer">
+              下单指引
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+            </a>
+          </div>
           <div class="howto-inner">
             <div class="step-btns" role="tablist" aria-label="购买步骤">
               <button class="step-btn on" data-step="0" role="tab" aria-selected="true">步骤 1</button>
