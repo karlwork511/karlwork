@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下单指引 · FalconGoo</title>
+<style>
+  :root{
+    --brand:#4b2ff0;
+    --brand-d:#3a20c9;
+    --brand-soft:#f2eeff;
+    --ink:#14161b;
+    --ink-2:#5b6270;
+    --ink-3:#8a9099;
+    --line:#eceef2;
+    --bg:#fafafb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px}
+
+  .top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+  .top-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-2);transition:color .15s}
+  .back:hover{color:var(--brand)}
+  .back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .brand{font-size:16px;font-weight:800;letter-spacing:-.02em}
+  .brand i{font-style:normal;color:var(--brand)}
+
+  .hero{padding:52px 0 36px}
+  .kicker{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--brand);background:var(--brand-soft);padding:6px 13px;border-radius:99px;margin-bottom:18px}
+  h1{font-size:38px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin:0 0 12px}
+  .lede{font-size:16px;color:var(--ink-2);margin:0;max-width:620px}
+
+  .steps{list-style:none;padding:0;margin:0 0 56px;display:flex;flex-direction:column;gap:16px}
+  .step{
+    display:grid;grid-template-columns:78px 1fr;gap:24px;
+    background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 30px;
+  }
+  .step-idx{
+    font-size:13px;font-weight:800;color:var(--brand);
+    background:var(--brand-soft);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    height:44px;letter-spacing:.02em;
+  }
+  .step h2{font-size:19px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+  .step p{font-size:14.5px;color:var(--ink-2);margin:0 0 12px}
+  .step p:last-child{margin-bottom:0}
+  .points{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+  .points li{position:relative;padding-left:22px;font-size:14px;color:var(--ink-2)}
+  .points li::before{
+    content:"";position:absolute;left:4px;top:9px;width:6px;height:6px;
+    border-radius:50%;background:var(--brand);opacity:.55;
+  }
+  .points b{color:var(--ink);font-weight:600}
+
+  .faq-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px 32px;margin-bottom:48px}
+  .faq-wrap h2{font-size:20px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+  .faq-wrap .sub{font-size:14px;color:var(--ink-3);margin:0 0 22px}
+  .faq{border-top:1px solid var(--line);padding:18px 0}
+  .faq:last-child{border-bottom:1px solid var(--line)}
+  .faq h3{font-size:15px;font-weight:700;margin:0 0 6px}
+  .faq p{font-size:14px;color:var(--ink-2);margin:0}
+
+  .cta{text-align:center;padding:8px 0 72px}
+  .cta a{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--brand);color:#fff;font-size:15px;font-weight:600;
+    padding:14px 38px;border-radius:99px;transition:background .15s;
+  }
+  .cta a:hover{background:var(--brand-d)}
+  .cta a svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .cta .hint{display:block;font-size:13px;color:var(--ink-3);margin-top:14px}
+
+  footer{border-top:1px solid var(--line);background:#fff;padding:24px 0;text-align:center;font-size:13px;color:var(--ink-3)}
+
+  @media (max-width:640px){
+    .wrap{padding:0 18px}
+    h1{font-size:28px}
+    .hero{padding:36px 0 26px}
+    .step{grid-template-columns:1fr;gap:14px;padding:22px 20px}
+    .step-idx{width:56px;height:36px}
+    .faq-wrap{padding:24px 20px}
+  }
+  @media print{
+    body{background:#fff}
+    .top{position:static}
+    .cta{display:none}
+    .step,.faq-wrap{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="back" href="https://karlwork.top/docs/falcongoo-home-v6-202611121055.html" target="_blank" rel="noopener noreferrer">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 19-7-7 7-7"/></svg>
+      返回首页
+    </a>
+    <span class="brand">Falcon<i>Goo</i></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="kicker">下单指引</span>
+    <h1>从粘贴链接到收到包裹，五步搞定</h1>
+    <p class="lede">FalconGoo 免费代购、全球寄送。你只负责挑商品，采购、质检、合箱、国际运输交给我们。</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-idx">01</span>
+      <div>
+        <h2>找到你要的商品</h2>
+        <p>在首页搜索框粘贴商品链接，或直接输入关键词搜索。</p>
+        <ul class="points">
+          <li>支持<b>淘宝、1688、微店</b>的商品链接，粘贴后自动识别</li>
+          <li>点击输入框可展开<b>搜索发现</b>，看看别人都在买什么</li>
+          <li>手机端可直接用<b>相机图搜</b>，拍下想要的东西找同款</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-idx">02</span>
+      <div>
+        <h2>选择规格并提交订单</h2>
+        <p>点「加入购物车」会弹出快捷加购窗，选好尺码、颜色、数量后提交代购订单。</p>
+        <ul class="points">
+          <li>代购订单提交后需支付<b>商品货款</b>，我们才会去平台下单</li>
+          <li>同一订单里可以放多件商品，<b>合并支付更省手续费</b></li>
+          <li>商品详情页可查看<b>货源店铺、实拍图与历史成交价</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-idx">03</span>
+      <div>
+        <h2>FalconGoo 采购与到仓质检</h2>
+        <p>我们按你的订单在平台下单采购，商品到仓后逐件开箱检查。</p>
+        <ul class="points">
+          <li>质检包含<b>外观、尺寸、数量、瑕疵</b>四项，全程开箱拍照</li>
+          <li>发现色差、破损、错发，第一时间通知你，可<b>申请退换或补偿</b></li>
+          <li>质检照片在「我的包裹」里可随时查看和下载</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-idx">04</span>
+      <div>
+        <h2>提包合箱，支付国际运费</h2>
+        <p>在包裹里勾选要发出的商品生成提包，选择线路并支付国际运费。</p>
+        <ul class="points">
+          <li>多件商品<b>合并成一个包裹</b>发出，运费更省</li>
+          <li>运费按<b>实重与体积重取大</b>计算，分线路阶梯计费，下单前可用运费预估试算</li>
+          <li>支持<b>180 天免费仓储</b>，可以攒够一批再一起寄</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-idx">05</span>
+      <div>
+        <h2>全程可查，签收包裹</h2>
+        <p>仓库打包出库后生成国际运单，物流轨迹全程可查。</p>
+        <ul class="points">
+          <li>出库后可在「我的包裹」查看<b>运单号与实时轨迹</b></li>
+          <li>签收前如遇异常，可直接在订单里发起<b>售后申请</b></li>
+          <li>7×24 小时客服在线，遇到问题随时找我们</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <section class="faq-wrap">
+    <h2>常见问题</h2>
+    <p class="sub">下单前最常被问到的几件事</p>
+
+    <div class="faq">
+      <h3>运费怎么算？</h3>
+      <p>按包裹实重与体积重取大值计费，不同线路有各自的阶梯价格。下单前可以用首页的「运费预估」工具先试算，最终以仓库称重后的实际费用为准。</p>
+    </div>
+
+    <div class="faq">
+      <h3>商品多久到仓？</h3>
+      <p>国内商家正常 3—5 天到仓，预售或定制款以商家发货时效为准。到仓后我们会立即质检并通知你。</p>
+    </div>
+
+    <div class="faq">
+      <h3>哪些商品不能寄？</h3>
+      <p>液体、粉末、电池、刀具、仿牌等属于国际运输禁运品，具体以《禁运品清单》为准。不确定的商品可以下单前先咨询客服。</p>
+    </div>
+
+    <div class="faq">
+      <h3>质检具体检查什么？</h3>
+      <p>核对数量与规格、检查外观瑕疵与色差、测量关键尺寸，并拍摄开箱照片。发现问题会先与你确认再决定是否发出。</p>
+    </div>
+
+    <div class="faq">
+      <h3>可以寄存多久？</h3>
+      <p>商品入仓后享 180 天免费仓储。超过 180 天会按天收取仓储费，建议攒够一批及时提包寄出。</p>
+    </div>
+  </section>
+
+  <div class="cta">
+    <a href="https://karlwork.top/docs/falcongoo-home-v6-202611121055.html" target="_blank" rel="noopener noreferrer">
+      去首页开始下单
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+    </a>
+    <span class="hint">免费代购，全球寄送</span>
+  </div>
+</main>
+
+<footer>
+  FalconGoo · 下单指引
+</footer>
+
+</body>
+</html>
