@@ -521,13 +521,6 @@
   .app-pop h4{margin:13px 0 4px;font-size:13.5px;font-weight:800}
   .app-pop p{margin:0;font-size:11.5px;color:#9aa0a8;line-height:1.6}
 
-  .service-pop{width:252px;padding:18px}
-  .service-pop h4{margin:0;font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px}
-  .service-pop h4 i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.16)}
-  .service-pop p{margin:8px 0 0;font-size:12px;color:#8b919b;line-height:1.7}
-  .service-pop .sbtn{margin-top:13px;width:100%;height:38px;border-radius:10px;background:#f5f3ff;color:var(--brand);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .16s;border:0;cursor:pointer}
-  .service-pop .sbtn:hover{background:#ece7ff}
-
   @media (max-width:1120px){
     .float-nav,.fn-expand,.fn-pop{display:none}
   }
@@ -804,7 +797,7 @@
     <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.6"/><path d="M10.4 18.6h3.2"/></svg>
   </div>
   <div class="fn-line"></div>
-  <div class="fn-item" data-pop="service" aria-label="在线客服">
+  <div class="fn-item" id="fnService" aria-label="在线客服" title="在线客服">
     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4.2 13.5v-1.2a7.8 7.8 0 0 1 15.6 0v1.2"/><rect x="2.6" y="13" width="4" height="6.2" rx="2"/><rect x="17.4" y="13" width="4" height="6.2" rx="2"/><path d="M19.4 19.2a3 3 0 0 1-3 2.6h-2.6"/></svg>
   </div>
   <div class="fn-line"></div>
@@ -839,12 +832,6 @@
   </div>
   <h4>扫码下载 FalconGoo App</h4>
   <p>iOS / Android 通用<br>手机端代购、查物流更方便</p>
-</div>
-
-<div class="fn-pop service-pop" id="popService">
-  <h4><i></i>在线客服</h4>
-  <p>服务时间 9:00 - 22:00（北京时间）<br>代购、转运、售后问题都可以问</p>
-  <button class="sbtn" id="serviceBtn">开始咨询</button>
 </div>
 
 <!-- ==================== 在线客服聊天弹窗 ==================== -->
@@ -1607,7 +1594,7 @@
   })();
 
   var popTimer = null, activePop = null;
-  var POP_MAP = {cart:'popCart', app:'popApp', service:'popService'};
+  var POP_MAP = {cart:'popCart', app:'popApp'};
 
   function openPop(kind, el){
     clearTimeout(popTimer);
@@ -1673,7 +1660,7 @@
   document.getElementById('cartGo').addEventListener('click', function(){
     showToast('购物车页面开发中，后续版本上线');
   });
-  document.getElementById('serviceBtn').addEventListener('click', function(){
+  document.getElementById('fnService').addEventListener('click', function(){
     closePopNow();
     if(window.__openServiceChat){ window.__openServiceChat(); }
     else { showToast('正在接入在线客服…'); }
