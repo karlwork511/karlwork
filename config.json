@@ -48,6 +48,16 @@
             "icon": "📋"
           }
         ]
+      },
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "运营主动发送消息",
+            "file": "docs/message-reach-send-annotated.html",
+            "icon": "📤"
+          }
+        ]
       }
     ]
   },
