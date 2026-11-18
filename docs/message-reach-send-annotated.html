@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>消息触达_消息发送_v2</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+.annotation-toolbar { display: flex; align-items: center; justify-content: flex-end; padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED; flex-shrink: 0; z-index: 100; }
+.toolbar-edit-btn { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #333; display: flex; align-items: center; gap: 4px; }
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.workspace { flex: 1; display: flex; min-height: 0; min-width: 0; }
+.preview-area { flex: 1; min-width: 0; overflow: auto; padding: 16px; position: relative; }
+
+.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease; }
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header { padding: 16px; font-size: 15px; font-weight: 600; color: #333; border-bottom: 1px solid #E4E7ED; background: #F7F8FA; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 8px; }
+.panel-toggle-btn { width: 24px; height: 24px; border: none; background: #E8EAED; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.panel-expand-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 36px; height: 48px; background: #165DFF; color: #fff; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15); }
+.panel-expand-btn.show { display: block; }
+.annotation-item { padding: 14px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge { width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+.anno-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none; }
+.anno-marker.highlight, .anno-marker:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22,93,255,0.4); }
+
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 560px; max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; position: relative; }
+.modal-lg { width: 760px; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th { background: #FAFAFA; width: 100px; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; vertical-align: top; }
+.detail-table td { padding: 12px 16px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.7; }
+.detail-table textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; }
+.btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22,93,255,0.6); } 100% { box-shadow: 0 0 0 3px rgba(22,93,255,0); } }
+
+/* ============ 产品界面 ============ */
+:root { --main: #00B389; --main-light: #E6F7F2; --line: #E4E7ED; --sub: #86909C; }
+.page-container { background: #fff; border-radius: 8px; height: calc(100vh - 74px); min-width: 940px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+.page-head { padding: 16px 24px 0; flex-shrink: 0; }
+.breadcrumb { font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+.breadcrumb span { color: #C9CDD4; margin: 0 4px; }
+.page-title { font-size: 18px; font-weight: 600; color: #1D2129; }
+
+.top-area { padding: 0 24px; flex-shrink: 0; position: relative; }
+.tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--line); margin-top: 14px; }
+.tab { padding: 10px 0; font-size: 14px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.active { color: var(--main); border-bottom-color: var(--main); font-weight: 600; }
+
+.send-body { flex: 1; overflow-y: auto; padding: 16px 24px 8px; }
+
+.section { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
+.sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.sec-no { width: 20px; height: 20px; border-radius: 4px; background: var(--main); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.sec-title { font-size: 14px; font-weight: 600; color: #1D2129; }
+.sec-tip { font-size: 12px; color: var(--sub); margin-left: auto; }
+
+.opt-row { display: flex; gap: 12px; }
+.opt-card { flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; cursor: pointer; display: flex; align-items: flex-start; gap: 9px; }
+.opt-card.active { border-color: var(--main); background: var(--main-light); }
+.opt-card.disabled { background: #FAFBFC; cursor: not-allowed; opacity: 0.7; }
+.radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #C9CDD4; flex-shrink: 0; position: relative; margin-top: 2px; }
+.opt-card.active .radio-dot { border-color: var(--main); }
+.opt-card.active .radio-dot::after { content: ''; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--main); }
+.opt-name { font-size: 13px; font-weight: 600; color: #1D2129; }
+.opt-desc { font-size: 12px; color: var(--sub); margin-top: 3px; line-height: 1.5; }
+.opt-tag { font-size: 11px; padding: 1px 6px; border-radius: 3px; background: #F2F3F5; color: var(--sub); margin-left: auto; flex-shrink: 0; }
+
+.target-row { display: flex; gap: 26px; align-items: center; }
+.target-opt { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; color: #4E5969; }
+.target-opt.active { color: var(--main); font-weight: 600; }
+
+/* 客户表格 */
+.cust-filter { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.cust-filter input { height: 32px; padding: 0 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; width: 130px; }
+.cust-filter input:focus { border-color: var(--main); }
+.btn-sm { height: 32px; padding: 0 14px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #DCDFE6; background: #fff; color: #4E5969; }
+.btn-sm.primary { background: var(--main); color: #fff; border-color: var(--main); }
+.btn-sm:hover { opacity: 0.9; }
+.selected-count { font-size: 13px; color: var(--sub); margin-left: 4px; }
+.selected-count b { color: var(--main); }
+
+.cust-table-wrap { border: 1px solid var(--line); border-radius: 6px; overflow-y: auto; max-height: 372px; position: relative; }
+table.cust { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.cust thead th { position: sticky; top: 0; z-index: 2; background: #FAFBFC; text-align: left; font-weight: 500; color: #4E5969; font-size: 12px; padding: 10px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.cust tbody td { padding: 9px 10px; border-bottom: 1px solid #F2F3F5; color: #1D2129; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+table.cust tbody tr:hover { background: #FAFCFB; }
+table.cust tbody tr.checked { background: var(--main-light); }
+.ck { width: 14px; height: 14px; border: 1px solid #C9CDD4; border-radius: 3px; display: inline-block; position: relative; cursor: pointer; vertical-align: middle; }
+.ck.on { background: var(--main); border-color: var(--main); }
+.ck.on::after { content: '✓'; position: absolute; color: #fff; font-size: 10px; line-height: 12px; left: 1px; }
+.cust-empty { padding: 40px; text-align: center; color: var(--sub); font-size: 13px; }
+
+.pager { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0 2px; font-size: 12px; color: #4E5969; }
+.pager .total { margin-right: 12px; color: var(--sub); }
+.pg { min-width: 26px; height: 26px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; }
+.pg.active { background: var(--main); color: #fff; border-color: var(--main); }
+.pg.dots { border: none; cursor: default; }
+
+/* Excel 导入 */
+.excel-area { border: 1px dashed #C9CDD4; border-radius: 6px; padding: 26px; text-align: center; background: #FAFBFC; }
+.excel-icon { font-size: 26px; margin-bottom: 8px; }
+.excel-title { font-size: 13px; color: #1D2129; margin-bottom: 6px; }
+.excel-tip { font-size: 12px; color: var(--sub); line-height: 1.7; margin-bottom: 14px; }
+.excel-done { display: none; border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; margin-top: 12px; }
+.excel-done.show { display: block; }
+.excel-file { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1D2129; margin-bottom: 8px; }
+.excel-stat { font-size: 12px; color: var(--sub); line-height: 1.9; }
+.excel-stat b { color: var(--main); }
+.excel-stat .err { color: #F53F3F; }
+
+.form-row { display: flex; align-items: flex-start; margin-bottom: 14px; }
+.form-row > label { width: 78px; flex-shrink: 0; text-align: right; padding-right: 12px; font-size: 13px; color: #4E5969; line-height: 32px; }
+.form-row > label .req { color: #F53F3F; margin-right: 2px; }
+.form-field { flex: 1; min-width: 0; }
+.form-field input[type=text], .form-field textarea { width: 100%; padding: 7px 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; outline: none; line-height: 1.6; }
+.form-field textarea { min-height: 100px; resize: vertical; }
+.form-field input:focus, .form-field textarea:focus { border-color: var(--main); }
+.counter { text-align: right; font-size: 12px; color: var(--sub); margin-top: 4px; }
+.counter.over { color: #F53F3F; }
+
+.lang-tabs-wrap { position: relative; padding-right: 30px; }
+.lang-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); }
+.lang-tab { padding: 6px 0; font-size: 13px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.lang-tab.active { color: var(--main); border-bottom-color: var(--main); font-weight: 600; }
+.lang-tab.pending::after { content: '·'; color: #F53F3F; margin-left: 3px; }
+
+.translate-row { display: flex; align-items: center; gap: 12px; }
+.btn-outline { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; font-size: 13px; color: #4E5969; cursor: pointer; }
+.btn-outline:hover { border-color: var(--main); color: var(--main); }
+.hint { font-size: 12px; color: var(--sub); }
+
+.time-row { display: flex; align-items: center; gap: 12px; }
+.time-row input[type=datetime-local] { padding: 6px 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; color: #1D2129; outline: none; }
+.time-disabled { opacity: 0.4; pointer-events: none; }
+
+.send-footer { flex-shrink: 0; border-top: 1px solid var(--line); padding: 12px 24px; display: flex; align-items: center; gap: 10px; background: #fff; position: relative; }
+.footer-tip { font-size: 12px; color: var(--sub); }
+.btn-main { background: var(--main); color: #fff; border: none; padding: 8px 22px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.btn-main:hover { opacity: 0.9; }
+.btn-ghost { background: #fff; border: 1px solid #DCDFE6; color: #4E5969; padding: 8px 18px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.btn-ghost:hover { border-color: var(--main); color: var(--main); }
+.ml-auto { margin-left: auto; }
+
+/* 预览 */
+.pv-lang { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.pv-lang-btn { padding: 5px 14px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 12px; color: #4E5969; cursor: pointer; background: #fff; }
+.pv-lang-btn.active { border-color: var(--main); color: var(--main); background: var(--main-light); }
+.pv-lang-btn.pending { color: #C9CDD4; }
+.pv-stage { background: #F5F7FA; border-radius: 8px; padding: 20px; min-height: 220px; position: relative; }
+.pv-note { font-size: 12px; color: #F53F3F; margin-bottom: 10px; }
+.inapp-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.inapp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.inapp-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--main); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+.inapp-src { font-size: 13px; font-weight: 600; color: #1D2129; }
+.inapp-time { font-size: 12px; color: var(--sub); margin-left: auto; }
+.inapp-title { font-size: 14px; font-weight: 600; color: #1D2129; margin-bottom: 8px; }
+.inapp-body { font-size: 13px; color: #4E5969; line-height: 1.8; }
+.inapp-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid #F2F3F5; }
+.inapp-btn { display: inline-block; padding: 6px 16px; background: var(--main); color: #fff; border-radius: 4px; font-size: 12px; }
+.mail-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.mail-head { background: #FAFBFC; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.mail-line { font-size: 12px; color: #4E5969; line-height: 1.9; }
+.mail-line b { color: #1D2129; font-weight: 500; }
+.mail-subject { font-size: 14px; font-weight: 600; color: #1D2129; padding: 14px 16px 8px; }
+.mail-body { padding: 0 16px 16px; font-size: 13px; color: #4E5969; line-height: 1.9; }
+.mail-foot { padding: 12px 16px; border-top: 1px solid #F2F3F5; font-size: 11px; color: #C9CDD4; }
+
+/* 确认弹窗 */
+.confirm-row { display: flex; padding: 10px 0; border-bottom: 1px solid #F2F3F5; font-size: 13px; }
+.confirm-row:last-child { border-bottom: none; }
+.confirm-label { width: 96px; color: var(--sub); flex-shrink: 0; }
+.confirm-value { color: #1D2129; flex: 1; }
+.confirm-value b { color: var(--main); }
+.danger-box { background: #FFF1F0; border: 1px solid #FFCCC7; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #CF1322; line-height: 1.7; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()">✏️ 编辑标注</button>
+    </div>
+
+    <div class="workspace">
+    <div class="preview-area">
+        <div class="page-container" id="anno-1">
+
+            <div class="page-head">
+                <div class="breadcrumb">运营中心<span>/</span>消息触达</div>
+                <div class="page-title">消息触达</div>
+            </div>
+
+            <div class="top-area" id="anno-2">
+                <div class="anno-marker" data-id="2">2</div>
+                <div class="tabs">
+                    <div class="tab active">消息发送</div>
+                    <div class="tab">消息模板</div>
+                    <div class="tab">发送记录</div>
+                </div>
+            </div>
+
+            <div class="send-body">
+
+                <!-- 发送方式 -->
+                <div class="section" id="anno-3">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <div class="sec-head">
+                        <span class="sec-no">1</span><span class="sec-title">发送方式</span>
+                        <span class="sec-tip">单选，一条消息只走一个渠道</span>
+                    </div>
+                    <div class="opt-row">
+                        <div class="opt-card active" data-ch="inapp" onclick="setChannel('inapp')">
+                            <span class="radio-dot"></span>
+                            <div>
+                                <div class="opt-name">站内信</div>
+                                <div class="opt-desc">站内消息中心，用户登录后可见</div>
+                            </div>
+                        </div>
+                        <div class="opt-card" data-ch="mail" onclick="setChannel('mail')">
+                            <span class="radio-dot"></span>
+                            <div>
+                                <div class="opt-name">邮件</div>
+                                <div class="opt-desc">发送至用户绑定邮箱</div>
+                            </div>
+                        </div>
+                        <div class="opt-card disabled" data-ch="push">
+                            <span class="radio-dot"></span>
+                            <div>
+                                <div class="opt-name">PUSH</div>
+                                <div class="opt-desc">需用户开启 App 通知权限</div>
+                            </div>
+                            <span class="opt-tag">待开放</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 消息内容 -->
+                <div class="section" id="anno-4">
+                    <div class="anno-marker" data-id="4">7</div>
+                    <div class="sec-head">
+                        <span class="sec-no">2</span><span class="sec-title">消息内容</span>
+                    </div>
+                    <div class="form-row">
+                        <label>语言</label>
+                        <div class="form-field">
+                            <div class="lang-tabs-wrap"><div class="lang-tabs" id="lang-tabs"></div></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label><span class="req">*</span>消息标题</label>
+                        <div class="form-field">
+                            <input type="text" id="m-title" placeholder="请输入消息标题" oninput="updateCounter()">
+                            <div class="counter" id="cnt-title">0 / 80</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label><span class="req">*</span>消息正文</label>
+                        <div class="form-field">
+                            <textarea id="m-body" placeholder="请输入消息正文" oninput="updateCounter()"></textarea>
+                            <div class="counter" id="cnt-body">0 / 4000</div>
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-bottom:0;">
+                        <label>翻译</label>
+                        <div class="form-field">
+                            <div class="translate-row">
+                                <button class="btn-outline" onclick="translateAll()">一键翻译所有语言</button>
+                                <span class="hint">调用CMS外部翻译接口，并保存返回的语言模板</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 目标客户群 -->
+                <div class="section" id="anno-5">
+                    <div class="anno-marker" data-id="5">4</div>
+                    <div class="sec-head">
+                        <span class="sec-no">3</span><span class="sec-title">目标客户群</span>
+                    </div>
+                    <div class="target-row">
+                        <div class="target-opt" data-t="all" onclick="setTarget('all')"><span class="radio-dot"></span>全部客户</div>
+                        <div class="target-opt active" data-t="list" onclick="setTarget('list')"><span class="radio-dot"></span>指定客户编码列表</div>
+                        <div class="target-opt" data-t="excel" onclick="setTarget('excel')"><span class="radio-dot"></span>从Excel导入</div>
+                    </div>
+                </div>
+
+                <!-- 指定客户 -->
+                <div class="section" id="anno-6">
+                    <div class="anno-marker" data-id="6">5</div>
+                    <div class="sec-head">
+                        <span class="sec-no">4</span><span class="sec-title">选择客户</span>
+                    </div>
+                    <div class="cust-filter">
+                        <input type="text" placeholder="客户编码" id="f-code">
+                        <input type="text" placeholder="客户昵称" id="f-nick">
+                        <input type="text" placeholder="邮箱" id="f-mail">
+                        <input type="text" placeholder="手机号" id="f-phone">
+                        <button class="btn-sm primary" onclick="renderCust()">查询</button>
+                        <button class="btn-sm" onclick="resetFilter()">重置</button>
+                        <span class="selected-count">已选 <b id="sel-count">0</b> 人</span>
+                    </div>
+                    <div class="cust-table-wrap">
+                        <table class="cust">
+                            <thead>
+                                <tr>
+                                    <th style="width:36px;"><span class="ck" id="ck-all" onclick="toggleAll()"></span></th>
+                                    <th style="width:46px;">编号</th>
+                                    <th style="width:132px;">ID</th>
+                                    <th style="width:70px;">客户标签</th>
+                                    <th>客户昵称</th>
+                                    <th style="width:82px;">客户编码</th>
+                                    <th>邮箱</th>
+                                    <th style="width:96px;">手机号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cust-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="pager">
+                        <span class="total">共 7,846 条</span>
+                        <span class="pg">‹</span>
+                        <span class="pg active">1</span>
+                        <span class="pg">2</span>
+                        <span class="pg">3</span>
+                        <span class="pg">4</span>
+                        <span class="pg">5</span>
+                        <span class="pg">6</span>
+                        <span class="pg dots">...</span>
+                        <span class="pg">393</span>
+                        <span class="pg">›</span>
+                    </div>
+                </div>
+
+                <!-- Excel 导入 -->
+                <div class="section" id="anno-7" style="display:none;">
+                    <div class="anno-marker" data-id="7">6</div>
+                    <div class="sec-head">
+                        <span class="sec-no">4</span><span class="sec-title">从 Excel 导入客户</span>
+                    </div>
+                    <div class="excel-area">
+                        <div class="excel-icon">📄</div>
+                        <div class="excel-title">点击上传或拖拽文件到此处</div>
+                        <div class="excel-tip">仅支持 .xlsx 格式，单次最多 10,000 条，按「客户编码」列匹配客户</div>
+                        <button class="btn-sm primary" onclick="mockUpload()">选择文件</button>
+                        <button class="btn-sm" style="margin-left:8px;" onclick="alert('已下载导入模板')">下载导入模板</button>
+                    </div>
+                    <div class="excel-done" id="excel-done">
+                        <div class="excel-file">📄 <span>客户名单_20261118.xlsx</span>
+                            <span class="btn-sm" style="margin-left:auto;height:26px;line-height:24px;" onclick="resetExcel()">移除</span>
+                        </div>
+                        <div class="excel-stat">
+                            共解析 <b>1,300</b> 条，成功匹配 <b>1,284</b> 条，未匹配 <span class="err">16</span> 条
+                        </div>
+                        <div class="excel-stat" style="color:#F53F3F;">未匹配原因：客户编码不存在 14 条，编码格式错误 2 条</div>
+                    </div>
+                </div>
+
+                <!-- 全部客户提示 -->
+                <div class="section" id="anno-5b" style="display:none;">
+                    <div class="sec-head">
+                        <span class="sec-no">4</span><span class="sec-title">接收范围</span>
+                    </div>
+                    <div class="excel-area" style="border-style:solid;background:#FFF7E6;border-color:#FFE0B2;">
+                        <div class="excel-title" style="color:#B25E09;">本次将发送给全部 7,846 位客户</div>
+                        <div class="excel-tip">发送前会再次确认，确认后不可撤回</div>
+                    </div>
+                </div>
+
+                <!-- 发送设置 -->
+                <div class="section" id="anno-8" style="margin-bottom:4px;">
+                    <div class="anno-marker" data-id="8">8</div>
+                    <div class="sec-head">
+                        <span class="sec-no">5</span><span class="sec-title">发送设置</span>
+                    </div>
+                    <div class="opt-row" style="margin-bottom:12px;">
+                        <div class="opt-card active" data-tm="now" onclick="setTiming('now')" style="flex:0 0 150px;">
+                            <span class="radio-dot"></span><div><div class="opt-name">立即发送</div></div>
+                        </div>
+                        <div class="opt-card" data-tm="plan" onclick="setTiming('plan')" style="flex:0 0 150px;">
+                            <span class="radio-dot"></span><div><div class="opt-name">定时发送</div></div>
+                        </div>
+                        <div class="time-row time-disabled" id="time-row" style="margin-left:12px;">
+                            <input type="datetime-local" id="plan-time" value="2026-11-19T10:00">
+                        </div>
+                    </div>
+                    <div class="hint">定时任务可在发送记录中查看与取消，到达时间前 5 分钟不可再取消。</div>
+                </div>
+
+            </div>
+
+            <div class="send-footer" id="anno-9">
+                <div class="anno-marker" data-id="9">9</div>
+                <span class="footer-tip">发送后不可撤回，请先预览确认内容</span>
+                <div class="ml-auto" style="display:flex;gap:10px;">
+                    <button class="btn-ghost" onclick="openPreview()">预览</button>
+                    <button class="btn-ghost" onclick="alert('已保存为草稿，可在发送记录中继续编辑')">保存草稿</button>
+                    <button class="btn-main" onclick="openConfirm()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()">📌</button>
+</div>
+
+<!-- 全部客户二次确认 -->
+<div class="modal-overlay" id="all-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">发送给全部客户？</div>
+            <button class="modal-close" onclick="closeAllModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div style="font-size:13px;color:#4E5969;line-height:1.9;">
+                本次将发送给平台全部 <b style="color:#F53F3F;">7,846</b> 位客户，包含从未下单的用户。<br>
+                发送后不可撤回，请确认内容已经过审核。
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeAllModal()">取消</button>
+            <button class="btn-main" onclick="confirmAll()">确认，发送给全部客户</button>
+        </div>
+    </div>
+</div>
+
+<!-- 预览 -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="pv-title">消息预览</div>
+            <button class="modal-close" onclick="closePreview()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="pv-lang" id="pv-lang"></div>
+            <div class="pv-stage" id="pv-stage"><div id="pv-content"></div></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closePreview()">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 发送确认 -->
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">确认发送</div>
+            <button class="modal-close" onclick="closeConfirm()">×</button>
+        </div>
+        <div class="modal-body" style="position:relative;">
+            <div class="anno-marker" data-id="10">10</div>
+            <div class="confirm-row"><div class="confirm-label">发送方式</div><div class="confirm-value" id="cf-ch">站内信</div></div>
+            <div class="confirm-row"><div class="confirm-label">目标客户群</div><div class="confirm-value" id="cf-target">指定客户编码列表</div></div>
+            <div class="confirm-row"><div class="confirm-label">接收人数</div><div class="confirm-value"><b id="cf-count">0</b> 人</div></div>
+            <div class="confirm-row"><div class="confirm-label">发送时间</div><div class="confirm-value" id="cf-time">立即发送</div></div>
+            <div class="confirm-row"><div class="confirm-label">消息标题</div><div class="confirm-value" id="cf-title">—</div></div>
+            <div class="danger-box" id="cf-danger" style="display:none;">本次为全部客户群发，涉及 7,846 人，确认后不可撤回。</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeConfirm()">取消</button>
+            <button class="btn-main" onclick="doSend()">确认发送</button>
+        </div>
+    </div>
+</div>
+
+<!-- 标注详情 -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body"><table class="detail-table" id="detail-table"></table></div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none;margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const LANGS = [
+  {code:'zh-CN', name:'中文简体'},
+  {code:'zh-TW', name:'中文繁体'},
+  {code:'en',    name:'English'},
+  {code:'ja',    name:'日本語'},
+  {code:'ru',    name:'Русский'}
+];
+
+const CONTENT = {
+  'zh-CN': {t:'双十一返场｜20元运费券限时领', b:'亲爱的用户，双十一返场活动开始啦！即日起至 11 月 20 日，登录 POKO 即可领取 20 元运费券，每个账号限领一张，先到先得。券可在提交包裹时直接抵扣运费。'},
+  'zh-TW': {t:'雙十一返場｜20元運費券限時領', b:'親愛的用戶，雙十一返場活動開始啦！即日起至 11 月 20 日，登入 POKO 即可領取 20 元運費券，每個帳號限領一張，先到先得。券可在提交包裹時直接折抵運費。'},
+  'en':    {t:'11.11 Encore | Claim your 20 CNY shipping voucher', b:'Dear user, our 11.11 Encore event has started! Log in to POKO from now until November 20 to claim a 20 CNY shipping voucher. One voucher per account, first come first served. The voucher can be applied directly to your packing fee.'},
+  'ja':    {t:'11.11 アンコール｜20元送料クーポン配布中', b:'いつもご利用ありがとうございます。11.11アンコールキャンペーンを開催中です。11月20日までにPOKOへログインすると20元の送料クーポンを受け取れます。お一人様1枚限り、先着順です。クーポンは荷物申請時のお支払いにご利用いただけます。'},
+  'ru':    {t:'11.11 Encore | Купон на доставку 20 юаней', b:'Здравствуйте! Стартовала акция 11.11 Encore. Войдите в POKO до 20 ноября и получите купон на доставку 20 юаней. Один купон на аккаунт, количество ограничено. Купон можно применить при оплате отправки посылки.'}
+};
+
+const CUSTOMERS = [
+ {id:'1329785959576223744', tag:'新用户', nick:'amychao960928', code:'1512372', mail:'amychao960928@gmail.com', phone:''},
+ {id:'1329704670487625728', tag:'新用户', nick:'fujinshan304', code:'1512255', mail:'fujinshan304@gmail.com', phone:''},
+ {id:'1329595526514458624', tag:'新用户', nick:'Z.', code:'1512234', mail:'', phone:''},
+ {id:'1329574057419980800', tag:'新用户', nick:'黄佳晨', code:'1512218', mail:'', phone:''},
+ {id:'1329516269676500992', tag:'新用户', nick:'五七人力（575...', code:'1512191', mail:'', phone:''},
+ {id:'1329482231154294784', tag:'老用户', nick:'lin_zhihao', code:'1512176', mail:'linzhihao@163.com', phone:'138****6621'},
+ {id:'1329451187426581504', tag:'老用户', nick:'陈小满', code:'1512154', mail:'chenxiaoman@qq.com', phone:'139****3308'},
+ {id:'1329419027736848384', tag:'VIP客户', nick:'wang_rui_88', code:'1512132', mail:'wangrui88@outlook.com', phone:'136****7742'},
+ {id:'1329386651474825216', tag:'VIP客户', nick:'佐藤明', code:'1512119', mail:'sato.akira@jp.com', phone:'135****2205'},
+ {id:'1329354412806719488', tag:'老用户', nick:'Иван Петров', code:'1512098', mail:'ivan.petrov@mail.ru', phone:'137****9914'}
+];
+
+let curLang = 'zh-CN';
+let curChannel = 'inapp';
+let curTarget = 'list';
+let curTiming = 'now';
+let selected = new Set();
+
+function renderLangTabs() {
+    document.getElementById('lang-tabs').innerHTML = LANGS.map(l => {
+        const has = !!CONTENT[l.code];
+        return `<span class="lang-tab ${l.code===curLang?'active':''} ${has?'':'pending'}" onclick="switchLang('${l.code}')">${l.name}</span>`;
+    }).join('');
+}
+function switchLang(code) { saveCur(); curLang = code; renderLangTabs(); fillForm(); }
+function saveCur() {
+    const t = document.getElementById('m-title').value;
+    const b = document.getElementById('m-body').value;
+    if (t || b) CONTENT[curLang] = {t: t, b: b};
+}
+function fillForm() {
+    const c = CONTENT[curLang];
+    document.getElementById('m-title').value = c ? c.t : '';
+    document.getElementById('m-body').value = c ? c.b : '';
+    document.getElementById('m-title').placeholder = c ? '请输入消息标题' : '该语言尚未翻译，可点击下方一键翻译';
+    document.getElementById('m-body').placeholder = c ? '请输入消息正文' : '该语言尚未翻译，可点击下方一键翻译';
+    updateCounter();
+}
+function updateCounter() {
+    const t = document.getElementById('m-title').value;
+    const b = document.getElementById('m-body').value;
+    const ct = document.getElementById('cnt-title'), cb = document.getElementById('cnt-body');
+    ct.textContent = t.length + ' / 80';
+    ct.className = 'counter' + (t.length > 80 ? ' over' : '');
+    cb.textContent = b.length + ' / 4000';
+    cb.className = 'counter' + (b.length > 4000 ? ' over' : '');
+}
+function translateAll() {
+    saveCur();
+    const base = CONTENT['zh-CN'];
+    if (!base || !base.t) { alert('请先填写中文简体内容'); return; }
+    LANGS.forEach(l => { if (l.code !== 'zh-CN' && !CONTENT[l.code]) CONTENT[l.code] = {t: base.t, b: base.b}; });
+    renderLangTabs(); fillForm();
+    alert('已调用翻译接口，4 种语言内容已生成');
+}
+
+function setChannel(ch) {
+    curChannel = ch;
+    document.querySelectorAll('#anno-3 .opt-card').forEach(el => el.classList.toggle('active', el.dataset.ch === ch));
+}
+
+function setTarget(t) {
+    if (t === 'all') { document.getElementById('all-modal').classList.add('show'); return; }
+    applyTarget(t);
+}
+function confirmAll() { closeAllModal(); applyTarget('all'); }
+function closeAllModal() { document.getElementById('all-modal').classList.remove('show'); }
+function applyTarget(t) {
+    curTarget = t;
+    document.querySelectorAll('.target-opt').forEach(el => el.classList.toggle('active', el.dataset.t === t));
+    document.getElementById('anno-6').style.display = t === 'list' ? 'block' : 'none';
+    document.getElementById('anno-7').style.display = t === 'excel' ? 'block' : 'none';
+    document.getElementById('anno-5b').style.display = t === 'all' ? 'block' : 'none';
+}
+
+function renderCust() {
+    document.getElementById('cust-body').innerHTML = CUSTOMERS.map((c, i) => `
+        <tr class="${selected.has(c.id)?'checked':''}">
+            <td><span class="ck ${selected.has(c.id)?'on':''}" onclick="toggleOne('${c.id}')"></span></td>
+            <td>${i+1}</td>
+            <td>${c.id}</td>
+            <td>${c.tag}</td>
+            <td title="${c.nick}">${c.nick}</td>
+            <td>${c.code}</td>
+            <td title="${c.mail}">${c.mail || '-'}</td>
+            <td>${c.phone || '-'}</td>
+        </tr>`).join('');
+    updateSelCount();
+}
+function toggleOne(id) {
+    if (selected.has(id)) selected.delete(id); else selected.add(id);
+    renderCust();
+}
+function toggleAll() {
+    if (selected.size === CUSTOMERS.length) selected.clear();
+    else CUSTOMERS.forEach(c => selected.add(c.id));
+    renderCust();
+}
+function updateSelCount() {
+    document.getElementById('sel-count').textContent = selected.size;
+    const all = document.getElementById('ck-all');
+    all.className = 'ck' + (selected.size === CUSTOMERS.length && selected.size > 0 ? ' on' : '');
+}
+function resetFilter() {
+    ['f-code','f-nick','f-mail','f-phone'].forEach(id => document.getElementById(id).value = '');
+    renderCust();
+}
+
+function mockUpload() {
+    document.getElementById('excel-done').classList.add('show');
+}
+function resetExcel() {
+    document.getElementById('excel-done').classList.remove('show');
+}
+
+function setTiming(t) {
+    curTiming = t;
+    document.querySelectorAll('#anno-8 .opt-card').forEach(el => el.classList.toggle('active', el.dataset.tm === t));
+    document.getElementById('time-row').classList.toggle('time-disabled', t !== 'plan');
+}
+
+function recvCount() {
+    if (curTarget === 'all') return 7846;
+    if (curTarget === 'excel') return 1284;
+    return selected.size;
+}
+
+function openPreview() {
+    saveCur(); renderPvLang(); renderPvStage();
+    document.getElementById('preview-modal').classList.add('show');
+}
+function renderPvLang() {
+    document.getElementById('pv-lang').innerHTML = LANGS.map(l => {
+        const has = !!CONTENT[l.code];
+        return `<span class="pv-lang-btn ${l.code===curLang?'active':''} ${has?'':'pending'}" onclick="pvSwitchLang('${l.code}')">${l.name}</span>`;
+    }).join('');
+}
+function pvSwitchLang(code) { curLang = code; renderLangTabs(); fillForm(); renderPvLang(); renderPvStage(); }
+function renderPvStage() {
+    const c = CONTENT[curLang] || CONTENT['zh-CN'];
+    const note = !CONTENT[curLang] ? '<div class="pv-note">该语言尚未翻译，当前展示中文简体内容</div>' : '';
+    document.getElementById('pv-title').textContent = '消息预览 · ' + (curChannel === 'mail' ? '邮件' : '站内信');
+    const stage = document.getElementById('pv-content');
+    if (curChannel === 'mail') {
+        stage.innerHTML = note + `
+        <div class="mail-card">
+            <div class="mail-head">
+                <div class="mail-line">发件人：<b>POKO 通知 &lt;notice@poko.com&gt;</b></div>
+                <div class="mail-line">收件人：<b>用户绑定邮箱</b></div>
+            </div>
+            <div class="mail-subject">${c.t}</div>
+            <div class="mail-body">${(c.b||'').replace(/\n/g,'<br>')}</div>
+            <div class="mail-foot">此邮件由系统自动发送，请勿直接回复</div>
+        </div>`;
+    } else {
+        stage.innerHTML = note + `
+        <div class="inapp-card">
+            <div class="inapp-head">
+                <div class="inapp-icon">P</div>
+                <div class="inapp-src">POKO 消息中心</div>
+                <div class="inapp-time">刚刚</div>
+            </div>
+            <div class="inapp-title">${c.t}</div>
+            <div class="inapp-body">${(c.b||'').replace(/\n/g,'<br>')}</div>
+            <div class="inapp-foot"><span class="inapp-btn">查看详情</span></div>
+        </div>`;
+    }
+}
+function closePreview() { document.getElementById('preview-modal').classList.remove('show'); }
+
+function openConfirm() {
+    saveCur();
+    const t = document.getElementById('m-title').value.trim();
+    const b = document.getElementById('m-body').value.trim();
+    if (!t) { alert('请输入消息标题'); return; }
+    if (!b) { alert('请输入消息正文'); return; }
+    if (t.length > 80) { alert('消息标题不能超过 80 字'); return; }
+    if (b.length > 4000) { alert('消息正文不能超过 4000 字'); return; }
+    if (recvCount() === 0) { alert('请先选择接收客户'); return; }
+    document.getElementById('cf-ch').textContent = curChannel === 'mail' ? '邮件' : '站内信';
+    const tnames = {list:'指定客户编码列表', excel:'从 Excel 导入', all:'全部客户'};
+    document.getElementById('cf-target').textContent = tnames[curTarget];
+    document.getElementById('cf-count').textContent = recvCount().toLocaleString();
+    document.getElementById('cf-time').textContent = curTiming === 'now' ? '立即发送' : document.getElementById('plan-time').value.replace('T',' ');
+    document.getElementById('cf-title').textContent = t;
+    document.getElementById('cf-danger').style.display = curTarget === 'all' ? 'block' : 'none';
+    document.getElementById('confirm-modal').classList.add('show');
+}
+function closeConfirm() { document.getElementById('confirm-modal').classList.remove('show'); }
+function doSend() { closeConfirm(); alert('已提交发送，可在「发送记录」中查看下发进度'); }
+
+/* ============ 标注系统 ============ */
+const STORAGE_KEY = 'annotated-prototype-message-send-v2';
+let currentAnnotation = null, isEditing = false, customAnnotations = null;
+
+const annotations = [
+  {
+    "id": 1,
+    "title": "页面总说明",
+    "summary": "运营手动给指定客户发消息的页面，按发送方式、客户群、内容、时间四步填写，发送前统一确认。",
+    "target": "#anno-1",
+    "showMarker": false,
+    "type": "overview",
+    "detail": {
+      "feature": "运营中心下的主动触达入口，用于运营人员向用户主动推送活动、通知、提醒类消息。与「消息模板」的区别是：模板由系统按场景自动触发，本页面由运营人工发起、人工选择接收人。",
+      "business": "一次发送只走一个渠道（站内信或邮件），不支持同一条消息多渠道同时下发。PUSH 渠道待开放，开放前不参与选择。",
+      "interaction": "填写顺序自上而下：发送方式 → 消息内容 → 目标客户群 → 选择客户 → 发送设置，最后点底部发送按钮进入确认弹窗。"
+    }
+  },
+  {
+    "id": 2,
+    "title": "页签切换",
+    "summary": "消息发送、消息模板、发送记录三个页签，本页为消息发送。",
+    "target": "#anno-2",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "三个页签分别承载主动发送、场景模板配置、历史记录查询三块业务。",
+      "interaction": "切换页签不丢失当前页面已填写内容，未发送的编辑内容在本次会话内保留。",
+      "state": "消息模板、发送记录为独立页面，本页只负责消息发送。"
+    }
+  },
+  {
+    "id": 3,
+    "title": "发送方式",
+    "summary": "站内信、邮件、PUSH 三选一，单选。PUSH 待开放置灰不可选。",
+    "target": "#anno-3",
+    "showMarker": true,
+    "type": "field",
+    "detail": {
+      "feature": "决定这条消息通过哪个渠道下发到用户。同一时刻只能选中一个渠道。",
+      "business": "站内信和邮件为平级关系，都非必选，运营按需选择。PUSH 渠道未接入，选项置灰并标注待开放，不可选中。",
+      "interaction": "点击卡片切换选中项，已选中的卡片再次点击不取消，始终保留一个选中状态。",
+      "exception": "邮件渠道下，若接收人未绑定邮箱则跳过该用户，在发送结果中记为发送失败并给出原因。",
+      "state": "站内信：用户登录后在站内消息中心可见，有留存；邮件：发送至用户绑定邮箱，可能被判定为垃圾邮件。"
+    }
+  },
+  {
+    "id": 4,
+    "title": "消息内容与多语言",
+    "summary": "五种语言分别填写标题与正文，标题上限 80 字，正文上限 4000 字，支持一键翻译。",
+    "target": "#anno-4",
+    "showMarker": true,
+    "type": "field",
+    "detail": {
+      "feature": "编辑这条消息在各语言下的标题和正文，用户收到的语言由用户账号的语言设置决定。",
+      "display": "语言页签为中文简体、中文繁体、English、日本語、Русский。标题最多 80 字，正文最多 4000 字，输入时实时显示字数。未翻译的语言页签带提示点。",
+      "business": "中文简体为必填语言，其余四种可以留空，留空时该语言用户收到中文简体内容。一键翻译调用 CMS 外部翻译接口，以中文简体为源语言生成其余四种，返回结果同时保存为语言模板。消息内容先于接收人群维护，内容定稿后再圈选接收人。",
+      "interaction": "切换语言页签时保存当前语言已填内容再加载目标语言，不丢失输入。点一键翻译只补全尚未填写的语言，不覆盖已有内容。",
+      "exception": "标题或正文超限时字数计数变为超限提示，发送按钮拦截并提示具体字段。一键翻译接口调用失败时保留原有内容并提示重试，不写入空值。",
+      "copywriting": "标题超限提示为「消息标题不能超过 80 字」，正文超限提示为「消息正文不能超过 4000 字」。"
+    }
+  },
+  {
+    "id": 5,
+    "title": "目标客户群",
+    "summary": "全部客户、指定客户编码列表、从 Excel 导入三选一，默认选中指定客户编码列表。",
+    "target": "#anno-5",
+    "showMarker": true,
+    "type": "field",
+    "detail": {
+      "feature": "确定这条消息发给谁，三种范围互斥，只能选一个。",
+      "business": "默认选中「指定客户编码列表」，避免误发全量。选择「全部客户」时会弹出二次确认，明确提示接收人数和不可撤回，确认后才生效。",
+      "interaction": "选择「指定客户编码列表」显示客户筛选与勾选表格；选择「从 Excel 导入」显示上传区域；选择「全部客户」显示全量接收提示。",
+      "exception": "切换范围时，已勾选的客户保留不清空，切回列表范围时恢复勾选状态。",
+      "copywriting": "全部客户二次确认标题为「发送给全部客户？」，正文说明接收人数与不可撤回，确认按钮为「确认，发送给全部客户」。"
+    }
+  },
+  {
+    "id": 6,
+    "title": "客户筛选与勾选列表",
+    "summary": "按客户编码、昵称、邮箱、手机号查询，表格勾选具体客户，实时显示已选人数。",
+    "target": "#anno-6",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "在指定客户范围内精确挑人，是「指定客户编码列表」模式下的操作区。",
+      "display": "筛选条件为客户编码、客户昵称、邮箱、手机号，多个条件之间取交集。列表字段为勾选框、编号、客户 ID、客户标签、客户昵称、客户编码、邮箱、手机号。",
+      "business": "只有勾选的客户会收到消息。已选人数实时显示在筛选行右侧，用于发送前核对。表格默认按客户 ID 倒序，新注册用户在前。",
+      "interaction": "点单行勾选框选中或取消单个客户，点表头勾选框全选或全不选当前页。点查询按当前条件重新检索，点重置清空全部筛选条件。",
+      "exception": "筛选无结果时表格显示空状态，不显示分页。手机号和邮箱为空的客户仍可勾选，但走邮件渠道时会发送失败。"
+    }
+  },
+  {
+    "id": 7,
+    "title": "从 Excel 导入客户",
+    "summary": "上传 Excel 按客户编码批量匹配客户，显示成功与未匹配数量及原因。",
+    "target": "#anno-7",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "批量导入接收人名单，适合运营在外部表格里维护好客户后一次性导入。",
+      "business": "只支持 xlsx 格式，单次上限 10,000 条，按「客户编码」列与平台客户匹配。匹配成功的计入接收人，未匹配的不计入并在结果中列出原因。",
+      "interaction": "点选择文件上传后展示解析结果，包含文件名、总解析条数、成功匹配条数、未匹配条数与失败原因。点移除清空本次导入结果。",
+      "exception": "上传文件缺少「客户编码」列时整体导入失败并提示列名缺失；超过 10,000 条时提示拆分文件；文件格式非 xlsx 时直接拒绝。",
+      "copywriting": "未匹配原因固定为三类文案：客户编码不存在、编码格式错误、客户已注销。"
+    }
+  },
+  {
+    "id": 8,
+    "title": "发送设置",
+    "summary": "立即发送或定时发送，定时需选择具体时间。",
+    "target": "#anno-8",
+    "showMarker": true,
+    "type": "field",
+    "detail": {
+      "feature": "决定这条消息什么时候下发。",
+      "business": "立即发送在点确认后立刻进入下发队列。定时发送在到达指定时间时进入下发队列，时间必须晚于当前时间。定时任务可在发送记录中查看与取消，到达时间前 5 分钟锁定不可取消。",
+      "interaction": "选中定时发送后时间选择器解除禁用，可编辑；选回立即发送时时间选择器置灰并保留上次选择。",
+      "exception": "定时时间早于当前时间时提交拦截并提示；定时任务创建后若接收人数据发生变化，以创建时的人员名单为准。"
+    }
+  },
+  {
+    "id": 9,
+    "title": "底部操作栏",
+    "summary": "预览、保存草稿、发送三个操作，发送前必须通过内容校验。",
+    "target": "#anno-9",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "页面级操作入口，固定吸底，滚动时始终可见。",
+      "interaction": "点预览打开预览弹窗，按当前选中的发送方式展示消息最终形态，支持五种语言切换。点保存草稿存入草稿箱，可在发送记录中继续编辑。点发送先做校验，校验通过后弹出确认弹窗。",
+      "business": "发送校验包含：标题必填且不超 80 字、正文必填且不超 4000 字、接收人数大于 0。任一不通过则拦截并定位到对应字段。",
+      "exception": "接收人数为 0 时提示「请先选择接收客户」。"
+    }
+  },
+  {
+    "id": 10,
+    "title": "发送确认弹窗",
+    "summary": "发送前汇总展示发送方式、客户群、人数、时间、标题，全部客户时额外提示不可撤回。",
+    "target": "#confirm-modal .modal-body",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "最后一道确认，让运营在消息真正下发前再核对一遍关键信息。",
+      "display": "展示发送方式、目标客户群、接收人数、发送时间、消息标题五项。选择全部客户时底部额外显示不可撤回的提示条。",
+      "interaction": "点确认发送后关闭弹窗并提交下发，页面提示已提交。点取消或点击遮罩关闭弹窗，返回编辑状态，已填内容全部保留。",
+      "business": "确认弹窗不再做二次频控拦截，频次控制由系统侧的发送频率限制统一处理，不在此处提示。",
+      "copywriting": "确认按钮文案为「确认发送」，全部客户场景的提示文案需明确写出接收人数与不可撤回。"
+    }
+  }
+];
+
+const DETAIL_LABELS = { feature:'功能说明', display:'字段/展示规则', interaction:'交互规则', business:'业务规则', state:'状态说明', exception:'异常/边界', copywriting:'文案规范' };
+
+function loadCustomAnnotations() { try { const s = localStorage.getItem(STORAGE_KEY); if (s) customAnnotations = JSON.parse(s); } catch(e) {} }
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+    document.getElementById('annotation-list').innerHTML = getActiveAnnotations().map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>`).join('');
+}
+function highlightMarker(id) {
+    const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.add('highlight');
+    const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.remove('highlight');
+    const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    if (item.target.indexOf('#anno-6') === 0) applyTarget('list');
+    if (item.target.indexOf('#anno-7') === 0) applyTarget('excel');
+    if (item.target.indexOf('#preview-modal') === 0 && !document.getElementById('preview-modal').classList.contains('show')) openPreview();
+    if (item.target.indexOf('#confirm-modal') === 0 && !document.getElementById('confirm-modal').classList.contains('show')) openConfirm();
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        previewArea.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+        target.classList.remove('anno-flash'); void target.offsetWidth; target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item; isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const rows = [];
+    ['feature','display','interaction','business','state','exception','copywriting'].forEach(k => {
+        if (item.detail[k]) rows.push({ label: DETAIL_LABELS[k], value: item.detail[k], key: k });
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td><textarea data-key="${r.key}">${r.value}</textarea></td></tr>`).join('');
+    else table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join('');
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    document.querySelectorAll('#detail-table textarea').forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item; isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？')) return;
+    localStorage.removeItem(STORAGE_KEY); customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original; isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePreview(); closeConfirm(); closeAllModal(); } });
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try { if (localStorage.getItem(PANEL_STATE_KEY) === '1') { document.getElementById('annotation-panel').classList.add('collapsed'); document.getElementById('panel-expand-btn').classList.add('show'); } } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const btn = document.getElementById('panel-expand-btn');
+    const collapsed = panel.classList.toggle('collapsed');
+    btn.classList.toggle('show', collapsed);
+    try { localStorage.setItem(PANEL_STATE_KEY, collapsed ? '1' : '0'); } catch(e) {}
+}
+function openEditMode() {
+    let html = '<div>';
+    getActiveAnnotations().forEach(item => {
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = html;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = { id:newId, title:'新标注 '+newId, summary:'点击编辑修改标注内容...', target:'#anno-'+newId, showMarker:true, type:'area', detail:{ feature:'请填写功能说明...' } };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); closeManageModal();
+    currentAnnotation = newItem; isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal(); renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+    const originalHTML = document.documentElement.outerHTML;
+    const replacement = 'const annotations = ' + JSON.stringify(getActiveAnnotations(), null, 2) + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `消息触达_消息发送_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+renderLangTabs();
+fillForm();
+renderCust();
+</script>
+</body>
+</html>
