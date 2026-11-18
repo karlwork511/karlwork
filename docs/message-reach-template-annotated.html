@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>消息触达_消息模板配置_v2</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; color: #333; background: #F5F7FA; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+.annotation-toolbar { display: flex; align-items: center; justify-content: flex-end; padding: 8px 16px; background: #fff; border-bottom: 1px solid #E4E7ED; flex-shrink: 0; z-index: 100; }
+.toolbar-edit-btn { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #333; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+.toolbar-edit-btn:hover { border-color: #165DFF; color: #165DFF; }
+
+.workspace { flex: 1; display: flex; min-height: 0; min-width: 0; }
+.preview-area { flex: 1; min-width: 0; overflow: auto; padding: 16px; position: relative; }
+
+.annotation-panel { width: 300px; background: #F7F8FA; border-left: 1px solid #E4E7ED; overflow-y: auto; flex-shrink: 0; transition: width 0.3s ease; }
+.annotation-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+.panel-header { padding: 16px; font-size: 15px; font-weight: 600; color: #333; border-bottom: 1px solid #E4E7ED; background: #F7F8FA; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 8px; }
+.panel-toggle-btn { width: 24px; height: 24px; border: none; background: #E8EAED; border-radius: 4px; cursor: pointer; font-size: 12px; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.panel-toggle-btn:hover { background: #DCDFE6; color: #333; }
+.panel-expand-btn { position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 36px; height: 48px; background: #165DFF; color: #fff; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 18px; z-index: 999; display: none; box-shadow: -2px 2px 8px rgba(0,0,0,0.15); }
+.panel-expand-btn.show { display: block; }
+.panel-expand-btn:hover { background: #0E42D2; }
+.annotation-item { padding: 14px 16px; border-bottom: 1px solid #E4E7ED; cursor: pointer; transition: background 0.2s; }
+.annotation-item:hover { background: #EEF0F3; }
+.annotation-item.active { background: #E8F3FF; }
+.annotation-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.annotation-badge { width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.annotation-title { font-size: 14px; font-weight: 600; color: #333; }
+.annotation-summary { font-size: 12px; color: #666; line-height: 1.6; padding-left: 32px; }
+
+.anno-marker { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: #165DFF; color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: all 0.2s ease; cursor: pointer; z-index: 9999; user-select: none; }
+.anno-marker.highlight, .anno-marker:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 2px 8px rgba(22, 93, 255, 0.4); }
+
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 560px; max-height: 86vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; position: relative; }
+.modal-lg { width: 760px; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #E4E7ED; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #333; }
+.modal-close { width: 28px; height: 28px; border: none; background: transparent; font-size: 20px; color: #999; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { color: #333; }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #E4E7ED; display: flex; justify-content: flex-end; gap: 10px; }
+
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table th { background: #FAFAFA; width: 100px; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border: 1px solid #E4E7ED; vertical-align: top; }
+.detail-table td { padding: 12px 16px; font-size: 13px; color: #333; border: 1px solid #E4E7ED; line-height: 1.7; }
+.detail-table textarea { width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; }
+.detail-table textarea:focus { border-color: #165DFF; }
+
+.btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #165DFF; color: #fff; }
+.btn-primary:hover { background: #0E42D2; }
+.btn-default { background: #fff; border-color: #DCDFE6; color: #666; }
+.btn-default:hover { border-color: #165DFF; color: #165DFF; }
+.btn-danger { background: #fff; border-color: #F53F3F; color: #F53F3F; }
+.btn-danger:hover { background: #F53F3F; color: #fff; }
+
+.anno-flash { animation: flashHighlight 1.5s ease-out; }
+@keyframes flashHighlight { 0% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.6); } 100% { box-shadow: 0 0 0 3px rgba(22, 93, 255, 0); } }
+
+/* ================= 产品界面 ================= */
+:root { --main: #00B389; --main-light: #E6F7F2; --line: #E4E7ED; --sub: #86909C; }
+.page-container { background: #fff; border-radius: 8px; height: calc(100vh - 74px); min-width: 940px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+.page-head { padding: 16px 24px 0; flex-shrink: 0; }
+.breadcrumb { font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+.breadcrumb span { color: #C9CDD4; margin: 0 4px; }
+.page-title { font-size: 18px; font-weight: 600; color: #1D2129; }
+
+.top-area { padding: 0 24px; flex-shrink: 0; position: relative; }
+.tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--line); margin-top: 14px; }
+.tab { padding: 10px 0; font-size: 14px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.active { color: var(--main); border-bottom-color: var(--main); font-weight: 600; }
+.stats { display: flex; gap: 12px; padding: 14px 0 4px; }
+.stat-card { flex: 1; background: #FAFBFC; border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.stat-label { font-size: 12px; color: var(--sub); }
+.stat-value { font-size: 20px; font-weight: 600; color: #1D2129; }
+.stat-value.green { color: var(--main); }
+.stat-value.gray { color: #C9CDD4; font-size: 15px; }
+
+.main-body { flex: 1; display: flex; min-height: 0; padding: 12px 24px 20px; gap: 16px; }
+
+.side-tree { width: 150px; flex-shrink: 0; border-right: 1px solid var(--line); padding-right: 12px; overflow-y: auto; position: relative; }
+.tree-title { font-size: 12px; color: var(--sub); padding: 4px 8px 10px; }
+.tree-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 4px; font-size: 13px; color: #4E5969; cursor: pointer; margin-bottom: 2px; }
+.tree-item:hover { background: #F7F8FA; }
+.tree-item.active { background: var(--main-light); color: var(--main); font-weight: 600; }
+.tree-count { font-size: 12px; color: var(--sub); }
+.tree-item.active .tree-count { color: var(--main); }
+
+.list-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
+.filter-row input, .filter-row select { height: 32px; padding: 0 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; color: #333; background: #fff; }
+.filter-row input { width: 200px; }
+.filter-row select { width: 130px; }
+.filter-row input:focus, .filter-row select:focus { border-color: var(--main); }
+
+.table-wrap { flex: 1; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; position: relative; }
+table.scene-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.scene-table thead th { position: sticky; top: 0; background: #FAFBFC; z-index: 5; text-align: left; font-weight: 500; color: #4E5969; font-size: 12px; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.scene-table tbody td { padding: 11px 12px; border-bottom: 1px solid #F2F3F5; color: #1D2129; vertical-align: middle; }
+table.scene-table tbody tr:hover { background: #FAFCFB; }
+.scene-name { font-weight: 500; }
+.scene-sub { font-size: 12px; color: var(--sub); margin-top: 3px; }
+.ch-dot { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap; }
+.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot.on { background: var(--main); }
+.dot.off { background: #C9CDD4; }
+.ch-text.on { color: #1D2129; }
+.ch-text.off { color: #C9CDD4; }
+.act-link { color: var(--main); cursor: pointer; font-size: 13px; }
+.act-link:hover { text-decoration: underline; }
+.act-sep { color: #E5E6EB; margin: 0 8px; }
+
+/* ===== 编辑弹窗 ===== */
+.ch-tabs { display: flex; align-items: center; border-bottom: 1px solid var(--line); margin-bottom: 18px; position: relative; padding-right: 34px; }
+.ch-tab { padding: 9px 0; margin-right: 26px; font-size: 14px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.ch-tab.active { color: var(--main); border-bottom-color: var(--main); font-weight: 600; }
+.ch-tab.soon { color: #C9CDD4; cursor: not-allowed; }
+.ch-tab-right { margin-left: auto; display: flex; align-items: center; gap: 12px; padding-bottom: 6px; }
+.switch { width: 34px; height: 18px; border-radius: 9px; background: #C9CDD4; position: relative; cursor: pointer; flex-shrink: 0; display: inline-block; }
+.switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: all 0.2s; }
+.switch.on { background: var(--main); }
+.switch.on::after { left: 18px; }
+.preview-btn { padding: 4px 12px; border: 1px solid var(--main); color: var(--main); background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.preview-btn:hover { background: var(--main-light); }
+
+.form-row { display: flex; align-items: flex-start; margin-bottom: 16px; }
+.form-row > label { width: 90px; flex-shrink: 0; text-align: right; padding-right: 12px; font-size: 13px; color: #4E5969; line-height: 32px; }
+.form-row > label .req { color: #F53F3F; margin-right: 2px; }
+.form-field { flex: 1; min-width: 0; position: relative; }
+.form-field input[type=text], .form-field textarea { width: 100%; padding: 7px 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; font-family: inherit; outline: none; color: #1D2129; line-height: 1.6; }
+.form-field textarea { min-height: 120px; resize: vertical; }
+.form-field input:focus, .form-field textarea:focus { border-color: var(--main); }
+.form-field .ro { padding: 7px 0; font-size: 13px; color: #1D2129; line-height: 32px; }
+.counter { text-align: right; font-size: 12px; color: var(--sub); margin-top: 4px; }
+.counter.over { color: #F53F3F; }
+.lang-tabs-wrap { position: relative; padding-right: 30px; }
+.lang-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); }
+.lang-tab { padding: 6px 0; font-size: 13px; color: #4E5969; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.lang-tab.active { color: var(--main); border-bottom-color: var(--main); font-weight: 600; }
+.lang-tab.pending::after { content: '·'; color: #F53F3F; margin-left: 3px; }
+.translate-row { display: flex; align-items: center; gap: 12px; }
+.btn-outline { padding: 6px 14px; border: 1px solid #DCDFE6; background: #fff; border-radius: 4px; font-size: 13px; color: #4E5969; cursor: pointer; }
+.btn-outline:hover { border-color: var(--main); color: var(--main); }
+.hint { font-size: 12px; color: var(--sub); }
+.btn-main { background: var(--main); color: #fff; border: none; padding: 8px 18px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.btn-main:hover { opacity: 0.9; }
+.btn-ghost { background: #fff; border: 1px solid #DCDFE6; color: #4E5969; padding: 8px 18px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+
+/* ===== 预览弹窗 ===== */
+.pv-lang { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.pv-lang-btn { padding: 5px 14px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 12px; color: #4E5969; cursor: pointer; background: #fff; }
+.pv-lang-btn.active { border-color: var(--main); color: var(--main); background: var(--main-light); }
+.pv-lang-btn.pending { color: #C9CDD4; }
+.pv-stage { background: #F5F7FA; border-radius: 8px; padding: 20px; min-height: 240px; position: relative; }
+.pv-note { font-size: 12px; color: #F53F3F; margin-bottom: 10px; }
+
+.inapp-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.inapp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.inapp-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--main); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+.inapp-src { font-size: 13px; font-weight: 600; color: #1D2129; }
+.inapp-time { font-size: 12px; color: var(--sub); margin-left: auto; }
+.inapp-title { font-size: 14px; font-weight: 600; color: #1D2129; margin-bottom: 8px; }
+.inapp-body { font-size: 13px; color: #4E5969; line-height: 1.8; }
+.inapp-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid #F2F3F5; }
+.inapp-btn { display: inline-block; padding: 6px 16px; background: var(--main); color: #fff; border-radius: 4px; font-size: 12px; }
+
+.mail-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.mail-head { background: #FAFBFC; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.mail-line { font-size: 12px; color: #4E5969; line-height: 1.9; }
+.mail-line b { color: #1D2129; font-weight: 500; }
+.mail-subject { font-size: 14px; font-weight: 600; color: #1D2129; padding: 14px 16px 8px; }
+.mail-body { padding: 0 16px 16px; font-size: 13px; color: #4E5969; line-height: 1.9; }
+.mail-foot { padding: 12px 16px; border-top: 1px solid #F2F3F5; font-size: 11px; color: #C9CDD4; }
+
+.push-wrap { display: flex; justify-content: center; }
+.push-phone { width: 320px; background: linear-gradient(160deg, #4A5568, #2D3748); border-radius: 22px; padding: 16px 12px; }
+.push-time { text-align: center; color: #fff; font-size: 26px; font-weight: 300; margin-bottom: 4px; }
+.push-date { text-align: center; color: rgba(255,255,255,0.75); font-size: 11px; margin-bottom: 16px; }
+.push-card { background: rgba(255,255,255,0.94); border-radius: 12px; padding: 11px 12px; }
+.push-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.push-app-icon { width: 18px; height: 18px; border-radius: 4px; background: var(--main); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.push-app-name { font-size: 11px; color: #4E5969; }
+.push-card-time { font-size: 11px; color: #86909C; margin-left: auto; }
+.push-title { font-size: 13px; font-weight: 600; color: #1D2129; margin-bottom: 3px; }
+.push-body { font-size: 12px; color: #4E5969; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="annotation-toolbar" id="annotation-toolbar">
+        <button class="toolbar-edit-btn" onclick="openEditMode()" title="编辑标注">✏️ 编辑标注</button>
+    </div>
+
+    <div class="workspace">
+    <div class="preview-area">
+        <div class="page-container" id="anno-1">
+
+            <div class="page-head">
+                <div class="breadcrumb">运营中心<span>/</span>消息触达</div>
+                <div class="page-title">消息触达</div>
+            </div>
+
+            <div class="top-area" id="anno-2">
+                <div class="anno-marker" data-id="2">2</div>
+                <div class="tabs">
+                    <div class="tab">消息发送</div>
+                    <div class="tab active">消息模板</div>
+                    <div class="tab">发送记录</div>
+                </div>
+                <div class="stats">
+                    <div class="stat-card"><span class="stat-label">场景总数</span><span class="stat-value" id="st-total">43</span></div>
+                    <div class="stat-card"><span class="stat-label">站内信已开启</span><span class="stat-value green" id="st-inapp">43</span></div>
+                    <div class="stat-card"><span class="stat-label">邮件已开启</span><span class="stat-value" id="st-mail">30</span></div>
+                    <div class="stat-card"><span class="stat-label">PUSH</span><span class="stat-value gray">待开放</span></div>
+                </div>
+            </div>
+
+            <div class="main-body">
+                <div class="side-tree" id="anno-3">
+                    <div class="anno-marker" data-id="3">3</div>
+                    <div class="tree-title">业务分类</div>
+                    <div class="tree-item active" data-cat="全部"><span>全部场景</span><span class="tree-count">43</span></div>
+                    <div class="tree-item" data-cat="订单"><span>订单</span><span class="tree-count">15</span></div>
+                    <div class="tree-item" data-cat="包裹"><span>包裹</span><span class="tree-count">17</span></div>
+                    <div class="tree-item" data-cat="售后"><span>售后</span><span class="tree-count">7</span></div>
+                    <div class="tree-item" data-cat="账户"><span>账户</span><span class="tree-count">2</span></div>
+                    <div class="tree-item" data-cat="营销"><span>营销</span><span class="tree-count">2</span></div>
+                </div>
+
+                <div class="list-area">
+                    <div class="filter-row">
+                        <input type="text" id="kw" placeholder="搜索场景名称" oninput="renderTable()">
+                        <select id="f-ch" onchange="renderTable()">
+                            <option value="">全部渠道</option>
+                            <option value="inapp">站内信已开启</option>
+                            <option value="mail">邮件已开启</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrap" id="anno-4">
+                        <div class="anno-marker" data-id="4">4</div>
+                        <table class="scene-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:50%;">场景名称</th>
+                                    <th style="width:13%;">站内信</th>
+                                    <th style="width:13%;">邮件</th>
+                                    <th style="width:12%;">PUSH</th>
+                                    <th style="width:12%; position:relative;" id="anno-5">操作<div class="anno-marker" data-id="5" style="top:4px;right:4px;width:18px;height:18px;font-size:10px;">5</div></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="panel-header">
+            <button class="panel-toggle-btn" onclick="togglePanel()" title="收起面板">◀</button>
+            <span>📌 标注说明</span>
+        </div>
+        <div id="annotation-list"></div>
+    </div>
+    </div>
+    <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()" title="展开标注面板">📌</button>
+</div>
+
+<!-- ===== 编辑弹窗 ===== -->
+<div class="modal-overlay" id="edit-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="edit-modal-title">编辑消息模板</div>
+            <button class="modal-close" onclick="closeEdit()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="ch-tabs">
+                <div class="anno-marker" data-id="6">6</div>
+                <div class="ch-tab active" data-ch="inapp" onclick="switchChannel('inapp')">站内信</div>
+                <div class="ch-tab" data-ch="mail" onclick="switchChannel('mail')">邮件</div>
+                <div class="ch-tab soon" data-ch="push">PUSH</div>
+                <div class="ch-tab-right">
+                    <span class="switch on" id="ch-switch" onclick="toggleChannel()"></span>
+                    <button class="preview-btn" onclick="openPreview()">预览</button>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>分类</label>
+                <div class="form-field"><div class="ro" id="edit-cat">订单</div></div>
+            </div>
+            <div class="form-row">
+                <label>场景</label>
+                <div class="form-field"><div class="ro" id="edit-scene">订单创建成功</div></div>
+            </div>
+            <div class="form-row">
+                <label>语言</label>
+                <div class="form-field">
+                    <div class="lang-tabs-wrap"><div class="lang-tabs" id="lang-tabs"></div><div class="anno-marker" data-id="7">7</div></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <label><span class="req">*</span>消息标题</label>
+                <div class="form-field">
+                    <input type="text" id="edit-title" placeholder="请输入消息标题" oninput="updateCounter()">
+                    <div class="counter" id="cnt-title">0 / 80</div>
+                </div>
+            </div>
+            <div class="form-row">
+                <label><span class="req">*</span>消息正文</label>
+                <div class="form-field">
+                    <textarea id="edit-body" placeholder="请输入消息正文" oninput="updateCounter()"></textarea>
+                    <div class="counter" id="cnt-body">0 / 4000</div>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>翻译</label>
+                <div class="form-field">
+                    <div class="translate-row">
+                        <button class="btn-outline" onclick="translateAll()">一键翻译所有语言</button>
+                        <span class="hint">调用CMS外部翻译接口，并保存返回的语言模板</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeEdit()">取消</button>
+            <button class="btn-main" onclick="saveEdit()">保存模板</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 预览弹窗 ===== -->
+<div class="modal-overlay" id="preview-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div class="modal-title" id="pv-title">消息预览 · 站内信</div>
+            <button class="modal-close" onclick="closePreview()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="pv-lang" id="pv-lang"></div>
+            <div class="pv-stage" id="pv-stage"><div class="anno-marker" data-id="8">8</div><div id="pv-content"></div></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closePreview()">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 标注详情弹窗 ===== -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modal-title">标注详情</div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body"><table class="detail-table" id="detail-table"></table></div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-danger" id="delete-btn" style="display:none; margin-right:auto;" onclick="deleteAnnotation()">删除标注</button>
+            <button class="btn btn-default" id="reset-btn" style="display:none;" onclick="resetAnnotation()">重置</button>
+            <button class="btn btn-default" id="export-btn" onclick="exportAnnotatedHTML()">导出HTML</button>
+            <button class="btn btn-default" id="edit-btn" onclick="toggleEdit()">编辑</button>
+            <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveAnnotation()">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="manage-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📌 标注管理</div>
+            <button class="modal-close" onclick="closeManageModal()">×</button>
+        </div>
+        <div class="modal-body" id="manage-modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeManageModal();addAnnotation()">+ 新增标注</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const LANGS = [
+  {code:'zh-CN', name:'中文简体'},
+  {code:'zh-TW', name:'中文繁体'},
+  {code:'en',    name:'English'},
+  {code:'ja',    name:'日本語'},
+  {code:'ru',    name:'Русский'}
+];
+
+const DATA = [{"cat":"订单","scene":"订单创建成功","trigger":"订单成功创建","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单已创建，请及时支付","b":"您的订单 {order_number} 已成功创建。请于 {expire_time} 内完成支付，否则订单将自动取消。点击支付：{payment_link}"},"mail":{"t":"订单已创建，请及时支付","b":"您的订单 {order_number} 已成功创建。请于 {expire_time} 内完成支付，否则订单将自动取消。点击支付：{payment_link}"},"push":{"t":"订单已创建，请及时支付","b":"您的订单 {order_number} 已成功创建。请于 {expire_tim"}},"zh-TW":{"inapp":{"t":"訂單已建立，請盡快付款","b":"您的訂單 {order_number} 已成功建立。請於 {expire_time} 前完成付款，逾期訂單將自動取消。"},"mail":{"t":"【POKO】訂單已建立，請盡快付款","b":"您好：\n您的訂單 {order_number} 已成功建立，應付金額 {amount} 元。\n請於 {expire_time} 前完成付款，逾期訂單將自動取消。\n\n此郵件由系統自動發送，請勿直接回覆。"},"push":{"t":"訂單已建立，請付款","b":"訂單 {order_number} 待付款，{expire_time} 前有效"}},"en":{"inapp":{"t":"Order created, please pay","b":"Your order {order_number} has been created successfully. Please complete payment before {expire_time}, otherwise the order will be cancelled automatically."},"mail":{"t":"[POKO] Order created, please complete payment","b":"Hello,\nYour order {order_number} has been created successfully. Amount due: {amount}.\nPlease complete payment before {expire_time}, otherwise the order will be cancelled automatically.\n\nThis is an automated message, please do not reply."},"push":{"t":"Order created, please pay","b":"Order {order_number} awaiting payment before {expire_time}"}},"ja":{"inapp":{"t":"ご注文を作成しました。お支払いください","b":"ご注文 {order_number} を作成しました。{expire_time} までにお支払いください。期限を過ぎますと自動的にキャンセルされます。"},"mail":{"t":"【POKO】ご注文を作成しました。お支払いください","b":"お客様\nご注文 {order_number} を作成しました。お支払い金額は {amount} 元です。\n{expire_time} までにお支払いください。期限を過ぎますと自動的にキャンセルされます。\n\nこのメールは自動送信です。返信はご遠慮ください。"},"push":{"t":"ご注文を作成しました","b":"ご注文 {order_number} のお支払いをお待ちしています"}},"ru":{"inapp":{"t":"Заказ создан, оплатите","b":"Ваш заказ {order_number} успешно создан. Оплатите до {expire_time}, иначе заказ будет автоматически отменён."},"mail":{"t":"[POKO] Заказ создан, оплатите","b":"Здравствуйте!\nВаш заказ {order_number} успешно создан. Сумма к оплате: {amount}.\nОплатите до {expire_time}, иначе заказ будет автоматически отменён.\n\nЭто автоматическое письмо, не отвечайте на него."},"push":{"t":"Заказ создан, оплатите","b":"Заказ {order_number} ожидает оплаты до {expire_time}"}}}},{"cat":"订单","scene":"订单待付款提醒","trigger":"采购订单已创建并且过了24小时仍然未支付的","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单已提交，请尽快付款","b":"您的订单{order_number}已成功提交。平台将在您支付之后在1688/淘宝为您采购商品。请于 {expire_time} 内完成支付，否则订单将自动取消"},"mail":{"t":"订单已提交，请尽快付款","b":"您的订单{order_number}已成功提交。平台将在您支付之后在1688/淘宝为您采购商品。请于 {expire_time} 内完成支付，否则订单将自动取消"},"push":{"t":"订单已提交，请尽快付款","b":"您的订单{order_number}已成功提交。平台将在您支付之后在1688/淘"}}}},{"cat":"订单","scene":"支付成功开始采购","trigger":"创建采购订单之后（状态为待采购）","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单已提交","b":"您的订单{order_number}已成功支付。平台将立即为您采购商品。"},"mail":{"t":"订单已提交","b":"您的订单{order_number}已成功支付。平台将立即为您采购商品。"},"push":{"t":"订单已提交","b":"您的订单{order_number}已成功支付。平台将立即为您采购商品。"}}}},{"cat":"订单","scene":"商品采购中","trigger":"分流至人工采购的订单，买手领取之后(状态为采购中）","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"商品采购中","b":"您的订单{order_number}已成功提交。商品“{product_name}”已开始从 {platform}（如淘宝/1688）采购，请耐心等待卖家发货。"},"mail":{"t":"商品采购中","b":"您的订单{order_number}已成功提交。商品“{product_name}”已开始从 {platform}（如淘宝/1688）采购，请耐心等待卖家发货。"},"push":{"t":"商品采购中","b":"您的订单{order_number}已成功提交。商品“{product_name"}}}},{"cat":"订单","scene":"商品已采购","trigger":"订单状态变为已采购","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"商品已采购","b":"订单 {order_number} 的商品“{product_name}”已完成采购。"},"mail":{"t":"商品已采购","b":"订单 {order_number} 的商品“{product_name}”已完成采购。"},"push":{"t":"商品已采购","b":"订单 {order_number} 的商品“{product_name}”已完成"}}}},{"cat":"订单","scene":"商品已发货","trigger":"获取到订单的物流单号，订单状态变成待入库","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"商品已发货","b":"您的订单 {order_number} 的商品“{product_name}”，商家已发货，国内段物流单号：{domestic_tracking_number}"},"mail":{"t":"商品已发货","b":"您的订单 {order_number} 的商品“{product_name}”，商家已发货，国内段物流单号：{domestic_tracking_number}"},"push":{"t":"商品已发货","b":"您的订单 {order_number} 的商品“{product_name}”，"}}}},{"cat":"订单","scene":"商品已入库","trigger":"商品已入库，订单状态变为已入库","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"商品已入库，可发起包裹","b":"订单 {order_number} 的所有商品均已入库，当前已入库 {total_count} 件。您可以前往“我的仓库”查看包裹，并发起国际集运提包申请，提包后将商品寄至您的海外地址。"},"mail":{"t":"商品已入库，可发起包裹","b":"订单 {order_number} 的所有商品均已入库，当前已入库 {total_count} 件。您可以前往“我的仓库”查看包裹，并发起国际集运提包申请，提包后将商品寄至您的海外地址。"},"push":{"t":"商品已入库，可发起包裹","b":"订单 {order_number} 的所有商品均已入库，当前已入库 {total"}}}},{"cat":"订单","scene":"订单已取消","trigger":"用户主动取消订单→ 已取消","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单已取消","b":"您的订单 {order_number} 已取消。如您有任何问题可联系客服或者再次发起购买。"},"mail":{"t":"订单已取消","b":"您的订单 {order_number} 已取消。如您有任何问题可联系客服或者再次发起购买。"},"push":{"t":"订单已取消","b":"您的订单 {order_number} 已取消。如您有任何问题可联系客服或者再次"}}}},{"cat":"订单","scene":"订单已超时取消","trigger":"订单长时间未支付自动取消 → 已取消","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单因超时已自动取消","b":"您的订单 {order_number} 因超过48小时未支付，已自动取消。如仍需购买，请重新下单。"},"mail":{"t":"订单因超时已自动取消","b":"您的订单 {order_number} 因超过48小时未支付，已自动取消。如仍需购买，请重新下单。"},"push":{"t":"订单因超时已自动取消","b":"您的订单 {order_number} 因超过48小时未支付，已自动取消。如仍需"}}}},{"cat":"订单","scene":"订单已被平台取消","trigger":"若商品是违禁品，平台直接取消订单，退款给用户","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"平台已取消订单","b":"您的订单 {order_number}因商品违禁不可寄，平台已为您取消。如您有任何问题可联系客服或者再次发起购买。"},"mail":{"t":"平台已取消订单","b":"您的订单 {order_number}因商品违禁不可寄，平台已为您取消。如您有任何问题可联系客服或者再次发起购买。"},"push":{"t":"平台已取消订单","b":"您的订单 {order_number}因商品违禁不可寄，平台已为您取消。如您有任"}}}},{"cat":"订单","scene":"订单已关闭已退款","trigger":"该订单下所有商品申请售后，并完成退款","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"订单已关闭（退款完成）","b":"您的订单 {order_number} 涉及的所有商品已退款完毕。退款金额 {refund_amount} 已返回您的原支付账户。订单流程结束。"},"mail":{"t":"订单已关闭（退款完成）","b":"您的订单 {order_number} 涉及的所有商品已退款完毕。退款金额 {refund_amount} 已返回您的原支付账户。订单流程结束。"},"push":{"t":"订单已关闭（退款完成）","b":"您的订单 {order_number} 涉及的所有商品已退款完毕。退款金额 {r"}}}},{"cat":"订单","scene":"订单需补商品差价","trigger":"需要用户补商品款","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"商品补款通知","b":"您的订单 {order_number} 采购商品费用高于预估，需补齐差价”，差价{amount} ，如您有任何问题可联系客服。"},"mail":{"t":"商品补款通知","b":"您的订单 {order_number} 采购商品费用高于预估，需补齐差价”，差价{amount} ，如您有任何问题可联系客服。"},"push":{"t":"商品补款通知","b":"您的订单 {order_number} 采购商品费用高于预估，需补齐差价”，差价"}}}},{"cat":"订单","scene":"订单需补运费差价","trigger":"需要用户补充运费","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"运费补款通知","b":"您的订单 {order_number} 采购商品运费高于预估，需补齐差价”，差价{amount}，如您有任何问题可联系客服。"},"mail":{"t":"运费补款通知","b":"您的订单 {order_number} 采购商品运费高于预估，需补齐差价”，差价{amount}，如您有任何问题可联系客服。"},"push":{"t":"运费补款通知","b":"您的订单 {order_number} 采购商品运费高于预估，需补齐差价”，差价"}}}},{"cat":"订单","scene":"商品差价已退还","trigger":"用户预先支付的款项＞实际货款","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"商品差价退还","b":"您的订单 {order_number} 支付款项大于采购价格，差价差价{amount} 将原路退还，请查收。如您有任何问题可联系客服。"},"mail":{"t":"商品差价退还","b":"您的订单 {order_number} 支付款项大于采购价格，差价差价{amount} 将原路退还，请查收。如您有任何问题可联系客服。"},"push":{"t":"商品差价退还","b":"您的订单 {order_number} 支付款项大于采购价格，差价差价{amou"}}}},{"cat":"订单","scene":"商品库存不足","trigger":"商品库存不足","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"商品库存不足","b":"抱歉，您的订单 {order_number} 的采购商品“{product_name}目前商家库存不足，您可选择等待或者取消订单。如您有任何问题可联系客服。"},"mail":{"t":"商品库存不足","b":"抱歉，您的订单 {order_number} 的采购商品“{product_name}目前商家库存不足，您可选择等待或者取消订单。如您有任何问题可联系客服。"},"push":{"t":"商品库存不足","b":"抱歉，您的订单 {order_number} 的采购商品“{product_na"}}}},{"cat":"包裹","scene":"包裹已签收","trigger":"包裹被poko仓库签收","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"包裹签收","b":"您的包裹 {package_number}已被poko仓库签收，我们会尽快进行质检"},"mail":{"t":"包裹签收","b":"您的包裹 {package_number}已被poko仓库签收，我们会尽快进行质检"},"push":{"t":"包裹签收","b":"您的包裹 {package_number}已被poko仓库签收，我们会尽快进行质"}}}},{"cat":"包裹","scene":"包裹质检完成","trigger":"包裹质检完成","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"包裹完成质检","b":"您的包裹 {package_number}已经完成质检。您可在【我的仓库】中查看"},"mail":{"t":"包裹完成质检","b":"您的包裹 {package_number}已经完成质检。您可在【我的仓库】中查看"},"push":{"t":"包裹完成质检","b":"您的包裹 {package_number}已经完成质检。您可在【我的仓库】中查看"}}}},{"cat":"包裹","scene":"包裹已入库","trigger":"包裹成功入库","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"包裹入库","b":"您的包裹 {package_number}已经入库。您可在【我的仓库】中查看并提交包裹。"},"mail":{"t":"包裹入库","b":"您的包裹 {package_number}已经入库。您可在【我的仓库】中查看并提交包裹。"},"push":{"t":"包裹入库","b":"您的包裹 {package_number}已经入库。您可在【我的仓库】中查看并提"}}}},{"cat":"包裹","scene":"包裹已超期","trigger":"包裹超过免费存储期","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹超期","b":"您的包裹 {package_number}已经在poko仓库存放{*days},超过免费存储期{*days}，请尽快处理。"},"mail":{"t":"包裹超期","b":"您的包裹 {package_number}已经在poko仓库存放{*days},超过免费存储期{*days}，请尽快处理。"},"push":{"t":"包裹超期","b":"您的包裹 {package_number}已经在poko仓库存放{*days},"}}}},{"cat":"包裹","scene":"提包申请已提交","trigger":"用户成功提交包裹","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"提包申请已提交，等待仓库处理","b":"您的包裹申请 {package_number}已提交，费用为 {package_fee} {currency}。请于 {expire_time} 内完成支付，否则包裹将自动取消"},"mail":{"t":"提包申请已提交，等待仓库处理","b":"您的包裹申请 {package_number}已提交，费用为 {package_fee} {currency}。请于 {expire_time} 内完成支付，否则包裹将自动取消"},"push":{"t":"提包申请已提交，等待仓库处理","b":"您的包裹申请 {package_number}已提交，费用为 {package_"}},"zh-TW":{"inapp":{"t":"提包申請已提交，等待倉庫處理","b":"您的包裹 {package_number} 已提交，應付費用 {package_fee} 元。請於 {expire_time} 前完成付款，逾期包裹將自動取消。"},"mail":{"t":"【POKO】提包申請已提交，等待倉庫處理","b":"您好：\n您的包裹 {package_number} 已提交，應付費用 {package_fee} 元。\n請於 {expire_time} 前完成付款，逾期包裹將自動取消。\n\n此郵件由系統自動發送，請勿直接回覆。"},"push":{"t":"提包申請已提交","b":"包裹 {package_number} 待付款 {package_fee} 元"}},"en":{"inapp":{"t":"Packing request submitted","b":"Your package {package_number} has been submitted. Amount due: {package_fee}. Please complete payment before {expire_time}, otherwise the package will be cancelled."},"mail":{"t":"[POKO] Packing request submitted","b":"Hello,\nYour package {package_number} has been submitted. Amount due: {package_fee}.\nPlease complete payment before {expire_time}, otherwise the package will be cancelled.\n\nThis is an automated message, please do not reply."},"push":{"t":"Packing request submitted","b":"Package {package_number} awaiting payment {package_fee}"}},"ja":{"inapp":{"t":"荷物申請を送信しました","b":"荷物 {package_number} を申請しました。料金は {package_fee} 元です。{expire_time} までにお支払いください。期限を過ぎますとキャンセルされます。"},"mail":{"t":"【POKO】荷物申請を送信しました","b":"お客様\n荷物 {package_number} を申請しました。料金は {package_fee} 元です。\n{expire_time} までにお支払いください。期限を過ぎますとキャンセルされます。\n\nこのメールは自動送信です。返信はご遠慮ください。"},"push":{"t":"荷物申請を送信しました","b":"荷物 {package_number} のお支払い {package_fee} 元"}},"ru":{"inapp":{"t":"Заявка на отправку создана","b":"Ваша посылка {package_number} отправлена на обработку. Стоимость: {package_fee}. Оплатите до {expire_time}, иначе заявка будет отменена."},"mail":{"t":"[POKO] Заявка на отправку создана","b":"Здравствуйте!\nВаша посылка {package_number} отправлена на обработку. Стоимость: {package_fee}.\nОплатите до {expire_time}, иначе заявка будет отменена.\n\nЭто автоматическое письмо, не отвечайте на него."},"push":{"t":"Заявка на отправку создана","b":"Посылка {package_number} ожидает оплаты {package_fee}"}}}},{"cat":"包裹","scene":"包裹待付款提醒","trigger":"集运订单已创建并且过了24小时仍然未支付的","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹已提交，请尽快付款","b":"您的包裹申请 {package_number}已提交，费用为 {package_fee} {currency}。请于 {expire_time} 内完成支付，否则包裹将自动取消"},"mail":{"t":"包裹已提交，请尽快付款","b":"您的包裹申请 {package_number}已提交，费用为 {package_fee} {currency}。请于 {expire_time} 内完成支付，否则包裹将自动取消"},"push":{"t":"包裹已提交，请尽快付款","b":"您的包裹申请 {package_number}已提交，费用为 {package_"}}}},{"cat":"包裹","scene":"提包申请审核中","trigger":"包裹提交次并且支付之后，变成待审核状态","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"提包申请已提交，等待审核","b":"您的包裹申请 {package_number}（包含 {item_count} 件商品）已提交。我们将尽快审核包裹，请耐心等待。"},"mail":{"t":"提包申请已提交，等待审核","b":"您的包裹申请 {package_number}（包含 {item_count} 件商品）已提交。我们将尽快审核包裹，请耐心等待。"},"push":{"t":"提包申请已提交，等待审核","b":"您的包裹申请 {package_number}（包含 {item_count} "}}}},{"cat":"包裹","scene":"包裹审核异常","trigger":"包裹审核异常","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹审核异常","b":"您的包裹申请 {package_number}审核异常。如您有任何问题可联系客服。"},"mail":{"t":"包裹审核异常","b":"您的包裹申请 {package_number}审核异常。如您有任何问题可联系客服。"},"push":{"t":"包裹审核异常","b":"您的包裹申请 {package_number}审核异常。如您有任何问题可联系客服"}}}},{"cat":"包裹","scene":"包裹审核通过待打包","trigger":"包裹审核通过→ 待发货","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"包裹审核通过，等待打包","b":"包裹 {package_number} 已通过审核。仓库将尽快为您打包发货。"},"mail":{"t":"包裹审核通过，等待打包","b":"包裹 {package_number} 已通过审核。仓库将尽快为您打包发货。"},"push":{"t":"包裹审核通过，等待打包","b":"包裹 {package_number} 已通过审核。仓库将尽快为您打包发货。"}}}},{"cat":"包裹","scene":"包裹已发出","trigger":"包裹完全发运→ 已发货","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"您的包裹已发出","b":"您的包裹 {package_number} 已从poko中国仓库发出。物流单号：{tracking_number}，承运商：{carrier}。查询链接：{tracking_link}"},"mail":{"t":"您的包裹已发出","b":"您的包裹 {package_number} 已从poko中国仓库发出。物流单号：{tracking_number}，承运商：{carrier}。查询链接：{tracking_link}"},"push":{"t":"您的包裹已发出","b":"您的包裹 {package_number} 已从poko中国仓库发出。物流单号："}}}},{"cat":"包裹","scene":"包裹已收货","trigger":"用户签收→已收货","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"包裹已签收，感谢您的使用","b":"您的包裹 {package_number} 已被签收。如有问题，请及时联系客服申请售后。"},"mail":{"t":"包裹已签收，感谢您的使用","b":"您的包裹 {package_number} 已被签收。如有问题，请及时联系客服申请售后。"},"push":{"t":"包裹已签收，感谢您的使用","b":"您的包裹 {package_number} 已被签收。如有问题，请及时联系客服申"}}}},{"cat":"包裹","scene":"包裹已取消","trigger":"用户主动取消包裹","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹已取消","b":"您已取消包裹 {package_number}。包裹中的商品将退回您的库存，您可在【我的仓库】查看并重新发起提包。"},"mail":{"t":"包裹已取消","b":"您已取消包裹 {package_number}。包裹中的商品将退回您的库存，您可在【我的仓库】查看并重新发起提包。"},"push":{"t":"包裹已取消","b":"您已取消包裹 {package_number}。包裹中的商品将退回您的库存，您可"}}}},{"cat":"包裹","scene":"包裹已超时取消","trigger":"包裹长时间未支付自动取消 → 已取消","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹因超时已自动取消","b":"您的包裹 {package_number}48小时未支付，已自动取消。包裹中的商品将退回您的库存，您可在【我的仓库】查看并重新发起提包。"},"mail":{"t":"包裹因超时已自动取消","b":"您的包裹 {package_number}48小时未支付，已自动取消。包裹中的商品将退回您的库存，您可在【我的仓库】查看并重新发起提包。"},"push":{"t":"包裹因超时已自动取消","b":"您的包裹 {package_number}48小时未支付，已自动取消。包裹中的商"}}}},{"cat":"包裹","scene":"包裹已关闭","trigger":"未装箱完成取消包裹，退回包裹费用，并扣除相关操作费","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹已关闭","b":"您的包裹 {package_number}已关闭。退款金额 {refund_amount} 已返回您的原支付账户。集运流程结束。"},"mail":{"t":"包裹已关闭","b":"您的包裹 {package_number}已关闭。退款金额 {refund_amount} 已返回您的原支付账户。集运流程结束。"},"push":{"t":"包裹已关闭","b":"您的包裹 {package_number}已关闭。退款金额 {refund_am"}}}},{"cat":"包裹","scene":"包裹需补款","trigger":"先付费模式包裹运费补款","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹补款","b":"您的包裹 {package_number}需要补充费用{amount}，请及时处理"},"mail":{"t":"包裹补款","b":"您的包裹 {package_number}需要补充费用{amount}，请及时处理"},"push":{"t":"包裹补款","b":"您的包裹 {package_number}需要补充费用{amount}，请及时处"}}}},{"cat":"包裹","scene":"包裹差价已退还","trigger":"先付费模式包裹费用差价退还","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹费用差价退还","b":"您的包裹 {package_number}支付的费用大于实际费用，差价{amount}，将原路退还。"},"mail":{"t":"包裹费用差价退还","b":"您的包裹 {package_number}支付的费用大于实际费用，差价{amount}，将原路退还。"},"push":{"t":"包裹费用差价退还","b":"您的包裹 {package_number}支付的费用大于实际费用，差价{amou"}}}},{"cat":"包裹","scene":"包裹费用待支付","trigger":"后付费模式下，仓库打包后→通知用户二次支付","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"包裹费用支付","b":"您的包裹 {package_number}仓库已打包，需要您支付费用{package_fee}，支付后我们才会出库邮寄给您。"},"mail":{"t":"包裹费用支付","b":"您的包裹 {package_number}仓库已打包，需要您支付费用{package_fee}，支付后我们才会出库邮寄给您。"},"push":{"t":"包裹费用支付","b":"您的包裹 {package_number}仓库已打包，需要您支付费用{packa"}}}},{"cat":"售后","scene":"售后申请已提交","trigger":"发起售后，创建售后单→售后单状态为：待审核","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"售后申请已提交，等待平台审核","b":"您的售后申请单 {after_sale_number}（关联订单 {order_number}）已提交。我们将及时审核，请耐心等待。"},"mail":{"t":"售后申请已提交，等待平台审核","b":"您的售后申请单 {after_sale_number}（关联订单 {order_number}）已提交。我们将及时审核，请耐心等待。"},"push":{"t":"售后申请已提交，等待平台审核","b":"您的售后申请单 {after_sale_number}（关联订单 {order_"}}}},{"cat":"售后","scene":"售后申请已通过","trigger":"平台审核通过，向1688/淘宝商家发起退货 → 待商家处理","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"售后申请已通过，等待商家确认","b":"您的售后申请 {after_sale_number} （关联订单 {order_number}）已通过平台审核。平台已向原商家发起退货/退款请求，等待商家处理，请耐心等待。"},"mail":{"t":"售后申请已通过，等待商家确认","b":"您的售后申请 {after_sale_number} （关联订单 {order_number}）已通过平台审核。平台已向原商家发起退货/退款请求，等待商家处理，请耐心等待。"},"push":{"t":"售后申请已通过，等待商家确认","b":"您的售后申请 {after_sale_number} （关联订单 {order_"}}}},{"cat":"售后","scene":"商家同意退货","trigger":"商家同意退货，平台仓库准备寄回商品 → 待仓库退货","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"商家同意退货，平台将为您安排寄回","b":"商家已同意您的退货请求（售后单 {after_sale_number}）。平台仓库将尽快把商品寄回商家，。退货发出后我们会通知您单号"},"mail":{"t":"商家同意退货，平台将为您安排寄回","b":"商家已同意您的退货请求（售后单 {after_sale_number}）。平台仓库将尽快把商品寄回商家，。退货发出后我们会通知您单号"},"push":{"t":"商家同意退货，平台将为您安排寄回","b":"商家已同意您的退货请求（售后单 {after_sale_number}）。平台仓"}}}},{"cat":"售后","scene":"商家待退款","trigger":"商家同意退款/退货，等待商家退款到账","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"商家同意退款/退货，等待商家退款到账","b":"商家已同意您的退货请求，正在办理退款（售后单 {after_sale_number}）。退款金额将原路返回。"},"mail":{"t":"商家同意退款/退货，等待商家退款到账","b":"商家已同意您的退货请求，正在办理退款（售后单 {after_sale_number}）。退款金额将原路返回。"},"push":{"t":"商家同意退款/退货，等待商家退款到账","b":"商家已同意您的退货请求，正在办理退款（售后单 {after_sale_numbe"}}}},{"cat":"售后","scene":"售后退款已完成","trigger":"退款完成 → 已退款","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"售后退款已完成","b":"您的售后申请 {after_sale_number} 已退款。退款金额 {refund_amount} {currency} 已返回您的原支付账户，请注意查收。"},"mail":{"t":"售后退款已完成","b":"您的售后申请 {after_sale_number} 已退款。退款金额 {refund_amount} {currency} 已返回您的原支付账户，请注意查收。"},"push":{"t":"售后退款已完成","b":"您的售后申请 {after_sale_number} 已退款。退款金额 {ref"}}}},{"cat":"售后","scene":"售后申请被驳回","trigger":"售后申请被驳回 → 已驳回","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"售后申请被驳回","b":"很遗憾，您的售后申请 {after_sale_number} 被驳回。驳回原因：{reject_reason}。您可修改后重新提交申请，或联系在线客服。"},"mail":{"t":"售后申请被驳回","b":"很遗憾，您的售后申请 {after_sale_number} 被驳回。驳回原因：{reject_reason}。您可修改后重新提交申请，或联系在线客服。"},"push":{"t":"售后申请被驳回","b":"很遗憾，您的售后申请 {after_sale_number} 被驳回。驳回原因："}}}},{"cat":"售后","scene":"售后已取消","trigger":"用户主动取消售后","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"售后申请已取消","b":"您已成功取消售后申请单 {after_sale_number}。如仍需售后，请重新提交申请。"},"mail":{"t":"售后申请已取消","b":"您已成功取消售后申请单 {after_sale_number}。如仍需售后，请重新提交申请。"},"push":{"t":"售后申请已取消","b":"您已成功取消售后申请单 {after_sale_number}。如仍需售后，请重"}}}},{"cat":"账户","scene":"账户充值成功","trigger":"充值之后","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"账户充值","b":"您的账户已于{time}成功充值 {amount} 元，当前余额可用于下单消费。"},"mail":{"t":"账户充值","b":"您的账户已于{time}成功充值 {amount} 元，当前余额可用于下单消费。"},"push":{"t":"账户充值","b":"您的账户已于{time}成功充值 {amount} 元，当前余额可用于下单消费。"}}}},{"cat":"账户","scene":"账户提现成功","trigger":"成功提现之后","inapp":1,"mail":1,"content":{"zh-CN":{"inapp":{"t":"账户提现","b":"您的账户已于{time}成功提现 {amount} 元，当前余额可用于下单消费。"},"mail":{"t":"账户提现","b":"您的账户已于{time}成功提现 {amount} 元，当前余额可用于下单消费。"},"push":{"t":"账户提现","b":"您的账户已于{time}成功提现 {amount} 元，当前余额可用于下单消费。"}}}},{"cat":"营销","scene":"优惠券已到账","trigger":"用户获取优惠券成功后","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"您有N张优惠券到账了","b":"您获得了{coupon_count} 张优惠券，价值 {coupon_value} 元，快去看看吧！"},"mail":{"t":"您有N张优惠券到账了","b":"您获得了{coupon_count} 张优惠券，价值 {coupon_value} 元，快去看看吧！"},"push":{"t":"您有N张优惠券到账了","b":"您获得了{coupon_count} 张优惠券，价值 {coupon_value"}}}},{"cat":"营销","scene":"优惠券即将过期","trigger":"优惠券到期前一天12-20点随机时段","inapp":1,"mail":0,"content":{"zh-CN":{"inapp":{"t":"您有优惠券快要过期了","b":"您有*张优惠券将于明天过期，价值 {coupon_value} 元，赶紧去用掉吧！"},"mail":{"t":"您有优惠券快要过期了","b":"您有*张优惠券将于明天过期，价值 {coupon_value} 元，赶紧去用掉吧！"},"push":{"t":"您有优惠券快要过期了","b":"您有*张优惠券将于明天过期，价值 {coupon_value} 元，赶紧去用掉吧"}}}}];
+
+let currentCat = '全部';
+let curScene = DATA[0];
+let curChannel = 'inapp';
+let curLang = 'zh-CN';
+
+function getContent(item, ch, lang) {
+    const c = item.content || {};
+    if (c[lang] && c[lang][ch]) return { t: c[lang][ch].t, b: c[lang][ch].b, pending: false };
+    const base = c['zh-CN'] && c['zh-CN'][ch] ? c['zh-CN'][ch] : { t: item.scene, b: '' };
+    return { t: base.t, b: base.b, pending: true };
+}
+
+const VAR_SAMPLE = {
+    order_number: 'PO20261118001',
+    domestic_tracking_number: 'SF1234567890',
+    tracking_number: 'POKO20261118001',
+    package_number: 'PKG20261118001',
+    after_sale_number: 'AS20261118001',
+    amount: '128.00',
+    package_fee: '68.00',
+    coupon_count: '3',
+    coupon_value: '15',
+    expire_time: '2026-11-20 14:30',
+    time: '2026-11-18 14:30',
+    payment_link: 'https://poko.com/pay'
+};
+function fillVars(s) {
+    return (s || '').replace(/\{([a-zA-Z_]+)\}/g, (m, k) => VAR_SAMPLE[k] || ('{' + k + '}'));
+}
+
+function renderTable() {
+    const kw = (document.getElementById('kw').value || '').trim();
+    const fch = document.getElementById('f-ch').value;
+    let list = DATA.filter(s => {
+        if (currentCat !== '全部' && s.cat !== currentCat) return false;
+        if (kw && s.scene.indexOf(kw) === -1) return false;
+        if (fch === 'inapp' && !s.inapp) return false;
+        if (fch === 'mail' && !s.mail) return false;
+        return true;
+    });
+    document.getElementById('tbody').innerHTML = list.map(s => `
+        <tr>
+            <td>
+                <div class="scene-name">${s.scene}</div>
+                <div class="scene-sub">${s.trigger}</div>
+            </td>
+            <td><span class="ch-dot"><i class="dot ${s.inapp?'on':'off'}"></i><span class="ch-text ${s.inapp?'on':'off'}">${s.inapp?'已开启':'未开启'}</span></span></td>
+            <td><span class="ch-dot"><i class="dot ${s.mail?'on':'off'}"></i><span class="ch-text ${s.mail?'on':'off'}">${s.mail?'已开启':'未开启'}</span></span></td>
+            <td><span class="ch-dot"><i class="dot off"></i><span class="ch-text off">待开放</span></span></td>
+            <td>
+                <span class="act-link" onclick="openEdit('${s.scene}')">编辑</span>
+                <span class="act-sep">|</span>
+                <span class="act-link" onclick="quickPreview('${s.scene}')">预览</span>
+            </td>
+        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#86909C;padding:40px 0;">暂无匹配场景</td></tr>';
+}
+
+document.querySelectorAll('.tree-item').forEach(el => {
+    el.addEventListener('click', () => {
+        document.querySelectorAll('.tree-item').forEach(x => x.classList.remove('active'));
+        el.classList.add('active');
+        currentCat = el.dataset.cat;
+        renderTable();
+    });
+});
+
+function openEdit(sceneName) {
+    const s = DATA.find(x => x.scene === sceneName);
+    if (!s) return;
+    curScene = s;
+    curChannel = 'inapp';
+    curLang = 'zh-CN';
+    document.getElementById('edit-modal-title').textContent = '编辑消息模板 · ' + s.scene;
+    document.getElementById('edit-cat').textContent = s.cat;
+    document.getElementById('edit-scene').textContent = s.scene;
+    switchChannel('inapp');
+    renderLangTabs();
+    fillContent();
+    document.getElementById('edit-modal').classList.add('show');
+}
+
+function switchChannel(ch) {
+    curChannel = ch;
+    document.querySelectorAll('.ch-tab').forEach(t => t.classList.toggle('active', t.dataset.ch === ch));
+    const sw = document.getElementById('ch-switch');
+    if (ch === 'push') { sw.className = 'switch'; sw.style.opacity = 0.4; }
+    else {
+        const on = ch === 'inapp' ? curScene.inapp : curScene.mail;
+        sw.style.opacity = 1;
+        sw.className = 'switch ' + (on ? 'on' : '');
+    }
+    fillContent();
+    renderLangTabs();
+}
+
+function toggleChannel() {
+    if (curChannel === 'push') return;
+    const sw = document.getElementById('ch-switch');
+    const on = sw.classList.contains('on');
+    sw.classList.toggle('on', !on);
+    if (curChannel === 'inapp') curScene.inapp = on ? 0 : 1;
+    if (curChannel === 'mail') curScene.mail = on ? 0 : 1;
+    renderTable();
+}
+
+function renderLangTabs() {
+    const box = document.getElementById('lang-tabs');
+    box.innerHTML = LANGS.map(l => {
+        const c = curScene.content || {};
+        const has = c[l.code] && c[l.code][curChannel];
+        return `<span class="lang-tab ${l.code === curLang ? 'active' : ''} ${has ? '' : 'pending'}" onclick="switchLang('${l.code}')">${l.name}</span>`;
+    }).join('');
+}
+
+function switchLang(code) {
+    curLang = code;
+    renderLangTabs();
+    fillContent();
+}
+
+function fillContent() {
+    const c = getContent(curScene, curChannel, curLang);
+    const t = document.getElementById('edit-title');
+    const b = document.getElementById('edit-body');
+    t.value = c.pending ? '' : c.t;
+    b.value = c.pending ? '' : c.b;
+    t.placeholder = c.pending ? '该语言尚未翻译，可点击下方一键翻译' : '请输入消息标题';
+    b.placeholder = c.pending ? '该语言尚未翻译，可点击下方一键翻译' : '请输入消息正文';
+    updateCounter();
+}
+
+function updateCounter() {
+    const t = document.getElementById('edit-title').value;
+    const b = document.getElementById('edit-body').value;
+    const ct = document.getElementById('cnt-title');
+    const cb = document.getElementById('cnt-body');
+    ct.textContent = t.length + ' / 80';
+    ct.className = 'counter' + (t.length > 80 ? ' over' : '');
+    cb.textContent = b.length + ' / 4000';
+    cb.className = 'counter' + (b.length > 4000 ? ' over' : '');
+}
+
+function translateAll() {
+    const zh = getContent(curScene, curChannel, 'zh-CN');
+    if (!zh.t) { alert('请先填写中文简体内容'); return; }
+    if (!curScene.content) curScene.content = {};
+    LANGS.forEach(l => {
+        if (l.code === 'zh-CN') return;
+        if (!curScene.content[l.code]) curScene.content[l.code] = {};
+        curScene.content[l.code][curChannel] = { t: zh.t, b: zh.b };
+    });
+    renderLangTabs();
+    alert('已调用翻译接口，4 种语言模板已生成');
+}
+
+function saveEdit() {
+    const t = document.getElementById('edit-title').value.trim();
+    const b = document.getElementById('edit-body').value.trim();
+    if (!t) { alert('请输入消息标题'); return; }
+    if (!b) { alert('请输入消息正文'); return; }
+    if (t.length > 80) { alert('消息标题不能超过 80 字'); return; }
+    if (b.length > 4000) { alert('消息正文不能超过 4000 字'); return; }
+    if (!curScene.content) curScene.content = {};
+    if (!curScene.content[curLang]) curScene.content[curLang] = {};
+    curScene.content[curLang][curChannel] = { t: t, b: b };
+    renderLangTabs();
+    alert('已保存');
+}
+
+function closeEdit() { document.getElementById('edit-modal').classList.remove('show'); }
+
+function quickPreview(sceneName) {
+    const s = DATA.find(x => x.scene === sceneName);
+    if (!s) return;
+    curScene = s;
+    curChannel = s.inapp ? 'inapp' : (s.mail ? 'mail' : 'inapp');
+    curLang = 'zh-CN';
+    openPreview();
+}
+
+function openPreview() {
+    renderPvLang();
+    renderPvStage();
+    const names = { inapp: '站内信', mail: '邮件', push: 'PUSH' };
+    document.getElementById('pv-title').textContent = '消息预览 · ' + names[curChannel];
+    document.getElementById('preview-modal').classList.add('show');
+}
+
+function renderPvLang() {
+    document.getElementById('pv-lang').innerHTML = LANGS.map(l => {
+        const c = curScene.content || {};
+        const has = c[l.code] && c[l.code][curChannel];
+        return `<span class="pv-lang-btn ${l.code === curLang ? 'active' : ''} ${has ? '' : 'pending'}" onclick="pvSwitchLang('${l.code}')">${l.name}</span>`;
+    }).join('');
+}
+
+function pvSwitchLang(code) {
+    curLang = code;
+    renderPvLang();
+    renderPvStage();
+}
+
+function renderPvStage() {
+    const c = getContent(curScene, curChannel, curLang);
+    const stage = document.getElementById('pv-content');
+    const note = c.pending ? '<div class="pv-note">该语言尚未翻译，当前展示中文简体内容</div>' : '';
+    const T = fillVars(c.t);
+    const B = fillVars(c.b).replace(/\n/g, '<br>');
+    if (curChannel === 'inapp') {
+        stage.innerHTML = note + `
+        <div class="inapp-card">
+            <div class="inapp-head">
+                <div class="inapp-icon">P</div>
+                <div class="inapp-src">POKO 消息中心</div>
+                <div class="inapp-time">刚刚</div>
+            </div>
+            <div class="inapp-title">${T}</div>
+            <div class="inapp-body">${B}</div>
+            <div class="inapp-foot"><span class="inapp-btn">查看详情</span></div>
+        </div>`;
+    } else if (curChannel === 'mail') {
+        stage.innerHTML = note + `
+        <div class="mail-card">
+            <div class="mail-head">
+                <div class="mail-line">发件人：<b>POKO 通知 &lt;notice@poko.com&gt;</b></div>
+                <div class="mail-line">收件人：<b>用户邮箱</b></div>
+            </div>
+            <div class="mail-subject">${T}</div>
+            <div class="mail-body">${B}</div>
+            <div class="mail-foot">此邮件由系统自动发送，请勿直接回复</div>
+        </div>`;
+    } else {
+        stage.innerHTML = note + `
+        <div class="push-wrap"><div class="push-phone">
+            <div class="push-time">9:41</div>
+            <div class="push-date">11月18日 星期三</div>
+            <div class="push-card">
+                <div class="push-card-head">
+                    <div class="push-app-icon">P</div>
+                    <div class="push-app-name">POKO</div>
+                    <div class="push-card-time">现在</div>
+                </div>
+                <div class="push-title">${T}</div>
+                <div class="push-body">${B}</div>
+            </div>
+        </div></div>`;
+    }
+}
+
+function closePreview() { document.getElementById('preview-modal').classList.remove('show'); }
+
+/* ================= 标注系统 ================= */
+const STORAGE_KEY = 'annotated-prototype-message-template-v2';
+let currentAnnotation = null;
+let isEditing = false;
+let customAnnotations = null;
+
+const annotations = [
+  {
+    "id": 1,
+    "title": "页面总说明",
+    "summary": "消息模板配置页，按场景维护各渠道、各语言的消息文案。",
+    "target": "#anno-1",
+    "showMarker": false,
+    "type": "overview",
+    "detail": {
+      "feature": "消息触达模块的模板配置页。运营在这里按业务场景维护站内信、邮件、PUSH 三个渠道的消息文案，每个渠道支持五种语言分别配置。页面按「消息发送 / 消息模板 / 发送记录」三个页签组织，当前为消息模板页签。",
+      "business": "场景清单由系统固定维护，运营不能新增或删除场景，只能编辑各场景的文案与渠道开关。当前共 43 个场景。",
+      "state": "PUSH 渠道本期仅占位展示、不可编辑。发送记录页签本期沿用现有页面，不做改造。"
+    }
+  },
+  {
+    "id": 2,
+    "title": "页签与概览卡",
+    "summary": "三个页签承载不同动作，概览卡展示场景与各渠道的开启情况。",
+    "target": "#anno-2",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "三个页签分别承载运营手动发消息、场景模板配置、发送记录查询。概览卡展示场景总数与各渠道已开启的场景数。",
+      "display": "场景总数按全部业务场景统计；站内信、邮件按已开启渠道的场景数统计；PUSH 本期固定显示待开放。",
+      "interaction": "点击页签切换页面；概览卡仅作状态概览，不参与列表筛选。",
+      "business": "「发送记录」页签本期沿用现有页面，本次不做改造。"
+    }
+  },
+  {
+    "id": 3,
+    "title": "业务分类树",
+    "summary": "按业务域给场景分组，用于快速定位与筛选。",
+    "target": "#anno-3",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "按业务域对场景分组，帮助运营快速定位到某一类消息。",
+      "display": "订单 15 条、包裹 17 条、售后 7 条、账户 2 条、营销 2 条。原方案中「入库质检」归入包裹域，「售后」从订单域独立出来。",
+      "interaction": "点击分类筛选右侧列表，选中项高亮；点击「全部场景」恢复全量。分类计数为固定值，不随筛选变化。",
+      "business": "分类由系统固定，运营不可增删分类。"
+    }
+  },
+  {
+    "id": 4,
+    "title": "场景列表",
+    "summary": "一行一个场景，展示各渠道开启状态，支持筛选与搜索。",
+    "target": "#anno-4",
+    "showMarker": true,
+    "type": "area",
+    "detail": {
+      "feature": "一行一个业务场景，展示场景名称、触发条件摘要、站内信与邮件的开启状态、PUSH 占位状态。",
+      "display": "场景名称下方为触发条件摘要，帮助运营判断这个场景在什么时机触发。渠道状态用圆点加文字区分已开启与未开启。",
+      "business": "场景名称与触发条件由系统固定，不可编辑。渠道默认值按业务重要性预设：涉及支付、退款、补款、审核异常的场景，站内信与邮件默认开启；纯进度通知只开站内信。",
+      "exception": "搜索与渠道筛选可叠加使用，无匹配结果时显示空状态提示。"
+    }
+  },
+  {
+    "id": 5,
+    "title": "编辑与预览入口",
+    "summary": "每行提供编辑与预览两个操作，编辑打开模板弹窗，预览直接看效果。",
+    "target": "#anno-5",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "每个场景行尾提供「编辑」与「预览」两个操作入口。",
+      "interaction": "点击「编辑」打开模板编辑弹窗，可修改三个渠道、五种语言的文案；点击「预览」直接打开预览弹窗，查看该场景当前已配置渠道的消息效果。",
+      "business": "编辑入口对运营开放，预览入口对所有角色开放。涉及资金类场景的渠道开关在弹窗内锁定，不可关闭。",
+      "exception": "未配置任何渠道的场景点击预览时，提示「该场景暂未配置可预览的渠道」。"
+    }
+  },
+  {
+    "id": 6,
+    "title": "发送方式页签与开关",
+    "summary": "三个发送方式用页签切换，右侧展示当前渠道的开启状态与预览按钮。",
+    "target": "#edit-modal .ch-tabs",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "编辑弹窗顶部用页签切换站内信、邮件、PUSH 三个发送方式，切换后下方表单内容随之切换。页签右侧展示当前渠道的开启开关和预览按钮。",
+      "interaction": "点击页签切换渠道；点击右侧开关可开启或关闭该渠道；点击「预览」打开预览弹窗查看当前渠道、当前语言的消息效果。",
+      "business": "涉及支付、退款、补款、审核异常的关键场景，站内信与邮件的开关锁定不可关闭，避免运营误关导致用户收不到资金类通知。仅营销类场景可自由开关。",
+      "state": "PUSH 页签为待开放状态，不可点击，右侧开关置灰不可操作。"
+    }
+  },
+  {
+    "id": 7,
+    "title": "多语言页签",
+    "summary": "五种语言分别配置，未翻译语言标红提示，支持一键翻译。",
+    "target": "#edit-modal .lang-tabs",
+    "showMarker": true,
+    "type": "field",
+    "detail": {
+      "feature": "站内信与邮件均支持中文简体、中文繁体、英文、日语、俄语五种语言分别维护标题与正文。",
+      "display": "当前选中语言高亮；未配置内容的语言在页签上显示红点提示。切换语言后标题与正文同步切换为该语言的内容。",
+      "business": "中文简体为基准语言。其余语言可通过「一键翻译所有语言」调用外部翻译接口生成，翻译结果可再手工修改。",
+      "exception": "未翻译的语言，标题与正文为空，输入框提示可点击一键翻译。发送时若目标语言缺失，回退使用中文简体内容。"
+    }
+  },
+  {
+    "id": 8,
+    "title": "消息预览",
+    "summary": "按发送方式渲染真实效果，支持五种语言切换查看。",
+    "target": "#preview-modal .pv-stage",
+    "showMarker": true,
+    "type": "interaction",
+    "detail": {
+      "feature": "预览弹窗按发送方式渲染不同的展示效果：站内信展示为消息中心卡片，邮件展示为邮件客户端样式，PUSH 展示为手机锁屏通知样式。",
+      "interaction": "顶部可切换五种语言查看，切换后预览内容同步更新；点击关闭返回。",
+      "business": "预览展示的是当前场景、当前渠道、当前语言的真实文案，变量会替换为示例值，方便运营确认文案效果与长度是否合适。",
+      "exception": "所选语言尚未翻译时，预览顶部提示当前展示的是中文简体内容。"
+    }
+  }
+];
+
+const DETAIL_LABELS = { feature:'功能说明', display:'字段/展示规则', interaction:'交互规则', business:'业务规则', state:'状态说明', exception:'异常/边界', copywriting:'文案规范' };
+
+function loadCustomAnnotations() {
+    try { const s = localStorage.getItem(STORAGE_KEY); if (s) customAnnotations = JSON.parse(s); } catch(e) {}
+}
+function getActiveAnnotations() { return customAnnotations || annotations; }
+function renderAnnotationList() {
+    const data = getActiveAnnotations();
+    document.getElementById('annotation-list').innerHTML = data.map(item => `
+        <div class="annotation-item" data-id="${item.id}" onclick="handleAnnotationClick(${item.id})" onmouseenter="highlightMarker(${item.id})" onmouseleave="unhighlightMarker(${item.id})">
+            <div class="annotation-header"><div class="annotation-badge">${item.id}</div><div class="annotation-title">${item.title}</div></div>
+            <div class="annotation-summary">${item.summary}</div>
+        </div>`).join('');
+}
+function highlightMarker(id) {
+    const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.add('highlight');
+    const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.add('active');
+}
+function unhighlightMarker(id) {
+    const m = document.querySelector(`.anno-marker[data-id="${id}"]`); if (m) m.classList.remove('highlight');
+    const i = document.querySelector(`.annotation-item[data-id="${id}"]`); if (i) i.classList.remove('active');
+}
+document.querySelectorAll('.anno-marker').forEach(marker => {
+    marker.addEventListener('mouseenter', () => highlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('mouseleave', () => unhighlightMarker(parseInt(marker.dataset.id)));
+    marker.addEventListener('click', () => showDetail(parseInt(marker.dataset.id)));
+});
+function handleAnnotationClick(id) { scrollToAnnotation(id); setTimeout(() => showDetail(id), 300); }
+function scrollToAnnotation(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    if (item.target.indexOf('#edit-modal') === 0) {
+        if (!document.getElementById('edit-modal').classList.contains('show')) { curScene = DATA[0]; openEdit(DATA[0].scene); }
+    }
+    if (item.target.indexOf('#preview-modal') === 0) {
+        if (!document.getElementById('preview-modal').classList.contains('show')) { curScene = DATA[0]; curChannel = 'inapp'; curLang = 'zh-CN'; openPreview(); }
+    }
+    const target = document.querySelector(item.target);
+    const previewArea = document.querySelector('.preview-area');
+    if (target && previewArea) {
+        const top = target.offsetTop - 20;
+        previewArea.scrollTo({ top: top, behavior: 'smooth' });
+        target.classList.remove('anno-flash'); void target.offsetWidth; target.classList.add('anno-flash');
+        setTimeout(() => target.classList.remove('anno-flash'), 1500);
+    }
+}
+function showDetail(id) {
+    const item = getActiveAnnotations().find(a => a.id === id);
+    if (!item) return;
+    currentAnnotation = item; isEditing = false;
+    document.getElementById('modal-title').textContent = `${item.id}. ${item.title}`;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = customAnnotations ? 'inline-flex' : 'none';
+    document.getElementById('delete-btn').style.display = (id !== 1) ? 'inline-flex' : 'none';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function renderDetailTable(item) {
+    const rows = [];
+    ['feature','display','interaction','business','state','exception','copywriting'].forEach(k => {
+        if (item.detail[k]) rows.push({ label: DETAIL_LABELS[k], value: item.detail[k], key: k });
+    });
+    const table = document.getElementById('detail-table');
+    if (isEditing) {
+        table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td><textarea data-key="${r.key}">${r.value}</textarea></td></tr>`).join('');
+    } else {
+        table.innerHTML = rows.map(r => `<tr><th>${r.label}</th><td>${r.value.replace(/\n/g,'<br>')}</td></tr>`).join('');
+    }
+}
+function toggleEdit() {
+    isEditing = !isEditing;
+    renderDetailTable(currentAnnotation);
+    document.getElementById('edit-btn').style.display = isEditing ? 'none' : 'inline-flex';
+    document.getElementById('save-btn').style.display = isEditing ? 'inline-flex' : 'none';
+}
+function saveAnnotation() {
+    const tas = document.querySelectorAll('#detail-table textarea');
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const item = customAnnotations.find(a => a.id === currentAnnotation.id);
+    if (!item) return;
+    tas.forEach(ta => { item.detail[ta.dataset.key] = ta.value; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    currentAnnotation = item; isEditing = false;
+    renderDetailTable(item);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-flex';
+    renderAnnotationList();
+}
+function resetAnnotation() {
+    if (!confirm('确定要重置为原始内容吗？所有自定义修改都会丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY); customAnnotations = null;
+    const original = annotations.find(a => a.id === currentAnnotation.id);
+    currentAnnotation = original; isEditing = false;
+    renderDetailTable(original);
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'none';
+    renderAnnotationList();
+}
+function closeModal() { document.getElementById('detail-modal').classList.remove('show'); }
+document.getElementById('detail-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeEdit(); closePreview(); } });
+
+const PANEL_STATE_KEY = STORAGE_KEY + '-panel';
+function initPanelState() {
+    try {
+        if (localStorage.getItem(PANEL_STATE_KEY) === '1') {
+            document.getElementById('annotation-panel').classList.add('collapsed');
+            document.getElementById('panel-expand-btn').classList.add('show');
+        }
+    } catch(e) {}
+}
+function togglePanel() {
+    const panel = document.getElementById('annotation-panel');
+    const btn = document.getElementById('panel-expand-btn');
+    const collapsed = panel.classList.toggle('collapsed');
+    btn.classList.toggle('show', collapsed);
+    try { localStorage.setItem(PANEL_STATE_KEY, collapsed ? '1' : '0'); } catch(e) {}
+}
+function openEditMode() {
+    const data = getActiveAnnotations();
+    let html = '<div style="display:flex;flex-direction:column;gap:0;">';
+    data.forEach(item => {
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #E4E7ED;">
+            <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="closeManageModal();showDetail(${item.id})">
+                <div class="annotation-badge">${item.id}</div>
+                <div style="font-size:14px;font-weight:600;color:#333;">${item.title}</div>
+                <div style="font-size:12px;color:#999;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.summary}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn btn-default" style="padding:4px 12px;font-size:12px;" onclick="closeManageModal();showDetail(${item.id});setTimeout(()=>toggleEdit(),100)">编辑</button>
+                ${item.id !== 1 ? `<button class="btn btn-danger" style="padding:4px 12px;font-size:12px;" onclick="deleteAnnotationById(${item.id})">删除</button>` : ''}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    document.getElementById('manage-modal-body').innerHTML = html;
+    document.getElementById('manage-modal').classList.add('show');
+}
+function closeManageModal() { document.getElementById('manage-modal').classList.remove('show'); }
+function deleteAnnotationById(id) {
+    const data = getActiveAnnotations();
+    const item = data.find(a => a.id === id);
+    if (!item || item.id === 1) return;
+    if (!confirm(`确定要删除标注「${item.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); openEditMode();
+}
+function addAnnotation() {
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    const newId = customAnnotations.length + 1;
+    const newItem = { id:newId, title:'新标注 '+newId, summary:'点击编辑修改标注内容...', target:'#anno-'+newId, showMarker:true, type:'area', detail:{ feature:'请填写功能说明...' } };
+    customAnnotations.push(newItem);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    renderAnnotationList(); closeManageModal();
+    currentAnnotation = newItem; isEditing = true;
+    document.getElementById('modal-title').textContent = `${newItem.id}. ${newItem.title}`;
+    renderDetailTable(newItem);
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('delete-btn').style.display = 'inline-flex';
+    document.getElementById('detail-modal').classList.add('show');
+}
+function deleteAnnotation() {
+    if (!currentAnnotation || currentAnnotation.id === 1) return;
+    if (!confirm(`确定要删除标注「${currentAnnotation.title}」吗？删除后序号会自动重排。`)) return;
+    if (!customAnnotations) customAnnotations = JSON.parse(JSON.stringify(annotations));
+    customAnnotations = customAnnotations.filter(a => a.id !== currentAnnotation.id);
+    customAnnotations.forEach((a, i) => { a.id = i + 1; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customAnnotations));
+    closeModal(); renderAnnotationList();
+}
+function exportAnnotatedHTML() {
+    const activeData = getActiveAnnotations();
+    const originalHTML = document.documentElement.outerHTML;
+    const replacement = 'const annotations = ' + JSON.stringify(activeData, null, 2) + ';';
+    const newHTML = originalHTML.replace(/const annotations = \[[\s\S]*?\n\];/, replacement);
+    const blob = new Blob([newHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `消息触达_消息模板配置_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.html`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+loadCustomAnnotations();
+renderAnnotationList();
+initPanelState();
+document.getElementById('st-total').textContent = DATA.length;
+document.getElementById('st-inapp').textContent = DATA.filter(d => d.inapp).length;
+document.getElementById('st-mail').textContent = DATA.filter(d => d.mail).length;
+renderTable();
+</script>
+</body>
+</html>
