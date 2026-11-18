@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推广联盟优化方案 v1.0 - POKO文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
+.doc-header { background: #1a1a2e; padding: 10px 24px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.doc-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.doc-header .meta { font-size: 11px; color: rgba(255,255,255,0.4); }
+.doc-header .actions { display: flex; gap: 6px; margin-left: auto; }
+.btn { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; }
+.btn:hover { background: rgba(255,255,255,0.15); }
+.btn.primary { background: #3b82f6; border-color: #3b82f6; }
+.btn.green { background: #10b941; border-color: #10b941; }
+.btn.green:hover { background: #059669; }
+.doc-body { max-width: 900px; margin: 16px auto; padding: 0 24px; }
+.doc-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 50vh; }
+.doc-content[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.doc-content h2 { font-size: 18px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+.doc-content h3 { font-size: 15px; margin: 20px 0 8px 0; }
+.doc-content p { margin: 8px 0; color: #444; }
+.doc-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.doc-content th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e5e5e5; font-weight: 600; }
+.doc-content td { padding: 10px 12px; border: 1px solid #e5e5e5; }
+.doc-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+.doc-content .placeholder { color: #aaa; text-align: center; padding: 60px 20px; }
+.doc-content .placeholder .icon { font-size: 40px; margin-bottom: 12px; }
+.doc-content .placeholder .title { font-size: 16px; color: #888; }
+.doc-content .placeholder .hint { font-size: 13px; margin-top: 8px; }
+.doc-footer { text-align: center; padding: 24px; color: #aaa; font-size: 12px; }
+#toast { position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>推广联盟优化方案 v1.0</h1>
+        <span class="meta">POKO SaaS</span>
+        <div class="actions">
+            <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">
+            <button class="btn green" id="imgBtn" onclick="document.getElementById('imgInput').click()" style="display:none">🖼️ 插入图片</button>
+            <button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button>
+        </div>
+    </div>
+    <div class="doc-body">
+        <div class="doc-content" id="docContent"><div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p>版本：v1.0
+日期：2026-11-18
+范围：商品链接分享归因、用户主动申请成为推广员</p></div>
+<p><strong>修订记录</strong></p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>修订内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-11-18 17:05</td>
+<td>归因窗口改为固定 30 天、不做后台配置；点击不同推广员链接时窗口重置</td>
+</tr>
+<tr>
+<td>2026-11-18 17:30</td>
+<td>确认默认「仅后台录入」；确认不支持跨端归因</td>
+</tr>
+<tr>
+<td>2026-11-18 17:32</td>
+<td>全文增加变更标记，新增内容用框标出</td>
+</tr>
+<tr>
+<td>2026-11-18 18:25</td>
+<td>去掉推广员协议勾选，不做协议确认</td>
+</tr>
+</tbody>
+</table>
+<p><strong>标记说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>【新增】</td>
+<td>本次全新增加的内容，原文中没有</td>
+</tr>
+<tr>
+<td>【修改】</td>
+<td>本次在原有内容上调整的内容</td>
+</tr>
+<tr>
+<td>无标记</td>
+<td>沿用现有规则，本次不改</td>
+</tr>
+</tbody>
+</table>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>框内内容 = 本次新增</strong>
+文中所有用引用框包住的内容，均为本次新增，需要研发重点评估。</p></div>
+<hr />
+<h2>〇、改动速览（共 7 处）</h2>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】1. 商品链接分享归因</strong>
+推广员分享商品链接，好友通过该链接首次注册后与该推广员绑定。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】2. 归因规则</strong>
+固定 30 天窗口、最后点击优先、点击其他推广员链接窗口重置。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【修改】3. 后台「注册成为推广员」开关 → 改为单选</strong>
+三个选项互斥：注册自动成为推广员／用户主动申请成为推广员／仅后台录入，默认仅后台录入。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】4. 用户主动申请成为推广员</strong>
+未开通页点击按钮即时生效，免审核。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【修改】5. 未开通页文案</strong>
+副标题、步骤 01、步骤 03 补充商品链接与新用户说明。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【修改】6. 未开通页主按钮文案</strong>
+按后台配置联动：主动申请模式显示「立即加入推广联盟」，仅后台录入模式保持「联系客服成为推广者」。</p></div>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】7. 商品详情分享参数注入</strong>
+页面不改，分享链接追加推广参数并记录点击日志。</p></div>
+<hr />
+<h2>一、决策结论（已拍板）</h2>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>决策项</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>商品链接是否商品订单分佣</td>
+<td>只扩归因入口，商品订单不单独分佣</td>
+</tr>
+<tr>
+<td>2</td>
+<td>老用户点击商品链接能否绑定</td>
+<td>已注册用户不重复绑定，仅新注册用户参与归因（现有逻辑已开发）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>多渠道冲突优先级</td>
+<td>最后点击优先</td>
+</tr>
+<tr>
+<td>4</td>
+<td>主动申请是否需审核</td>
+<td>免审核，点击即时生效</td>
+</tr>
+<tr>
+<td>5</td>
+<td>成为推广员方式配置形态</td>
+<td>三种方式改为单选互斥</td>
+</tr>
+<tr>
+<td>6</td>
+<td>归因窗口</td>
+<td>固定 30 天，不做后台配置；点击其他推广员的链接时窗口重置</td>
+</tr>
+<tr>
+<td>7</td>
+<td>成为推广员方式默认选项</td>
+<td>默认「仅后台录入」</td>
+</tr>
+<tr>
+<td>8</td>
+<td>跨端归因</td>
+<td>不支持跨端归因，按端内归因处理</td>
+</tr>
+<tr>
+<td>9</td>
+<td>推广员协议</td>
+<td>不做协议勾选确认</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>二、需求一：商品链接分享归因</h2>
+<h3>2.1 业务定义</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】</strong>
+推广员在商品详情页分享商品，好友通过该商品链接进入并首次注册后，与推广员建立绑定关系。此后该好友产生的提包单佣金归该推广员。</p></div>
+<p>商品订单本身不产生佣金，佣金仍按现有规则在提包单环节结算。</p>
+<h3>2.2 归因规则</h3>
+<table>
+<thead>
+<tr>
+<th>规则项</th>
+<th>规则内容</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>归因对象</td>
+<td>仅首次注册的新用户；已注册用户点击链接不建立绑定、不改变现有绑定关系</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>归因窗口</td>
+<td>固定 30 天，不做后台配置。从最后一次有效点击起算，30 天内完成注册即归因有效，超出不建立绑定</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>窗口重置</td>
+<td>用户点击其他推广员的分享链接，归因窗口从新点击时间重新起算 30 天，归属以最后一次点击为准</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>冲突优先级</td>
+<td>最后点击优先。同一用户点击多个推广员的链接，以注册前最后一次有效点击为准</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>归因入口</td>
+<td>专属邀请链接、推广码、推广海报、商品链接，四种入口同权，统一按最后点击判断</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>绑定建立时点</td>
+<td>注册成功时建立绑定关系</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>绑定关系期限</td>
+<td>沿用「绑定有效期」，自注册时间起算，与归因窗口相互独立</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>重复点击</td>
+<td>同一用户重复点击同一推广员链接，只更新最后点击时间并重置 30 天窗口，不重复生成绑定记录</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>推广员禁用</td>
+<td>推广员被禁用后，其链接不再产生新归因</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>自绑限制</td>
+<td>推广员本人账号不可通过自身链接建立绑定</td>
+<td>沿用</td>
+</tr>
+</tbody>
+</table>
+<h3>2.3 归因路径</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】全链路</strong></p></div>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>环节</th>
+<th>处理内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>推广员分享</td>
+<td>商品详情页分享时，系统判断当前用户是否为有效推广员；是则分享链接追加推广参数，否则按普通链接分享</td>
+</tr>
+<tr>
+<td>2</td>
+<td>好友打开链接</td>
+<td>落地页解析推广参数，记录点击日志（推广员标识、商品编号、点击时间、设备标识、渠道来源）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>参数暂存</td>
+<td>推广参数同时写入本地标记，用于后续注册页回读；每次新点击覆盖旧标记</td>
+</tr>
+<tr>
+<td>4</td>
+<td>进入注册</td>
+<td>未登录用户进入注册流程；已注册用户直接登录，不触发归因</td>
+</tr>
+<tr>
+<td>5</td>
+<td>注册成功</td>
+<td>读取归因标记，校验：最后点击距今未超 30 天、无历史绑定、推广员状态正常、非自绑</td>
+</tr>
+<tr>
+<td>6</td>
+<td>建立绑定</td>
+<td>校验通过后写入绑定关系，记录来源类型（商品链接／专属链接／推广码／海报）、来源商品编号、绑定时间</td>
+</tr>
+<tr>
+<td>7</td>
+<td>校验不通过</td>
+<td>不建立绑定，注册正常完成</td>
+</tr>
+</tbody>
+</table>
+<h3>2.4 异常与边界</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>处理规则</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>商品下架或售罄</td>
+<td>落地页跳兜底页（推荐同款／回首页），归因标记保留，用户后续注册仍可绑定</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>归因窗口内多次点击不同推广员</td>
+<td>以最后一次有效点击为准，覆盖前一次，30 天窗口同步重置</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>点击后超过 30 天再点击同一推广员</td>
+<td>窗口从新点击时间重新起算 30 天</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>用户注册前清除浏览器缓存</td>
+<td>以服务端点击日志兜底，按设备标识匹配最近一次有效点击</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>电脑端点击、移动端注册</td>
+<td>不支持跨端归因。点击与注册必须在同一端完成才建立绑定，跨端时正常注册但不归因</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>同一端内切换页面或重新登录</td>
+<td>归因标记保留，窗口内注册仍有效</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>链接被篡改冒用推广员标识</td>
+<td>推广参数需签名校验，校验失败按普通链接处理</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>推广员分享后本人被禁用</td>
+<td>该链接在禁用时点后不再产生新绑定</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<h3>2.5 归因结果记录（字段说明）</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】以下字段中，来源类型、来源商品编号为新增字段，其余为现有绑定记录字段</strong></p></div>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绑定用户标识</td>
+<td>被绑定的用户</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>推广员标识</td>
+<td>归属推广员</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>来源类型</td>
+<td>商品链接／专属链接／推广码／推广海报</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>来源商品编号</td>
+<td>通过商品链接归因时记录，其他来源为空</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>绑定时间</td>
+<td>绑定建立时间</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>绑定到期时间</td>
+<td>按绑定有效期计算，永久时为空</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>绑定状态</td>
+<td>已绑定／已解绑</td>
+<td>沿用</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>三、需求二：用户主动申请成为推广员</h2>
+<h3>3.1 三种方式互斥</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【修改】原「注册成为推广员」为单一开关，现改为单选，三个选项互斥，同一时间仅一项生效，默认「仅后台录入」。</strong></p></div>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>含义</th>
+<th>用户端表现</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>注册自动成为推广员</td>
+<td>用户完成注册即为推广员</td>
+<td>不出现未开通页，注册后直接是推广员视角</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>用户主动申请成为推广员</td>
+<td>用户在推广联盟页面点击按钮后即时成为推广员，免审核</td>
+<td>未开通页展示「立即加入推广联盟」按钮</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>仅后台录入</td>
+<td>只能由运营在后台添加</td>
+<td>未开通页展示「联系客服成为推广者」按钮</td>
+<td>沿用</td>
+</tr>
+</tbody>
+</table>
+<h3>3.2 申请流程（方式=用户主动申请）</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】全流程</strong></p></div>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>操作</th>
+<th>规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>用户进入推广联盟页</td>
+<td>未成为推广员时展示未开通页</td>
+</tr>
+<tr>
+<td>2</td>
+<td>点击「立即加入推广联盟」</td>
+<td>即时生效，不进入审核</td>
+</tr>
+<tr>
+<td>3</td>
+<td>系统创建推广员记录</td>
+<td>生成推广员编号，写入来源为「用户主动申请」，记录申请时间</td>
+</tr>
+<tr>
+<td>4</td>
+<td>页面切换为推广员视角</td>
+<td>展示资产数据、分享区、等级信息，并提示已开通及当前佣金比例</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 状态说明</h3>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>状态</th>
+<th>说明</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户与推广联盟</td>
+<td>未开通</td>
+<td>展示未开通页</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>用户与推广联盟</td>
+<td>已开通</td>
+<td>展示推广员视角</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>用户与推广联盟</td>
+<td>已禁用</td>
+<td>不可自助申请、不可自助恢复，仅后台解禁；展示禁用提示</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<h3>3.4 费率与成长值规则</h3>
+<table>
+<thead>
+<tr>
+<th>规则项</th>
+<th>规则内容</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>佣金费率</td>
+<td>代理等级未启用：取「默认佣金比例」；代理等级已启用：从最低等级起步</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>成长值</td>
+<td>从 0 开始累计</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>历史订单</td>
+<td>成为推广员之前本人产生的订单不追溯佣金</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>绑定关系</td>
+<td>成为推广员不影响其作为普通用户已存在的绑定关系（如有）</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>重复申请</td>
+<td>已是推广员再次点击，按幂等处理，不重复创建记录、不重置费率与成长值</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>四、后台改动清单</h2>
+<h3>4.1 全局规则配置 — 基础规则（仅此项改动）</h3>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>现有形态</th>
+<th>调整后形态</th>
+<th>默认值</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>启用推广联盟</td>
+<td>开关</td>
+<td>不变</td>
+<td>开启</td>
+<td>无</td>
+</tr>
+<tr>
+<td>注册成为推广员</td>
+<td>开关</td>
+<td><strong>改为单选：成为推广员方式</strong><br>选项一：注册自动成为推广员<br>选项二：用户主动申请成为推广员<br>选项三：仅后台录入</td>
+<td>仅后台录入</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>绑定有效期</td>
+<td>数字输入，单位天</td>
+<td>不变</td>
+<td>30</td>
+<td>无</td>
+</tr>
+<tr>
+<td>成长值有效期</td>
+<td>数字输入，单位天</td>
+<td>不变</td>
+<td>365</td>
+<td>无</td>
+</tr>
+<tr>
+<td>成长值获取规则</td>
+<td>配置入口</td>
+<td>不变</td>
+<td>邀请注册+10、有效下单+20</td>
+<td>无</td>
+</tr>
+<tr>
+<td>保存全局规则</td>
+<td>按钮</td>
+<td>不变</td>
+<td>—</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【说明】</strong>
+归因窗口固定 30 天，不做后台配置，页面不新增字段。
+佣金规则配置、提现规则配置本次均不改动。商品订单不产生佣金，佣金规则无需调整。</p></div>
+<h3>4.2 不做但需知晓的逻辑改动（不涉及页面）</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>说明</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绑定关系写入来源类型与来源商品</td>
+<td>绑定记录新增来源字段，供后续统计使用</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>点击日志记录</td>
+<td>新增链接点击记录，用于归因兜底与冲突判断；每次点击覆盖前一次有效点击</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>禁用用户自助申请拦截</td>
+<td>已禁用状态不响应加入按钮，需后台解禁</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>分享链接参数注入</td>
+<td>商品详情分享时按登录态判断是否追加推广参数</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>五、用户端改动清单</h2>
+<h3>5.1 推广联盟未开通页（文案调整）</h3>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>现有文案</th>
+<th>调整后文案</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主标题</td>
+<td>邀请好友注册下单，轻松赚取佣金</td>
+<td>不变</td>
+<td>无</td>
+</tr>
+<tr>
+<td>副标题</td>
+<td>分享专属推广码、邀请链接或推广海报，好友完成有效订单后，佣金将自动进入您的推广账户。</td>
+<td>分享专属推广码、邀请链接、推广海报或商品链接，好友注册下单并完成签收后，佣金将自动进入您的推广账户。</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>主按钮（方式=用户主动申请）</td>
+<td>联系客服成为推广者</td>
+<td>立即加入推广联盟</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>主按钮（方式=仅后台录入）</td>
+<td>联系客服成为推广者</td>
+<td>不变</td>
+<td>无</td>
+</tr>
+<tr>
+<td>步骤 01</td>
+<td>复制邀请链接或推广码</td>
+<td>复制邀请链接、推广码，或分享商品链接</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>步骤 02</td>
+<td>分享给好友</td>
+<td>不变</td>
+<td>无</td>
+</tr>
+<tr>
+<td>步骤 03</td>
+<td>好友下单并完成签收</td>
+<td>好友注册下单并完成签收</td>
+<td>【修改】</td>
+</tr>
+<tr>
+<td>步骤 04</td>
+<td>佣金结算到账</td>
+<td>不变</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】页面新增元素</strong></p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>内容</th>
+<th>位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绑定说明</td>
+<td>好友需为首次注册的新用户，通过您的链接注册后即可与您绑定</td>
+<td>主按钮下方</td>
+</tr>
+</tbody>
+</table></div>
+<h3>5.2 加入成功反馈</h3>
+<div style="border-left:3px solid #3b82f6;background:#f0f6ff;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;"><p><strong>【新增】全部</strong></p></div>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示文案</td>
+<td>您已成为推广员，当前佣金比例 5%</td>
+</tr>
+<tr>
+<td>页面变化</td>
+<td>由未开通页切换为推广员视角，展示资产数据、分享区、等级信息</td>
+</tr>
+<tr>
+<td>后续引导</td>
+<td>引导至分享区，展示邀请链接、推广码、推广海报、商品分享入口</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 商品详情分享（页面不改）</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>说明</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分享入口</td>
+<td>沿用现有商品详情页分享功能，不新增按钮</td>
+<td>无</td>
+</tr>
+<tr>
+<td>分享内容</td>
+<td>分享链接追加推广参数</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>非推广员分享</td>
+<td>不追加参数，按普通分享处理</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>未登录分享</td>
+<td>不追加参数，按普通分享处理</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>六、状态与异常清单</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>处理</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>已注册用户点击商品链接</td>
+<td>正常浏览，不建立绑定，不提示归因失败</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>新用户点击链接后超 30 天注册</td>
+<td>正常注册，不建立绑定</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>新用户点击 A 推广员链接后又点击 B 推广员链接后注册</td>
+<td>绑定 B，窗口从 B 的点击时间重新起算 30 天</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>新用户已在其他推广员处绑定</td>
+<td>不重复绑定，保持原绑定关系</td>
+<td>沿用</td>
+</tr>
+<tr>
+<td>推广员被禁用后点击其链接</td>
+<td>不产生新归因</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>已禁用推广员进入推广联盟页</td>
+<td>展示禁用提示，不展示加入按钮</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>商品链接失效</td>
+<td>跳兜底页，归因保留</td>
+<td>【新增】</td>
+</tr>
+<tr>
+<td>已是推广员重复点击加入按钮</td>
+<td>幂等处理，不重复创建</td>
+<td>【新增】</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>七、已确认事项</h2>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>事项</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>「成为推广员方式」上线后的默认选项</td>
+<td>默认「仅后台录入」，由运营手动切换至「用户主动申请成为推广员」</td>
+</tr>
+<tr>
+<td>2</td>
+<td>跨端归因</td>
+<td>不支持跨端归因，按端内归因处理</td>
+</tr>
+<tr>
+<td>3</td>
+<td>推广员协议</td>
+<td>不做协议勾选，点击按钮即加入</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>八、风险提示（本次不做，但需知晓）</h2>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>影响</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>推广员列表无「来源」字段</td>
+<td>运营无法区分自主申请与后台录入的推广员，无法评估新功能效果</td>
+<td>后续迭代在列表补充来源字段与筛选</td>
+</tr>
+<tr>
+<td>推广员看不到商品分享数据</td>
+<td>不知道分享的商品带来多少点击与注册，功能使用动力不足</td>
+<td>后续迭代在推广员视角补充商品分享数据</td>
+</tr>
+<tr>
+<td>商品链接仅对新用户有效</td>
+<td>推广员分享给老客户无效，易产生客诉</td>
+<td>在未开通页或分享区说明「仅新注册用户可绑定」</td>
+</tr>
+<tr>
+<td>免审核即时生效</td>
+<td>刷号自推自买风险</td>
+<td>沿用现有同设备、同手机号限制；提现审核环节兜底</td>
+</tr>
+<tr>
+<td>不支持跨端归因</td>
+<td>用户在手机点开、到电脑注册时无法归因，会损失部分绑定</td>
+<td>分享落地页提示「请在当前设备完成注册」</td>
+</tr>
+<tr>
+<td>商品链接批量分享</td>
+<td>异常高频绑定</td>
+<td>上线后监控同链接短时间大量注册，异常进风控队列</td>
+</tr>
+</tbody>
+</table>
+        </div>
+    </div>
+    <div class="doc-footer">POKO 文档 · Powered by GitHub Pages</div>
+    <script>
+    var REPO = 'karlwork511/karlwork';
+    var FILE = 'docs/promotion-opt-doc-20261118.html';
+    var editing = false;
+
+    function toggleEdit() {
+        var c = document.getElementById('docContent');
+        var ph = document.getElementById('placeholder');
+        var eb = document.getElementById('editBtn');
+        var sb = document.getElementById('saveBtn');
+        var ib = document.getElementById('imgBtn');
+        if (!editing) {
+            if (ph) ph.remove();
+            c.contentEditable = 'true';
+            c.focus();
+            eb.textContent = '退出编辑';
+            sb.style.display = 'inline-block';
+            ib.style.display = 'inline-block';
+            editing = true;
+        } else {
+            c.contentEditable = 'false';
+            eb.textContent = '\u270f\ufe0f 编辑';
+            sb.style.display = 'none';
+            ib.style.display = 'none';
+            editing = false;
+        }
+    }
+
+    async function insertImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) === -1) ext = 'png';
+        var fn = 'img-' + Date.now() + '.' + ext;
+        showToast('正在上传图片...', '#3b82f6');
+        try {
+            var token = localStorage.getItem('github_token');
+            if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+            var base64 = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var path = 'images/' + fn;
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Upload ' + fn, content: base64 })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'Upload failed'); }
+            var data = await resp.json();
+            var imgUrl = data.content.download_url;
+            var docContent = document.getElementById('docContent');
+            var sel = window.getSelection();
+            if (sel.rangeCount > 0 && docContent.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                range.deleteContents();
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                docContent.appendChild(img);
+            }
+            showToast('\u2705 图片已插入', '#10b941');
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+        }
+        input.value = '';
+    }
+
+    async function savePage() {
+        var sb = document.getElementById('saveBtn');
+        var eb = document.getElementById('editBtn');
+        var ib = document.getElementById('imgBtn');
+        var token = localStorage.getItem('github_token');
+        if (!token) { token = prompt('请输入 GitHub Token（只会保存在你的浏览器）：'); if (!token) return; localStorage.setItem('github_token', token); }
+        document.getElementById('docContent').contentEditable = 'false';
+        eb.textContent = '\u270f\ufe0f 编辑';
+        sb.style.display = 'none';
+        ib.style.display = 'none';
+        sb.textContent = '\u23f3 保存中...';
+        editing = false;
+        var html = document.getElementById('docContent').innerHTML;
+        var page = buildPage(html);
+        try {
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                headers: { 'Authorization': 'token ' + token }
+            });
+            var data = await resp.json();
+            var sha = data.sha;
+            var encoded = btoa(unescape(encodeURIComponent(page)));
+            var putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'update', content: encoded, sha: sha })
+            });
+            if (!putResp.ok) { var e2 = await putResp.json(); throw new Error(e2.message); }
+            showToast('\u2705 已保存', '#10b981');
+            sb.textContent = '\ud83d\udcc1 保存';
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+            sb.textContent = '\ud83d\udcc1 保存';
+        }
+    }
+
+    function buildPage(c) {
+        return '<!DOCTYPE html><html><head><meta charset=UTF-8><title>doc</title></head><body>' + c + '</body></html>';
+    }
+
+    function showToast(m, c2) {
+        var t = document.getElementById('toast');
+        if (t) t.remove();
+        var d = document.createElement('div');
+        d.id = 'toast';
+        d.textContent = m;
+        d.style.background = c2;
+        document.body.appendChild(d);
+        setTimeout(function() { d.remove(); }, 3000);
+    }
+</script>
+</body>
+</html>
