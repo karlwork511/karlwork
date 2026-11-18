@@ -38,7 +38,18 @@
     "name": "消息触达",
     "desc": "运营中心消息触达模块重构：消息模板覆盖 43 个业务场景，站内信/邮件/PUSH 三渠道独立开关，支持五种语言；消息发送支持渠道单选、客户群三选一（全部客户/指定编码列表/Excel 导入）。PUSH 渠道待开放",
     "docs": [],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "场景消息模板配置（43 个场景）",
+            "file": "docs/message-reach-template-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "gift-deduction",
