@@ -18,6 +18,11 @@
             "name": "场景消息模板配置（43 个场景）",
             "file": "docs/message-reach-template-annotated.html",
             "icon": "📋"
+          },
+          {
+            "name": "运营主动发送消息",
+            "file": "docs/message-reach-send-annotated.html",
+            "icon": "📤"
           }
         ]
       }
