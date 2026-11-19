@@ -10,7 +10,18 @@
         "icon": "📄"
       }
     ],
-    "groups": []
+    "groups": [
+      {
+        "title": "原型",
+        "pages": [
+          {
+            "name": "场景消息模板配置（43 个场景）",
+            "file": "docs/message-reach-template-annotated.html",
+            "icon": "📋"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "promotion-alliance-opt",
