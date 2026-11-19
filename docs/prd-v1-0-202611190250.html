@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息触达模块 PRD v1.0 - POKO文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
+.doc-header { background: #1a1a2e; padding: 10px 24px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.doc-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.doc-header .meta { font-size: 11px; color: rgba(255,255,255,0.4); }
+.doc-header .actions { display: flex; gap: 6px; margin-left: auto; }
+.btn { padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; }
+.btn:hover { background: rgba(255,255,255,0.15); }
+.btn.primary { background: #3b82f6; border-color: #3b82f6; }
+.btn.green { background: #10b941; border-color: #10b941; }
+.btn.green:hover { background: #059669; }
+.doc-body { max-width: 900px; margin: 16px auto; padding: 0 24px; }
+.doc-content { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: 50vh; }
+.doc-content[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.doc-content h2 { font-size: 18px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+.doc-content h3 { font-size: 15px; margin: 20px 0 8px 0; }
+.doc-content p { margin: 8px 0; color: #444; }
+.doc-content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.doc-content th { background: #f5f5f5; padding: 10px 12px; text-align: left; border: 1px solid #e5e5e5; font-weight: 600; }
+.doc-content td { padding: 10px 12px; border: 1px solid #e5e5e5; }
+.doc-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+.doc-content .placeholder { color: #aaa; text-align: center; padding: 60px 20px; }
+.doc-content .placeholder .icon { font-size: 40px; margin-bottom: 12px; }
+.doc-content .placeholder .title { font-size: 16px; color: #888; }
+.doc-content .placeholder .hint { font-size: 13px; margin-top: 8px; }
+.doc-footer { text-align: center; padding: 24px; color: #aaa; font-size: 12px; }
+#toast { position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>消息触达模块 PRD v1.0</h1>
+        <span class="meta">POKO SaaS</span>
+        <div class="actions">
+            <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
+            <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="insertImage(this)">
+            <button class="btn green" id="imgBtn" onclick="document.getElementById('imgInput').click()" style="display:none">🖼️ 插入图片</button>
+            <button class="btn primary" id="saveBtn" onclick="savePage()" style="display:none">📁 保存</button>
+        </div>
+    </div>
+    <div class="doc-body">
+        <div class="doc-content" id="docContent"><h1>POKO 消息触达模块 PRD</h1>
+<p><strong>版本</strong>：v1.0   <strong>日期</strong>：2026-11-19   <strong>模块</strong>：运营中心 → 消息触达   <strong>状态</strong>：待评审</p>
+<hr>
+<h2>一、需求背景</h2>
+<h3>1.1 现状</h3>
+<p>运营中心 → 消息触达 当前只有「发送记录」一个页签，只能查看历史发送结果，既无法管理消息模板，也无法主动发起定向发送。</p>
+<p>实际运营中存在三个具体问题：</p>
+<p>1. <strong>文案散落在代码里</strong>：43 个业务节点的用户通知文案写在各业务模块内部，改一句话要走一次发版，运营无法自助调整。 2. <strong>渠道没有统一开关</strong>：站内信、邮件、PUSH 三个渠道缺少按场景的独立开关，部分场景只应发站内信却同时触发了邮件，造成用户打扰。 3. <strong>海外用户只能收到中文</strong>：平台面向多个语种市场，现有通知只有中文，海外用户需要人工翻译后手工发送，时效和准确度都不可控。</p>
+<h3>1.2 目标</h3>
+<p>把「消息触达」从"发送记录查看"升级为「模板管理 + 主动发送 + 记录回溯」的完整闭环：</p>
+<ul><li>43 个业务场景的通知模板统一在后台维护，运营可自助改文案、开关渠道</li><li>一份模板覆盖五种语言，自动翻译 + 人工校正</li><li>运营可自主发起定向发送，不再依赖开发介入</li></ul>
+<h3>1.3 衡量指标</h3>
+<table><thead><tr><th>指标</th><th>目标</th></tr></thead><tbody><tr><td>模板覆盖率</td><td>43 个场景 100% 有可用模板</td></tr><tr><td>多语言覆盖</td><td>五个语种的模板可用率</td></tr><tr><td>运营自主率</td><td>主动发送请求无需开发介入的比例</td></tr><tr><td>触达准确率</td><td>发送失败率（渠道超限、变量缺失）下降</td></tr></tbody></table>
+<hr>
+<h2>二、需求范围</h2>
+<h3>2.1 本期范围</h3>
+<table><thead><tr><th>模块</th><th>内容</th></tr></thead><tbody><tr><td>消息模板</td><td>43 个场景的模板管理、渠道独立开关、五语言、变量白名单、效果预览</td></tr><tr><td>消息发送</td><td>发送方式单选、消息内容编辑、目标客户群三选一、客户勾选、Excel 导入、发送确认</td></tr><tr><td>发送记录</td><td>沿用现有页面，本期不做改动</td></tr></tbody></table>
+<h3>2.2 本期不做</h3>
+<ul><li>PUSH 渠道的实际发送（页面占位，置灰标记待开放）</li><li>退订管理</li><li>模板变更审批流</li><li>定时发送的重复规则（本期仅支持单次定时）</li><li>发送记录页改版</li><li>消息触达数据看板</li></ul>
+<hr>
+<h2>三、信息架构</h2>
+<pre><code>运营中心
+└─ 消息触达
+   ├─ 消息发送    运营手动发起，选渠道、写内容、选人群、定时间
+   ├─ 消息模板    43 个业务场景的自动触发模板管理
+   └─ 发送记录    历史发送结果查询（本期沿用现有）</code></pre>
+<p>三个页签的分工边界：</p>
+<ul><li><strong>消息模板</strong>：业务事件自动触发，渠道由模板开关决定</li><li><strong>消息发送</strong>：运营手动发起，渠道由运营当次选择</li><li><strong>发送记录</strong>：两者的结果都汇总在这里</li></ul>
+<hr>
+<h2>四、消息模板</h2>
+<h3>4.1 页面结构</h3>
+<p>左侧分类树 + 右侧场景列表，两栏布局。</p>
+<h3>4.2 分类树</h3>
+<table><thead><tr><th>分类</th><th>场景数</th></tr></thead><tbody><tr><td>全部场景</td><td>43</td></tr><tr><td>订单</td><td>15</td></tr><tr><td>包裹</td><td>17</td></tr><tr><td>售后</td><td>7</td></tr><tr><td>账户</td><td>2</td></tr><tr><td>营销</td><td>2</td></tr></tbody></table>
+<p>点击分类，右侧列表按分类过滤。</p>
+<h3>4.3 列表字段</h3>
+<table><thead><tr><th>字段</th><th>说明</th><th>列宽</th></tr></thead><tbody><tr><td>场景名称</td><td>业务节点名称，点击可查看详情</td><td>50%</td></tr><tr><td>站内信</td><td>该场景站内信渠道的开启状态</td><td>13%</td></tr><tr><td>邮件</td><td>该场景邮件渠道的开启状态</td><td>13%</td></tr><tr><td>PUSH</td><td>该场景 PUSH 渠道的开启状态，本期统一显示待开放</td><td>12%</td></tr><tr><td>操作</td><td>编辑、预览</td><td>12%</td></tr></tbody></table>
+<p><strong>已删除字段</strong>：触发方式、接入状态。触发条件属于业务侧逻辑，不在此页暴露；接入状态由渠道开关体现。</p>
+<h3>4.4 筛选条件</h3>
+<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>场景名称</td><td>关键字模糊搜索</td></tr><tr><td>渠道状态</td><td>按站内信、邮件、PUSH 的开启状态筛选</td></tr></tbody></table>
+<p>按钮：查询、重置。</p>
+<h3>4.5 编辑弹窗</h3>
+<p>弹窗自上而下分三层：发送方式页签 → 基础信息 → 内容编辑区。</p>
+<p><strong>第一层：发送方式页签</strong></p>
+<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>站内信页签</td><td>切换后内容区显示站内信模板</td></tr><tr><td>邮件页签</td><td>切换后内容区显示邮件模板</td></tr><tr><td>PUSH 页签</td><td>切换后内容区显示 PUSH 模板，本期置灰</td></tr><tr><td>开关</td><td>位于页签右侧，控制当前渠道的开启状态，切换页签时同步显示对应渠道的开关</td></tr><tr><td>预览按钮</td><td>位于开关右侧，点击打开当前渠道的预览弹窗</td></tr></tbody></table>
+<p><strong>第二层：基础信息（只读）</strong></p>
+<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>分类</td><td>该场景所属业务分类</td></tr><tr><td>场景名称</td><td>该场景名称</td></tr><tr><td>触发条件</td><td>该场景的业务触发说明，仅供查看不可编辑</td></tr></tbody></table>
+<p><strong>第三层：内容编辑区</strong></p>
+<table><thead><tr><th>字段</th><th>限制</th><th>说明</th></tr></thead><tbody><tr><td>语言页签</td><td>五选一</td><td>中文简体、中文繁体、English、日本語、Русский</td></tr><tr><td>标题</td><td>最多 80 字</td><td>必填，显示实时字数统计</td></tr><tr><td>正文</td><td>最多 4000 字</td><td>必填，支持换行、变量、链接</td></tr><tr><td>可用变量</td><td>按场景白名单</td><td>点击插入到正文光标位置</td></tr></tbody></table>
+<p><strong>按钮</strong></p>
+<table><thead><tr><th>按钮</th><th>说明</th></tr></thead><tbody><tr><td>一键翻译</td><td>把中文简体内容翻译成其余四种语言并写入对应模板</td></tr><tr><td>保存模板</td><td>保存当前场景当前渠道的全部语言内容</td></tr><tr><td>取消</td><td>关闭弹窗，不保存</td></tr></tbody></table>
+<h3>4.6 渠道开关规则</h3>
+<table><thead><tr><th>渠道</th><th>默认值</th><th>是否可关闭</th><th>说明</th></tr></thead><tbody><tr><td>站内信</td><td>全部开启</td><td>否</td><td>兜底渠道，保证用户一定能看到通知</td></tr><tr><td>邮件</td><td>按场景预设，28 个场景开启</td><td>是</td><td>关闭后该场景不再发邮件</td></tr><tr><td>PUSH</td><td>全部关闭</td><td>是（本期锁定）</td><td>本期不实现发送，统一置灰标记待开放</td></tr></tbody></table>
+<h3>4.7 预览弹窗</h3>
+<p>按渠道渲染不同样式：</p>
+<table><thead><tr><th>渠道</th><th>预览形态</th></tr></thead><tbody><tr><td>站内信</td><td>站内信消息卡片，含标题、正文、时间</td></tr><tr><td>邮件</td><td>邮件客户端视图，含主题、发件人、正文</td></tr><tr><td>PUSH</td><td>手机锁屏通知，含应用名、标题、正文</td></tr></tbody></table>
+<p>预览时变量按示例值渲染，语言跟随当前选中的语言页签。</p>
+<hr>
+<h2>五、消息发送</h2>
+<h3>5.1 页面结构</h3>
+<p>页面按运营的操作顺序自上而下分五段：</p>
+<p>1. 发送方式 2. 消息内容 3. 目标客户群 4. 选择客户（或从 Excel 导入） 5. 发送设置</p>
+<p>底部固定操作栏：预览、保存草稿、发送。</p>
+<p>&gt; 顺序说明：先定渠道才能定内容形态，先有内容才有发送意义，人群放在内容之后符合运营的实际思考顺序。</p>
+<h3>5.2 发送方式</h3>
+<p>单选，默认站内信。</p>
+<table><thead><tr><th>选项</th><th>状态</th><th>说明</th></tr></thead><tbody><tr><td>站内信</td><td>可选</td><td>发送到用户站内消息中心</td></tr><tr><td>邮件</td><td>可选</td><td>发送到用户绑定邮箱</td></tr><tr><td>PUSH</td><td>置灰</td><td>标记待开放，本期不可选</td></tr></tbody></table>
+<p><strong>关键规则</strong>：站内信不是必选项，三个渠道互斥单选，一次只能用一个渠道发送。</p>
+<h3>5.3 消息内容</h3>
+<table><thead><tr><th>字段</th><th>限制</th><th>说明</th></tr></thead><tbody><tr><td>语言页签</td><td>五选一</td><td>中文简体、中文繁体、English、日本語、Русский</td></tr><tr><td>标题</td><td>最多 80 字</td><td>必填</td></tr><tr><td>正文</td><td>最多 4000 字</td><td>必填，支持换行、变量、链接</td></tr><tr><td>可用变量</td><td>按发送场景白名单</td><td>点击插入</td></tr></tbody></table>
+<p>按钮：一键翻译。</p>
+<h3>5.4 目标客户群</h3>
+<p>三选一，默认「指定客户编码列表」。</p>
+<table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>全部客户</td><td>向全量客户发送，选中时先弹二次确认</td></tr><tr><td>指定客户编码列表</td><td>手动勾选客户，支持筛选</td></tr><tr><td>从 Excel 导入</td><td>上传客户编码文件批量导入</td></tr></tbody></table>
+<p><strong>全部客户二次确认弹窗</strong></p>
+<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>提示文案</td><td>将向全部 7,846 位客户发送消息，该操作不可撤回</td></tr><tr><td>按钮</td><td>取消、确认发送全部客户</td></tr></tbody></table>
+<p>确认后才切换为全部客户模式，取消则保持原选择不变。</p>
+<h3>5.5 选择客户</h3>
+<p><strong>筛选条件</strong></p>
+<table><thead><tr><th>字段</th><th>匹配方式</th></tr></thead><tbody><tr><td>客户编码</td><td>精确匹配</td></tr><tr><td>客户昵称</td><td>模糊匹配</td></tr><tr><td>邮箱</td><td>模糊匹配</td></tr><tr><td>手机号</td><td>模糊匹配</td></tr></tbody></table>
+<p>按钮：查询、重置。</p>
+<p><strong>已选统计</strong>：显示已选人数，实时更新。</p>
+<p><strong>客户表格</strong></p>
+<table><thead><tr><th>列</th><th>说明</th></tr></thead><tbody><tr><td>勾选</td><td>多选，支持全选当前页</td></tr><tr><td>编号</td><td>序号</td></tr><tr><td>ID</td><td>客户唯一标识</td></tr><tr><td>客户标签</td><td>如新用户、老用户、VIP</td></tr><tr><td>客户昵称</td><td>客户注册昵称</td></tr><tr><td>客户编码</td><td>平台客户编号</td></tr><tr><td>邮箱</td><td>客户绑定邮箱，可能为空</td></tr><tr><td>手机号</td><td>客户绑定手机，可能为空</td></tr></tbody></table>
+<p><strong>分页</strong>：显示总条数，支持切换每页条数。</p>
+<p><strong>渠道与字段的联动</strong>：选择邮件渠道时，邮箱为空的客户不可勾选并置灰；选择站内信时不限制。</p>
+<h3>5.6 从 Excel 导入</h3>
+<p><strong>上传区</strong></p>
+<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>上传入口</td><td>支持点击选择或拖拽文件，格式限 .xlsx / .xls</td></tr><tr><td>下载模板</td><td>下载标准模板，仅含客户编码一列</td></tr></tbody></table>
+<p><strong>解析结果</strong></p>
+<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>客户编码在系统中存在的条数</td></tr><tr><td>未匹配</td><td>客户编码不存在或格式错误的条数</td></tr></tbody></table>
+<p>未匹配明细展示原因分类：编码不存在、格式错误。运营可下载未匹配清单修正后重新上传。</p>
+<h3>5.7 发送设置</h3>
+<table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>立即发送</td><td>默认选中，提交后立即进入发送队列</td></tr><tr><td>定时发送</td><td>选择日期与时间，到点自动发送</td></tr></tbody></table>
+<h3>5.8 底部操作栏</h3>
+<table><thead><tr><th>按钮</th><th>说明</th></tr></thead><tbody><tr><td>预览</td><td>按当前渠道渲染消息预览</td></tr><tr><td>保存草稿</td><td>保存当前配置，不发送</td></tr><tr><td>发送</td><td>打开发送确认弹窗</td></tr></tbody></table>
+<h3>5.9 发送确认弹窗</h3>
+<table><thead><tr><th>展示项</th><th>说明</th></tr></thead><tbody><tr><td>发送方式</td><td>站内信 / 邮件</td></tr><tr><td>目标客户群</td><td>全部客户 / 指定客户编码列表 / 从 Excel 导入</td></tr><tr><td>接收人数</td><td>本次实际接收人数</td></tr><tr><td>发送时间</td><td>立即发送，或定时发送的具体时间</td></tr><tr><td>消息标题</td><td>当前语言下的标题</td></tr></tbody></table>
+<p>全部客户时，弹窗内额外显示红色警示：本次发送覆盖全部客户，提交后不可撤回。</p>
+<p>按钮：取消、确认发送。</p>
+<p>&gt; 该弹窗不展示发送频次提示。</p>
+<h3>5.10 系统限制</h3>
+<p>发送类型区分为手动与自动，两者共用模板内容但入口不同：</p>
+<table><thead><tr><th>类型</th><th>入口</th><th>触发方式</th><th>渠道决定方</th></tr></thead><tbody><tr><td>手动发送</td><td>消息发送页</td><td>运营点击发送</td><td>运营当次选择</td></tr><tr><td>自动发送</td><td>消息模板页</td><td>业务事件触发</td><td>模板的渠道开关</td></tr></tbody></table>
+<hr>
+<h2>六、消息渠道规范</h2>
+<h3>6.1 站内信</h3>
+<table><thead><tr><th>项</th><th>规范</th></tr></thead><tbody><tr><td>标题</td><td>最多 80 字</td></tr><tr><td>正文</td><td>最多 4000 字</td></tr><tr><td>变量</td><td>支持</td></tr><tr><td>链接</td><td>支持，可点击跳转</td></tr><tr><td>超限处理</td><td>不允许保存</td></tr></tbody></table>
+<h3>6.2 邮件</h3>
+<table><thead><tr><th>项</th><th>规范</th></tr></thead><tbody><tr><td>标题</td><td>最多 80 字</td></tr><tr><td>正文</td><td>最多 4000 字</td></tr><tr><td>变量</td><td>支持</td></tr><tr><td>链接</td><td>支持</td></tr><tr><td>超限处理</td><td>不允许保存</td></tr></tbody></table>
+<h3>6.3 PUSH（本期不实现，仅定规范）</h3>
+<p>各厂商推送通道的长度限制差异很大，超限时是<strong>发送失败</strong>而不是自动截断，因此必须按最严标准约束。</p>
+<table><thead><tr><th>厂商</th><th>标题限制</th><th>正文限制</th></tr></thead><tbody><tr><td>vivo</td><td>20 汉字</td><td>50 汉字</td></tr><tr><td>华为</td><td>15 中文字（显示层）</td><td>—</td></tr><tr><td>苹果</td><td>20 汉字 / 40 字符</td><td>—</td></tr><tr><td>OPPO</td><td>32 字符</td><td>200 字符</td></tr><tr><td>小米</td><td>50 字符</td><td>128 字符</td></tr></tbody></table>
+<p><strong>POKO 统一规范（取各厂商最严值）</strong></p>
+<table><thead><tr><th>项</th><th>规范</th></tr></thead><tbody><tr><td>标题</td><td>不超过 15 字符</td></tr><tr><td>正文</td><td>不超过 50 字符</td></tr><tr><td>变量估算</td><td>每个变量按 8 字符计入长度</td></tr><tr><td>超限处理</td><td>编辑时实时提示剩余字数，超限不允许保存</td></tr></tbody></table>
+<hr>
+<h2>七、多语言规则</h2>
+<h3>7.1 支持语言</h3>
+<table><thead><tr><th>语言</th><th>说明</th></tr></thead><tbody><tr><td>中文简体</td><td>源语言，默认页签</td></tr><tr><td>中文繁体</td><td>由中文简体翻译生成</td></tr><tr><td>English</td><td>由中文简体翻译生成</td></tr><tr><td>日本語</td><td>由中文简体翻译生成</td></tr><tr><td>Русский</td><td>由中文简体翻译生成</td></tr></tbody></table>
+<h3>7.2 存储规则</h3>
+<p>每个场景、每个渠道、每种语言独立存储一份标题和正文。即：43 个场景 × 3 个渠道 × 5 种语言。</p>
+<h3>7.3 翻译规则</h3>
+<table><thead><tr><th>规则</th><th>说明</th></tr></thead><tbody><tr><td>源语言</td><td>中文简体为唯一源语言，必须填写</td></tr><tr><td>翻译方式</td><td>点击一键翻译，调用翻译接口批量生成其余四种语言</td></tr><tr><td>人工校正</td><td>翻译结果可逐条修改，修改后以人工版本为准</td></tr><tr><td>未翻译标记</td><td>未翻译的语言在页签上显示红点</td></tr><tr><td>翻译覆盖</td><td>一键翻译不覆盖已有的人工翻译内容，只补缺失的语言</td></tr><tr><td>发送回退</td><td>发送时按客户语言偏好匹配，缺失则回退中文简体</td></tr></tbody></table>
+<h3>7.4 翻译接口</h3>
+<p>调用 CMS 提供的外部翻译接口，返回结果直接写入对应语言模板。</p>
+<hr>
+<h2>八、变量规则</h2>
+<h3>8.1 变量格式</h3>
+<p>变量用花括号包裹，例如 <code>{order_number}</code>。</p>
+<h3>8.2 白名单机制</h3>
+<p>每个场景绑定一组专属可用变量，编辑时只能插入白名单内的变量，不允许跨场景引用。例如订单类场景不能使用包裹类变量。</p>
+<h3>8.3 渲染规则</h3>
+<table><thead><tr><th>场景</th><th>处理方式</th></tr></thead><tbody><tr><td>预览</td><td>按示例值渲染</td></tr><tr><td>发送</td><td>替换为实际业务数据</td></tr><tr><td>变量为空</td><td>显示为空字符串，不展示原始变量名</td></tr></tbody></table>
+<h3>8.4 长度计算</h3>
+<p>PUSH 渠道下，变量按 8 字符计入长度校验，避免实际渲染后超限。</p>
+<hr>
+<h2>九、场景清单</h2>
+<table><thead><tr><th>序号</th><th>分类</th><th>场景名称</th><th>触发条件</th><th>站内信</th><th>邮件</th><th>PUSH</th></tr></thead><tbody><tr><td>1</td><td>订单</td><td>订单创建成功</td><td>订单成功创建</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>2</td><td>订单</td><td>订单待付款提醒</td><td>采购订单已创建并且过了24小时仍然未支付的</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>3</td><td>订单</td><td>支付成功开始采购</td><td>创建采购订单之后（状态为待采购）</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>4</td><td>订单</td><td>商品采购中</td><td>分流至人工采购的订单，买手领取之后(状态为采购中）</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>5</td><td>订单</td><td>商品已采购</td><td>订单状态变为已采购</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>6</td><td>订单</td><td>商品已发货</td><td>获取到订单的物流单号，订单状态变成待入库</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>7</td><td>订单</td><td>商品已入库</td><td>商品已入库，订单状态变为已入库</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>8</td><td>订单</td><td>订单已取消</td><td>用户主动取消订单→ 已取消</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>9</td><td>订单</td><td>订单已超时取消</td><td>订单长时间未支付自动取消 → 已取消</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>10</td><td>订单</td><td>订单已被平台取消</td><td>若商品是违禁品，平台直接取消订单，退款给用户</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>11</td><td>订单</td><td>订单已关闭已退款</td><td>该订单下所有商品申请售后，并完成退款</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>12</td><td>订单</td><td>订单需补商品差价</td><td>需要用户补商品款</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>13</td><td>订单</td><td>订单需补运费差价</td><td>需要用户补充运费</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>14</td><td>订单</td><td>商品差价已退还</td><td>用户预先支付的款项＞实际货款</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>15</td><td>订单</td><td>商品库存不足</td><td>商品库存不足</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>16</td><td>包裹</td><td>包裹已签收</td><td>包裹被poko仓库签收</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>17</td><td>包裹</td><td>包裹质检完成</td><td>包裹质检完成</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>18</td><td>包裹</td><td>包裹已入库</td><td>包裹成功入库</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>19</td><td>包裹</td><td>包裹已超期</td><td>包裹超过免费存储期</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>20</td><td>包裹</td><td>提包申请已提交</td><td>用户成功提交包裹</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>21</td><td>包裹</td><td>包裹待付款提醒</td><td>集运订单已创建并且过了24小时仍然未支付的</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>22</td><td>包裹</td><td>提包申请审核中</td><td>包裹提交次并且支付之后，变成待审核状态</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>23</td><td>包裹</td><td>包裹审核异常</td><td>包裹审核异常</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>24</td><td>包裹</td><td>包裹审核通过待打包</td><td>包裹审核通过→ 待发货</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>25</td><td>包裹</td><td>包裹已发出</td><td>包裹完全发运→ 已发货</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>26</td><td>包裹</td><td>包裹已收货</td><td>用户签收→已收货</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>27</td><td>包裹</td><td>包裹已取消</td><td>用户主动取消包裹</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>28</td><td>包裹</td><td>包裹已超时取消</td><td>包裹长时间未支付自动取消 → 已取消</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>29</td><td>包裹</td><td>包裹已关闭</td><td>未装箱完成取消包裹，退回包裹费用，并扣除相关操作费</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>30</td><td>包裹</td><td>包裹需补款</td><td>先付费模式包裹运费补款</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>31</td><td>包裹</td><td>包裹差价已退还</td><td>先付费模式包裹费用差价退还</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>32</td><td>包裹</td><td>包裹费用待支付</td><td>后付费模式下，仓库打包后→通知用户二次支付</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>33</td><td>售后</td><td>售后申请已提交</td><td>发起售后，创建售后单→售后单状态为：待审核</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>34</td><td>售后</td><td>售后申请已通过</td><td>平台审核通过，向1688/淘宝商家发起退货 → 待商家处理</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>35</td><td>售后</td><td>商家同意退货</td><td>商家同意退货，平台仓库准备寄回商品 → 待仓库退货</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>36</td><td>售后</td><td>商家待退款</td><td>商家同意退款/退货，等待商家退款到账</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>37</td><td>售后</td><td>售后退款已完成</td><td>退款完成 → 已退款</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>38</td><td>售后</td><td>售后申请被驳回</td><td>售后申请被驳回 → 已驳回</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>39</td><td>售后</td><td>售后已取消</td><td>用户主动取消售后</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>40</td><td>账户</td><td>账户充值成功</td><td>充值之后</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>41</td><td>账户</td><td>账户提现成功</td><td>成功提现之后</td><td>开启</td><td>开启</td><td>待开放</td></tr><tr><td>42</td><td>营销</td><td>优惠券已到账</td><td>用户获取优惠券成功后</td><td>开启</td><td>关闭</td><td>待开放</td></tr><tr><td>43</td><td>营销</td><td>优惠券即将过期</td><td>优惠券到期前一天12-20点随机时段</td><td>开启</td><td>关闭</td><td>待开放</td></tr></tbody></table>
+<hr>
+<h2>十、待确认事项</h2>
+<table><thead><tr><th>序号</th><th>事项</th><th>说明</th><th>影响</th></tr></thead><tbody><tr><td>1</td><td>场景新增入口</td><td>模板页是否需要「新增场景」按钮，还是场景由业务侧固定</td><td>决定模板页操作栏设计</td></tr><tr><td>2</td><td>开关锁定范围</td><td>支付类、退款类场景的渠道开关是否锁死不可关闭</td><td>决定开关是否可编辑</td></tr><tr><td>3</td><td>保存按钮命名</td><td>使用「保存模板」还是沿用现有「保存自动触发模板」</td><td>文案一致性</td></tr><tr><td>4</td><td>Excel 导入上限</td><td>单次导入的条数上限、文件大小上限</td><td>决定是否需要分批导入</td></tr><tr><td>5</td><td>PUSH 开放时间</td><td>PUSH 渠道的具体开放排期</td><td>决定本期是否保留置灰占位</td></tr></tbody></table>
+<hr>
+<h2>十一、原型索引</h2>
+<table><thead><tr><th>页面</th><th>说明</th></tr></thead><tbody><tr><td>消息模板配置</td><td>43 个场景的模板列表、编辑弹窗、渠道开关、五语言、预览</td></tr><tr><td>消息发送</td><td>发送方式单选、消息内容、目标客户群三选一、客户勾选、Excel 导入、发送确认</td></tr></tbody></table>
+<p>原型地址见原型中心「消息触达优化」版本。</p>
+        </div>
+    </div>
+    <div class="doc-footer">POKO 文档 · Powered by GitHub Pages</div>
+    <script>
+    var REPO = 'karlwork511/karlwork';
+    var FILE = 'docs/prd-v1-0-202611190250.html';
+    var editing = false;
+
+    function toggleEdit() {
+        var c = document.getElementById('docContent');
+        var ph = document.getElementById('placeholder');
+        var eb = document.getElementById('editBtn');
+        var sb = document.getElementById('saveBtn');
+        var ib = document.getElementById('imgBtn');
+        if (!editing) {
+            if (ph) ph.remove();
+            c.contentEditable = 'true';
+            c.focus();
+            eb.textContent = '退出编辑';
+            sb.style.display = 'inline-block';
+            ib.style.display = 'inline-block';
+            editing = true;
+        } else {
+            c.contentEditable = 'false';
+            eb.textContent = '\u270f\ufe0f 编辑';
+            sb.style.display = 'none';
+            ib.style.display = 'none';
+            editing = false;
+        }
+    }
+
+    async function insertImage(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) === -1) ext = 'png';
+        var fn = 'img-' + Date.now() + '.' + ext;
+        showToast('正在上传图片...', '#3b82f6');
+        try {
+            var token = localStorage.getItem('github_token');
+            if (!token) { token = prompt('请输入 GitHub Token：'); if (!token) return; localStorage.setItem('github_token', token); }
+            var base64 = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var path = 'images/' + fn;
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Upload ' + fn, content: base64 })
+            });
+            if (!resp.ok) { var err = await resp.json(); throw new Error(err.message || 'Upload failed'); }
+            var data = await resp.json();
+            var imgUrl = data.content.download_url;
+            var docContent = document.getElementById('docContent');
+            var sel = window.getSelection();
+            if (sel.rangeCount > 0 && docContent.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                range.deleteContents();
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.style.cssText = 'max-width:100%;border-radius:8px;margin:12px 0;display:block;';
+                docContent.appendChild(img);
+            }
+            showToast('\u2705 图片已插入', '#10b941');
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+        }
+        input.value = '';
+    }
+
+    async function savePage() {
+        var sb = document.getElementById('saveBtn');
+        var eb = document.getElementById('editBtn');
+        var ib = document.getElementById('imgBtn');
+        var token = localStorage.getItem('github_token');
+        if (!token) { token = prompt('请输入 GitHub Token（只会保存在你的浏览器）：'); if (!token) return; localStorage.setItem('github_token', token); }
+        document.getElementById('docContent').contentEditable = 'false';
+        eb.textContent = '\u270f\ufe0f 编辑';
+        sb.style.display = 'none';
+        ib.style.display = 'none';
+        sb.textContent = '\u23f3 保存中...';
+        editing = false;
+        var html = document.getElementById('docContent').innerHTML;
+        var page = buildPage(html);
+        try {
+            var resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                headers: { 'Authorization': 'token ' + token }
+            });
+            var data = await resp.json();
+            var sha = data.sha;
+            var encoded = btoa(unescape(encodeURIComponent(page)));
+            var putResp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
+                method: 'PUT',
+                headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'update', content: encoded, sha: sha })
+            });
+            if (!putResp.ok) { var e2 = await putResp.json(); throw new Error(e2.message); }
+            showToast('\u2705 已保存', '#10b981');
+            sb.textContent = '\ud83d\udcc1 保存';
+        } catch (e) {
+            if (e.message && e.message.includes('401')) localStorage.removeItem('github_token');
+            showToast('\u274c ' + e.message, '#ef4444');
+            sb.textContent = '\ud83d\udcc1 保存';
+        }
+    }
+
+    function buildPage(c) {
+        return '<!DOCTYPE html><html><head><meta charset=UTF-8><title>doc</title></head><body>' + c + '</body></html>';
+    }
+
+    function showToast(m, c2) {
+        var t = document.getElementById('toast');
+        if (t) t.remove();
+        var d = document.createElement('div');
+        d.id = 'toast';
+        d.textContent = m;
+        d.style.background = c2;
+        document.body.appendChild(d);
+        setTimeout(function() { d.remove(); }, 3000);
+    }
+</script>
+</body>
+</html>
