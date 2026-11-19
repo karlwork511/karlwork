@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>消息触达模块 PRD v1.2 - POKO文档</title>
+    <title>消息触达模块 PRD v1.3 - POKO文档</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
@@ -36,7 +36,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 </head>
 <body>
     <div class="doc-header">
-        <h1>消息触达模块 PRD v1.2</h1>
+        <h1>消息触达模块 PRD v1.3</h1>
         <span class="meta">POKO SaaS</span>
         <div class="actions">
             <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
@@ -46,7 +46,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
         </div>
     </div>
     <div class="doc-body">
-        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.2 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
+        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.3 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
 <hr>
 <h2>一、需求背景</h2>
 <h3>1.1 现状</h3>
@@ -61,7 +61,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <hr>
 <h2>二、需求范围</h2>
 <h3>2.1 本期范围</h3>
-<table><thead><tr><th>模块</th><th>内容</th></tr></thead><tbody><tr><td>消息模板</td><td>43 个场景的模板管理、渠道独立开关、五语言、变量白名单、效果预览</td></tr><tr><td>消息发送</td><td>发送方式单选、消息内容编辑、目标客户群三选一、客户勾选、Excel 导入、发送确认</td></tr><tr><td>发送记录</td><td>沿用现有页面，本期不做改动</td></tr></tbody></table>
+<table><thead><tr><th>模块</th><th>内容</th></tr></thead><tbody><tr><td>消息模板</td><td>43 个场景的模板管理、渠道独立开关、五语言、变量白名单、效果预览</td></tr><tr><td>消息发送</td><td>发送方式单选、消息内容编辑、目标会员群三选一、会员勾选、Excel 导入、发送确认</td></tr><tr><td>发送记录</td><td>沿用现有页面，本期不做改动</td></tr></tbody></table>
 <h3>2.2 本期不做</h3>
 <ul><li>退订管理</li><li>模板变更审批流</li><li>定时发送的重复规则（本期仅支持单次定时）</li><li>发送记录页改版</li><li>消息触达数据看板</li></ul>
 <hr>
@@ -97,13 +97,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <p>两个渠道均不设锁定，全部 43 个场景的开关都可自由开关。关闭后该场景对应渠道不再下发，重新开启即恢复。</p>
 <h3>4.7 预览弹窗</h3>
 <p>按渠道渲染不同样式：</p>
-<table><thead><tr><th>渠道</th><th>预览形态</th></tr></thead><tbody><tr><td>站内信</td><td>站内信消息卡片，含标题、正文、时间</td></tr><tr><td>邮件</td><td>邮件客户端视图，含主题、发件人、正文</td></tr></tbody></table>
+<table><thead><tr><th>渠道</th><th>预览形态</th></tr></thead><tbody><tr><td>站内信</td><td>站内信消息卡片，含标题、正文、时间</td></tr><tr><td>邮件</td><td>邮件会员端视图，含主题、发件人、正文</td></tr></tbody></table>
 <p>预览时变量按示例值渲染，语言跟随当前选中的语言页签。</p>
 <hr>
 <h2>五、消息发送</h2>
 <h3>5.1 页面结构</h3>
 <p>页面按运营的操作顺序自上而下分五段：</p>
-<ol><li>发送方式</li><li>消息内容</li><li>目标客户群</li><li>选择客户（或从 Excel 导入）</li><li>发送设置</li></ol>
+<ol><li>发送方式</li><li>消息内容</li><li>目标会员群</li><li>选择会员（或从 Excel 导入）</li><li>发送设置</li></ol>
 <p>底部固定操作栏：预览、保存草稿、发送。</p>
 <blockquote>顺序说明：先定渠道才能定内容形态，先有内容才有发送意义，人群放在内容之后符合运营的实际思考顺序。</blockquote>
 <h3>5.2 发送方式</h3>
@@ -113,37 +113,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <h3>5.3 消息内容</h3>
 <table><thead><tr><th>字段</th><th>限制</th><th>说明</th></tr></thead><tbody><tr><td>语言页签</td><td>五选一</td><td>中文简体、中文繁体、English、日本語、Русский</td></tr><tr><td>标题</td><td>最多 80 字</td><td>必填</td></tr><tr><td>正文</td><td>最多 4000 字</td><td>必填，支持换行、变量、链接</td></tr><tr><td>可用变量</td><td>按发送场景白名单</td><td>点击插入</td></tr></tbody></table>
 <p>按钮：一键翻译。</p>
-<h3>5.4 目标客户群</h3>
-<p>三选一，默认「指定客户编码列表」。</p>
-<table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>全部客户</td><td>向全量客户发送，选中时先弹二次确认</td></tr><tr><td>指定客户编码列表</td><td>手动勾选客户，支持筛选</td></tr><tr><td>从 Excel 导入</td><td>上传客户编码文件批量导入</td></tr></tbody></table>
-<p><strong>全部客户二次确认弹窗</strong></p>
-<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>提示文案</td><td>将向全部 7,846 位客户发送消息，该操作不可撤回</td></tr><tr><td>按钮</td><td>取消、确认发送全部客户</td></tr></tbody></table>
-<p>确认后才切换为全部客户模式，取消则保持原选择不变。</p>
-<h3>5.5 选择客户</h3>
+<h3>5.4 目标会员群</h3>
+<p>三选一，默认「指定会员」。</p>
+<table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>全部会员</td><td>向全量会员发送，选中时先弹二次确认</td></tr><tr><td>指定会员</td><td>手动勾选会员，支持筛选</td></tr><tr><td>从 Excel 导入</td><td>上传会员ID文件批量导入</td></tr></tbody></table>
+<p><strong>全部会员二次确认弹窗</strong></p>
+<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>提示文案</td><td>将向全部 7,846 位会员发送消息，该操作不可撤回</td></tr><tr><td>按钮</td><td>取消、确认发送全部会员</td></tr></tbody></table>
+<p>确认后才切换为全部会员模式，取消则保持原选择不变。</p>
+<h3>5.5 选择会员</h3>
 <p><strong>筛选条件</strong></p>
-<table><thead><tr><th>字段</th><th>匹配方式</th></tr></thead><tbody><tr><td>客户编码</td><td>精确匹配</td></tr><tr><td>客户昵称</td><td>模糊匹配</td></tr><tr><td>邮箱</td><td>模糊匹配</td></tr><tr><td>手机号</td><td>模糊匹配</td></tr></tbody></table>
+<table><thead><tr><th>字段</th><th>匹配方式</th></tr></thead><tbody><tr><td>会员ID</td><td>精确匹配</td></tr><tr><td>会员昵称</td><td>模糊匹配</td></tr><tr><td>邮箱</td><td>模糊匹配</td></tr></tbody></table>
 <p>按钮：查询、重置。</p>
 <p><strong>已选统计</strong>：显示已选人数，实时更新。</p>
-<p><strong>客户表格</strong></p>
-<table><thead><tr><th>列</th><th>说明</th></tr></thead><tbody><tr><td>勾选</td><td>多选，支持全选当前页</td></tr><tr><td>编号</td><td>序号</td></tr><tr><td>ID</td><td>客户唯一标识</td></tr><tr><td>客户标签</td><td>如新用户、老用户、VIP</td></tr><tr><td>客户昵称</td><td>客户注册昵称</td></tr><tr><td>客户编码</td><td>平台客户编号</td></tr><tr><td>邮箱</td><td>客户绑定邮箱，可能为空</td></tr><tr><td>手机号</td><td>客户绑定手机，可能为空</td></tr></tbody></table>
+<p><strong>会员表格</strong></p>
+<table><thead><tr><th>列</th><th>说明</th></tr></thead><tbody><tr><td>勾选</td><td>多选，支持全选当前页</td></tr><tr><td>编号</td><td>序号</td></tr><tr><td>会员ID</td><td>会员唯一标识，格式为 M + 数字</td></tr><tr><td>会员昵称</td><td>会员注册昵称</td></tr><tr><td>邮箱</td><td>会员绑定邮箱，可能为空</td></tr></tbody></table>
 <p><strong>分页</strong>：显示总条数，支持切换每页条数。</p>
-<p><strong>渠道与字段的联动</strong>：选择邮件渠道时，邮箱为空的客户不可勾选并置灰；选择站内信时不限制。</p>
+<p><strong>渠道与字段的联动</strong>：邮箱为空的会员仍可勾选，走邮件渠道时该条会发送失败并计入失败明细。</p>
 <h3>5.6 从 Excel 导入</h3>
 <p><strong>上传区</strong></p>
-<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>上传入口</td><td>支持点击选择或拖拽文件，格式限 .xlsx / .xls</td></tr><tr><td>下载模板</td><td>下载标准模板，仅含客户编码一列</td></tr></tbody></table>
+<table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>上传入口</td><td>支持点击选择或拖拽文件，格式限 .xlsx / .xls</td></tr><tr><td>下载模板</td><td>下载标准模板，仅含会员ID一列</td></tr></tbody></table>
 <p><strong>解析结果</strong></p>
-<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>客户编码在系统中存在的条数</td></tr><tr><td>未匹配</td><td>客户编码不存在或格式错误的条数</td></tr></tbody></table>
-<p>未匹配明细展示原因分类：编码不存在、格式错误。运营可下载未匹配清单修正后重新上传。</p>
+<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>会员ID在系统中存在的条数</td></tr><tr><td>未匹配</td><td>会员ID不存在或格式错误的条数</td></tr></tbody></table>
+<p>未匹配明细展示原因分类：会员ID不存在、会员ID格式错误、会员已注销。运营可下载未匹配清单修正后重新上传。</p>
 <p><strong>导入上限</strong></p>
 <table><thead><tr><th>项</th><th>限制</th><th>超限处理</th></tr></thead><tbody><tr><td>单次条数</td><td>最多 5000 条</td><td>超出提示分批导入，本次不解析</td></tr><tr><td>文件大小</td><td>最多 5MB</td><td>上传即拦截，提示压缩或拆分</td></tr><tr><td>文件格式</td><td>.xlsx / .xls</td><td>其他格式不支持</td></tr></tbody></table>
-<p>单次 5000 条可覆盖现有客户规模下的绝大多数定向群发场景（当前全量客户约 7,846 人），超过时按批拆分，每批独立发送。</p>
+<p>单次 5000 条可覆盖现有会员规模下的绝大多数定向群发场景（当前全量会员约 7,846 人），超过时按批拆分，每批独立发送。</p>
 <h3>5.7 发送设置</h3>
 <table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>立即发送</td><td>默认选中，提交后立即进入发送队列</td></tr><tr><td>定时发送</td><td>选择日期与时间，到点自动发送</td></tr></tbody></table>
 <h3>5.8 底部操作栏</h3>
 <table><thead><tr><th>按钮</th><th>说明</th></tr></thead><tbody><tr><td>预览</td><td>按当前渠道渲染消息预览</td></tr><tr><td>保存草稿</td><td>保存当前配置，不发送</td></tr><tr><td>发送</td><td>打开发送确认弹窗</td></tr></tbody></table>
 <h3>5.9 发送确认弹窗</h3>
-<table><thead><tr><th>展示项</th><th>说明</th></tr></thead><tbody><tr><td>发送方式</td><td>站内信 / 邮件</td></tr><tr><td>目标客户群</td><td>全部客户 / 指定客户编码列表 / 从 Excel 导入</td></tr><tr><td>接收人数</td><td>本次实际接收人数</td></tr><tr><td>发送时间</td><td>立即发送，或定时发送的具体时间</td></tr><tr><td>消息标题</td><td>当前语言下的标题</td></tr></tbody></table>
-<p>全部客户时，弹窗内额外显示红色警示：本次发送覆盖全部客户，提交后不可撤回。</p>
+<table><thead><tr><th>展示项</th><th>说明</th></tr></thead><tbody><tr><td>发送方式</td><td>站内信 / 邮件</td></tr><tr><td>目标会员群</td><td>全部会员 / 指定会员 / 从 Excel 导入</td></tr><tr><td>接收人数</td><td>本次实际接收人数</td></tr><tr><td>发送时间</td><td>立即发送，或定时发送的具体时间</td></tr><tr><td>消息标题</td><td>当前语言下的标题</td></tr></tbody></table>
+<p>全部会员时，弹窗内额外显示红色警示：本次发送覆盖全部会员，提交后不可撤回。</p>
 <p>按钮：取消、确认发送。</p>
 <blockquote>该弹窗不展示发送频次提示。</blockquote>
 <h3>5.10 系统限制</h3>
@@ -161,7 +161,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <h3>7.2 存储规则</h3>
 <p>每个场景、每个渠道、每种语言独立存储一份标题和正文。即：43 个场景 × 2 个渠道 × 5 种语言。</p>
 <h3>7.3 翻译规则</h3>
-<table><thead><tr><th>规则</th><th>说明</th></tr></thead><tbody><tr><td>源语言</td><td>中文简体为唯一源语言，必须填写</td></tr><tr><td>翻译方式</td><td>点击一键翻译，调用翻译接口批量生成其余四种语言</td></tr><tr><td>人工校正</td><td>翻译结果可逐条修改，修改后以人工版本为准</td></tr><tr><td>未翻译标记</td><td>未翻译的语言在页签上显示红点</td></tr><tr><td>翻译覆盖</td><td>一键翻译不覆盖已有的人工翻译内容，只补缺失的语言</td></tr><tr><td>发送回退</td><td>发送时按客户语言偏好匹配，缺失则回退中文简体</td></tr></tbody></table>
+<table><thead><tr><th>规则</th><th>说明</th></tr></thead><tbody><tr><td>源语言</td><td>中文简体为唯一源语言，必须填写</td></tr><tr><td>翻译方式</td><td>点击一键翻译，调用翻译接口批量生成其余四种语言</td></tr><tr><td>人工校正</td><td>翻译结果可逐条修改，修改后以人工版本为准</td></tr><tr><td>未翻译标记</td><td>未翻译的语言在页签上显示红点</td></tr><tr><td>翻译覆盖</td><td>一键翻译不覆盖已有的人工翻译内容，只补缺失的语言</td></tr><tr><td>发送回退</td><td>发送时按会员语言偏好匹配，缺失则回退中文简体</td></tr></tbody></table>
 <h3>7.4 翻译接口</h3>
 <p>调用 CMS 提供的外部翻译接口，返回结果直接写入对应语言模板。</p>
 <hr>
@@ -179,7 +179,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <table><thead><tr><th>序号</th><th>事项</th><th>结论</th></tr></thead><tbody><tr><td>1</td><td>场景新增入口</td><td>不支持新增。场景由业务侧固定维护，模板页不设「新增场景」按钮，运营只能编辑已有场景的文案与渠道开关</td></tr><tr><td>2</td><td>开关锁定范围</td><td>不锁死。全部场景的站内信、邮件开关均可自由开关，包括支付、退款、补款、审核异常等资金类场景</td></tr><tr><td>3</td><td>保存按钮命名</td><td>使用「保存模板」</td></tr><tr><td>4</td><td>Excel 导入上限</td><td>单次最多 5000 条、文件不超过 5MB，超出分批导入</td></tr></tbody></table>
 <hr>
 <h2>十一、原型索引</h2>
-<table><thead><tr><th>页面</th><th>说明</th></tr></thead><tbody><tr><td>消息场景模板配置</td><td>43 个场景的模板列表、编辑弹窗、渠道开关、五语言、预览</td></tr><tr><td>运营主动发送消息</td><td>发送方式单选、消息内容、目标客户群三选一、客户勾选、Excel 导入、发送确认</td></tr></tbody></table>
+<table><thead><tr><th>页面</th><th>说明</th></tr></thead><tbody><tr><td>消息场景模板配置</td><td>43 个场景的模板列表、编辑弹窗、渠道开关、五语言、预览</td></tr><tr><td>运营主动发送消息</td><td>发送方式单选、消息内容、目标会员群三选一、会员勾选、Excel 导入、发送确认</td></tr></tbody></table>
 <p>原型地址见原型中心「消息触达优化」版本。</p>
         </div>
     </div>
