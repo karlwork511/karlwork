@@ -5,12 +5,12 @@
     "desc": "运营中心消息触达模块重构：43 个业务场景的模板统一管理，站内信、邮件双渠道独立开关，五种语言自动翻译；运营主动发送支持渠道单选、客户群三选一（全部客户/指定编码列表/Excel 导入）、发送前二次确认。",
     "docs": [
       {
-        "name": "消息触达模块 PRD v1.1",
+        "name": "消息触达模块 PRD v1.2",
         "file": "docs/prd-v1-0-202611190250.html",
         "icon": "📄"
       },
       {
-        "name": "消息触达模块 PRD v1.1（飞书）",
+        "name": "消息触达模块 PRD v1.2（飞书）",
         "file": "https://zcn9mbpydspc.feishu.cn/docx/Xya6djyILo430VxbMbqclLnSnud",
         "icon": "📄"
       }
