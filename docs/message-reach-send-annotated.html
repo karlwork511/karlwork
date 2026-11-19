@@ -243,14 +243,6 @@ table.cust tbody tr.checked { background: var(--main-light); }
                                 <div class="opt-desc">发送至用户绑定邮箱</div>
                             </div>
                         </div>
-                        <div class="opt-card disabled" data-ch="push">
-                            <span class="radio-dot"></span>
-                            <div>
-                                <div class="opt-name">PUSH</div>
-                                <div class="opt-desc">需用户开启 App 通知权限</div>
-                            </div>
-                            <span class="opt-tag">待开放</span>
-                        </div>
                     </div>
                 </div>
 
@@ -745,7 +737,7 @@ const annotations = [
     "type": "overview",
     "detail": {
       "feature": "运营中心下的主动触达入口，用于运营人员向用户主动推送活动、通知、提醒类消息。与「消息模板」的区别是：模板由系统按场景自动触发，本页面由运营人工发起、人工选择接收人。",
-      "business": "一次发送只走一个渠道（站内信或邮件），不支持同一条消息多渠道同时下发。PUSH 渠道待开放，开放前不参与选择。",
+      "business": "一次发送只走一个渠道（站内信或邮件），不支持同一条消息多渠道同时下发。",
       "interaction": "填写顺序自上而下：发送方式 → 消息内容 → 目标客户群 → 选择客户 → 发送设置，最后点底部发送按钮进入确认弹窗。"
     }
   },
@@ -765,13 +757,13 @@ const annotations = [
   {
     "id": 3,
     "title": "发送方式",
-    "summary": "站内信、邮件、PUSH 三选一，单选。PUSH 待开放置灰不可选。",
+    "summary": "站内信、邮件二选一，单选。",
     "target": "#anno-3",
     "showMarker": true,
     "type": "field",
     "detail": {
       "feature": "决定这条消息通过哪个渠道下发到用户。同一时刻只能选中一个渠道。",
-      "business": "站内信和邮件为平级关系，都非必选，运营按需选择。PUSH 渠道未接入，选项置灰并标注待开放，不可选中。",
+      "business": "站内信和邮件为平级关系，都非必选，运营按需选择。",
       "interaction": "点击卡片切换选中项，已选中的卡片再次点击不取消，始终保留一个选中状态。",
       "exception": "邮件渠道下，若接收人未绑定邮箱则跳过该用户，在发送结果中记为发送失败并给出原因。",
       "state": "站内信：用户登录后在站内消息中心可见，有留存；邮件：发送至用户绑定邮箱，可能被判定为垃圾邮件。"
