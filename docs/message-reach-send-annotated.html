@@ -89,7 +89,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helv
 .target-opt { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; color: #4E5969; }
 .target-opt.active { color: var(--main); font-weight: 600; }
 
-/* 客户表格 */
+/* 会员表格 */
 .cust-filter { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
 .cust-filter input { height: 32px; padding: 0 10px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; width: 130px; }
 .cust-filter input:focus { border-color: var(--main); }
@@ -283,30 +283,29 @@ table.cust tbody tr.checked { background: var(--main-light); }
                     </div>
                 </div>
 
-                <!-- 目标客户群 -->
+                <!-- 目标会员群 -->
                 <div class="section" id="anno-5">
                     <div class="anno-marker" data-id="5">4</div>
                     <div class="sec-head">
-                        <span class="sec-no">3</span><span class="sec-title">目标客户群</span>
+                        <span class="sec-no">3</span><span class="sec-title">目标会员群</span>
                     </div>
                     <div class="target-row">
-                        <div class="target-opt" data-t="all" onclick="setTarget('all')"><span class="radio-dot"></span>全部客户</div>
-                        <div class="target-opt active" data-t="list" onclick="setTarget('list')"><span class="radio-dot"></span>指定客户编码列表</div>
-                        <div class="target-opt" data-t="excel" onclick="setTarget('excel')"><span class="radio-dot"></span>从Excel导入</div>
+                        <div class="target-opt" data-t="all" onclick="setTarget('all')"><span class="radio-dot"></span>全部会员</div>
+                        <div class="target-opt active" data-t="list" onclick="setTarget('list')"><span class="radio-dot"></span>指定会员</div>
+                        <div class="target-opt" data-t="excel" onclick="setTarget('excel')"><span class="radio-dot"></span>从 Excel 导入</div>
                     </div>
                 </div>
 
-                <!-- 指定客户 -->
+                <!-- 指定会员 -->
                 <div class="section" id="anno-6">
                     <div class="anno-marker" data-id="6">5</div>
                     <div class="sec-head">
-                        <span class="sec-no">4</span><span class="sec-title">选择客户</span>
+                        <span class="sec-no">4</span><span class="sec-title">选择会员</span>
                     </div>
                     <div class="cust-filter">
-                        <input type="text" placeholder="客户编码" id="f-code">
-                        <input type="text" placeholder="客户昵称" id="f-nick">
+                        <input type="text" placeholder="会员ID" id="f-code">
+                        <input type="text" placeholder="会员昵称" id="f-nick">
                         <input type="text" placeholder="邮箱" id="f-mail">
-                        <input type="text" placeholder="手机号" id="f-phone">
                         <button class="btn-sm primary" onclick="renderCust()">查询</button>
                         <button class="btn-sm" onclick="resetFilter()">重置</button>
                         <span class="selected-count">已选 <b id="sel-count">0</b> 人</span>
@@ -317,12 +316,9 @@ table.cust tbody tr.checked { background: var(--main-light); }
                                 <tr>
                                     <th style="width:36px;"><span class="ck" id="ck-all" onclick="toggleAll()"></span></th>
                                     <th style="width:46px;">编号</th>
-                                    <th style="width:132px;">ID</th>
-                                    <th style="width:70px;">客户标签</th>
-                                    <th>客户昵称</th>
-                                    <th style="width:82px;">客户编码</th>
-                                    <th>邮箱</th>
-                                    <th style="width:96px;">手机号</th>
+                                    <th style="width:130px;">会员ID</th>
+                                    <th>会员昵称</th>
+                                    <th style="width:240px;">邮箱</th>
                                 </tr>
                             </thead>
                             <tbody id="cust-body"></tbody>
@@ -347,33 +343,33 @@ table.cust tbody tr.checked { background: var(--main-light); }
                 <div class="section" id="anno-7" style="display:none;">
                     <div class="anno-marker" data-id="7">6</div>
                     <div class="sec-head">
-                        <span class="sec-no">4</span><span class="sec-title">从 Excel 导入客户</span>
+                        <span class="sec-no">4</span><span class="sec-title">从 Excel 导入会员</span>
                     </div>
                     <div class="excel-area">
                         <div class="excel-icon">📄</div>
                         <div class="excel-title">点击上传或拖拽文件到此处</div>
-                        <div class="excel-tip">仅支持 .xlsx 格式，单次最多 10,000 条，按「客户编码」列匹配客户</div>
+                        <div class="excel-tip">仅支持 .xlsx 格式，单次最多 5,000 条、文件不超过 5MB，按「会员ID」列匹配会员</div>
                         <button class="btn-sm primary" onclick="mockUpload()">选择文件</button>
                         <button class="btn-sm" style="margin-left:8px;" onclick="alert('已下载导入模板')">下载导入模板</button>
                     </div>
                     <div class="excel-done" id="excel-done">
-                        <div class="excel-file">📄 <span>客户名单_20261118.xlsx</span>
+                        <div class="excel-file">📄 <span>会员名单_20261118.xlsx</span>
                             <span class="btn-sm" style="margin-left:auto;height:26px;line-height:24px;" onclick="resetExcel()">移除</span>
                         </div>
                         <div class="excel-stat">
                             共解析 <b>1,300</b> 条，成功匹配 <b>1,284</b> 条，未匹配 <span class="err">16</span> 条
                         </div>
-                        <div class="excel-stat" style="color:#F53F3F;">未匹配原因：客户编码不存在 14 条，编码格式错误 2 条</div>
+                        <div class="excel-stat" style="color:#F53F3F;">未匹配原因：会员ID不存在 14 条，编码格式错误 2 条</div>
                     </div>
                 </div>
 
-                <!-- 全部客户提示 -->
+                <!-- 全部会员提示 -->
                 <div class="section" id="anno-5b" style="display:none;">
                     <div class="sec-head">
                         <span class="sec-no">4</span><span class="sec-title">接收范围</span>
                     </div>
                     <div class="excel-area" style="border-style:solid;background:#FFF7E6;border-color:#FFE0B2;">
-                        <div class="excel-title" style="color:#B25E09;">本次将发送给全部 7,846 位客户</div>
+                        <div class="excel-title" style="color:#B25E09;">本次将发送给全部 7,846 位会员</div>
                         <div class="excel-tip">发送前会再次确认，确认后不可撤回</div>
                     </div>
                 </div>
@@ -423,22 +419,22 @@ table.cust tbody tr.checked { background: var(--main-light); }
     <button class="panel-expand-btn" id="panel-expand-btn" onclick="togglePanel()">📌</button>
 </div>
 
-<!-- 全部客户二次确认 -->
+<!-- 全部会员二次确认 -->
 <div class="modal-overlay" id="all-modal">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">发送给全部客户？</div>
+            <div class="modal-title">发送给全部会员？</div>
             <button class="modal-close" onclick="closeAllModal()">×</button>
         </div>
         <div class="modal-body">
             <div style="font-size:13px;color:#4E5969;line-height:1.9;">
-                本次将发送给平台全部 <b style="color:#F53F3F;">7,846</b> 位客户，包含从未下单的用户。<br>
+                本次将发送给平台全部 <b style="color:#F53F3F;">7,846</b> 位会员，包含从未下单的用户。<br>
                 发送后不可撤回，请确认内容已经过审核。
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn-ghost" onclick="closeAllModal()">取消</button>
-            <button class="btn-main" onclick="confirmAll()">确认，发送给全部客户</button>
+            <button class="btn-main" onclick="confirmAll()">确认，发送给全部会员</button>
         </div>
     </div>
 </div>
@@ -470,11 +466,11 @@ table.cust tbody tr.checked { background: var(--main-light); }
         <div class="modal-body" style="position:relative;">
             <div class="anno-marker" data-id="10">10</div>
             <div class="confirm-row"><div class="confirm-label">发送方式</div><div class="confirm-value" id="cf-ch">站内信</div></div>
-            <div class="confirm-row"><div class="confirm-label">目标客户群</div><div class="confirm-value" id="cf-target">指定客户编码列表</div></div>
+            <div class="confirm-row"><div class="confirm-label">目标会员群</div><div class="confirm-value" id="cf-target">指定会员</div></div>
             <div class="confirm-row"><div class="confirm-label">接收人数</div><div class="confirm-value"><b id="cf-count">0</b> 人</div></div>
             <div class="confirm-row"><div class="confirm-label">发送时间</div><div class="confirm-value" id="cf-time">立即发送</div></div>
             <div class="confirm-row"><div class="confirm-label">消息标题</div><div class="confirm-value" id="cf-title">—</div></div>
-            <div class="danger-box" id="cf-danger" style="display:none;">本次为全部客户群发，涉及 7,846 人，确认后不可撤回。</div>
+            <div class="danger-box" id="cf-danger" style="display:none;">本次为全部会员群发，涉及 7,846 人，确认后不可撤回。</div>
         </div>
         <div class="modal-footer">
             <button class="btn-ghost" onclick="closeConfirm()">取消</button>
@@ -539,8 +535,8 @@ const CUSTOMERS = [
  {id:'1329516269676500992', tag:'新用户', nick:'五七人力（575...', code:'1512191', mail:'', phone:''},
  {id:'1329482231154294784', tag:'老用户', nick:'lin_zhihao', code:'1512176', mail:'linzhihao@163.com', phone:'138****6621'},
  {id:'1329451187426581504', tag:'老用户', nick:'陈小满', code:'1512154', mail:'chenxiaoman@qq.com', phone:'139****3308'},
- {id:'1329419027736848384', tag:'VIP客户', nick:'wang_rui_88', code:'1512132', mail:'wangrui88@outlook.com', phone:'136****7742'},
- {id:'1329386651474825216', tag:'VIP客户', nick:'佐藤明', code:'1512119', mail:'sato.akira@jp.com', phone:'135****2205'},
+ {id:'1329419027736848384', tag:'VIP会员', nick:'wang_rui_88', code:'1512132', mail:'wangrui88@outlook.com', phone:'136****7742'},
+ {id:'1329386651474825216', tag:'VIP会员', nick:'佐藤明', code:'1512119', mail:'sato.akira@jp.com', phone:'135****2205'},
  {id:'1329354412806719488', tag:'老用户', nick:'Иван Петров', code:'1512098', mail:'ivan.petrov@mail.ru', phone:'137****9914'}
 ];
 
@@ -612,12 +608,9 @@ function renderCust() {
         <tr class="${selected.has(c.id)?'checked':''}">
             <td><span class="ck ${selected.has(c.id)?'on':''}" onclick="toggleOne('${c.id}')"></span></td>
             <td>${i+1}</td>
-            <td>${c.id}</td>
-            <td>${c.tag}</td>
+            <td>M${c.code}</td>
             <td title="${c.nick}">${c.nick}</td>
-            <td>${c.code}</td>
             <td title="${c.mail}">${c.mail || '-'}</td>
-            <td>${c.phone || '-'}</td>
         </tr>`).join('');
     updateSelCount();
 }
@@ -636,7 +629,7 @@ function updateSelCount() {
     all.className = 'ck' + (selected.size === CUSTOMERS.length && selected.size > 0 ? ' on' : '');
 }
 function resetFilter() {
-    ['f-code','f-nick','f-mail','f-phone'].forEach(id => document.getElementById(id).value = '');
+    ['f-code','f-nick','f-mail'].forEach(id => document.getElementById(id).value = '');
     renderCust();
 }
 
@@ -710,9 +703,9 @@ function openConfirm() {
     if (!b) { alert('请输入消息正文'); return; }
     if (t.length > 80) { alert('消息标题不能超过 80 字'); return; }
     if (b.length > 4000) { alert('消息正文不能超过 4000 字'); return; }
-    if (recvCount() === 0) { alert('请先选择接收客户'); return; }
+    if (recvCount() === 0) { alert('请先选择接收会员'); return; }
     document.getElementById('cf-ch').textContent = curChannel === 'mail' ? '邮件' : '站内信';
-    const tnames = {list:'指定客户编码列表', excel:'从 Excel 导入', all:'全部客户'};
+    const tnames = {list:'指定会员', excel:'从 Excel 导入', all:'全部会员'};
     document.getElementById('cf-target').textContent = tnames[curTarget];
     document.getElementById('cf-count').textContent = recvCount().toLocaleString();
     document.getElementById('cf-time').textContent = curTiming === 'now' ? '立即发送' : document.getElementById('plan-time').value.replace('T',' ');
@@ -731,14 +724,14 @@ const annotations = [
   {
     "id": 1,
     "title": "页面总说明",
-    "summary": "运营手动给指定客户发消息的页面，按发送方式、客户群、内容、时间四步填写，发送前统一确认。",
+    "summary": "运营手动给指定会员发消息的页面，按发送方式、会员群、内容、时间四步填写，发送前统一确认。",
     "target": "#anno-1",
     "showMarker": false,
     "type": "overview",
     "detail": {
       "feature": "运营中心下的主动触达入口，用于运营人员向用户主动推送活动、通知、提醒类消息。与「消息模板」的区别是：模板由系统按场景自动触发，本页面由运营人工发起、人工选择接收人。",
       "business": "一次发送只走一个渠道（站内信或邮件），不支持同一条消息多渠道同时下发。",
-      "interaction": "填写顺序自上而下：发送方式 → 消息内容 → 目标客户群 → 选择客户 → 发送设置，最后点底部发送按钮进入确认弹窗。"
+      "interaction": "填写顺序自上而下：发送方式 → 消息内容 → 目标会员群 → 选择会员 → 发送设置，最后点底部发送按钮进入确认弹窗。"
     }
   },
   {
@@ -787,47 +780,47 @@ const annotations = [
   },
   {
     "id": 5,
-    "title": "目标客户群",
-    "summary": "全部客户、指定客户编码列表、从 Excel 导入三选一，默认选中指定客户编码列表。",
+    "title": "目标会员群",
+    "summary": "全部会员、指定会员、从 Excel 导入三选一，默认选中指定会员。",
     "target": "#anno-5",
     "showMarker": true,
     "type": "field",
     "detail": {
       "feature": "确定这条消息发给谁，三种范围互斥，只能选一个。",
-      "business": "默认选中「指定客户编码列表」，避免误发全量。选择「全部客户」时会弹出二次确认，明确提示接收人数和不可撤回，确认后才生效。",
-      "interaction": "选择「指定客户编码列表」显示客户筛选与勾选表格；选择「从 Excel 导入」显示上传区域；选择「全部客户」显示全量接收提示。",
-      "exception": "切换范围时，已勾选的客户保留不清空，切回列表范围时恢复勾选状态。",
-      "copywriting": "全部客户二次确认标题为「发送给全部客户？」，正文说明接收人数与不可撤回，确认按钮为「确认，发送给全部客户」。"
+      "business": "默认选中「指定会员」，避免误发全量。选择「全部会员」时会弹出二次确认，明确提示接收人数和不可撤回，确认后才生效。",
+      "interaction": "选择「指定会员」显示会员筛选与勾选表格；选择「从 Excel 导入」显示上传区域；选择「全部会员」显示全量接收提示。",
+      "exception": "切换范围时，已勾选的会员保留不清空，切回列表范围时恢复勾选状态。",
+      "copywriting": "全部会员二次确认标题为「发送给全部会员？」，正文说明接收人数与不可撤回，确认按钮为「确认，发送给全部会员」。"
     }
   },
   {
     "id": 6,
-    "title": "客户筛选与勾选列表",
-    "summary": "按客户编码、昵称、邮箱、手机号查询，表格勾选具体客户，实时显示已选人数。",
+    "title": "会员筛选与勾选列表",
+    "summary": "按会员ID、会员昵称、邮箱查询，表格勾选具体会员，实时显示已选人数。",
     "target": "#anno-6",
     "showMarker": true,
     "type": "area",
     "detail": {
-      "feature": "在指定客户范围内精确挑人，是「指定客户编码列表」模式下的操作区。",
-      "display": "筛选条件为客户编码、客户昵称、邮箱、手机号，多个条件之间取交集。列表字段为勾选框、编号、客户 ID、客户标签、客户昵称、客户编码、邮箱、手机号。",
-      "business": "只有勾选的客户会收到消息。已选人数实时显示在筛选行右侧，用于发送前核对。表格默认按客户 ID 倒序，新注册用户在前。",
-      "interaction": "点单行勾选框选中或取消单个客户，点表头勾选框全选或全不选当前页。点查询按当前条件重新检索，点重置清空全部筛选条件。",
-      "exception": "筛选无结果时表格显示空状态，不显示分页。手机号和邮箱为空的客户仍可勾选，但走邮件渠道时会发送失败。"
+      "feature": "在指定会员范围内精确挑人，是「指定会员」模式下的操作区。",
+      "display": "筛选条件为会员ID、会员昵称、邮箱，多个条件之间取交集。列表字段为勾选框、编号、会员ID、会员昵称、邮箱。",
+      "business": "只有勾选的会员会收到消息。已选人数实时显示在筛选行右侧，用于发送前核对。表格默认按注册时间倒序，新注册会员在前。",
+      "interaction": "点单行勾选框选中或取消单个会员，点表头勾选框全选或全不选当前页。点查询按当前条件重新检索，点重置清空全部筛选条件。",
+      "exception": "筛选无结果时表格显示空状态，不显示分页。邮箱为空的会员仍可勾选，但走邮件渠道时会发送失败。"
     }
   },
   {
     "id": 7,
-    "title": "从 Excel 导入客户",
-    "summary": "上传 Excel 按客户编码批量匹配客户，显示成功与未匹配数量及原因。",
+    "title": "从 Excel 导入会员",
+    "summary": "上传 Excel 按会员ID批量匹配会员，显示成功与未匹配数量及原因。",
     "target": "#anno-7",
     "showMarker": true,
     "type": "interaction",
     "detail": {
-      "feature": "批量导入接收人名单，适合运营在外部表格里维护好客户后一次性导入。",
-      "business": "只支持 xlsx 格式，单次上限 10,000 条，按「客户编码」列与平台客户匹配。匹配成功的计入接收人，未匹配的不计入并在结果中列出原因。",
+      "feature": "批量导入接收人名单，适合运营在外部表格里维护好会员后一次性导入。",
+      "business": "只支持 xlsx 格式，单次上限 5,000 条、文件不超过 5MB，按「会员ID」列与平台会员匹配。匹配成功的计入接收人，未匹配的不计入并在结果中列出原因。",
       "interaction": "点选择文件上传后展示解析结果，包含文件名、总解析条数、成功匹配条数、未匹配条数与失败原因。点移除清空本次导入结果。",
-      "exception": "上传文件缺少「客户编码」列时整体导入失败并提示列名缺失；超过 10,000 条时提示拆分文件；文件格式非 xlsx 时直接拒绝。",
-      "copywriting": "未匹配原因固定为三类文案：客户编码不存在、编码格式错误、客户已注销。"
+      "exception": "上传文件缺少「会员ID」列时整体导入失败并提示列名缺失；超过 5,000 条或 5MB 时提示拆分文件；文件格式非 xlsx 时直接拒绝。",
+      "copywriting": "未匹配原因固定为三类文案：会员ID不存在、会员ID格式错误、会员已注销。"
     }
   },
   {
@@ -855,22 +848,22 @@ const annotations = [
       "feature": "页面级操作入口，固定吸底，滚动时始终可见。",
       "interaction": "点预览打开预览弹窗，按当前选中的发送方式展示消息最终形态，支持五种语言切换。点保存草稿存入草稿箱，可在发送记录中继续编辑。点发送先做校验，校验通过后弹出确认弹窗。",
       "business": "发送校验包含：标题必填且不超 80 字、正文必填且不超 4000 字、接收人数大于 0。任一不通过则拦截并定位到对应字段。",
-      "exception": "接收人数为 0 时提示「请先选择接收客户」。"
+      "exception": "接收人数为 0 时提示「请先选择接收会员」。"
     }
   },
   {
     "id": 10,
     "title": "发送确认弹窗",
-    "summary": "发送前汇总展示发送方式、客户群、人数、时间、标题，全部客户时额外提示不可撤回。",
+    "summary": "发送前汇总展示发送方式、会员群、人数、时间、标题，全部会员时额外提示不可撤回。",
     "target": "#confirm-modal .modal-body",
     "showMarker": true,
     "type": "interaction",
     "detail": {
       "feature": "最后一道确认，让运营在消息真正下发前再核对一遍关键信息。",
-      "display": "展示发送方式、目标客户群、接收人数、发送时间、消息标题五项。选择全部客户时底部额外显示不可撤回的提示条。",
+      "display": "展示发送方式、目标会员群、接收人数、发送时间、消息标题五项。选择全部会员时底部额外显示不可撤回的提示条。",
       "interaction": "点确认发送后关闭弹窗并提交下发，页面提示已提交。点取消或点击遮罩关闭弹窗，返回编辑状态，已填内容全部保留。",
       "business": "确认弹窗不再做二次频控拦截，频次控制由系统侧的发送频率限制统一处理，不在此处提示。",
-      "copywriting": "确认按钮文案为「确认发送」，全部客户场景的提示文案需明确写出接收人数与不可撤回。"
+      "copywriting": "确认按钮文案为「确认发送」，全部会员场景的提示文案需明确写出接收人数与不可撤回。"
     }
   }
 ];
