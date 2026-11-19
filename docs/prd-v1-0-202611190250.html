@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>消息触达模块 PRD v1.1 - POKO文档</title>
+    <title>消息触达模块 PRD v1.2 - POKO文档</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
@@ -36,7 +36,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 </head>
 <body>
     <div class="doc-header">
-        <h1>消息触达模块 PRD v1.1</h1>
+        <h1>消息触达模块 PRD v1.2</h1>
         <span class="meta">POKO SaaS</span>
         <div class="actions">
             <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
@@ -46,7 +46,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
         </div>
     </div>
     <div class="doc-body">
-        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.1 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
+        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.2 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
 <hr>
 <h2>一、需求背景</h2>
 <h3>1.1 现状</h3>
@@ -93,7 +93,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <p><strong>按钮</strong></p>
 <table><thead><tr><th>按钮</th><th>说明</th></tr></thead><tbody><tr><td>一键翻译</td><td>把中文简体内容翻译成其余四种语言并写入对应模板</td></tr><tr><td>保存模板</td><td>保存当前场景当前渠道的全部语言内容</td></tr><tr><td>取消</td><td>关闭弹窗，不保存</td></tr></tbody></table>
 <h3>4.6 渠道开关规则</h3>
-<table><thead><tr><th>渠道</th><th>默认值</th><th>是否可关闭</th><th>说明</th></tr></thead><tbody><tr><td>站内信</td><td>全部开启</td><td>否</td><td>兜底渠道，保证用户一定能看到通知</td></tr><tr><td>邮件</td><td>按场景预设，28 个场景开启</td><td>是</td><td>关闭后该场景不再发邮件</td></tr></tbody></table>
+<table><thead><tr><th>渠道</th><th>默认值</th><th>是否可关闭</th><th>说明</th></tr></thead><tbody><tr><td>站内信</td><td>全部开启</td><td>是</td><td>关闭后该场景不再发站内信</td></tr><tr><td>邮件</td><td>按场景预设，28 个场景开启</td><td>是</td><td>关闭后该场景不再发邮件</td></tr></tbody></table>
+<p>两个渠道均不设锁定，全部 43 个场景的开关都可自由开关。关闭后该场景对应渠道不再下发，重新开启即恢复。</p>
 <h3>4.7 预览弹窗</h3>
 <p>按渠道渲染不同样式：</p>
 <table><thead><tr><th>渠道</th><th>预览形态</th></tr></thead><tbody><tr><td>站内信</td><td>站内信消息卡片，含标题、正文、时间</td></tr><tr><td>邮件</td><td>邮件客户端视图，含主题、发件人、正文</td></tr></tbody></table>
@@ -133,6 +134,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <p><strong>解析结果</strong></p>
 <table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>客户编码在系统中存在的条数</td></tr><tr><td>未匹配</td><td>客户编码不存在或格式错误的条数</td></tr></tbody></table>
 <p>未匹配明细展示原因分类：编码不存在、格式错误。运营可下载未匹配清单修正后重新上传。</p>
+<p><strong>导入上限</strong></p>
+<table><thead><tr><th>项</th><th>限制</th><th>超限处理</th></tr></thead><tbody><tr><td>单次条数</td><td>最多 5000 条</td><td>超出提示分批导入，本次不解析</td></tr><tr><td>文件大小</td><td>最多 5MB</td><td>上传即拦截，提示压缩或拆分</td></tr><tr><td>文件格式</td><td>.xlsx / .xls</td><td>其他格式不支持</td></tr></tbody></table>
+<p>单次 5000 条可覆盖现有客户规模下的绝大多数定向群发场景（当前全量客户约 7,846 人），超过时按批拆分，每批独立发送。</p>
 <h3>5.7 发送设置</h3>
 <table><thead><tr><th>选项</th><th>说明</th></tr></thead><tbody><tr><td>立即发送</td><td>默认选中，提交后立即进入发送队列</td></tr><tr><td>定时发送</td><td>选择日期与时间，到点自动发送</td></tr></tbody></table>
 <h3>5.8 底部操作栏</h3>
@@ -171,8 +175,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <h2>九、场景清单</h2>
 <table><thead><tr><th>序号</th><th>分类</th><th>场景名称</th><th>触发条件</th><th>站内信</th><th>邮件</th></tr></thead><tbody><tr><td>1</td><td>订单</td><td>订单创建成功</td><td>订单成功创建</td><td>开启</td><td>开启</td></tr><tr><td>2</td><td>订单</td><td>订单待付款提醒</td><td>采购订单已创建并且过了24小时仍然未支付的</td><td>开启</td><td>开启</td></tr><tr><td>3</td><td>订单</td><td>支付成功开始采购</td><td>创建采购订单之后（状态为待采购）</td><td>开启</td><td>开启</td></tr><tr><td>4</td><td>订单</td><td>商品采购中</td><td>分流至人工采购的订单，买手领取之后(状态为采购中）</td><td>开启</td><td>关闭</td></tr><tr><td>5</td><td>订单</td><td>商品已采购</td><td>订单状态变为已采购</td><td>开启</td><td>关闭</td></tr><tr><td>6</td><td>订单</td><td>商品已发货</td><td>获取到订单的物流单号，订单状态变成待入库</td><td>开启</td><td>关闭</td></tr><tr><td>7</td><td>订单</td><td>商品已入库</td><td>商品已入库，订单状态变为已入库</td><td>开启</td><td>关闭</td></tr><tr><td>8</td><td>订单</td><td>订单已取消</td><td>用户主动取消订单→ 已取消</td><td>开启</td><td>开启</td></tr><tr><td>9</td><td>订单</td><td>订单已超时取消</td><td>订单长时间未支付自动取消 → 已取消</td><td>开启</td><td>开启</td></tr><tr><td>10</td><td>订单</td><td>订单已被平台取消</td><td>若商品是违禁品，平台直接取消订单，退款给用户</td><td>开启</td><td>开启</td></tr><tr><td>11</td><td>订单</td><td>订单已关闭已退款</td><td>该订单下所有商品申请售后，并完成退款</td><td>开启</td><td>开启</td></tr><tr><td>12</td><td>订单</td><td>订单需补商品差价</td><td>需要用户补商品款</td><td>开启</td><td>开启</td></tr><tr><td>13</td><td>订单</td><td>订单需补运费差价</td><td>需要用户补充运费</td><td>开启</td><td>开启</td></tr><tr><td>14</td><td>订单</td><td>商品差价已退还</td><td>用户预先支付的款项＞实际货款</td><td>开启</td><td>开启</td></tr><tr><td>15</td><td>订单</td><td>商品库存不足</td><td>商品库存不足</td><td>开启</td><td>开启</td></tr><tr><td>16</td><td>包裹</td><td>包裹已签收</td><td>包裹被poko仓库签收</td><td>开启</td><td>关闭</td></tr><tr><td>17</td><td>包裹</td><td>包裹质检完成</td><td>包裹质检完成</td><td>开启</td><td>关闭</td></tr><tr><td>18</td><td>包裹</td><td>包裹已入库</td><td>包裹成功入库</td><td>开启</td><td>关闭</td></tr><tr><td>19</td><td>包裹</td><td>包裹已超期</td><td>包裹超过免费存储期</td><td>开启</td><td>开启</td></tr><tr><td>20</td><td>包裹</td><td>提包申请已提交</td><td>用户成功提交包裹</td><td>开启</td><td>开启</td></tr><tr><td>21</td><td>包裹</td><td>包裹待付款提醒</td><td>集运订单已创建并且过了24小时仍然未支付的</td><td>开启</td><td>开启</td></tr><tr><td>22</td><td>包裹</td><td>提包申请审核中</td><td>包裹提交次并且支付之后，变成待审核状态</td><td>开启</td><td>关闭</td></tr><tr><td>23</td><td>包裹</td><td>包裹审核异常</td><td>包裹审核异常</td><td>开启</td><td>开启</td></tr><tr><td>24</td><td>包裹</td><td>包裹审核通过待打包</td><td>包裹审核通过→ 待发货</td><td>开启</td><td>关闭</td></tr><tr><td>25</td><td>包裹</td><td>包裹已发出</td><td>包裹完全发运→ 已发货</td><td>开启</td><td>关闭</td></tr><tr><td>26</td><td>包裹</td><td>包裹已收货</td><td>用户签收→已收货</td><td>开启</td><td>关闭</td></tr><tr><td>27</td><td>包裹</td><td>包裹已取消</td><td>用户主动取消包裹</td><td>开启</td><td>开启</td></tr><tr><td>28</td><td>包裹</td><td>包裹已超时取消</td><td>包裹长时间未支付自动取消 → 已取消</td><td>开启</td><td>开启</td></tr><tr><td>29</td><td>包裹</td><td>包裹已关闭</td><td>未装箱完成取消包裹，退回包裹费用，并扣除相关操作费</td><td>开启</td><td>开启</td></tr><tr><td>30</td><td>包裹</td><td>包裹需补款</td><td>先付费模式包裹运费补款</td><td>开启</td><td>开启</td></tr><tr><td>31</td><td>包裹</td><td>包裹差价已退还</td><td>先付费模式包裹费用差价退还</td><td>开启</td><td>开启</td></tr><tr><td>32</td><td>包裹</td><td>包裹费用待支付</td><td>后付费模式下，仓库打包后→通知用户二次支付</td><td>开启</td><td>开启</td></tr><tr><td>33</td><td>售后</td><td>售后申请已提交</td><td>发起售后，创建售后单→售后单状态为：待审核</td><td>开启</td><td>开启</td></tr><tr><td>34</td><td>售后</td><td>售后申请已通过</td><td>平台审核通过，向1688/淘宝商家发起退货 → 待商家处理</td><td>开启</td><td>开启</td></tr><tr><td>35</td><td>售后</td><td>商家同意退货</td><td>商家同意退货，平台仓库准备寄回商品 → 待仓库退货</td><td>开启</td><td>关闭</td></tr><tr><td>36</td><td>售后</td><td>商家待退款</td><td>商家同意退款/退货，等待商家退款到账</td><td>开启</td><td>开启</td></tr><tr><td>37</td><td>售后</td><td>售后退款已完成</td><td>退款完成 → 已退款</td><td>开启</td><td>开启</td></tr><tr><td>38</td><td>售后</td><td>售后申请被驳回</td><td>售后申请被驳回 → 已驳回</td><td>开启</td><td>开启</td></tr><tr><td>39</td><td>售后</td><td>售后已取消</td><td>用户主动取消售后</td><td>开启</td><td>关闭</td></tr><tr><td>40</td><td>账户</td><td>账户充值成功</td><td>充值之后</td><td>开启</td><td>开启</td></tr><tr><td>41</td><td>账户</td><td>账户提现成功</td><td>成功提现之后</td><td>开启</td><td>开启</td></tr><tr><td>42</td><td>营销</td><td>优惠券已到账</td><td>用户获取优惠券成功后</td><td>开启</td><td>关闭</td></tr><tr><td>43</td><td>营销</td><td>优惠券即将过期</td><td>优惠券到期前一天12-20点随机时段</td><td>开启</td><td>关闭</td></tr></tbody></table>
 <hr>
-<h2>十、待确认事项</h2>
-<table><thead><tr><th>序号</th><th>事项</th><th>说明</th><th>影响</th></tr></thead><tbody><tr><td>1</td><td>场景新增入口</td><td>模板页是否需要「新增场景」按钮，还是场景由业务侧固定</td><td>决定模板页操作栏设计</td></tr><tr><td>2</td><td>开关锁定范围</td><td>支付类、退款类场景的渠道开关是否锁死不可关闭</td><td>决定开关是否可编辑</td></tr><tr><td>3</td><td>保存按钮命名</td><td>使用「保存模板」还是沿用现有「保存自动触发模板」</td><td>文案一致性</td></tr><tr><td>4</td><td>Excel 导入上限</td><td>单次导入的条数上限、文件大小上限</td><td>决定是否需要分批导入</td></tr></tbody></table>
+<h2>十、已确认事项</h2>
+<table><thead><tr><th>序号</th><th>事项</th><th>结论</th></tr></thead><tbody><tr><td>1</td><td>场景新增入口</td><td>不支持新增。场景由业务侧固定维护，模板页不设「新增场景」按钮，运营只能编辑已有场景的文案与渠道开关</td></tr><tr><td>2</td><td>开关锁定范围</td><td>不锁死。全部场景的站内信、邮件开关均可自由开关，包括支付、退款、补款、审核异常等资金类场景</td></tr><tr><td>3</td><td>保存按钮命名</td><td>使用「保存模板」</td></tr><tr><td>4</td><td>Excel 导入上限</td><td>单次最多 5000 条、文件不超过 5MB，超出分批导入</td></tr></tbody></table>
 <hr>
 <h2>十一、原型索引</h2>
 <table><thead><tr><th>页面</th><th>说明</th></tr></thead><tbody><tr><td>消息场景模板配置</td><td>43 个场景的模板列表、编辑弹窗、渠道开关、五语言、预览</td></tr><tr><td>运营主动发送消息</td><td>发送方式单选、消息内容、目标客户群三选一、客户勾选、Excel 导入、发送确认</td></tr></tbody></table>
