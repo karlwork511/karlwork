@@ -192,6 +192,26 @@ table.cust tbody tr.checked { background: var(--main-light); }
 .confirm-value { color: #1D2129; flex: 1; }
 .confirm-value b { color: var(--main); }
 .danger-box { background: #FFF1F0; border: 1px solid #FFCCC7; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #CF1322; line-height: 1.7; margin-top: 14px; }
+
+/* 会员搜索添加 */
+.member-search { position: relative; margin-bottom: 12px; }
+.member-search input { width: 100%; height: 34px; padding: 0 12px; border: 1px solid #DCDFE6; border-radius: 4px; font-size: 13px; outline: none; color: #333; }
+.member-search input:focus { border-color: var(--main); }
+.search-drop { display: none; position: absolute; left: 0; right: 0; top: 38px; background: #fff; border: 1px solid #E5E6EB; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 30; max-height: 280px; overflow-y: auto; }
+.drop-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid #F2F3F5; }
+.drop-item:last-child { border-bottom: none; }
+.drop-item:hover { background: #F7FBFA; }
+.drop-main { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 0; }
+.drop-id { font-weight: 600; color: #1D2129; }
+.drop-nick { color: #4E5969; }
+.drop-mail { color: #86909C; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drop-add { flex-shrink: 0; font-size: 12px; color: var(--main); cursor: pointer; padding: 2px 10px; border: 1px solid var(--main); border-radius: 4px; }
+.drop-add.added { color: #C9CDD4; border-color: #E5E6EB; cursor: default; }
+.drop-empty { padding: 16px 12px; font-size: 13px; color: #86909C; text-align: center; }
+.picked-bar { font-size: 13px; color: #4E5969; margin-bottom: 8px; }
+.picked-bar b { color: var(--main); font-size: 15px; margin: 0 2px; }
+.empty-row { text-align: center; color: #86909C; font-size: 13px; padding: 28px 0 !important; }
+.link-del { color: #F53F3F; font-size: 12px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -301,41 +321,26 @@ table.cust tbody tr.checked { background: var(--main-light); }
                     <div class="anno-marker" data-id="6">5</div>
                     <div class="sec-head">
                         <span class="sec-no">4</span><span class="sec-title">选择会员</span>
+                        <span class="sec-tip">搜索后逐个添加</span>
                     </div>
-                    <div class="cust-filter">
-                        <input type="text" placeholder="会员ID" id="f-code">
-                        <input type="text" placeholder="会员昵称" id="f-nick">
-                        <input type="text" placeholder="邮箱" id="f-mail">
-                        <button class="btn-sm primary" onclick="renderCust()">查询</button>
-                        <button class="btn-sm" onclick="resetFilter()">重置</button>
-                        <span class="selected-count">已选 <b id="sel-count">0</b> 人</span>
+                    <div class="member-search">
+                        <input type="text" id="m-search" placeholder="输入会员ID、会员昵称或邮箱搜索" oninput="searchMember()">
+                        <div class="search-drop" id="search-drop"></div>
                     </div>
+                    <div class="picked-bar">已选 <b id="sel-count">0</b> 人</div>
                     <div class="cust-table-wrap">
                         <table class="cust">
                             <thead>
                                 <tr>
-                                    <th style="width:36px;"><span class="ck" id="ck-all" onclick="toggleAll()"></span></th>
                                     <th style="width:46px;">编号</th>
                                     <th style="width:130px;">会员ID</th>
                                     <th>会员昵称</th>
                                     <th style="width:240px;">邮箱</th>
+                                    <th style="width:64px;">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="cust-body"></tbody>
+                            <tbody id="picked-body"></tbody>
                         </table>
-                    </div>
-                    <div class="pager">
-                        <span class="total">共 7,846 条</span>
-                        <span class="pg">‹</span>
-                        <span class="pg active">1</span>
-                        <span class="pg">2</span>
-                        <span class="pg">3</span>
-                        <span class="pg">4</span>
-                        <span class="pg">5</span>
-                        <span class="pg">6</span>
-                        <span class="pg dots">...</span>
-                        <span class="pg">393</span>
-                        <span class="pg">›</span>
                     </div>
                 </div>
 
@@ -599,38 +604,68 @@ function applyTarget(t) {
     curTarget = t;
     document.querySelectorAll('.target-opt').forEach(el => el.classList.toggle('active', el.dataset.t === t));
     document.getElementById('anno-6').style.display = t === 'list' ? 'block' : 'none';
+    const si = document.getElementById('m-search'); if (si) si.value = '';
+    const sd = document.getElementById('search-drop'); if (sd) { sd.style.display = 'none'; sd.innerHTML = ''; }
     document.getElementById('anno-7').style.display = t === 'excel' ? 'block' : 'none';
     document.getElementById('anno-5b').style.display = t === 'all' ? 'block' : 'none';
 }
 
-function renderCust() {
-    document.getElementById('cust-body').innerHTML = CUSTOMERS.map((c, i) => `
-        <tr class="${selected.has(c.id)?'checked':''}">
-            <td><span class="ck ${selected.has(c.id)?'on':''}" onclick="toggleOne('${c.id}')"></span></td>
-            <td>${i+1}</td>
-            <td>M${c.code}</td>
-            <td title="${c.nick}">${c.nick}</td>
-            <td title="${c.mail}">${c.mail || '-'}</td>
-        </tr>`).join('');
-    updateSelCount();
+function searchMember() {
+    const kw = (document.getElementById('m-search').value || '').trim().toLowerCase();
+    const drop = document.getElementById('search-drop');
+    if (!kw) { drop.style.display = 'none'; drop.innerHTML = ''; return; }
+    const hits = CUSTOMERS.filter(c =>
+        ('m' + c.code).includes(kw) || c.code.includes(kw) ||
+        (c.nick || '').toLowerCase().includes(kw) ||
+        (c.mail || '').toLowerCase().includes(kw)
+    ).slice(0, 8);
+    if (!hits.length) {
+        drop.innerHTML = '<div class="drop-empty">没有匹配的会员</div>';
+    } else {
+        drop.innerHTML = hits.map(c => {
+            const added = selected.has(c.id);
+            return `<div class="drop-item">
+                <div class="drop-main">
+                    <span class="drop-id">M${c.code}</span>
+                    <span class="drop-nick">${c.nick}</span>
+                    <span class="drop-mail">${c.mail || '无邮箱'}</span>
+                </div>
+                <span class="drop-add ${added ? 'added' : ''}" onclick="addMember('${c.id}')">${added ? '已添加' : '添加'}</span>
+            </div>`;
+        }).join('');
+    }
+    drop.style.display = 'block';
 }
-function toggleOne(id) {
-    if (selected.has(id)) selected.delete(id); else selected.add(id);
-    renderCust();
+
+function addMember(id) {
+    if (selected.has(id)) return;
+    selected.add(id);
+    searchMember();
+    renderPicked();
 }
-function toggleAll() {
-    if (selected.size === CUSTOMERS.length) selected.clear();
-    else CUSTOMERS.forEach(c => selected.add(c.id));
-    renderCust();
+
+function removeMember(id) {
+    selected.delete(id);
+    searchMember();
+    renderPicked();
 }
-function updateSelCount() {
+
+function renderPicked() {
+    const body = document.getElementById('picked-body');
+    const list = CUSTOMERS.filter(c => selected.has(c.id));
+    if (!list.length) {
+        body.innerHTML = '<tr><td colspan="5" class="empty-row">还没有添加会员，在上方搜索框输入会员ID、昵称或邮箱后点击「添加」</td></tr>';
+    } else {
+        body.innerHTML = list.map((c, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>M${c.code}</td>
+                <td title="${c.nick}">${c.nick}</td>
+                <td title="${c.mail}">${c.mail || '-'}</td>
+                <td><span class="link-del" onclick="removeMember('${c.id}')">移除</span></td>
+            </tr>`).join('');
+    }
     document.getElementById('sel-count').textContent = selected.size;
-    const all = document.getElementById('ck-all');
-    all.className = 'ck' + (selected.size === CUSTOMERS.length && selected.size > 0 ? ' on' : '');
-}
-function resetFilter() {
-    ['f-code','f-nick','f-mail'].forEach(id => document.getElementById(id).value = '');
-    renderCust();
 }
 
 function mockUpload() {
@@ -788,24 +823,24 @@ const annotations = [
     "detail": {
       "feature": "确定这条消息发给谁，三种范围互斥，只能选一个。",
       "business": "默认选中「指定会员」，避免误发全量。选择「全部会员」时会弹出二次确认，明确提示接收人数和不可撤回，确认后才生效。",
-      "interaction": "选择「指定会员」显示会员筛选与勾选表格；选择「从 Excel 导入」显示上传区域；选择「全部会员」显示全量接收提示。",
-      "exception": "切换范围时，已勾选的会员保留不清空，切回列表范围时恢复勾选状态。",
+      "interaction": "选择「指定会员」显示会员搜索与已选列表；选择「从 Excel 导入」显示上传区域；选择「全部会员」显示全量接收提示。",
+      "exception": "切换范围时，已选会员保留不清空，切回「指定会员」时恢复已选状态。",
       "copywriting": "全部会员二次确认标题为「发送给全部会员？」，正文说明接收人数与不可撤回，确认按钮为「确认，发送给全部会员」。"
     }
   },
   {
     "id": 6,
-    "title": "会员筛选与勾选列表",
-    "summary": "按会员ID、会员昵称、邮箱查询，表格勾选具体会员，实时显示已选人数。",
+    "title": "会员搜索与已选列表",
+    "summary": "按会员ID、会员昵称、邮箱搜索，逐个添加，已选会员单独成表可移除。",
     "target": "#anno-6",
     "showMarker": true,
     "type": "area",
     "detail": {
-      "feature": "在指定会员范围内精确挑人，是「指定会员」模式下的操作区。",
-      "display": "筛选条件为会员ID、会员昵称、邮箱，多个条件之间取交集。列表字段为勾选框、编号、会员ID、会员昵称、邮箱。",
-      "business": "只有勾选的会员会收到消息。已选人数实时显示在筛选行右侧，用于发送前核对。表格默认按注册时间倒序，新注册会员在前。",
-      "interaction": "点单行勾选框选中或取消单个会员，点表头勾选框全选或全不选当前页。点查询按当前条件重新检索，点重置清空全部筛选条件。",
-      "exception": "筛选无结果时表格显示空状态，不显示分页。邮箱为空的会员仍可勾选，但走邮件渠道时会发送失败。"
+      "feature": "在指定会员范围内精确挑人，是「指定会员」模式下的操作区。不展示全量会员列表，只展示搜索结果和已选结果。",
+      "display": "上方为搜索框，输入后下拉展示匹配结果，每条显示会员ID、会员昵称、邮箱和添加按钮；下方为已选会员表格，字段为编号、会员ID、会员昵称、邮箱、操作，表格上方显示已选人数。",
+      "business": "只有已选列表中的会员会收到消息。已选人数实时更新，用于发送前核对。已选会员不会因继续搜索而丢失。",
+      "interaction": "在搜索框输入会员ID、会员昵称或邮箱的任意片段，下拉实时展示最多 8 条匹配结果；点「添加」把该会员加入已选列表，按钮变为「已添加」不可重复添加；点已选列表的「移除」把该会员移出，可再次搜索添加。",
+      "exception": "搜索无匹配时下拉显示「没有匹配的会员」；已选列表为空时显示引导文案；同一个会员重复添加不生效。"
     }
   },
   {
@@ -1046,7 +1081,13 @@ renderAnnotationList();
 initPanelState();
 renderLangTabs();
 fillForm();
-renderCust();
+renderPicked();
+
+document.addEventListener('click', function (e) {
+    const box = document.querySelector('.member-search');
+    const drop = document.getElementById('search-drop');
+    if (box && drop && !box.contains(e.target)) drop.style.display = 'none';
+});
 </script>
 </body>
 </html>
