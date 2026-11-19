@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>消息触达模块 PRD v1.4 - POKO文档</title>
+    <title>消息触达模块 PRD v1.5 - POKO文档</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #fafafa; color: #1a1a2e; line-height: 1.7; }
@@ -36,7 +36,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 </head>
 <body>
     <div class="doc-header">
-        <h1>消息触达模块 PRD v1.4</h1>
+        <h1>消息触达模块 PRD v1.5</h1>
         <span class="meta">POKO SaaS</span>
         <div class="actions">
             <button class="btn" id="editBtn" onclick="toggleEdit()">✏️ 编辑</button>
@@ -46,7 +46,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
         </div>
     </div>
     <div class="doc-body">
-        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.4 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
+        <div class="doc-content" id="docContent"><p><strong>版本</strong>：v1.5 <strong>日期</strong>：2026-11-19 <strong>模块</strong>：运营中心 → 消息触达 <strong>状态</strong>：待评审</p>
 <hr>
 <h2>一、需求背景</h2>
 <h3>1.1 现状</h3>
@@ -133,8 +133,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Ping
 <p><strong>上传区</strong></p>
 <table><thead><tr><th>元素</th><th>说明</th></tr></thead><tbody><tr><td>上传入口</td><td>支持点击选择或拖拽文件，格式限 .xlsx / .xls</td></tr><tr><td>下载模板</td><td>下载标准模板，仅含会员ID一列</td></tr></tbody></table>
 <p><strong>解析结果</strong></p>
-<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>会员ID在系统中存在的条数</td></tr><tr><td>未匹配</td><td>会员ID不存在或格式错误的条数</td></tr></tbody></table>
-<p>未匹配明细展示原因分类：会员ID不存在、会员ID格式错误、会员已注销。运营可下载未匹配清单修正后重新上传。</p>
+<table><thead><tr><th>字段</th><th>说明</th></tr></thead><tbody><tr><td>总条数</td><td>文件中的总行数</td></tr><tr><td>成功匹配</td><td>会员ID在系统中存在的条数</td></tr><tr><td>未匹配</td><td>会员ID不存在、格式错误或会员已注销的条数</td></tr></tbody></table>
+<p><strong>未匹配明细</strong></p>
+<p>只给数量运营无法定位问题，必须逐条列出。</p>
+<table><thead><tr><th>列</th><th>说明</th></tr></thead><tbody><tr><td>序号</td><td>明细序号</td></tr><tr><td>Excel 中的会员ID</td><td>原样展示文件里填的值，不做格式修正，便于运营对照原表</td></tr><tr><td>会员昵称</td><td>文件里填了则展示，没填显示「—」</td></tr><tr><td>未匹配原因</td><td>会员ID不存在 / 会员ID格式错误（缺少 M 前缀、含非法字符）/ 会员已注销</td></tr></tbody></table>
+<p><strong>下载未匹配清单</strong>：导出 CSV，只含未匹配的行和原因列。运营在清单里改好会员ID 后可直接重新导入。</p>
+<p>未匹配明细在解析完成后直接展开，不需要额外点击；全部匹配成功时不展示该区域。</p>
 <p><strong>导入上限</strong></p>
 <table><thead><tr><th>项</th><th>限制</th><th>超限处理</th></tr></thead><tbody><tr><td>单次条数</td><td>最多 5000 条</td><td>超出提示分批导入，本次不解析</td></tr><tr><td>文件大小</td><td>最多 5MB</td><td>上传即拦截，提示压缩或拆分</td></tr><tr><td>文件格式</td><td>.xlsx / .xls</td><td>其他格式不支持</td></tr></tbody></table>
 <p>单次 5000 条可覆盖现有会员规模下的绝大多数定向群发场景（当前全量会员约 7,846 人），超过时按批拆分，每批独立发送。</p>
