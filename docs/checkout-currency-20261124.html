@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选择付款方式 · 收银台币种展示优化</title>
+<style>
+:root{
+  --bg:#F5F6FA;
+  --surface:#FFFFFF;
+  --line:#EDEEF3;
+  --line-strong:#E2E4EC;
+  --text:#1F2233;
+  --text-2:#6B7280;
+  --text-3:#9AA0AE;
+  --brand:#5B4CF5;
+  --brand-dark:#4B3DD9;
+  --brand-weak:#F4F2FF;
+  --brand-line:#E3DEFF;
+  --warn:#B45309;
+  --warn-bg:#FFF8E8;
+  --warn-line:#FBE6B4;
+  --radius-lg:14px;
+  --radius-md:10px;
+  --shadow:0 1px 2px rgba(23,26,42,.04), 0 10px 28px rgba(23,26,42,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.checkout{max-width:1320px;margin:0 auto;padding:26px 24px 56px}
+.page-head{margin-bottom:16px}
+h1{font-size:18px;font-weight:600;margin:0;color:var(--text);letter-spacing:-.01em}
+.page-sub{margin:6px 0 0;font-size:12.5px;color:var(--text-3)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 348px;gap:20px;align-items:start}
+
+/* ---------- 左侧支付方式 ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:10px;box-shadow:var(--shadow)}
+.panel + .panel{margin-top:16px}
+.panel-title{font-size:14px;font-weight:600;margin:6px 12px 8px;color:var(--text)}
+.pay-row{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;border-radius:var(--radius-md);
+  border:1px solid transparent;cursor:pointer;
+  transition:background .16s ease, border-color .16s ease;
+}
+.pay-row:hover{background:#FAFAFD}
+.pay-row.is-active{background:var(--brand-weak);border-color:var(--brand-line)}
+.radio{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  border:1.5px solid #D3D6E0;background:#fff;flex:none;margin:0;cursor:pointer;
+  transition:border-color .16s ease, border-width .16s ease;
+}
+.radio:checked{border-color:var(--brand);border-width:5px}
+.radio:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.logo{
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);
+  background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;
+  font-weight:700;line-height:1;
+}
+.logo-alipay{color:#1677FF;font-size:17px}
+.logo-yoomoney{color:#8B3FFD;font-size:18px}
+.logo-gpay{font-size:18px;background:linear-gradient(135deg,#4285F4,#EA4335 42%,#FBBC05 68%,#34A853);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo-apay{color:#111;font-size:13px;letter-spacing:-.02em}
+.logo-payid{color:#E4002B;font-size:10px;letter-spacing:.02em}
+.pay-info{min-width:0;flex:1}
+.pay-name{display:block;font-size:14px;font-weight:500;color:var(--text)}
+.pay-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:3px;font-size:12.5px;color:var(--text-3)}
+.pay-meta .sep{width:1px;height:10px;background:#DFE1E9;flex:none}
+.pay-meta .cur-path{color:#7E8496}
+.pay-meta .fx{color:var(--brand);font-weight:500}
+.recharge{
+  margin-left:auto;flex:none;color:var(--brand);font-size:13px;font-weight:500;
+  text-decoration:none;padding:6px 8px;border-radius:6px;
+  border:0;background:transparent;font-family:inherit;cursor:pointer;
+}
+.recharge:hover{background:#EFEBFF}
+.recharge:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+
+/* ---------- 右侧付款摘要 ---------- */
+.summary{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:20px;box-shadow:var(--shadow);position:sticky;top:20px;
+}
+.summary-title{font-size:15px;font-weight:600;margin:0 0 16px}
+.sum-list{margin:0}
+.sum-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sum-row dt{font-size:13px;color:var(--text-2);flex:none}
+.sum-row dd{margin:0;text-align:right;font-size:14px;font-weight:500;color:var(--text);overflow-wrap:anywhere}
+.sum-row dd .cny{font-size:12px;font-weight:400;color:var(--text-3);margin-left:4px;white-space:nowrap}
+.sum-row dd.is-name{font-weight:600}
+.fee-rule{font-size:12px;color:var(--text-3);margin:-6px 0 14px;text-align:right}
+.total{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border-top:1px solid var(--line);margin-top:2px;padding-top:16px;
+}
+.total-label{font-size:14px;font-weight:600}
+.total-amount{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.total-amount .main{font-size:24px;font-weight:700;color:var(--brand);letter-spacing:-.02em}
+.total-amount .total-cny{font-size:13px;font-weight:400;color:var(--text-3);white-space:nowrap}
+.fx-note{font-size:12px;color:var(--text-3);margin:10px 0 0;line-height:1.55}
+.balance-tip{
+  margin:12px 0 0;padding:9px 12px;border-radius:8px;
+  background:var(--warn-bg);border:1px solid var(--warn-line);
+  color:var(--warn);font-size:12.5px;
+}
+.agree{
+  display:flex;align-items:flex-start;gap:8px;margin-top:16px;
+  font-size:12.5px;color:var(--text-2);line-height:1.55;cursor:pointer;
+}
+.agree input{
+  appearance:none;-webkit-appearance:none;width:16px;height:16px;flex:none;margin:2px 0 0;
+  border:1.5px solid #C9CCD8;border-radius:4px;background:#fff;cursor:pointer;position:relative;
+}
+.agree input:checked{background:var(--brand);border-color:var(--brand)}
+.agree input:checked::after{
+  content:"";position:absolute;left:4.5px;top:1px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+.agree input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.btn-pay{
+  width:100%;margin-top:16px;height:46px;border:0;border-radius:var(--radius-md);
+  background:var(--brand);color:#fff;font-size:15px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:background .16s ease, transform .16s ease;
+}
+.btn-pay:hover:not(:disabled){background:var(--brand-dark)}
+.btn-pay:active:not(:disabled){transform:translateY(1px)}
+.btn-pay:disabled{background:#C9C7E8;cursor:not-allowed}
+.btn-pay:focus-visible{outline:2px solid #2C2580;outline-offset:2px}
+
+/* ---------- 动效与提示 ---------- */
+.flash{animation:flashIn .24s ease-out}
+@keyframes flashIn{from{opacity:.4;transform:translateY(2px)}to{opacity:1;transform:none}}
+.toast{
+  position:fixed;left:50%;bottom:32px;transform:translate(-50%,8px);
+  background:rgba(31,34,51,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;
+  opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:9;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:920px){
+  .checkout{padding:20px 16px 48px}
+  .layout{grid-template-columns:1fr}
+  .summary{position:static}
+}
+@media (max-width:420px){
+  .total-amount .main{font-size:22px}
+  .pay-row{padding:12px 10px;gap:10px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
+@media print{
+  body{background:#fff}
+  .checkout{padding:0;max-width:none}
+  .panel,.summary{box-shadow:none;border-color:#C9CCD8}
+  .summary{position:static}
+  .btn-pay,.toast{display:none}
+  .pay-row.is-active{background:#fff;border-color:#8B8FA0}
+  .layout{grid-template-columns:1fr 320px}
+}
+</style>
+</head>
+<body>
+<main class="checkout">
+  <header class="page-head">
+    <h1>选择付款方式</h1>
+    <p class="page-sub">应付金额以人民币为基准计算，切换支付方式后按该渠道收款币种自动换算展示</p>
+  </header>
+
+  <div class="layout">
+    <section aria-label="支付方式">
+
+      <div class="panel">
+        <h2 class="panel-title">账户余额支付</h2>
+        <label class="pay-row" for="pm-balance">
+          <input class="radio" type="radio" name="paymethod" id="pm-balance" value="balance">
+          <span class="logo logo-balance" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false" aria-hidden="true">
+              <rect x="3" y="6" width="18" height="12" rx="3" fill="#1F2233"></rect>
+              <rect x="3" y="9.4" width="18" height="2.2" fill="#fff" opacity=".9"></rect>
+              <circle cx="17.4" cy="14.6" r="1.4" fill="#fff" opacity=".9"></circle>
+            </svg>
+          </span>
+          <span class="pay-info">
+            <span class="pay-name">账户余额</span>
+            <span class="pay-meta">
+              <span>可用余额 CN ¥ 37.87</span>
+              <span class="sep"></span>
+              <span class="cur-path">收款币种 CNY</span>
+              <span class="sep"></span>
+              <span class="fx">免手续费</span>
+            </span>
+          </span>
+          <button type="button" class="recharge" data-demo="跳转充值页（演示）">立即充值</button>
+        </label>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">在线支付</h2>
+
+        <label class="pay-row" for="pm-alipay">
+          <input class="radio" type="radio" name="paymethod" id="pm-alipay" value="alipay">
+          <span class="logo logo-alipay" aria-hidden="true">支</span>
+          <span class="pay-info">
+            <span class="pay-name">支付宝</span>
+            <span class="pay-meta">
+              <span>手续费 0%</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → CNY</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:1</span>
+            </span>
+          </span>
+        </label>
+
+        <label class="pay-row" for="pm-yoomoney">
+          <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
+          <span class="logo logo-yoomoney" aria-hidden="true">Y</span>
+          <span class="pay-info">
+            <span class="pay-name">YooMoney</span>
+            <span class="pay-meta">
+              <span>手续费 2.7%</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → RUB</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:12.2699</span>
+            </span>
+          </span>
+        </label>
+
+        <label class="pay-row is-active" for="pm-card">
+          <input class="radio" type="radio" name="paymethod" id="pm-card" value="card" checked>
+          <span class="logo logo-card" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false" aria-hidden="true">
+              <rect x="2.5" y="5.5" width="19" height="13" rx="3" fill="#F97316"></rect>
+              <rect x="2.5" y="9" width="19" height="2.4" fill="#fff" opacity=".85"></rect>
+              <rect x="5.6" y="13.8" width="5" height="1.8" rx=".9" fill="#fff" opacity=".85"></rect>
+            </svg>
+          </span>
+          <span class="pay-info">
+            <span class="pay-name">信用卡</span>
+            <span class="pay-meta">
+              <span>手续费 4.3% + 0.3 USD</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → USD</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:0.149</span>
+            </span>
+          </span>
+        </label>
+
+        <label class="pay-row" for="pm-googlepay">
+          <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
+          <span class="logo logo-gpay" aria-hidden="true">G</span>
+          <span class="pay-info">
+            <span class="pay-name">Google Pay</span>
+            <span class="pay-meta">
+              <span>手续费 4.3% + 0.3 USD</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → USD</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:0.149</span>
+            </span>
+          </span>
+        </label>
+
+        <label class="pay-row" for="pm-applepay">
+          <input class="radio" type="radio" name="paymethod" id="pm-applepay" value="applepay">
+          <span class="logo logo-apay" aria-hidden="true">Pay</span>
+          <span class="pay-info">
+            <span class="pay-name">Apple Pay</span>
+            <span class="pay-meta">
+              <span>手续费 4.3% + 0.3 USD</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → USD</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:0.149</span>
+            </span>
+          </span>
+        </label>
+
+        <label class="pay-row" for="pm-payid">
+          <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
+          <span class="logo logo-payid" aria-hidden="true">PayID</span>
+          <span class="pay-info">
+            <span class="pay-name">PayID</span>
+            <span class="pay-meta">
+              <span>手续费 2% + 0.7 AUD</span>
+              <span class="sep"></span>
+              <span class="cur-path">CNY → AUD</span>
+              <span class="sep"></span>
+              <span class="fx">汇率 1:0.2128</span>
+            </span>
+          </span>
+        </label>
+      </div>
+
+    </section>
+
+    <aside aria-label="付款摘要">
+      <div class="summary">
+        <h2 class="summary-title">付款摘要</h2>
+
+        <dl class="sum-list">
+          <div class="sum-row">
+            <dt>应付金额</dt>
+            <dd id="sum-payable">$ 4.83<span class="cny">(CN ¥ 32.40)</span></dd>
+          </div>
+          <div class="sum-row">
+            <dt>支付手续费</dt>
+            <dd id="sum-fee">$ 0.51<span class="cny">(CN ¥ 3.41)</span></dd>
+          </div>
+          <div class="sum-row">
+            <dt>付款方式</dt>
+            <dd id="sum-method" class="is-name">信用卡</dd>
+          </div>
+        </dl>
+        <p class="fee-rule" id="fee-rule">手续费规则：4.3% + 0.3 USD</p>
+
+        <div class="total">
+          <span class="total-label">实际应付金额</span>
+          <span class="total-amount">
+            <span class="main" id="sum-total">$ 5.34</span>
+            <span class="total-cny" id="sum-total-cny">(CN ¥ 35.81)</span>
+          </span>
+        </div>
+
+        <p class="fx-note" id="fx-note">参考汇率 1 CNY = 0.149 USD，最终以支付渠道实际结算为准</p>
+        <p class="balance-tip" id="balance-tip" hidden></p>
+
+        <label class="agree" for="agree">
+          <input type="checkbox" id="agree" checked>
+          <span>我已阅读并同意《免责声明》、《违禁物品说明》、《用户协议》与《用户隐私协议》</span>
+        </label>
+
+        <button type="button" class="btn-pay" id="btn-pay">立即支付</button>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  try{
+    /* ---------- 可配置数据 ---------- */
+    // 汇率：1 CNY = N 目标币种
+    var FX = { CNY: 1, USD: 0.149, RUB: 12.2699, AUD: 0.2128 };
+    var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$' };
+    var ORDER_CNY = 32.40;   // 应付金额（人民币基准）
+    var BALANCE_CNY = 37.87; // 账户可用余额
+
+    var METHODS = {
+      balance:   { name:'账户余额', currency:'CNY', feeRate:0,     feeFixed:null,                          rule:'该支付方式免手续费' },
+      alipay:    { name:'支付宝',   currency:'CNY', feeRate:0,     feeFixed:null,                          rule:'该支付方式免手续费' },
+      yoomoney:  { name:'YooMoney', currency:'RUB', feeRate:0.027, feeFixed:null,                          rule:'手续费规则：2.7%' },
+      card:      { name:'信用卡',   currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
+      googlepay: { name:'Google Pay', currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
+      applepay:  { name:'Apple Pay',  currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
+      payid:     { name:'PayID',    currency:'AUD', feeRate:0.02,  feeFixed:{ amount:0.7, currency:'AUD' }, rule:'手续费规则：2% + 0.7 AUD' }
+    };
+
+    /* ---------- 工具 ---------- */
+    function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+    function money(v, cur){
+      return SYMBOL[cur] + ' ' + v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    }
+    function cny(v){ return '(CN ¥ ' + v.toFixed(2) + ')'; }
+    function byId(id){ return document.getElementById(id); }
+
+    /* ---------- 计算：先以人民币算清，再换算到收款币种 ---------- */
+    function compute(id){
+      var m = METHODS[id] || METHODS.card;
+      var fx = FX[m.currency];
+      var fixedCny = 0;
+      if (m.feeFixed){ fixedCny = m.feeFixed.amount / FX[m.feeFixed.currency]; }
+      var feeCny = round2(ORDER_CNY * m.feeRate + fixedCny);
+      var totalCny = round2(ORDER_CNY + feeCny);
+      return {
+        m: m,
+        fx: fx,
+        feeCny: feeCny,
+        totalCny: totalCny,
+        payable: money(round2(ORDER_CNY * fx), m.currency),
+        fee: money(round2(feeCny * fx), m.currency),
+        total: money(round2(totalCny * fx), m.currency)
+      };
+    }
+
+    function setAmount(el, main, sub){
+      while (el.firstChild){ el.removeChild(el.firstChild); }
+      el.appendChild(document.createTextNode(main));
+      if (sub){
+        var s = document.createElement('span');
+        s.className = 'cny';
+        s.textContent = sub;
+        el.appendChild(s);
+      }
+    }
+
+    function flash(el){
+      el.classList.remove('flash');
+      void el.offsetWidth;
+      el.classList.add('flash');
+    }
+
+    /* ---------- 渲染 ---------- */
+    function render(id){
+      var r = compute(id);
+      var sameCurrency = (r.m.currency === 'CNY');
+
+      setAmount(byId('sum-payable'), r.payable, sameCurrency ? '' : cny(ORDER_CNY));
+      setAmount(byId('sum-fee'), r.fee, sameCurrency ? '' : cny(r.feeCny));
+
+      var methodEl = byId('sum-method');
+      methodEl.textContent = r.m.name;
+
+      byId('fee-rule').textContent = r.rule;
+
+      var totalEl = byId('sum-total');
+      totalEl.textContent = r.total;
+      var totalCnyEl = byId('sum-total-cny');
+      totalCnyEl.textContent = sameCurrency ? '' : cny(r.totalCny);
+      totalCnyEl.hidden = sameCurrency;
+
+      byId('fx-note').textContent = sameCurrency
+        ? '该支付方式按人民币收款，无需汇率换算'
+        : '参考汇率 1 CNY = ' + r.fx + ' ' + r.m.currency + '，最终以支付渠道实际结算为准';
+
+      var tip = byId('balance-tip');
+      if (id === 'balance' && r.totalCny > BALANCE_CNY){
+        tip.hidden = false;
+        tip.textContent = '账户余额不足，还需充值 ' + money(round2(r.totalCny - BALANCE_CNY), 'CNY') + '，可先充值或切换其他支付方式。';
+      } else {
+        tip.hidden = true;
+        tip.textContent = '';
+      }
+
+      flash(byId('sum-total'));
+      flash(byId('sum-payable'));
+    }
+
+    /* ---------- 交互 ---------- */
+    var radios = Array.prototype.slice.call(document.querySelectorAll('.pay-row input[type="radio"]'));
+    radios.forEach(function(input){
+      input.addEventListener('change', function(){
+        radios.forEach(function(i){
+          var row = i.closest('.pay-row');
+          if (row){ row.classList.toggle('is-active', i.checked); }
+        });
+        if (input.checked){ render(input.value); }
+      });
+    });
+
+    var agree = byId('agree');
+    var btn = byId('btn-pay');
+    function syncBtn(){ btn.disabled = !agree.checked; }
+    agree.addEventListener('change', syncBtn);
+    syncBtn();
+
+    var toast = byId('toast');
+    var toastTimer = null;
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add('show');
+      if (toastTimer){ clearTimeout(toastTimer); }
+      toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1800);
+    }
+
+    Array.prototype.slice.call(document.querySelectorAll('[data-demo]')).forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        showToast(el.getAttribute('data-demo') || '演示操作');
+      });
+    });
+
+    btn.addEventListener('click', function(){
+      if (btn.disabled){ return; }
+      var checked = document.querySelector('.pay-row input[type="radio"]:checked');
+      var id = checked ? checked.value : 'card';
+      var r = compute(id);
+      showToast('发起支付（演示）：' + r.m.name + ' · ' + r.total + (r.m.currency === 'CNY' ? '' : ' / ' + cny(r.totalCny)));
+    });
+
+    render('card');
+  }catch(err){
+    /* 脚本异常时静态内容仍可读，不做任何阻断 */
+  }
+})();
+</script>
+</body>
+</html>
