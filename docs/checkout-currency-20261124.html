@@ -105,7 +105,6 @@ h1{font-size:18px;font-weight:600;margin:0;color:var(--text);letter-spacing:-.01
 .total-amount{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .total-amount .main{font-size:24px;font-weight:700;color:var(--brand);letter-spacing:-.02em}
 .total-amount .total-cny{font-size:13px;font-weight:400;color:var(--text-3);white-space:nowrap}
-.fx-note{font-size:12px;color:var(--text-3);margin:10px 0 0;line-height:1.55}
 .balance-tip{
   margin:12px 0 0;padding:9px 12px;border-radius:8px;
   background:var(--warn-bg);border:1px solid var(--warn-line);
@@ -333,7 +332,6 @@ h1{font-size:18px;font-weight:600;margin:0;color:var(--text);letter-spacing:-.01
           </span>
         </div>
 
-        <p class="fx-note" id="fx-note">参考汇率 1 CNY = 0.149 USD，最终以支付渠道实际结算为准</p>
         <p class="balance-tip" id="balance-tip" hidden></p>
 
         <label class="agree" for="agree">
@@ -431,10 +429,6 @@ h1{font-size:18px;font-weight:600;margin:0;color:var(--text);letter-spacing:-.01
       var totalCnyEl = byId('sum-total-cny');
       totalCnyEl.textContent = sameCurrency ? '' : cny(r.totalCny);
       totalCnyEl.hidden = sameCurrency;
-
-      byId('fx-note').textContent = sameCurrency
-        ? '该支付方式按人民币收款，无需汇率换算'
-        : '参考汇率 1 CNY = ' + r.fx + ' ' + r.m.currency + '，最终以支付渠道实际结算为准';
 
       var tip = byId('balance-tip');
       if (id === 'balance' && r.totalCny > BALANCE_CNY){
