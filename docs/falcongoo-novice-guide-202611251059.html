@@ -177,12 +177,10 @@
   .closing{background:linear-gradient(135deg,#f7f4ff,#fdfcff);border:1px solid var(--brand-line);border-radius:var(--radius);padding:30px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
   .closing h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
   .closing p{font-size:13.5px;color:var(--ink-2);margin-top:6px;max-width:600px}
-  /* 收货：左说明 + 右截图 */
-  .receive-split{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:32px;align-items:start}
-  .receive-desc{font-size:14px;color:var(--ink-2);line-height:1.85;margin-bottom:20px}
-  .receive-split .closing{flex-direction:column;align-items:flex-start;gap:18px;padding:24px 26px}
-  .receive-split .closing p{max-width:none}
-  .receive-split .closing .btn-primary{margin-left:0}
+  /* 步骤卡内的结尾卡片 */
+  .step-card .closing{flex-direction:column;align-items:flex-start;gap:18px;padding:24px 26px}
+  .step-card .closing p{max-width:none}
+  .step-card .closing .btn-primary{margin-left:0}
   .btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--brand);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;padding:11px 24px;border-radius:999px;transition:background .18s;margin-left:auto;flex-shrink:0}
   .btn-primary:hover{background:var(--brand-d)}
 
@@ -214,7 +212,6 @@
     .assure-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
     .method-block{grid-template-columns:1fr;gap:14px}
     .step-card.split{grid-template-columns:1fr;row-gap:14px}
-    .receive-split{grid-template-columns:1fr;gap:20px}
     .hd-search{max-width:none}
     .lang,.ico{display:none}
     .hd-tools .txt-link{padding:0 6px}
@@ -454,7 +451,7 @@
         <li><a href="#step-6" class="sub" data-nav><i>06</i>提交包裹</a></li>
         <li><a href="#step-7" class="sub" data-nav><i>07</i>支付预估运费</a></li>
         <li><a href="#step-8" class="sub" data-nav><i>08</i>FalconGoo 发货</a></li>
-        <li><a href="#receive" data-nav>收货</a></li>
+        <li><a href="#step-9" class="sub" data-nav><i>09</i>收货</a></li>
       </ol>
     </aside>
 
@@ -719,26 +716,22 @@
           </figure>
         </article>
 
-      </section>
-
-      <!-- ============ 收货 ============ -->
-      <section class="content-sec" id="receive" aria-labelledby="receiveTitle">
-        <div class="group-head">
-          <span class="group-badge">最后一步</span>
-          <h2 id="receiveTitle">收货</h2>
-        </div>
-
-        <div class="receive-split">
-          <div>
-            <p class="receive-desc">收到包裹后，在“我的 FalconGoo”－“我的包裹”里确认签收。</p>
-            <div class="closing">
-              <div>
-                <h3>剩下的都交给我们</h3>
-                <p>选好商品下单、有问题时回一句、凑齐后提交包裹——<b>您只需要做这三件事</b>。采购、验货、打包、报关、发货，全程由 FalconGoo 处理。</p>
-                <p class="closing-note">遇到订单、包裹或费用相关的问题，随时联系在线客服，我们会尽快帮您处理。</p>
-              </div>
-              <a class="btn-primary" href="https://www.falcongoo.com" target="_blank" rel="noopener noreferrer">开始第一次代购</a>
+        <!-- 步骤9 -->
+        <article class="step-card ship split" id="step-9">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">09</span>
+            <div>
+              <h3>收货</h3>
+              <p class="step-lead">收到包裹后，在“我的 FalconGoo”－“我的包裹”里确认签收。</p>
             </div>
+          </div>
+          <div class="closing">
+            <div>
+              <h3>剩下的都交给我们</h3>
+              <p>选好商品下单、有问题时回一句、凑齐后提交包裹——<b>您只需要做这三件事</b>。采购、验货、打包、报关、发货，全程由 FalconGoo 处理。</p>
+              <p class="closing-note">遇到订单、包裹或费用相关的问题，随时联系在线客服，我们会尽快帮您处理。</p>
+            </div>
+            <a class="btn-primary" href="https://www.falcongoo.com" target="_blank" rel="noopener noreferrer">开始第一次代购</a>
           </div>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：确认签收页面的截图">
@@ -747,8 +740,9 @@
               <span class="ph-s">我的包裹 · 确认签收</span>
             </div>
           </figure>
-        </div>
+        </article>
       </section>
+
     </div>
   </div>
 </main>
