@@ -95,7 +95,7 @@
   .closing-note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
 
   /* ================= 主体两栏 ================= */
-  .guide-layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:52px;padding-top:44px;padding-bottom:72px;align-items:start}
+  .guide-layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:52px;padding-top:0;padding-bottom:72px;align-items:start}
   .guide-nav{position:sticky;top:130px}
   .guide-nav h2{font-size:12px;letter-spacing:.1em;color:var(--ink-3);font-weight:700;margin-bottom:14px}
   .guide-nav ol{display:flex;flex-direction:column;gap:2px}
@@ -108,6 +108,7 @@
   .guide-nav .sub.on i{color:var(--brand);opacity:.75}
 
   /* ================= 内容区 ================= */
+  .platform-sec{padding-top:38px;padding-bottom:56px;scroll-margin-top:130px}
   .content-sec{margin-bottom:48px;scroll-margin-top:130px}
   .group-head{margin-bottom:20px}
   .group-badge{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--brand);background:var(--brand-soft);padding:4px 10px;border-radius:6px;margin-bottom:10px}
@@ -128,8 +129,6 @@
   .plogo.dark{color:#1a1a1a}
   .plogo svg{width:23px;height:23px;fill:currentColor}
   .plat > span:last-child{font-size:11.5px;color:var(--ink-2);font-weight:500;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .platform-foot{margin-top:16px;padding:13px 16px;background:#fff;border:1px solid var(--brand-line);border-radius:12px;font-size:13.5px;line-height:1.75;color:var(--ink-2)}
-  .platform-foot b{color:var(--brand-d);font-weight:700}
 
   /* 步骤卡 */
   .step-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin-bottom:14px;scroll-margin-top:130px;transition:box-shadow .2s,border-color .2s}
@@ -366,6 +365,75 @@
     </div>
   </section>
 
+  <section class="platform-sec wrap" id="platforms" aria-labelledby="platformTitle">
+    <div class="group-head">
+      <span class="group-badge">支持的平台</span>
+      <h2 id="platformTitle">FalconGoo 支持的代购平台</h2>
+      <p>看到想买的商品，复制链接贴进搜索框就行，中国所有电商平台，都支持代购。</p>
+    </div>
+
+    <div class="platform-panel">
+      <ul class="platform-grid">
+        <li class="plat">
+          <span class="plogo" style="background:#ff5000">淘</span>
+          <span>淘宝</span>
+        </li>
+        <li class="plat">
+          <span class="plogo" style="background:#e01e28">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 11.6 5.4 4.2 9 8.1a8.4 8.4 0 0 1 6 0l3.6-3.9 2.2 7.4a7.6 7.6 0 0 1-1 8.1c-1.6 2-4 3.1-7.8 3.1S5.8 21.7 4.2 19.7a7.6 7.6 0 0 1-1-8.1Z"/></svg>
+          </span>
+          <span>天猫</span>
+        </li>
+        <li class="plat">
+          <span class="plogo sm" style="background:#ff6a00">1688</span>
+          <span>1688</span>
+        </li>
+        <li class="plat">
+          <span class="plogo sm" style="background:#e1251b">JD</span>
+          <span>京东</span>
+        </li>
+        <li class="plat">
+          <span class="plogo" style="background:#e02e24">拼</span>
+          <span>拼多多</span>
+        </li>
+        <li class="plat">
+          <span class="plogo xs" style="background:#ff2442">小红书</span>
+          <span>小红书</span>
+        </li>
+        <li class="plat">
+          <span class="plogo" style="background:#161823">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c.3 2 1.4 3.4 3.4 4v3.1c-1.3 0-2.5-.4-3.5-1.1v5.9a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.7 2.7 0 1 0 1.9 2.6V3.2h3.2Z"/></svg>
+          </span>
+          <span>抖音商城</span>
+        </li>
+        <li class="plat">
+          <span class="plogo xs" style="background:#e6004c">唯品会</span>
+          <span>唯品会</span>
+        </li>
+        <li class="plat">
+          <span class="plogo sm" style="background:#111318">得物</span>
+          <span>得物</span>
+        </li>
+        <li class="plat">
+          <span class="plogo dark" style="background:#ffe60f">闲</span>
+          <span>闲鱼</span>
+        </li>
+        <li class="plat">
+          <span class="plogo sm" style="background:#ffaa00">苏宁</span>
+          <span>苏宁易购</span>
+        </li>
+        <li class="plat">
+          <span class="plogo sm" style="background:#b72a2a">严选</span>
+          <span>网易严选</span>
+        </li>
+        <li class="plat-more">
+          <span class="plogo" aria-hidden="true">···</span>
+          <span>更多</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <div class="wrap guide-layout">
     <aside class="guide-nav" aria-label="页面目录">
       <h2>目录</h2>
@@ -387,77 +455,6 @@
     </aside>
 
     <div>
-      <!-- ============ 平台 ============ -->
-      <section class="content-sec" id="platforms" aria-labelledby="platformTitle">
-        <div class="group-head">
-          <span class="group-badge">支持的平台</span>
-          <h2 id="platformTitle">FalconGoo 支持的代购平台</h2>
-          <p>看到想买的商品，复制链接贴进搜索框就行，不用管它在哪个平台，也不用分别注册账号。</p>
-        </div>
-
-        <div class="platform-panel">
-          <ul class="platform-grid">
-            <li class="plat">
-              <span class="plogo" style="background:#ff5000">淘</span>
-              <span>淘宝</span>
-            </li>
-            <li class="plat">
-              <span class="plogo" style="background:#e01e28">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 11.6 5.4 4.2 9 8.1a8.4 8.4 0 0 1 6 0l3.6-3.9 2.2 7.4a7.6 7.6 0 0 1-1 8.1c-1.6 2-4 3.1-7.8 3.1S5.8 21.7 4.2 19.7a7.6 7.6 0 0 1-1-8.1Z"/></svg>
-              </span>
-              <span>天猫</span>
-            </li>
-            <li class="plat">
-              <span class="plogo sm" style="background:#ff6a00">1688</span>
-              <span>1688</span>
-            </li>
-            <li class="plat">
-              <span class="plogo sm" style="background:#e1251b">JD</span>
-              <span>京东</span>
-            </li>
-            <li class="plat">
-              <span class="plogo" style="background:#e02e24">拼</span>
-              <span>拼多多</span>
-            </li>
-            <li class="plat">
-              <span class="plogo xs" style="background:#ff2442">小红书</span>
-              <span>小红书</span>
-            </li>
-            <li class="plat">
-              <span class="plogo" style="background:#161823">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c.3 2 1.4 3.4 3.4 4v3.1c-1.3 0-2.5-.4-3.5-1.1v5.9a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.7 2.7 0 1 0 1.9 2.6V3.2h3.2Z"/></svg>
-              </span>
-              <span>抖音商城</span>
-            </li>
-            <li class="plat">
-              <span class="plogo xs" style="background:#e6004c">唯品会</span>
-              <span>唯品会</span>
-            </li>
-            <li class="plat">
-              <span class="plogo sm" style="background:#111318">得物</span>
-              <span>得物</span>
-            </li>
-            <li class="plat">
-              <span class="plogo dark" style="background:#ffe60f">闲</span>
-              <span>闲鱼</span>
-            </li>
-            <li class="plat">
-              <span class="plogo sm" style="background:#ffaa00">苏宁</span>
-              <span>苏宁易购</span>
-            </li>
-            <li class="plat">
-              <span class="plogo sm" style="background:#b72a2a">严选</span>
-              <span>网易严选</span>
-            </li>
-            <li class="plat-more">
-              <span class="plogo" aria-hidden="true">···</span>
-              <span>更多</span>
-            </li>
-          </ul>
-          <p class="platform-foot"><b>中国所有电商平台，都支持代购。</b>上面只是最常用的一批，不在列表里的平台也一样——复制商品链接，贴进搜索框就行，不用管它在哪个平台，也不用分别注册账号。</p>
-        </div>
-      </section>
-
       <!-- ============ 代购流程 ============ -->
       <section class="content-sec" id="buy" aria-labelledby="buyTitle">
         <div class="group-head">
