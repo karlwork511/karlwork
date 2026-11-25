@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新手指引 | FalconGoo 代购与转运全流程</title>
+<style>
+  :root{
+    --brand:#4b2ff0;
+    --brand-d:#3a20d4;
+    --brand-soft:#f4f1ff;
+    --brand-line:#e9e4ff;
+    --ink:#14161b;
+    --ink-2:#565c66;
+    --ink-3:#9aa0a8;
+    --line:#eceef2;
+    --bg:#fff;
+    --bg-soft:#f7f7fb;
+    --radius:18px;
+    --shadow:0 1px 2px rgba(20,22,27,.04), 0 8px 24px rgba(20,22,27,.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  img,svg{display:block}
+  ul{list-style:none}
+
+  .wrap{width:100%;max-width:1240px;margin:0 auto;padding:0 24px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--brand);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;z-index:300}
+  .skip:focus{left:0}
+
+  /* ================= 顶栏（对齐线上站点） ================= */
+  .site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line)}
+  .hd-inner{display:flex;align-items:center;gap:26px;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo{width:36px;height:36px;border-radius:11px;background:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(75,47,240,.24)}
+  .logo svg{width:20px;height:20px}
+  .brand-name{font-size:21px;font-weight:800;letter-spacing:-.02em}
+  .brand-name i{font-style:normal;color:var(--brand)}
+
+  .hd-search{flex:1;max-width:700px;display:flex;align-items:center;gap:8px;background:#f7f7fa;border:1px solid #eeeef4;border-radius:999px;padding:5px 6px 5px 16px;height:42px;transition:background .18s,border-color .18s}
+  .hd-search:focus-within{background:#fff;border-color:var(--brand)}
+  .s-ico{width:16px;height:16px;stroke:#9aa0a8;fill:none;stroke-width:2;flex-shrink:0}
+  .hd-search input{flex:1;min-width:0;border:none;background:transparent;outline:none;font-size:14px;font-family:inherit;color:var(--ink);padding:4px 0}
+  .hd-search input::placeholder{color:#a8adbb}
+  .cam-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .cam-btn:hover{background:#eeedf4}
+  .cam-btn svg{width:18px;height:18px;stroke:#8b919b;fill:none;stroke-width:1.7}
+  .s-btn{height:32px;padding:0 24px;border:none;border-radius:999px;background:var(--brand);color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0;transition:background .18s}
+  .s-btn:hover{background:var(--brand-d)}
+
+  .hd-tools{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0}
+  .lang{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-2);padding:8px 10px;border:none;background:transparent;font-family:inherit;cursor:pointer;white-space:nowrap;border-radius:8px}
+  .lang:hover{color:var(--brand)}
+  .lang svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .ico{position:relative;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .18s}
+  .ico:hover{background:#f5f5f8}
+  .ico svg{width:21px;height:21px;stroke:#33363d;fill:none;stroke-width:1.7}
+  .badge{position:absolute;top:1px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--brand);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
+  .dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#ff4d4f;border:1.5px solid #fff}
+  .txt-link{font-size:14px;color:var(--ink-2);padding:0 10px;white-space:nowrap}
+  .txt-link:hover{color:var(--brand)}
+  .btn-signup{background:var(--brand);color:#fff;border-radius:999px;padding:8px 22px;font-size:14px;font-weight:600;white-space:nowrap;transition:background .18s}
+  .btn-signup:hover{background:var(--brand-d)}
+
+  .hd-nav{border-bottom:1px solid var(--line)}
+  .hd-nav-inner{display:flex;align-items:center;gap:32px;height:45px}
+  .hd-nav a{position:relative;height:45px;display:flex;align-items:center;font-size:14.5px;color:var(--ink-2);transition:color .18s}
+  .hd-nav a:hover{color:var(--brand)}
+  .hd-nav a.on{color:var(--brand);font-weight:600}
+  .hd-nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--brand)}
+
+  /* ================= Hero ================= */
+  .hero{background:linear-gradient(180deg,#f8f5ff 0%,#fdfcff 62%,#fff 100%);border-bottom:1px solid #f4f2fb;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-120px;top:-160px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(75,47,240,.13),rgba(75,47,240,0) 68%);pointer-events:none}
+  .hero-inner{position:relative;padding:52px 0 46px;max-width:820px}
+  h1{font-size:clamp(30px,4vw,46px);line-height:1.22;letter-spacing:-.025em;font-weight:800}
+  h1 em{font-style:normal;color:var(--brand)}
+  .hero-sub{margin-top:16px;font-size:16px;color:var(--ink-2);max-width:620px}
+
+  /* ================= 服务保障条 ================= */
+  .assurance{padding:36px 0 0}
+  .assure-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:var(--shadow)}
+  .assure-item{display:flex;gap:12px;align-items:flex-start;min-width:0}
+  .assure-ico{width:34px;height:34px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .assure-ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .assure-t{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5}
+  .assure-d{font-size:12.5px;color:var(--ink-3);margin-top:3px;line-height:1.55}
+  .closing-note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+
+  /* ================= 主体两栏 ================= */
+  .guide-layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:52px;padding-top:44px;padding-bottom:80px;align-items:start}
+  .guide-nav{position:sticky;top:130px}
+  .guide-nav h2{font-size:12px;letter-spacing:.1em;color:var(--ink-3);font-weight:700;margin-bottom:14px}
+  .guide-nav ol{display:flex;flex-direction:column;gap:2px}
+  .guide-nav li{list-style:none}
+  .guide-nav a{display:block;padding:7px 0 7px 16px;border-left:2px solid transparent;font-size:13.5px;color:var(--ink-2);transition:color .18s,border-color .18s}
+  .guide-nav a:hover{color:var(--brand)}
+  .guide-nav a.on{color:var(--brand);font-weight:600;border-left-color:var(--brand)}
+  .guide-nav .sub{padding-left:28px;font-size:12.5px;color:var(--ink-3)}
+
+  /* ================= 内容区 ================= */
+  .content-sec{margin-bottom:64px;scroll-margin-top:130px}
+  .group-head{margin-bottom:24px}
+  .group-badge{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--brand);background:var(--brand-soft);padding:4px 10px;border-radius:6px;margin-bottom:10px}
+  .group-head h2{font-size:clamp(22px,2.4vw,29px);letter-spacing:-.022em;font-weight:800}
+  .group-head p{font-size:14px;color:var(--ink-2);margin-top:8px;max-width:680px}
+
+  /* 平台平铺 */
+  .platform-panel{background:var(--bg-soft);border-radius:var(--radius);padding:28px 28px 24px;border:1px solid var(--line)}
+  .platform-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+  .plat{display:flex;flex-direction:column;align-items:center;gap:9px;padding:16px 8px;background:#fff;border:1px solid var(--line);border-radius:14px;transition:transform .18s,border-color .18s,box-shadow .18s}
+  .plat:hover{transform:translateY(-2px);border-color:#dcd6ff;box-shadow:var(--shadow)}
+  .plogo{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .plogo.sm{font-size:12px}
+  .plogo.xs{font-size:9.5px}
+  .plogo.dark{color:#1a1a1a}
+  .plogo svg{width:24px;height:24px;fill:currentColor}
+  .plat span{font-size:13px;color:var(--ink-2);font-weight:500;text-align:center}
+  .platform-foot{margin-top:20px;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .platform-foot b{color:var(--ink);font-weight:600}
+
+  /* 步骤卡 */
+  .step-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px 30px;margin-bottom:18px;scroll-margin-top:130px;transition:box-shadow .2s,border-color .2s}
+  .step-card:hover{border-color:#e3defc;box-shadow:var(--shadow)}
+  .step-head{display:flex;gap:18px;align-items:flex-start;margin-bottom:22px}
+  .step-num{font-size:38px;font-weight:800;line-height:.9;color:var(--brand);opacity:.26;letter-spacing:-.04em;font-variant-numeric:tabular-nums;flex-shrink:0;padding-top:2px}
+  .step-card.ship .step-num{color:#6b7280;opacity:.3}
+  .step-head h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .step-lead{font-size:14px;color:var(--ink-2);margin-top:6px;max-width:720px}
+
+  /* 方式块：文字 + 自己的大图 */
+  .method-block{padding-top:20px;border-top:1px dashed var(--line);margin-top:20px}
+  .method-block:first-child{padding-top:0;border-top:none;margin-top:0}
+  .method-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+  .method-tag{flex-shrink:0;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:6px;background:var(--brand-soft);color:var(--brand);white-space:nowrap;margin-top:3px}
+  .method-head p{font-size:14.5px;color:var(--ink-2);line-height:1.8;max-width:820px}
+  .method-head p b{color:var(--ink);font-weight:600}
+
+  /* 大图占位 */
+  figure.shot{margin:0}
+  .ph{position:relative;width:100%;aspect-ratio:16/9;border:1.5px dashed #d5d9e4;border-radius:14px;background:
+      linear-gradient(135deg,rgba(75,47,240,.03),rgba(75,47,240,0) 60%),
+      repeating-linear-gradient(45deg,#fbfbfe 0 12px,#f7f7fc 12px 24px);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px}
+  .ph svg{width:36px;height:36px;stroke:#bfc4d2;fill:none;stroke-width:1.4}
+  .ph-t{font-size:15px;font-weight:700;color:#8f95a3;letter-spacing:.01em}
+  .ph-s{font-size:12.5px;color:#aeb3c1;line-height:1.6;max-width:320px}
+  figcaption{margin-top:10px;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+  figcaption::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--brand);opacity:.55;flex-shrink:0}
+
+  /* TIPS */
+  .tips{margin-top:22px;background:#faf9ff;border:1px solid var(--brand-line);border-radius:12px;padding:16px 20px;max-width:900px}
+  .tips-h{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;letter-spacing:.12em;color:var(--brand)}
+  .tips-h::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--brand)}
+  .tips ul{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .tips li{position:relative;padding-left:14px;font-size:13.5px;color:var(--ink-2);line-height:1.75}
+  .tips li::before{content:"";position:absolute;left:0;top:9px;width:4px;height:4px;border-radius:50%;background:#c4bcf5}
+  .tips li b{color:var(--ink);font-weight:600}
+  .tips.no-top{margin-top:0}
+
+  /* 结尾提示 */
+  .closing{background:linear-gradient(135deg,#f7f4ff,#fdfcff);border:1px solid var(--brand-line);border-radius:var(--radius);padding:30px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .closing h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .closing p{font-size:13.5px;color:var(--ink-2);margin-top:6px;max-width:600px}
+  .btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--brand);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;padding:11px 24px;border-radius:999px;transition:background .18s;margin-left:auto;flex-shrink:0}
+  .btn-primary:hover{background:var(--brand-d)}
+
+  /* ================= 页脚 ================= */
+  .site-footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:36px 0}
+  .footer-in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .footer-in p{font-size:12.5px;color:var(--ink-3)}
+  .footer-links{display:flex;gap:22px;flex-wrap:wrap}
+  .footer-links a{font-size:12.5px;color:var(--ink-2)}
+  .footer-links a:hover{color:var(--brand)}
+
+  /* 轻提示 */
+  .toast{position:fixed;left:50%;bottom:36px;transform:translate(-50%,12px);background:#22252b;color:#fff;font-size:13px;padding:11px 20px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:400;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+
+  /* ================= 响应式 ================= */
+  @media (max-width:1080px){
+    .platform-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .guide-layout{grid-template-columns:1fr;gap:0}
+    .guide-nav{display:none}
+  }
+  @media (max-width:900px){
+    .assure-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .hd-search{max-width:none}
+    .lang,.ico{display:none}
+    .hd-tools .txt-link{padding:0 6px}
+  }
+  @media (max-width:720px){
+    .wrap{padding:0 16px}
+    .hd-inner{height:58px;gap:12px}
+    .brand-name{font-size:18px}
+    .logo{width:32px;height:32px;border-radius:10px}
+    .hd-search{height:38px;padding:4px 4px 4px 12px;gap:6px}
+    .hd-search input{font-size:13px}
+    .s-btn{height:30px;padding:0 16px;font-size:13px}
+    .cam-btn{display:none}
+    .hd-tools .txt-link{display:none}
+    .btn-signup{padding:7px 16px;font-size:13px}
+    .hd-nav-inner{gap:20px;height:42px;overflow-x:auto}
+    .hd-nav a{height:42px;font-size:14px;white-space:nowrap}
+    .hero-inner{padding:34px 0 34px}
+    .assure-bar{grid-template-columns:minmax(0,1fr);gap:16px;padding:18px}
+    .platform-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .platform-panel{padding:18px}
+    .step-card{padding:20px 16px}
+    .step-num{font-size:30px}
+    .step-head{gap:12px}
+    .ph{aspect-ratio:4/3}
+    .ph svg{width:28px;height:28px}
+    .ph-t{font-size:13.5px}
+    .closing{padding:22px}
+    .btn-primary{margin-left:0;width:100%}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{transition:none !important;animation:none !important}
+  }
+
+  @media print{
+    .site-header,.guide-nav,.closing .btn-primary,.site-footer,.toast{display:none !important}
+    body{background:#fff}
+    .hero{background:#fff;border:none}
+    .hero-inner{padding:0 0 16px}
+    .guide-layout{display:block;padding:0}
+    .step-card,.platform-panel{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+    .ph{border-color:#ccc;background:#fff;break-inside:avoid}
+    .content-sec{margin-bottom:28px}
+    .tips{background:#fff}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#platforms">跳到正文内容</a>
+
+<header class="site-header">
+  <div class="wrap hd-inner">
+    <a href="#top" class="brand" aria-label="FalconGoo 首页">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13.5 20.5 4l-6.2 8.6 2.3 7.4-4.6-4.2L8 20l.4-4.6L3 13.5Z" fill="#fff"/></svg>
+      </span>
+      <span class="brand-name">Falcon<i>Goo</i></span>
+    </a>
+
+    <form class="hd-search" id="searchForm" role="search">
+      <svg class="s-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+      <label for="searchInput" class="sr-only">搜索商品</label>
+      <input id="searchInput" type="text" placeholder="粘贴淘宝 / 1688 / 微店商品链接，或搜索商品名称" autocomplete="off">
+      <button class="cam-btn" type="button" aria-label="以图搜索" title="以图搜索">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="13" rx="3"/><circle cx="12" cy="13" r="3.4"/><path d="M8.5 6.5 10 4h4l1.5 2.5"/></svg>
+      </button>
+      <button class="s-btn" type="submit">搜索</button>
+    </form>
+
+    <div class="hd-tools">
+      <button class="lang" type="button">
+        中文(简体)/CNY
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2 4.5 4 4 4-4"/></svg>
+      </button>
+      <a class="ico" href="#top" aria-label="购物车，3 件商品">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+        <span class="badge">3</span>
+      </a>
+      <a class="ico" href="#top" aria-label="全部服务">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+      </a>
+      <a class="ico" href="#top" aria-label="消息，有未读">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.3 9.3 0 0 1-3.8-.8L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>
+        <span class="dot"></span>
+      </a>
+      <a class="txt-link" href="#top">登录</a>
+      <a class="btn-signup" href="#top">注册</a>
+    </div>
+  </div>
+
+  <nav class="hd-nav" aria-label="主导航">
+    <div class="wrap hd-nav-inner">
+      <a href="#top" class="on">首页</a>
+      <a href="#buy">代购</a>
+      <a href="#ship">转运</a>
+      <a href="#step-2">手工下单</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-inner">
+        <h1>欢迎查阅<em>新手指引</em></h1>
+        <p class="hero-sub">从粘贴一条商品链接，到包裹送到您手上——9 个步骤，带您走完 FalconGoo 的代购与转运全流程。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="assurance wrap" aria-label="服务保障">
+    <div class="assure-bar">
+      <div class="assure-item">
+        <span class="assure-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+        </span>
+        <div>
+          <div class="assure-t">买手代购</div>
+          <div class="assure-d">不用自己联系卖家，沟通、催发货都由买手处理</div>
+        </div>
+      </div>
+      <div class="assure-item">
+        <span class="assure-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="13" rx="3"/><circle cx="12" cy="13" r="3.4"/><path d="M8.5 6.5 10 4h4l1.5 2.5"/></svg>
+        </span>
+        <div>
+          <div class="assure-t">免费验货</div>
+          <div class="assure-d">到仓开箱检查并拍照，有问题第一时间告诉您</div>
+        </div>
+      </div>
+      <div class="assure-item">
+        <span class="assure-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8.5 12 4l8.5 4.5v7L12 20l-8.5-4.5v-7Z"/><path d="M3.5 8.5 12 13l8.5-4.5M12 13v7"/></svg>
+        </span>
+        <div>
+          <div class="assure-t">180 天免费仓储</div>
+          <div class="assure-d">慢慢凑单再一起寄，合并寄送更省国际运费</div>
+        </div>
+      </div>
+      <div class="assure-item">
+        <span class="assure-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg>
+        </span>
+        <div>
+          <div class="assure-t">全程可追踪</div>
+          <div class="assure-d">订单、包裹状态实时可查，异常主动通知并协助处理</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap guide-layout">
+    <aside class="guide-nav" aria-label="页面目录">
+      <h2>目录</h2>
+      <ol>
+        <li><a href="#platforms" data-nav>支持的代购平台</a></li>
+        <li><a href="#buy" data-nav>如何代购商品</a></li>
+        <li><a href="#step-1" class="sub" data-nav>挑选商品</a></li>
+        <li><a href="#step-2" class="sub" data-nav>提交代购</a></li>
+        <li><a href="#step-3" class="sub" data-nav>支付商品费用</a></li>
+        <li><a href="#step-4" class="sub" data-nav>FalconGoo 代购</a></li>
+        <li><a href="#step-5" class="sub" data-nav>验货入库</a></li>
+        <li><a href="#ship" data-nav>如何提交包裹</a></li>
+        <li><a href="#step-6" class="sub" data-nav>提交包裹</a></li>
+        <li><a href="#step-7" class="sub" data-nav>支付预估运费</a></li>
+        <li><a href="#step-8" class="sub" data-nav>FalconGoo 发货</a></li>
+        <li><a href="#step-9" class="sub" data-nav>等待收货</a></li>
+        <li><a href="#receive" data-nav>收货与售后</a></li>
+      </ol>
+    </aside>
+
+    <div>
+      <!-- ============ 平台 ============ -->
+      <section class="content-sec" id="platforms" aria-labelledby="platformTitle">
+        <div class="group-head">
+          <span class="group-badge">支持的平台</span>
+          <h2 id="platformTitle">FalconGoo 支持的代购平台</h2>
+          <p>看到想买的商品，复制链接贴进搜索框就行，不用管它在哪个平台，也不用分别注册账号。</p>
+        </div>
+
+        <div class="platform-panel">
+          <ul class="platform-grid">
+            <li class="plat">
+              <span class="plogo" style="background:#ff5000">淘</span>
+              <span>淘宝</span>
+            </li>
+            <li class="plat">
+              <span class="plogo" style="background:#e01e28">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 11.6 5.4 4.2 9 8.1a8.4 8.4 0 0 1 6 0l3.6-3.9 2.2 7.4a7.6 7.6 0 0 1-1 8.1c-1.6 2-4 3.1-7.8 3.1S5.8 21.7 4.2 19.7a7.6 7.6 0 0 1-1-8.1Z"/></svg>
+              </span>
+              <span>天猫</span>
+            </li>
+            <li class="plat">
+              <span class="plogo sm" style="background:#ff6a00">1688</span>
+              <span>1688</span>
+            </li>
+            <li class="plat">
+              <span class="plogo sm" style="background:#e1251b">JD</span>
+              <span>京东</span>
+            </li>
+            <li class="plat">
+              <span class="plogo" style="background:#e02e24">拼</span>
+              <span>拼多多</span>
+            </li>
+            <li class="plat">
+              <span class="plogo xs" style="background:#ff2442">小红书</span>
+              <span>小红书</span>
+            </li>
+            <li class="plat">
+              <span class="plogo" style="background:#161823">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3.2c.3 2 1.4 3.4 3.4 4v3.1c-1.3 0-2.5-.4-3.5-1.1v5.9a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.2a2.7 2.7 0 1 0 1.9 2.6V3.2h3.2Z"/></svg>
+              </span>
+              <span>抖音商城</span>
+            </li>
+            <li class="plat">
+              <span class="plogo xs" style="background:#e6004c">唯品会</span>
+              <span>唯品会</span>
+            </li>
+            <li class="plat">
+              <span class="plogo sm" style="background:#111318">得物</span>
+              <span>得物</span>
+            </li>
+            <li class="plat">
+              <span class="plogo dark" style="background:#ffe60f">闲</span>
+              <span>闲鱼</span>
+            </li>
+            <li class="plat">
+              <span class="plogo sm" style="background:#ffaa00">苏宁</span>
+              <span>苏宁易购</span>
+            </li>
+            <li class="plat">
+              <span class="plogo sm" style="background:#b72a2a">严选</span>
+              <span>网易严选</span>
+            </li>
+          </ul>
+          <p class="platform-foot">以上平台均可在同一个账号、同一张订单里下单，<b>无需切换平台，也无需分别注册</b>。</p>
+        </div>
+      </section>
+
+      <!-- ============ 代购流程 ============ -->
+      <section class="content-sec" id="buy" aria-labelledby="buyTitle">
+        <div class="group-head">
+          <span class="group-badge">代购阶段 · 步骤 1 ~ 5</span>
+          <h2 id="buyTitle">如何通过 FalconGoo 代购商品</h2>
+          <p>选品、下单、付款，剩下的交给买手。商品到仓后我们会验货并拍照给您看。</p>
+        </div>
+
+        <!-- 步骤1 -->
+        <article class="step-card" id="step-1">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">01</span>
+            <div>
+              <h3>挑选商品</h3>
+              <p class="step-lead">两种方式都能找到想买的中国商品，用哪种都可以。</p>
+            </div>
+          </div>
+
+          <div class="method-block">
+            <div class="method-head">
+              <span class="method-tag">方式一</span>
+              <p>在<b>淘宝 / 天猫 / 京东</b>等平台找到想要购买的商品，复制商品链接后，在 FalconGoo 搜索框<b>粘贴商品网址链接</b>。</p>
+            </div>
+            <figure class="shot">
+              <div class="ph" role="img" aria-label="待补充：在搜索框粘贴商品链接的截图">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+                <span class="ph-t">截图待补充</span>
+                <span class="ph-s">在搜索框粘贴商品链接</span>
+              </div>
+              <figcaption>图 1 · 对应「方式一」：搜索框粘贴商品链接</figcaption>
+            </figure>
+          </div>
+
+          <div class="method-block">
+            <div class="method-head">
+              <span class="method-tag">方式二</span>
+              <p>在 FalconGoo 搜索框<b>输入商品名称</b>，从推荐的商品中挑选。</p>
+            </div>
+            <figure class="shot">
+              <div class="ph" role="img" aria-label="待补充：输入商品名称后的搜索结果截图">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+                <span class="ph-t">截图待补充</span>
+                <span class="ph-s">输入商品名称后的搜索结果</span>
+              </div>
+              <figcaption>图 2 · 对应「方式二」：输入商品名称搜索</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 步骤2 -->
+        <article class="step-card" id="step-2">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">02</span>
+            <div>
+              <h3>提交代购</h3>
+              <p class="step-lead">大部分商品可以直接选规格下单，少部分需要您自己填一下订单信息。</p>
+            </div>
+          </div>
+
+          <div class="method-block">
+            <div class="method-head">
+              <span class="method-tag">方式一</span>
+              <p>FalconGoo 可支持 <b>99% 淘宝 / 天猫 / 京东商品</b>的信息抓取，您可以直接选择商品颜色、尺寸、数量，点击“加入购物车”或“立即购买”。</p>
+            </div>
+            <figure class="shot">
+              <div class="ph" role="img" aria-label="待补充：商品详情页选择颜色尺码数量的截图">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+                <span class="ph-t">截图待补充</span>
+                <span class="ph-s">商品详情页选择颜色、尺码、数量</span>
+              </div>
+              <figcaption>图 1 · 对应「方式一」：商品详情页直接选规格</figcaption>
+            </figure>
+          </div>
+
+          <div class="method-block">
+            <div class="method-head">
+              <span class="method-tag">方式二</span>
+              <p>购买上述平台商品时，如出现“<b>填写代购单页面</b>”，您需自主填写商品订单信息后，点击“立即代购”。</p>
+            </div>
+            <figure class="shot">
+              <div class="ph" role="img" aria-label="待补充：填写代购单页面的截图">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+                <span class="ph-t">截图待补充</span>
+                <span class="ph-s">填写代购单页面</span>
+              </div>
+              <figcaption>图 2 · 对应「方式二」：填写代购单页面</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 步骤3 -->
+        <article class="step-card" id="step-3">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">03</span>
+            <div>
+              <h3>支付商品费用</h3>
+              <p class="step-lead">提交代购订单，选择支付方式，支付商品售价及中国大陆运费。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>支持外币和人民币多币种支付。</li>
+              <li>支付方式包括：国际信用卡、Google Pay、Apple Pay、微信、支付宝等。</li>
+              <li>填写寄送国及备注购买需求，如需增值服务，可勾选对应的服务，核实无误后提交订单。</li>
+              <li>支付完成后，订单进度和采购状态可在“我的 FalconGoo”随时查看。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：支付商品费用页面的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">支付商品费用页面</span>
+            </div>
+            <figcaption>图 1 · 支付商品费用页面</figcaption>
+          </figure>
+        </article>
+
+        <!-- 步骤4 -->
+        <article class="step-card" id="step-4">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">04</span>
+            <div>
+              <h3>FalconGoo 代购</h3>
+              <p class="step-lead">买手为您联系卖家订购商品。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>采购由买手全程帮您完成，<b>您不需要自己联系卖家</b>。</li>
+              <li>采购过程中如出现问题（缺货、颜色尺码不全、需要补充要求等），买手会<b>主动通过站内信联系您</b>，补齐或确认信息。</li>
+              <li>下单后请留意站内信通知，及时回复可以避免采购延误。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：代购订单状态与站内信的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">代购订单状态与站内信</span>
+            </div>
+            <figcaption>图 1 · 代购订单状态与站内信</figcaption>
+          </figure>
+        </article>
+
+        <!-- 步骤5 -->
+        <article class="step-card" id="step-5">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">05</span>
+            <div>
+              <h3>FalconGoo 验货入库</h3>
+              <p class="step-lead">收货验货，称重入库。入库后商品将会在“我的 FalconGoo”－“我的仓库”里显示。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>收货入库时，我们进行严格专业的验货，并拍摄商品实物照片供您查看，发现问题及时反馈您并协助解决。</li>
+              <li>1688 代购商品的“验货入库”服务标准与其他代购商品不同，详情请查看 FalconGoo 代购 1688 服务说明。</li>
+              <li>接下来您可以把已入库的商品提交寄送海外（步骤 6~9），或购买更多商品合并提交寄送（重复步骤 1~5，再继续步骤 6~9）。</li>
+              <li>我们的仓库提供 <b>180 天的免费存储</b>。</li>
+              <li>凑齐更多商品合并寄送海外，将能节省国际运费。</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 提包流程 ============ -->
+      <section class="content-sec" id="ship" aria-labelledby="shipTitle">
+        <div class="group-head">
+          <span class="group-badge">转运阶段 · 步骤 6 ~ 9</span>
+          <h2 id="shipTitle">如何在 FalconGoo 提交包裹</h2>
+          <p>仓库里的商品凑齐后，提交包裹、支付预估运费，剩下的交给我们打包发货。</p>
+        </div>
+
+        <!-- 步骤6 -->
+        <article class="step-card ship" id="step-6">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">06</span>
+            <div>
+              <h3>提交包裹</h3>
+              <p class="step-lead">在“我的仓库”中，选择商品点击提交包裹，填写海外收货人地址信息，从推荐的配送方式中进行选择。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>有些商品受<b>重量、体积等限制</b>，并非所有物流线路都能寄送，我们为您筛选出可用的配送方式，您从中选择即可。</li>
+              <li>我们提供去包装 / 加固 / 保险等相关服务，若有需要会按您的要求来打包。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：提交包裹页面的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">选择商品、填写收货地址、选择配送方式</span>
+            </div>
+            <figcaption>图 1 · 提交包裹页面</figcaption>
+          </figure>
+        </article>
+
+        <!-- 步骤7 -->
+        <article class="step-card ship" id="step-7">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">07</span>
+            <div>
+              <h3>支付预估国际运费及必要附加费</h3>
+              <p class="step-lead">选择支付方式，支付预估国际运费及必要附加费。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>预估国际运费根据商品预估重量、选择的运送方式、运送地区计算得出；必要附加费按所选物流线路的规定收取。</li>
+              <li>最终运费以承运方核定的包裹体积和重量为准，与预估费用的差额部分将在发货后多退少补至您的 FalconGoo 账户内。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：支付预估国际运费及必要附加费页面的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">预估国际运费与必要附加费明细</span>
+            </div>
+            <figcaption>图 1 · 支付预估国际运费及必要附加费页面</figcaption>
+          </figure>
+        </article>
+
+        <!-- 步骤8 -->
+        <article class="step-card ship" id="step-8">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">08</span>
+            <div>
+              <h3>FalconGoo 发货</h3>
+              <p class="step-lead">商品合并打包，加固包裹，称重发货。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>发货后可在“我的 FalconGoo”－“我的包裹”查看物流信息。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：我的包裹页面物流信息的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">我的包裹 · 物流信息</span>
+            </div>
+            <figcaption>图 1 · 我的包裹 · 物流信息</figcaption>
+          </figure>
+        </article>
+
+        <!-- 步骤9 -->
+        <article class="step-card ship" id="step-9">
+          <div class="step-head">
+            <span class="step-num" aria-hidden="true">09</span>
+            <div>
+              <h3>等待收货</h3>
+              <p class="step-lead">在包裹列表页中查看物流轨迹并关注包裹寄送进度。</p>
+            </div>
+          </div>
+          <div class="tips no-top">
+            <div class="tips-h">TIPS</div>
+            <ul>
+              <li>国际包裹寄送过程中，会有一定的概率出现意外情况，比如延误、罚没、征税、破损、丢失等。FalconGoo 无法控制和避免第三方物流商和各国海关会出现的服务质量和意外情况，但本着用户第一的服务理念，FalconGoo 会根据各线路和国家的情况事先告知提醒，并且在发生问题时力所能及地协助您。</li>
+              <li>有关包裹寄送与物流的注意事项，请查看 FalconGoo 物流寄送说明。</li>
+            </ul>
+          </div>
+          <figure class="shot" style="margin-top:20px">
+            <div class="ph" role="img" aria-label="待补充：包裹列表页物流轨迹的截图">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+              <span class="ph-t">截图待补充</span>
+              <span class="ph-s">包裹列表页 · 物流轨迹</span>
+            </div>
+            <figcaption>图 1 · 包裹列表页 · 物流轨迹</figcaption>
+          </figure>
+        </article>
+      </section>
+
+      <!-- ============ 收货 ============ -->
+      <section class="content-sec" id="receive" aria-labelledby="receiveTitle">
+        <div class="group-head">
+          <span class="group-badge">最后一步</span>
+          <h2 id="receiveTitle">收货与售后</h2>
+          <p>收到包裹后，在“我的 FalconGoo”－“我的包裹”里确认签收。</p>
+        </div>
+
+        <figure class="shot" style="margin-top:20px">
+          <div class="ph" role="img" aria-label="待补充：确认签收页面的截图">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+            <span class="ph-t">截图待补充</span>
+            <span class="ph-s">我的包裹 · 确认签收</span>
+          </div>
+          <figcaption>图 1 · 确认签收</figcaption>
+        </figure>
+
+        <div class="closing" style="margin-top:24px">
+          <div>
+            <h3>剩下的都交给我们</h3>
+            <p>选好商品下单、有问题时回一句、凑齐后提交包裹——<b>您只需要做这三件事</b>。采购、验货、打包、报关、发货，全程由 FalconGoo 处理。</p>
+            <p class="closing-note">遇到订单、包裹或费用相关的问题，随时联系在线客服，我们会尽快帮您处理。</p>
+          </div>
+          <a class="btn-primary" href="https://www.falcongoo.com" target="_blank" rel="noopener noreferrer">开始第一次代购</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-in">
+    <p>© 2026 FalconGoo · 中国代购与国际转运服务平台</p>
+    <div class="footer-links">
+      <a href="#platforms">支持的代购平台</a>
+      <a href="#buy">代购流程</a>
+      <a href="#ship">转运流程</a>
+      <a href="https://www.falcongoo.com" target="_blank" rel="noopener noreferrer">FalconGoo 主站</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  try{
+    // 顶栏搜索：示例页不跳转，给出明确提示
+    var form = document.getElementById('searchForm');
+    var input = document.getElementById('searchInput');
+    var toast = document.getElementById('toast');
+    var timer = null;
+
+    function showToast(msg){
+      if(!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if(timer) clearTimeout(timer);
+      timer = setTimeout(function(){ toast.classList.remove('show'); }, 2600);
+    }
+
+    if(form && input){
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var v = (input.value || '').trim();
+        if(!v){
+          showToast('请先粘贴商品链接，或输入商品名称');
+          input.focus();
+          return;
+        }
+        showToast('这是新手指引示例页，实际搜索请前往 FalconGoo 主站');
+      });
+    }
+
+    // 页内锚点：始终在当前文档内滚动
+    var links = document.querySelectorAll('a[href^="#"]');
+    Array.prototype.forEach.call(links, function(a){
+      a.addEventListener('click', function(e){
+        var id = a.getAttribute('href').slice(1);
+        if(!id) return;
+        var target = document.getElementById(id);
+        if(!target) return;
+        e.preventDefault();
+        target.scrollIntoView({behavior:'smooth', block:'start'});
+        if(history.replaceState){ history.replaceState(null, '', '#' + id); }
+      });
+    });
+
+    // 目录高亮
+    var navLinks = document.querySelectorAll('.guide-nav a[data-nav]');
+    var targets = [];
+    Array.prototype.forEach.call(navLinks, function(a){
+      var el = document.getElementById(a.getAttribute('href').slice(1));
+      if(el) targets.push({link:a, el:el});
+    });
+    if(targets.length && 'IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(en.isIntersecting){
+            Array.prototype.forEach.call(navLinks, function(a){ a.classList.remove('on'); });
+            targets.forEach(function(t){
+              if(t.el === en.target){ t.link.classList.add('on'); }
+            });
+          }
+        });
+      }, {rootMargin:'-130px 0px -65% 0px', threshold:0});
+      targets.forEach(function(t){ io.observe(t.el); });
+    }
+  }catch(err){ /* 静态内容仍完整可读 */ }
+})();
+</script>
+</body>
+</html>
