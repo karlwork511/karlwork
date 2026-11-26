@@ -127,6 +127,38 @@
     padding:16px;
   }
 
+  .group-card--note{
+    padding:16px 18px;
+  }
+
+  .note-list{
+    margin:0;
+    padding:0;
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+
+  .note-list li{
+    position:relative;
+    padding-left:13px;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--text-2);
+  }
+
+  .note-list li::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:8px;
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    background:#C7CBD8;
+  }
+
   .pay-row{
     display:flex;
     align-items:center;
@@ -226,7 +258,7 @@
 
   .recharge:hover{text-decoration:underline}
 
-  /* 在线支付图标 */
+  /* 渠道图标 */
   .logo{
     width:78px;
     height:34px;
@@ -237,7 +269,7 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:3px;
     line-height:1;
     overflow:hidden;
   }
@@ -273,11 +305,44 @@
     letter-spacing:-.4px;
   }
 
+  .lg-up{
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+  }
+
+  .lg-up-txt{
+    color:#003B7C;
+    font-size:8.5px;
+    font-weight:800;
+    letter-spacing:-.2px;
+  }
+
   .lg-yoomoney{
     color:#8B3FFD;
     font-size:12px;
     font-weight:800;
     letter-spacing:-.5px;
+  }
+
+  .lg-sber{
+    background:#21A038;
+    color:#fff;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:-.1px;
+    padding:3px 6px;
+    border-radius:4px;
+  }
+
+  .lg-tbank{
+    background:#FFDD2D;
+    color:#111;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.1px;
+    padding:3px 5px;
+    border-radius:3px;
   }
 
   .lg-apple-pay{
@@ -309,6 +374,19 @@
     font-weight:500;
   }
 
+  .lg-paypal{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+  }
+
+  .lg-paypal-txt{
+    color:#003087;
+    font-size:8.5px;
+    font-weight:800;
+    letter-spacing:-.2px;
+  }
+
   .lg-payid{
     display:inline-flex;
     align-items:center;
@@ -331,6 +409,23 @@
     padding:3px 3px;
     border-radius:4px;
     line-height:1;
+  }
+
+  .lg-trustly{
+    background:#0EC46A;
+    color:#fff;
+    font-size:9.5px;
+    font-weight:800;
+    letter-spacing:-.2px;
+    padding:3px 7px;
+    border-radius:4px;
+  }
+
+  .lg-skrill{
+    color:#6B21D6;
+    font-size:12.5px;
+    font-weight:800;
+    letter-spacing:-.5px;
   }
 
   .pay-info{
@@ -664,10 +759,37 @@
             <span class="pay-info"><span class="pay-name">支付宝</span></span>
           </label>
 
+          <label class="pay-row" for="pm-unionpay">
+            <input class="radio" type="radio" name="paymethod" id="pm-unionpay" value="unionpay">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-up">
+                <svg viewBox="0 0 14 14" width="11" height="11" aria-hidden="true">
+                  <rect x="0" y="2" width="3.2" height="10" fill="#E21836" transform="skewX(-10)"></rect>
+                  <rect x="4.8" y="2" width="3.2" height="10" fill="#00447C" transform="skewX(-10)"></rect>
+                  <rect x="9.6" y="2" width="3.2" height="10" fill="#007B84" transform="skewX(-10)"></rect>
+                </svg>
+                <span class="lg-up-txt">UnionPay</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">银联</span></span>
+          </label>
+
           <label class="pay-row" for="pm-yoomoney">
             <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
             <span class="logo" aria-hidden="true"><span class="lg-yoomoney">yoomoney</span></span>
             <span class="pay-info"><span class="pay-name">YooMoney</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-sberpay">
+            <input class="radio" type="radio" name="paymethod" id="pm-sberpay" value="sberpay">
+            <span class="logo" aria-hidden="true"><span class="lg-sber">Pay</span></span>
+            <span class="pay-info"><span class="pay-name">SberPay</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-tbank">
+            <input class="radio" type="radio" name="paymethod" id="pm-tbank" value="tbank">
+            <span class="logo" aria-hidden="true"><span class="lg-tbank">T BANK</span></span>
+            <span class="pay-info"><span class="pay-name">T-Bank</span></span>
           </label>
 
           <label class="pay-row" for="pm-card">
@@ -696,6 +818,31 @@
             <span class="pay-info"><span class="pay-name">Apple Pay</span></span>
           </label>
 
+          <label class="pay-row" for="pm-googlepay">
+            <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-gpay">
+                <span class="lg-g">G</span>
+                <span class="lg-gpay-txt">Pay</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">Google Pay</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-paypal">
+            <input class="radio" type="radio" name="paymethod" id="pm-paypal" value="paypal">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-paypal">
+                <svg viewBox="0 0 12 14" width="9" height="11" aria-hidden="true">
+                  <path d="M2 1h5.2c1.9 0 3 1.1 2.7 2.9-.35 2.1-1.9 3.3-4.1 3.3H4.4l-.6 3.3H1.3L2 1z" fill="#003087"></path>
+                  <path d="M4.6 4.2h4.6c1.7 0 2.7 1 2.4 2.6-.3 1.9-1.7 3-3.7 3H6.2l-.5 2.8H3.1l1.5-8.4z" fill="#009CDE" opacity=".85"></path>
+                </svg>
+                <span class="lg-paypal-txt">PayPal</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">PayPal</span></span>
+          </label>
+
           <label class="pay-row" for="pm-payid">
             <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
             <span class="logo" aria-hidden="true">
@@ -707,17 +854,31 @@
             <span class="pay-info"><span class="pay-name">PayID</span></span>
           </label>
 
-          <label class="pay-row" for="pm-googlepay">
-            <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
-            <span class="logo" aria-hidden="true">
-              <span class="lg-gpay">
-                <span class="lg-g">G</span>
-                <span class="lg-gpay-txt">Pay</span>
-              </span>
-            </span>
-            <span class="pay-info"><span class="pay-name">Google Pay</span></span>
+          <label class="pay-row" for="pm-trustly">
+            <input class="radio" type="radio" name="paymethod" id="pm-trustly" value="trustly">
+            <span class="logo" aria-hidden="true"><span class="lg-trustly">Trustly</span></span>
+            <span class="pay-info"><span class="pay-name">Trustly</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-skrill">
+            <input class="radio" type="radio" name="paymethod" id="pm-skrill" value="skrill">
+            <span class="logo" aria-hidden="true"><span class="lg-skrill">Skrill</span></span>
+            <span class="pay-info"><span class="pay-name">Skrill</span></span>
           </label>
         </div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2 class="group-title">支付说明</h2>
+      <div class="group-card group-card--note">
+        <ul class="note-list">
+          <li>应付金额以人民币为基准计算，切换支付方式后按该渠道收款币种自动换算，括号内为对应人民币金额。</li>
+          <li>各渠道手续费费率不同，最终扣款以支付渠道结算为准，超出部分由平台承担。</li>
+          <li>汇率每日更新一次，进入收银台时锁定，支付超时后需重新发起支付。</li>
+          <li>账户余额仅可用于支付本平台订单，不可提现、不可转让。</li>
+          <li>支付过程中如遇到扣款失败、重复扣款等问题，请保留支付凭证并联系在线客服。</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -775,25 +936,30 @@
 </main>
 
 <script>
-  var FX = { CNY: 1, USD: 0.149, RUB: 12.3762, AUD: 0.2257 };
-  var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$' };
+  var FX = { CNY: 1, USD: 0.149, RUB: 12.3762, AUD: 0.2257, EUR: 0.1363 };
+  var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$', EUR: '€' };
   var ORDER_CNY = 32.40;
 
-  /* 账户余额约合展示币种（对应截图中的 ≈ AUD 口径，可按需改成用户展示币种） */
-  var BALANCE_CNY = 37.87;
+  /* 账户余额约合展示币种（对应截图中的 ≈ AUD 口径） */
   var BALANCE_DISPLAY_CUR = 'AUD';
 
   var METHODS = {
-    balance:   { name: '账户余额',  currency: 'CNY', rate: 0,     fixed: null },
-    alipay:    { name: '支付宝',    currency: 'CNY', rate: 0,     fixed: null },
-    yoomoney:  { name: 'YooMoney',  currency: 'RUB', rate: 0.027, fixed: null },
-    card:      { name: '信用卡',    currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
-    applepay:  { name: 'Apple Pay', currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
-    payid:     { name: 'PayID',     currency: 'AUD', rate: 0.02,  fixed: { amount: 0.7, currency: 'AUD' } },
-    googlepay: { name: 'Google Pay', currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } }
+    balance:   { name: '账户余额',   currency: 'CNY', rate: 0,     fixed: null },
+    alipay:    { name: '支付宝',     currency: 'CNY', rate: 0,     fixed: null },
+    unionpay:  { name: '银联',       currency: 'CNY', rate: 0.006, fixed: null },
+    yoomoney:  { name: 'YooMoney',   currency: 'RUB', rate: 0.027, fixed: null },
+    sberpay:   { name: 'SberPay',    currency: 'RUB', rate: 0.035, fixed: { amount: 10, currency: 'RUB' } },
+    tbank:     { name: 'T-Bank',     currency: 'RUB', rate: 0.035, fixed: { amount: 10, currency: 'RUB' } },
+    card:      { name: '信用卡',     currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
+    applepay:  { name: 'Apple Pay',  currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
+    googlepay: { name: 'Google Pay', currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
+    paypal:    { name: 'PayPal',     currency: 'USD', rate: 0.044, fixed: { amount: 0.3, currency: 'USD' } },
+    payid:     { name: 'PayID',      currency: 'AUD', rate: 0.02,  fixed: { amount: 0.7, currency: 'AUD' } },
+    trustly:   { name: 'Trustly',    currency: 'EUR', rate: 0.018, fixed: { amount: 0.35, currency: 'USD' } },
+    skrill:    { name: 'Skrill',     currency: 'EUR', rate: 0.028, fixed: { amount: 0.35, currency: 'USD' } }
   };
 
-  var FIXED_SYMBOL = { USD: 'US $', AUD: 'AU $', RUB: 'RUB ', CNY: 'CN ¥' };
+  var FIXED_SYMBOL = { USD: 'US $', AUD: 'AU $', RUB: 'RUB ', CNY: 'CN ¥', EUR: '€ ' };
 
   function byId(id) { return document.getElementById(id); }
 
