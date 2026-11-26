@@ -3,561 +3,858 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>选择付款方式 · 收银台币种展示优化</title>
+<title>收银台 · 选择付款方式</title>
 <style>
-:root{
-  --bg:#F5F6FA;
-  --surface:#FFFFFF;
-  --line:#EDEEF3;
-  --line-strong:#E2E4EC;
-  --text:#1F2233;
-  --text-2:#6B7280;
-  --text-3:#9AA0AE;
-  --brand:#5B4CF5;
-  --brand-dark:#4B3DD9;
-  --brand-weak:#F4F2FF;
-  --brand-line:#E3DEFF;
-  --warn:#B45309;
-  --warn-bg:#FFF8E8;
-  --warn-line:#FBE6B4;
-  --radius-lg:14px;
-  --radius-md:10px;
-  --shadow:0 1px 2px rgba(23,26,42,.04), 0 10px 28px rgba(23,26,42,.05);
-}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  font-size:14px;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
-.checkout{max-width:1320px;margin:0 auto;padding:26px 24px 56px}
-.page-head{margin-bottom:16px}
-h1{font-size:18px;font-weight:600;margin:0;color:var(--text);letter-spacing:-.01em}
-.page-sub{margin:6px 0 0;font-size:12.5px;color:var(--text-3);line-height:1.6}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 348px;gap:20px;align-items:start}
+  :root{
+    --brand:#6C5CE7;
+    --brand-soft:#F2EFFF;
+    --brand-line:#D9D2FB;
+    --text-1:#171A2A;
+    --text-2:#565C70;
+    --text-3:#8A90A2;
+    --line:#EDEFF4;
+    --line-strong:#E3E6EE;
+    --bg:#F6F7FB;
+    --card:#FFFFFF;
+    --radius:14px;
+  }
 
-/* ---------- 左侧支付方式 ---------- */
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:10px;box-shadow:var(--shadow)}
-.panel + .panel{margin-top:16px}
-.panel-title{font-size:14px;font-weight:600;margin:6px 12px 8px;color:var(--text)}
-.pay-row{
-  display:flex;align-items:center;gap:12px;
-  padding:15px 14px;border-radius:var(--radius-md);
-  border:1px solid transparent;cursor:pointer;
-  transition:background .16s ease, border-color .16s ease;
-}
-.pay-row:hover{background:#FAFAFD}
-.pay-row.is-active{background:var(--brand-weak);border-color:var(--brand-line)}
-.radio{
-  appearance:none;-webkit-appearance:none;
-  width:18px;height:18px;border-radius:50%;
-  border:1.5px solid #D3D6E0;background:#fff;flex:none;margin:0;cursor:pointer;
-  transition:border-color .16s ease, border-width .16s ease;
-}
-.radio:checked{border-color:var(--brand);border-width:5px}
-.radio:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.logo{
-  width:36px;height:36px;border-radius:9px;border:1px solid var(--line-strong);
-  background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;
-  font-weight:700;line-height:1;
-}
-.logo-alipay{color:#1677FF;font-size:17px}
-.logo-yoomoney{color:#8B3FFD;font-size:18px}
-.logo-gpay{font-size:18px;background:linear-gradient(135deg,#4285F4,#EA4335 42%,#FBBC05 68%,#34A853);-webkit-background-clip:text;background-clip:text;color:transparent}
-.logo-apay{color:#111;font-size:13px;letter-spacing:-.02em}
-.logo-payid{color:#E4002B;font-size:10px;letter-spacing:.02em}
-.pay-info{min-width:0;flex:1}
-.pay-name{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--text)}
-.cur-tag{
-  display:inline-flex;align-items:center;height:19px;padding:0 7px;flex:none;
-  border-radius:5px;background:#F3F4F8;border:1px solid #EAEBF1;
-  font-size:11.5px;font-weight:500;color:#7E8496;white-space:nowrap;
-}
-.pay-row.is-active .cur-tag{background:#fff;border-color:var(--brand-line);color:var(--brand)}
-.pay-meta{display:block;margin-top:4px;font-size:12.5px;color:var(--text-3)}
-.recharge{
-  margin-left:auto;flex:none;color:var(--brand);font-size:13px;font-weight:500;
-  padding:6px 8px;border-radius:6px;
-  border:0;background:transparent;font-family:inherit;cursor:pointer;
-}
-.recharge:hover{background:#EFEBFF}
-.recharge:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+  *{box-sizing:border-box}
 
-/* ---------- 右侧付款摘要 ---------- */
-.summary{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
-  padding:20px;box-shadow:var(--shadow);position:sticky;top:20px;
-}
-.summary-title{font-size:15px;font-weight:600;margin:0 0 16px}
-.sum-list{margin:0}
-.sum-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
-.sum-row dt{font-size:13px;color:var(--text-2);flex:none}
-.sum-row dd{margin:0;text-align:right;font-size:14px;font-weight:500;color:var(--text);overflow-wrap:anywhere}
-.sum-row dd .cny{font-size:12px;font-weight:400;color:var(--text-3);margin-left:4px;white-space:nowrap}
-.sum-row dd.is-name{font-weight:600}
-.fee-rule{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  margin:-6px 0 14px;font-size:12px;color:var(--text-3);
-}
-.detail-btn{
-  flex:none;border:0;background:transparent;padding:2px 0;
-  color:var(--brand);font-size:12px;font-family:inherit;cursor:pointer;
-  border-bottom:1px dashed rgba(91,76,245,.5);line-height:1.3;
-}
-.detail-btn:hover{color:var(--brand-dark);border-bottom-color:var(--brand-dark)}
-.detail-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:3px}
-.total{
-  display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  border-top:1px solid var(--line);margin-top:2px;padding-top:16px;
-}
-.total-label{font-size:14px;font-weight:600}
-.total-amount{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.total-amount .main{font-size:24px;font-weight:700;color:var(--brand);letter-spacing:-.02em}
-.total-amount .total-cny{font-size:13px;font-weight:400;color:var(--text-3);white-space:nowrap}
-.balance-tip{
-  margin:12px 0 0;padding:9px 12px;border-radius:8px;
-  background:var(--warn-bg);border:1px solid var(--warn-line);
-  color:var(--warn);font-size:12.5px;
-}
-.agree{
-  display:flex;align-items:flex-start;gap:8px;margin-top:16px;
-  font-size:12.5px;color:var(--text-2);line-height:1.55;cursor:pointer;
-}
-.agree input{
-  appearance:none;-webkit-appearance:none;width:16px;height:16px;flex:none;margin:2px 0 0;
-  border:1.5px solid #C9CCD8;border-radius:4px;background:#fff;cursor:pointer;position:relative;
-}
-.agree input:checked{background:var(--brand);border-color:var(--brand)}
-.agree input:checked::after{
-  content:"";position:absolute;left:4.5px;top:1px;width:5px;height:9px;
-  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
-}
-.agree input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.btn-pay{
-  width:100%;margin-top:16px;height:46px;border:0;border-radius:var(--radius-md);
-  background:var(--brand);color:#fff;font-size:15px;font-weight:600;font-family:inherit;
-  cursor:pointer;transition:background .16s ease, transform .16s ease;
-}
-.btn-pay:hover:not(:disabled){background:var(--brand-dark)}
-.btn-pay:active:not(:disabled){transform:translateY(1px)}
-.btn-pay:disabled{background:#C9C7E8;cursor:not-allowed}
-.btn-pay:focus-visible{outline:2px solid #2C2580;outline-offset:2px}
+  html,body{margin:0;padding:0}
 
-/* ---------- 费用明细弹层 ---------- */
-.detail-dialog{
-  border:0;border-radius:var(--radius-lg);padding:0;color:var(--text);
-  width:min(392px, calc(100vw - 32px));
-  box-shadow:0 24px 64px rgba(23,26,42,.24);
-}
-.detail-dialog::backdrop{background:rgba(20,22,34,.42)}
-.detail-inner{padding:20px}
-.detail-title{font-size:16px;font-weight:600;margin:0 0 16px}
-.detail-list{margin:0}
-.detail-list > div{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:8px 0}
-.detail-list dt{font-size:13px;color:var(--text-2);flex:none}
-.detail-list dd{margin:0;text-align:right;font-size:13.5px;color:var(--text);overflow-wrap:anywhere}
-.detail-list .detail-total{border-top:1px solid var(--line);margin-top:4px;padding-top:12px}
-.detail-list .detail-total dt{font-weight:600;color:var(--text)}
-.detail-list .detail-total dd{font-weight:700;color:var(--brand)}
-.detail-note{
-  margin:12px 0 0;padding:9px 12px;border-radius:8px;
-  background:#F7F8FB;color:var(--text-3);font-size:12px;line-height:1.55;
-}
-.btn-close{
-  width:100%;margin-top:16px;height:42px;border:1px solid var(--line-strong);
-  border-radius:var(--radius-md);background:#fff;color:var(--text);
-  font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;
-}
-.btn-close:hover{background:#F7F8FB}
-.btn-close:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  body{
+    background:var(--bg);
+    color:var(--text-1);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
 
-/* ---------- 动效与提示 ---------- */
-.flash{animation:flashIn .24s ease-out}
-@keyframes flashIn{from{opacity:.4;transform:translateY(2px)}to{opacity:1;transform:none}}
-.toast{
-  position:fixed;left:50%;bottom:32px;transform:translate(-50%,8px);
-  background:rgba(31,34,51,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;
-  opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:9;
-}
-.toast.show{opacity:1;transform:translate(-50%,0)}
+  .topbar{
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    padding:0 24px;
+  }
 
-@media (max-width:920px){
-  .checkout{padding:20px 16px 48px}
-  .layout{grid-template-columns:1fr}
-  .summary{position:static}
-}
-@media (max-width:420px){
-  .total-amount .main{font-size:22px}
-  .pay-row{padding:13px 10px;gap:10px}
-}
-@media (prefers-reduced-motion: reduce){
-  *{animation:none !important;transition:none !important}
-}
-@media print{
-  body{background:#fff}
-  .checkout{padding:0;max-width:none}
-  .panel,.summary{box-shadow:none;border-color:#C9CCD8}
-  .summary{position:static}
-  .btn-pay,.toast,.detail-btn,.detail-dialog{display:none}
-  .pay-row.is-active{background:#fff;border-color:#8B8FA0}
-  .layout{grid-template-columns:1fr 320px}
-}
+  .topbar-inner{
+    max-width:1180px;
+    margin:0 auto;
+    height:58px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .brand-mark{
+    width:26px;
+    height:26px;
+    border-radius:8px;
+    background:linear-gradient(135deg,#6C5CE7,#9A8BFF);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:none;
+  }
+
+  .brand-name{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+
+  .topbar-sep{
+    width:1px;
+    height:16px;
+    background:var(--line-strong);
+    margin:0 4px;
+  }
+
+  .topbar-crumb{
+    font-size:13px;
+    color:var(--text-3);
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:28px 24px 64px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 352px;
+    gap:24px;
+    align-items:start;
+  }
+
+  .pay-head{
+    margin:0 0 6px;
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:-.2px;
+  }
+
+  .page-sub{
+    margin:0 0 22px;
+    font-size:12.5px;
+    color:var(--text-3);
+    line-height:1.7;
+  }
+
+  .section-label{
+    margin:0 0 10px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--text-3);
+    letter-spacing:.3px;
+  }
+
+  .pay-list{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:8px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .pay-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 12px;
+    border:1px solid transparent;
+    border-radius:11px;
+    background:#fff;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+
+  .pay-row:hover{background:#FAFAFD}
+
+  .pay-row.is-active{
+    background:var(--brand-soft);
+    border-color:var(--brand-line);
+  }
+
+  .radio{
+    appearance:none;
+    -webkit-appearance:none;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    border:1.5px solid #C7CBD8;
+    background:#fff;
+    margin:0;
+    flex:none;
+    cursor:pointer;
+    transition:border-color .15s ease, border-width .15s ease;
+  }
+
+  .radio:checked{
+    border:5px solid var(--brand);
+  }
+
+  .radio:focus-visible{
+    outline:2px solid var(--brand);
+    outline-offset:2px;
+  }
+
+  .logo{
+    width:72px;
+    height:34px;
+    flex:none;
+    border:1px solid var(--line-strong);
+    border-radius:7px;
+    background:#fff;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    line-height:1;
+    overflow:hidden;
+  }
+
+  .lg-visa{
+    color:#1A1F71;
+    font-size:10.5px;
+    font-weight:800;
+    font-style:italic;
+    letter-spacing:-.5px;
+  }
+
+  .lg-amex{
+    background:#2E77BC;
+    color:#fff;
+    font-size:6.5px;
+    font-weight:800;
+    letter-spacing:.2px;
+    padding:2px 2.5px;
+    border-radius:2px;
+  }
+
+  .lg-alipay{
+    color:#1677FF;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:-.4px;
+  }
+
+  .lg-yoomoney{
+    color:#8B3FFD;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:-.5px;
+  }
+
+  .lg-apple-pay{
+    color:#111;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:-.2px;
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+  }
+
+  .lg-gpay{
+    display:inline-flex;
+    align-items:baseline;
+    gap:1px;
+  }
+
+  .lg-g{
+    color:#4285F4;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:-.3px;
+  }
+
+  .lg-gpay-txt{
+    color:#5F6368;
+    font-size:13px;
+    font-weight:500;
+  }
+
+  .lg-payid{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+  }
+
+  .lg-payid-txt{
+    color:#111;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:-.3px;
+  }
+
+  .lg-payid-id{
+    background:#7B2FF7;
+    color:#fff;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.2px;
+    padding:3px 3px;
+    border-radius:4px;
+    line-height:1;
+  }
+
+  .pay-info{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+  }
+
+  .pay-name{
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-1);
+  }
+
+  .pay-row.is-active .pay-name{font-weight:600}
+
+  .pay-meta{
+    font-size:12px;
+    color:var(--text-3);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+
+  .recharge{
+    border:0;
+    background:transparent;
+    padding:0;
+    font-family:inherit;
+    font-size:12px;
+    color:var(--brand);
+    cursor:pointer;
+  }
+
+  .recharge:hover{text-decoration:underline}
+
+  .sum-col{
+    position:sticky;
+    top:20px;
+    align-self:start;
+  }
+
+  .sum-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:0 1px 2px rgba(23,26,42,.03);
+  }
+
+  .sum-title{
+    margin:0 0 16px;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:-.1px;
+  }
+
+  .sum-list{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+
+  .sum-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .sum-row dt{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin:0;
+    font-size:13px;
+    color:var(--text-2);
+    flex:none;
+  }
+
+  .sum-row dd{
+    margin:0;
+    text-align:right;
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--text-1);
+    min-width:0;
+  }
+
+  .amt-sub{
+    display:block;
+    font-size:11.5px;
+    font-weight:400;
+    color:var(--text-3);
+    margin-top:1px;
+  }
+
+  .amt-plain{
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-3);
+  }
+
+  .q-wrap{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+  }
+
+  .q-mark{
+    width:15px;
+    height:15px;
+    padding:0;
+    border:1px solid #C7CBD8;
+    border-radius:50%;
+    background:#fff;
+    color:var(--text-3);
+    font-family:inherit;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:help;
+    transition:border-color .15s ease, color .15s ease;
+  }
+
+  .q-mark:hover,
+  .q-mark:focus-visible{
+    border-color:var(--brand);
+    color:var(--brand);
+    outline:none;
+  }
+
+  .q-tip{
+    position:absolute;
+    left:-10px;
+    bottom:calc(100% + 8px);
+    z-index:6;
+    padding:7px 10px;
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    background:#fff;
+    box-shadow:0 8px 22px rgba(23,26,42,.12);
+    font-size:12px;
+    font-weight:400;
+    color:var(--text-2);
+    white-space:nowrap;
+    opacity:0;
+    transform:translateY(4px);
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+  }
+
+  .q-wrap:hover .q-tip,
+  .q-wrap:focus-within .q-tip{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .fx-tag{
+    display:inline-block;
+    padding:1px 5px;
+    margin:0 2px;
+    border-radius:4px;
+    background:#F0EDFF;
+    color:#6B5CF0;
+    font-size:11px;
+    font-weight:500;
+  }
+
+  .sum-row dd.is-fx{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--text-2);
+  }
+
+  .sum-total{
+    margin-top:16px;
+    padding-top:15px;
+    border-top:1px dashed var(--line-strong);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .sum-total-label{
+    font-size:13px;
+    color:var(--text-2);
+    padding-top:3px;
+    flex:none;
+  }
+
+  .total-block{text-align:right}
+
+  .total-main{
+    display:block;
+    font-size:21px;
+    font-weight:600;
+    letter-spacing:-.4px;
+    color:var(--text-1);
+  }
+
+  .total-cny{
+    display:block;
+    margin-top:2px;
+    font-size:12px;
+    color:var(--text-3);
+  }
+
+  .agree{
+    display:flex;
+    align-items:flex-start;
+    gap:7px;
+    margin:16px 0 12px;
+    font-size:12px;
+    color:var(--text-3);
+    cursor:pointer;
+  }
+
+  .agree input{
+    margin:2px 0 0;
+    width:14px;
+    height:14px;
+    accent-color:var(--brand);
+    flex:none;
+    cursor:pointer;
+  }
+
+  .pay-btn{
+    width:100%;
+    height:44px;
+    border:0;
+    border-radius:10px;
+    background:var(--brand);
+    color:#fff;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:.2px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:background .15s ease;
+  }
+
+  .pay-btn:hover{background:#5B4CD6}
+
+  .pay-btn:focus-visible{
+    outline:2px solid var(--brand);
+    outline-offset:2px;
+  }
+
+  .sum-note{
+    margin:12px 0 0;
+    font-size:11.5px;
+    line-height:1.65;
+    color:var(--text-3);
+  }
+
+  @media (max-width:900px){
+    .wrap{
+      grid-template-columns:minmax(0,1fr);
+      padding:22px 16px 48px;
+    }
+
+    .sum-col{
+      position:static;
+    }
+
+    .sum-card{
+      padding:18px;
+    }
+  }
+
+  @media (max-width:420px){
+    .logo{width:64px}
+    .pay-head{font-size:20px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important}
+  }
+
+  @media print{
+    body{background:#fff}
+    .topbar{display:none}
+    .wrap{display:block;max-width:none;padding:0}
+    .sum-col{position:static;margin-top:16px}
+    .q-tip{display:none}
+    .pay-btn,.agree{display:none}
+  }
 </style>
 </head>
 <body>
-<main class="checkout">
-  <header class="page-head">
-    <h1>选择付款方式</h1>
-    <p class="page-sub">应付金额以人民币为基准计算，切换支付方式后按该渠道收款币种自动换算展示<br>收款币种由支付渠道决定，与用户端展示币种设置无关</p>
-  </header>
 
-  <div class="layout">
-    <section aria-label="支付方式">
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="brand-mark" aria-hidden="true">S</span>
+    <span class="brand-name">SZT</span>
+    <span class="topbar-sep" aria-hidden="true"></span>
+    <span class="topbar-crumb">提交包裹 · 收银台</span>
+  </div>
+</header>
 
-      <div class="panel">
-        <h2 class="panel-title">账户余额支付</h2>
-        <label class="pay-row" for="pm-balance">
-          <input class="radio" type="radio" name="paymethod" id="pm-balance" value="balance">
-          <span class="logo logo-balance" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false" aria-hidden="true">
-              <rect x="3" y="6" width="18" height="12" rx="3" fill="#1F2233"></rect>
-              <rect x="3" y="9.4" width="18" height="2.2" fill="#fff" opacity=".9"></rect>
-              <circle cx="17.4" cy="14.6" r="1.4" fill="#fff" opacity=".9"></circle>
+<main class="wrap">
+  <section class="pay-col">
+    <h1 class="pay-head">选择付款方式</h1>
+    <p class="page-sub">
+      应付金额以人民币为基准计算，切换支付方式后按该渠道收款币种自动换算展示<br>
+      收款币种由支付渠道决定，与用户端展示币种设置无关
+    </p>
+
+    <p class="section-label">在线支付</p>
+
+    <div class="pay-list" id="pay-list">
+      <label class="pay-row is-active" for="pm-balance">
+        <input class="radio" type="radio" name="paymethod" id="pm-balance" value="balance" checked>
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 26 18" width="26" height="18" aria-hidden="true">
+            <rect x="1" y="1" width="24" height="16" rx="3.5" fill="#1F2430"></rect>
+            <rect x="1" y="5.5" width="24" height="3" fill="#39405A"></rect>
+            <rect x="4" y="11.5" width="7" height="2" rx="1" fill="#8C93A8"></rect>
+          </svg>
+        </span>
+        <span class="pay-info">
+          <span class="pay-name">账户余额</span>
+          <span class="pay-meta">可用余额 CN ¥ 37.87 · <button type="button" class="recharge">立即充值</button></span>
+        </span>
+      </label>
+
+      <label class="pay-row" for="pm-alipay">
+        <input class="radio" type="radio" name="paymethod" id="pm-alipay" value="alipay">
+        <span class="logo" aria-hidden="true"><span class="lg-alipay">Alipay</span></span>
+        <span class="pay-info"><span class="pay-name">支付宝</span></span>
+      </label>
+
+      <label class="pay-row" for="pm-yoomoney">
+        <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
+        <span class="logo" aria-hidden="true"><span class="lg-yoomoney">yoomoney</span></span>
+        <span class="pay-info"><span class="pay-name">YooMoney</span></span>
+      </label>
+
+      <label class="pay-row" for="pm-card">
+        <input class="radio" type="radio" name="paymethod" id="pm-card" value="card">
+        <span class="logo" aria-hidden="true">
+          <span class="lg-visa">VISA</span>
+          <svg viewBox="0 0 30 18" width="19" height="12" aria-hidden="true">
+            <circle cx="11" cy="9" r="8" fill="#EB001B"></circle>
+            <circle cx="19" cy="9" r="8" fill="#F79E1B" opacity=".82"></circle>
+          </svg>
+          <span class="lg-amex">AMEX</span>
+        </span>
+        <span class="pay-info"><span class="pay-name">信用卡</span></span>
+      </label>
+
+      <label class="pay-row" for="pm-applepay">
+        <input class="radio" type="radio" name="paymethod" id="pm-applepay" value="applepay">
+        <span class="logo" aria-hidden="true">
+          <span class="lg-apple-pay">
+            <svg viewBox="0 0 24 24" width="12" height="14" fill="#111" aria-hidden="true">
+              <path d="M16.37 1.43c0 1.14-.42 2.2-1.26 3.03-.9.9-1.94 1.4-3.05 1.32-.02-1.13.44-2.2 1.25-3.02.85-.87 1.95-1.4 3.06-1.33zM20.6 17.05c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.17 3.19-3.75 3.2-1.4.02-1.76-.9-3.66-.9-1.9 0-2.3.9-3.67.92-1.58.02-2.78-1.6-3.68-3.02C2.06 16.4 1.8 11.9 3.3 9.5c1.05-1.7 2.7-2.7 4.26-2.7 1.6 0 2.6.9 3.92.9 1.28 0 2.06-.9 3.9-.9 1.4 0 2.87.76 3.92 2.08-3.44 1.88-2.88 6.8 1.3 8.17z"></path>
             </svg>
+            <span>Pay</span>
           </span>
-          <span class="pay-info">
-            <span class="pay-name">账户余额 <span class="cur-tag">人民币</span></span>
-            <span class="pay-meta">可用余额 CN ¥ 37.87</span>
+        </span>
+        <span class="pay-info"><span class="pay-name">Apple Pay</span></span>
+      </label>
+
+      <label class="pay-row" for="pm-payid">
+        <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
+        <span class="logo" aria-hidden="true">
+          <span class="lg-payid">
+            <span class="lg-payid-txt">Pay</span>
+            <span class="lg-payid-id">ID</span>
           </span>
-          <button type="button" class="recharge" data-demo="跳转充值页（演示）">立即充值</button>
-        </label>
-      </div>
+        </span>
+        <span class="pay-info"><span class="pay-name">PayID</span></span>
+      </label>
 
-      <div class="panel">
-        <h2 class="panel-title">在线支付</h2>
-
-        <label class="pay-row" for="pm-alipay">
-          <input class="radio" type="radio" name="paymethod" id="pm-alipay" value="alipay">
-          <span class="logo logo-alipay" aria-hidden="true">支</span>
-          <span class="pay-info">
-            <span class="pay-name">支付宝 <span class="cur-tag">人民币</span></span>
+      <label class="pay-row" for="pm-googlepay">
+        <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
+        <span class="logo" aria-hidden="true">
+          <span class="lg-gpay">
+            <span class="lg-g">G</span>
+            <span class="lg-gpay-txt">Pay</span>
           </span>
-        </label>
+        </span>
+        <span class="pay-info"><span class="pay-name">Google Pay</span></span>
+      </label>
+    </div>
+  </section>
 
-        <label class="pay-row" for="pm-yoomoney">
-          <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
-          <span class="logo logo-yoomoney" aria-hidden="true">Y</span>
-          <span class="pay-info">
-            <span class="pay-name">YooMoney <span class="cur-tag">卢布</span></span>
-          </span>
-        </label>
+  <aside class="sum-col">
+    <div class="sum-card">
+      <h2 class="sum-title">付款详情</h2>
 
-        <label class="pay-row is-active" for="pm-card">
-          <input class="radio" type="radio" name="paymethod" id="pm-card" value="card" checked>
-          <span class="logo logo-card" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false" aria-hidden="true">
-              <rect x="2.5" y="5.5" width="19" height="13" rx="3" fill="#F97316"></rect>
-              <rect x="2.5" y="9" width="19" height="2.4" fill="#fff" opacity=".85"></rect>
-              <rect x="5.6" y="13.8" width="5" height="1.8" rx=".9" fill="#fff" opacity=".85"></rect>
-            </svg>
-          </span>
-          <span class="pay-info">
-            <span class="pay-name">信用卡 <span class="cur-tag">美元</span></span>
-          </span>
-        </label>
-
-        <label class="pay-row" for="pm-googlepay">
-          <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
-          <span class="logo logo-gpay" aria-hidden="true">G</span>
-          <span class="pay-info">
-            <span class="pay-name">Google Pay <span class="cur-tag">美元</span></span>
-          </span>
-        </label>
-
-        <label class="pay-row" for="pm-applepay">
-          <input class="radio" type="radio" name="paymethod" id="pm-applepay" value="applepay">
-          <span class="logo logo-apay" aria-hidden="true">Pay</span>
-          <span class="pay-info">
-            <span class="pay-name">Apple Pay <span class="cur-tag">美元</span></span>
-          </span>
-        </label>
-
-        <label class="pay-row" for="pm-payid">
-          <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
-          <span class="logo logo-payid" aria-hidden="true">PayID</span>
-          <span class="pay-info">
-            <span class="pay-name">PayID <span class="cur-tag">澳元</span></span>
-          </span>
-        </label>
-      </div>
-
-    </section>
-
-    <aside aria-label="付款摘要">
-      <div class="summary">
-        <h2 class="summary-title">付款摘要</h2>
-
-        <dl class="sum-list">
-          <div class="sum-row">
-            <dt>应付金额</dt>
-            <dd id="sum-payable">$ 4.83<span class="cny">(CN ¥ 32.40)</span></dd>
-          </div>
-          <div class="sum-row">
-            <dt>支付手续费</dt>
-            <dd id="sum-fee">$ 0.51<span class="cny">(CN ¥ 3.41)</span></dd>
-          </div>
-          <div class="sum-row">
-            <dt>付款方式</dt>
-            <dd id="sum-method" class="is-name">信用卡</dd>
-          </div>
-        </dl>
-
-        <p class="fee-rule">
-          <span id="fee-rule">手续费规则：4.3% + 0.3 USD</span>
-          <button type="button" class="detail-btn" id="detail-btn" aria-haspopup="dialog">费用明细</button>
-        </p>
-
-        <div class="total">
-          <span class="total-label">实际应付金额</span>
-          <span class="total-amount">
-            <span class="main" id="sum-total">$ 5.34</span>
-            <span class="total-cny" id="sum-total-cny">(CN ¥ 35.81)</span>
-          </span>
+      <dl class="sum-list">
+        <div class="sum-row">
+          <dt>应付金额</dt>
+          <dd id="sum-payable"></dd>
         </div>
 
-        <p class="balance-tip" id="balance-tip" hidden></p>
+        <div class="sum-row">
+          <dt>
+            支付手续费
+            <span class="q-wrap">
+              <button type="button" class="q-mark" aria-describedby="fee-tip" aria-label="手续费计算方式">?</button>
+              <span class="q-tip" id="fee-tip" role="tooltip"></span>
+            </span>
+          </dt>
+          <dd id="sum-fee"></dd>
+        </div>
 
-        <label class="agree" for="agree">
-          <input type="checkbox" id="agree" checked>
-          <span>我已阅读并同意《免责声明》、《违禁物品说明》、《用户协议》与《用户隐私协议》</span>
-        </label>
+        <div class="sum-row">
+          <dt>付款方式</dt>
+          <dd id="sum-method"></dd>
+        </div>
 
-        <button type="button" class="btn-pay" id="btn-pay">立即支付</button>
+        <div class="sum-row">
+          <dt>汇率</dt>
+          <dd id="sum-fx" class="is-fx"></dd>
+        </div>
+      </dl>
+
+      <div class="sum-total">
+        <span class="sum-total-label">实际应付金额</span>
+        <div class="total-block">
+          <span class="total-main" id="sum-total"></span>
+          <span class="total-cny" id="sum-total-cny"></span>
+        </div>
       </div>
-    </aside>
-  </div>
+
+      <label class="agree">
+        <input type="checkbox" checked>
+        <span>我已阅读并同意《支付服务协议》，并确认以上金额为本次实际支付金额</span>
+      </label>
+
+      <button type="button" class="pay-btn" id="pay-btn">立即支付</button>
+
+      <p class="sum-note">收款币种由所选支付方式决定，与账户展示币种无关，实际扣款以支付渠道结算为准。</p>
+    </div>
+  </aside>
 </main>
 
-<dialog class="detail-dialog" id="detail-dialog" aria-labelledby="detail-title">
-  <div class="detail-inner">
-    <h2 class="detail-title" id="detail-title">费用明细</h2>
-    <dl class="detail-list">
-      <div>
-        <dt>付款方式</dt>
-        <dd id="d-method">信用卡</dd>
-      </div>
-      <div>
-        <dt>收款币种</dt>
-        <dd id="d-currency">美元 USD</dd>
-      </div>
-      <div>
-        <dt>订单金额</dt>
-        <dd id="d-order">CN ¥ 32.40</dd>
-      </div>
-      <div>
-        <dt>手续费规则</dt>
-        <dd id="d-rule">4.3% + 0.3 USD</dd>
-      </div>
-      <div>
-        <dt>手续费金额</dt>
-        <dd id="d-fee">CN ¥ 3.41</dd>
-      </div>
-      <div>
-        <dt>换算汇率</dt>
-        <dd id="d-fx">1 CNY = 0.149 USD</dd>
-      </div>
-      <div class="detail-total">
-        <dt>实际应付（人民币）</dt>
-        <dd id="d-total">CN ¥ 35.81</dd>
-      </div>
-    </dl>
-    <p class="detail-note">收款币种由所选支付方式决定，与账户展示币种无关，实际扣款以支付渠道结算为准。</p>
-    <form method="dialog">
-      <button type="submit" class="btn-close">关闭</button>
-    </form>
-  </div>
-</dialog>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
-(function(){
-  try{
-    /* ---------- 可配置数据 ---------- */
-    // 汇率：1 CNY = N 目标币种
-    var FX = { CNY: 1, USD: 0.149, RUB: 12.2699, AUD: 0.2128 };
-    var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$' };
-    var CUR_NAME = { CNY: '人民币', USD: '美元', RUB: '卢布', AUD: '澳元' };
-    var ORDER_CNY = 32.40;   // 应付金额（人民币基准）
-    var BALANCE_CNY = 37.87; // 账户可用余额
+  var FX = { CNY: 1, USD: 0.149, RUB: 12.3762, AUD: 0.2257 };
+  var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$' };
+  var ORDER_CNY = 32.40;
 
-    var METHODS = {
-      balance:   { name:'账户余额',   currency:'CNY', feeRate:0,     feeFixed:null,                          rule:'该支付方式免手续费' },
-      alipay:    { name:'支付宝',     currency:'CNY', feeRate:0,     feeFixed:null,                          rule:'该支付方式免手续费' },
-      yoomoney:  { name:'YooMoney',   currency:'RUB', feeRate:0.027, feeFixed:null,                          rule:'手续费规则：2.7%' },
-      card:      { name:'信用卡',     currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
-      googlepay: { name:'Google Pay', currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
-      applepay:  { name:'Apple Pay',  currency:'USD', feeRate:0.043, feeFixed:{ amount:0.3, currency:'USD' }, rule:'手续费规则：4.3% + 0.3 USD' },
-      payid:     { name:'PayID',      currency:'AUD', feeRate:0.02,  feeFixed:{ amount:0.7, currency:'AUD' }, rule:'手续费规则：2% + 0.7 AUD' }
-    };
+  var METHODS = {
+    balance:   { name: '账户余额',  currency: 'CNY', rate: 0,     fixed: null },
+    alipay:    { name: '支付宝',    currency: 'CNY', rate: 0,     fixed: null },
+    yoomoney:  { name: 'YooMoney',  currency: 'RUB', rate: 0.027, fixed: null },
+    card:      { name: '信用卡',    currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
+    applepay:  { name: 'Apple Pay', currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } },
+    payid:     { name: 'PayID',     currency: 'AUD', rate: 0.02,  fixed: { amount: 0.7, currency: 'AUD' } },
+    googlepay: { name: 'Google Pay', currency: 'USD', rate: 0.043, fixed: { amount: 0.3, currency: 'USD' } }
+  };
 
-    /* ---------- 工具 ---------- */
-    function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
-    function money(v, cur){
-      return SYMBOL[cur] + ' ' + v.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
-    }
-    function cny(v){ return '(CN ¥ ' + v.toFixed(2) + ')'; }
-    function byId(id){ return document.getElementById(id); }
+  var FIXED_SYMBOL = { USD: 'US $', AUD: 'AU $', RUB: 'RUB ', CNY: 'CN ¥' };
 
-    /* ---------- 计算：先以人民币算清，再换算到收款币种 ---------- */
-    function compute(id){
-      var m = METHODS[id] || METHODS.card;
-      var fx = FX[m.currency];
-      var fixedCny = 0;
-      if (m.feeFixed){ fixedCny = m.feeFixed.amount / FX[m.feeFixed.currency]; }
-      var feeCny = round2(ORDER_CNY * m.feeRate + fixedCny);
-      var totalCny = round2(ORDER_CNY + feeCny);
-      return {
-        m: m,
-        fx: fx,
-        feeCny: feeCny,
-        totalCny: totalCny,
-        payable: money(round2(ORDER_CNY * fx), m.currency),
-        fee: money(round2(feeCny * fx), m.currency),
-        total: money(round2(totalCny * fx), m.currency)
-      };
-    }
+  function byId(id) { return document.getElementById(id); }
 
-    function setAmount(el, main, sub){
-      while (el.firstChild){ el.removeChild(el.firstChild); }
-      el.appendChild(document.createTextNode(main));
-      if (sub){
-        var s = document.createElement('span');
-        s.className = 'cny';
-        s.textContent = sub;
-        el.appendChild(s);
-      }
-    }
+  function round2(n) { return Math.round(n * 100) / 100; }
 
-    function flash(el){
-      el.classList.remove('flash');
-      void el.offsetWidth;
-      el.classList.add('flash');
-    }
-
-    function feeText(r){
-      return r.feeCny > 0 ? money(r.feeCny, 'CNY') : '免收';
-    }
-
-    /* ---------- 渲染 ---------- */
-    var currentId = 'card';
-
-    function render(id){
-      currentId = id;
-      var r = compute(id);
-      var sameCurrency = (r.m.currency === 'CNY');
-
-      if (r.feeCny > 0){
-        setAmount(byId('sum-fee'), r.fee, sameCurrency ? '' : cny(r.feeCny));
-      } else {
-        setAmount(byId('sum-fee'), '免手续费', '');
-      }
-
-      setAmount(byId('sum-payable'), r.payable, sameCurrency ? '' : cny(ORDER_CNY));
-      byId('sum-method').textContent = r.m.name;
-      byId('fee-rule').textContent = r.rule;
-
-      var totalEl = byId('sum-total');
-      totalEl.textContent = r.total;
-      var totalCnyEl = byId('sum-total-cny');
-      totalCnyEl.textContent = sameCurrency ? '' : cny(r.totalCny);
-      totalCnyEl.hidden = sameCurrency;
-
-      var tip = byId('balance-tip');
-      if (id === 'balance' && r.totalCny > BALANCE_CNY){
-        tip.hidden = false;
-        tip.textContent = '账户余额不足，还需充值 ' + money(round2(r.totalCny - BALANCE_CNY), 'CNY') + '，可先充值或切换其他支付方式。';
-      } else {
-        tip.hidden = true;
-        tip.textContent = '';
-      }
-
-      flash(totalEl);
-      flash(byId('sum-payable'));
-    }
-
-    /* ---------- 费用明细弹层 ---------- */
-    function renderDetail(){
-      var r = compute(currentId);
-      var cur = r.m.currency;
-      byId('d-method').textContent = r.m.name;
-      byId('d-currency').textContent = CUR_NAME[cur] + ' ' + cur;
-      byId('d-order').textContent = money(ORDER_CNY, 'CNY');
-      byId('d-rule').textContent = r.m.feeRate > 0 ? r.rule.replace('手续费规则：', '') : '免手续费';
-      byId('d-fee').textContent = feeText(r);
-      byId('d-fx').textContent = cur === 'CNY' ? '1:1（无需换算）' : '1 CNY = ' + r.fx + ' ' + cur;
-      byId('d-total').textContent = money(r.totalCny, 'CNY');
-    }
-
-    var dialog = byId('detail-dialog');
-    byId('detail-btn').addEventListener('click', function(){
-      renderDetail();
-      if (typeof dialog.showModal === 'function'){
-        dialog.showModal();
-      } else {
-        dialog.setAttribute('open', '');
-      }
-    });
-
-    /* ---------- 交互 ---------- */
-    var radios = Array.prototype.slice.call(document.querySelectorAll('.pay-row input[type="radio"]'));
-    radios.forEach(function(input){
-      input.addEventListener('change', function(){
-        radios.forEach(function(i){
-          var row = i.closest('.pay-row');
-          if (row){ row.classList.toggle('is-active', i.checked); }
-        });
-        if (input.checked){ render(input.value); }
-      });
-    });
-
-    var agree = byId('agree');
-    var btn = byId('btn-pay');
-    function syncBtn(){ btn.disabled = !agree.checked; }
-    agree.addEventListener('change', syncBtn);
-    syncBtn();
-
-    var toast = byId('toast');
-    var toastTimer = null;
-    function showToast(text){
-      toast.textContent = text;
-      toast.classList.add('show');
-      if (toastTimer){ clearTimeout(toastTimer); }
-      toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1800);
-    }
-
-    Array.prototype.slice.call(document.querySelectorAll('[data-demo]')).forEach(function(el){
-      el.addEventListener('click', function(e){
-        e.preventDefault();
-        showToast(el.getAttribute('data-demo') || '演示操作');
-      });
-    });
-
-    btn.addEventListener('click', function(){
-      if (btn.disabled){ return; }
-      var r = compute(currentId);
-      showToast('发起支付（演示）：' + r.m.name + ' · ' + r.total + (r.m.currency === 'CNY' ? '' : ' / ' + cny(r.totalCny)));
-    });
-
-    render('card');
-  }catch(err){
-    /* 脚本异常时静态内容仍可读，不做任何阻断 */
+  function fmt(n) {
+    var parts = Math.abs(n).toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (n < 0 ? '-' : '') + parts[0] + '.' + parts[1];
   }
-})();
+
+  function money(n, currency) { return SYMBOL[currency] + ' ' + fmt(n); }
+
+  function cnyText(n) { return 'CN ¥ ' + fmt(n); }
+
+  function pct(rate) { return String(Math.round(rate * 10000) / 100); }
+
+  function compute(id) {
+    var m = METHODS[id] || METHODS.card;
+    var fx = FX[m.currency];
+    var fixedCny = m.fixed ? m.fixed.amount / FX[m.fixed.currency] : 0;
+    var feeCny = round2(ORDER_CNY * m.rate + fixedCny);
+    var totalCny = round2(ORDER_CNY + feeCny);
+    return {
+      m: m,
+      fx: fx,
+      feeCny: feeCny,
+      totalCny: totalCny,
+      payable: money(round2(ORDER_CNY * fx), m.currency),
+      fee: money(round2(feeCny * fx), m.currency),
+      total: money(round2(totalCny * fx), m.currency)
+    };
+  }
+
+  function tipText(m) {
+    if (!m.rate) { return '该支付方式免收手续费'; }
+    var s = '(=应付金额*' + pct(m.rate) + '%';
+    if (m.fixed) {
+      s += ' + ' + (FIXED_SYMBOL[m.fixed.currency] || '') + m.fixed.amount;
+    }
+    return s + ')';
+  }
+
+  function setPair(el, main, sub) {
+    el.textContent = '';
+    var a = document.createElement('span');
+    a.textContent = main;
+    el.appendChild(a);
+    if (sub) {
+      var b = document.createElement('span');
+      b.className = 'amt-sub';
+      b.textContent = '(' + sub + ')';
+      el.appendChild(b);
+    }
+  }
+
+  function setPlain(el, text) {
+    el.textContent = '';
+    var s = document.createElement('span');
+    s.className = 'amt-plain';
+    s.textContent = text;
+    el.appendChild(s);
+  }
+
+  function render(id) {
+    var r = compute(id);
+    var cur = r.m.currency;
+    var sameCurrency = cur === 'CNY';
+
+    setPair(byId('sum-payable'), r.payable, sameCurrency ? '' : cnyText(ORDER_CNY));
+
+    if (r.feeCny > 0) {
+      setPair(byId('sum-fee'), r.fee, sameCurrency ? '' : cnyText(r.feeCny));
+    } else {
+      setPlain(byId('sum-fee'), '免手续费');
+    }
+
+    byId('sum-method').textContent = r.m.name;
+
+    var fxEl = byId('sum-fx');
+    fxEl.textContent = 'CNY → ' + cur + ' ';
+    var tag = document.createElement('span');
+    tag.className = 'fx-tag';
+    tag.textContent = '汇率';
+    fxEl.appendChild(tag);
+    fxEl.appendChild(document.createTextNode(' 1:' + (sameCurrency ? '1' : String(r.fx))));
+
+    byId('fee-tip').textContent = tipText(r.m);
+
+    byId('sum-total').textContent = r.total;
+    byId('sum-total-cny').textContent = sameCurrency ? '' : '(' + cnyText(r.totalCny) + ')';
+
+    byId('pay-btn').textContent = '立即支付 ' + r.total;
+  }
+
+  function selectRow(row) {
+    var rows = document.querySelectorAll('.pay-row');
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.remove('is-active');
+    }
+    row.classList.add('is-active');
+    render(row.querySelector('input').value);
+  }
+
+  var rows = document.querySelectorAll('.pay-row');
+  for (var i = 0; i < rows.length; i++) {
+    (function (row) {
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.recharge')) { return; }
+        selectRow(row);
+      });
+      row.querySelector('input').addEventListener('change', function () {
+        selectRow(row);
+      });
+    })(rows[i]);
+  }
+
+  var rechargeBtn = document.querySelector('.recharge');
+  if (rechargeBtn) {
+    rechargeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
+  render('balance');
 </script>
+
 </body>
 </html>
