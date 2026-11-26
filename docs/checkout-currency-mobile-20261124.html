@@ -956,7 +956,7 @@
     if (!sameCurrency) {
       var sub = document.createElement('span');
       sub.className = 'm-sub';
-      sub.textContent = '（' + cny(cnyAmount) + '）';
+      sub.textContent = '(' + cny(cnyAmount) + ')';
       el.appendChild(sub);
     }
   }
@@ -973,7 +973,7 @@
     if (!same) {
       var sub = document.createElement('span');
       sub.className = 'm-bar-cny';
-      sub.textContent = '（' + cny(r.totalCny) + '）';
+      sub.textContent = '(' + cny(r.totalCny) + ')';
       el.appendChild(sub);
     }
   }
@@ -1010,7 +1010,7 @@
     if (!same) {
       var tsub = document.createElement('span');
       tsub.className = 'm-sub';
-      tsub.textContent = '（' + cny(r.totalCny) + '）';
+      tsub.textContent = '(' + cny(r.totalCny) + ')';
       totalEl.appendChild(tsub);
     }
   }
