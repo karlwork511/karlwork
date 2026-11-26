@@ -136,6 +136,30 @@ a{color:inherit}
 .tips li:last-child{margin-bottom:0}
 .tips b{color:var(--ink)}
 
+/* ---------- 首屏压缩 ---------- */
+.ab-sp{flex:0 0 auto;width:44px;height:44px}
+.hero{padding:18px var(--pad) 12px}
+.hero h1{margin-top:8px}
+
+.assure{grid-template-columns:1fr 1fr;gap:8px;padding:0 var(--pad) 12px}
+.as{flex-direction:column;align-items:flex-start;gap:7px;padding:12px}
+.as .ico{width:28px;height:28px;border-radius:9px}
+.as .ico svg{width:16px;height:16px}
+.as b{font-size:13px;line-height:1.4}
+.as div span{display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink-3)}
+
+#platforms .sec-head{padding:14px var(--pad) 10px}
+#platforms .sec-head h2{margin-top:0;font-size:17px}
+#platforms .sec-head p{margin-top:4px;font-size:12.5px;line-height:1.6}
+.plats-wrap{margin:0 var(--pad);border-radius:14px}
+.plats{gap:11px;padding:12px}
+.plat{width:54px;gap:5px}
+.plogo{width:40px;height:40px;border-radius:12px;font-size:12px}
+.plogo.sm{font-size:10px}
+.plogo.xs{font-size:8.5px}
+.plogo svg{width:21px;height:21px}
+.plats-tip{margin:6px var(--pad) 0;font-size:11px}
+
 /* ---------- 步骤折叠（手风琴） ---------- */
 .step{padding:0;overflow:hidden}
 .step-h{
@@ -245,9 +269,7 @@ a{color:inherit}
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
     </button>
     <div class="ab-title">新手指引</div>
-    <button class="ab-btn" type="button" id="moreBtn" aria-label="打开目录" aria-expanded="false" aria-controls="sheet">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>
-    </button>
+    <span class="ab-sp" aria-hidden="true"></span>
     <div class="read-bar" aria-hidden="true"><i id="readBar"></i></div>
   </header>
 
@@ -268,28 +290,27 @@ a{color:inherit}
     <section class="assure" aria-label="服务保障">
       <div class="as">
         <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
-        <div><b>买手代购</b><span>不用自己联系卖家，沟通、催发货都由买手处理</span></div>
+        <div><b>买手代购</b><span>沟通、催发货都由买手处理</span></div>
       </div>
       <div class="as">
         <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="13" rx="3"/><circle cx="12" cy="13" r="3.4"/><path d="M8.5 6.5 10 4h4l1.5 2.5"/></svg></span>
-        <div><b>免费验货</b><span>到仓开箱检查并拍照，有问题第一时间告诉您</span></div>
+        <div><b>免费验货</b><span>到仓开箱检查并拍照</span></div>
       </div>
       <div class="as">
         <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8.5 12 4l8.5 4.5v7L12 20l-8.5-4.5v-7Z"/><path d="M3.5 8.5 12 13l8.5-4.5M12 13v7"/></svg></span>
-        <div><b>180 天免费仓储</b><span>慢慢凑单再一起寄，合并寄送更省国际运费</span></div>
+        <div><b>180 天免费仓储</b><span>凑单合并寄更省运费</span></div>
       </div>
       <div class="as">
         <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg></span>
-        <div><b>全程可追踪</b><span>订单、包裹状态实时可查，异常主动通知并协助处理</span></div>
+        <div><b>全程可追踪</b><span>状态实时可查，异常主动通知</span></div>
       </div>
     </section>
 
     <!-- ========== 平台 ========== -->
     <section class="sec" id="platforms" aria-labelledby="platformTitle">
       <div class="sec-head">
-        <span class="badge">支持的平台</span>
-        <h2 id="platformTitle">FalconGoo 支持的代购平台</h2>
-        <p>看到想买的商品，复制链接贴进搜索框就行，中国所有电商平台，都支持代购。</p>
+        <h2 id="platformTitle">支持的代购平台</h2>
+        <p>复制商品链接贴进搜索框就行，中国所有电商平台都支持。</p>
       </div>
       <div class="plats-wrap">
         <ul class="plats">
