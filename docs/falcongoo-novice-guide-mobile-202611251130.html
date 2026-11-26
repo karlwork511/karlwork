@@ -136,6 +136,38 @@ a{color:inherit}
 .tips li:last-child{margin-bottom:0}
 .tips b{color:var(--ink)}
 
+/* ---------- 步骤折叠（手风琴） ---------- */
+.step{padding:0;overflow:hidden}
+.step-h{
+  display:flex;align-items:center;gap:10px;width:100%;padding:15px 14px;border:0;background:none;
+  font:inherit;color:inherit;text-align:left;cursor:pointer;
+}
+.step-h .h3{margin:0;font-size:17px;font-weight:700;line-height:1.36;letter-spacing:-.2px}
+.step-h .tg{
+  margin-left:auto;flex:0 0 auto;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  background:var(--bg-soft);color:var(--ink-2);transition:background .2s,color .2s;
+}
+.step-h .tg svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.step.open .step-h .tg{background:var(--brand-soft);color:var(--brand)}
+.step.open .step-h .tg .v{display:none}
+.step-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.3,.9,.3,1)}
+.step.open .step-body{grid-template-rows:1fr}
+.step-body>.inner{overflow:hidden;padding:0 14px 15px}
+.step:not(.open) .step-body>.inner{padding-bottom:0}
+.step.open .step-h{border-bottom:1px solid transparent}
+
+/* ---------- 方式一 / 方式二 tab ---------- */
+.mtabs{display:flex;gap:8px;margin-top:12px}
+.mtabs button{
+  flex:0 0 auto;padding:7px 15px;border-radius:10px;border:1px solid var(--line);background:#fff;
+  color:var(--ink-2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .18s,color .18s,border-color .18s;
+}
+.mtabs button.on{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
+.mpanel{display:none;margin-top:11px}
+.mpanel.on{display:block}
+.mpanel p{font-size:13.5px;line-height:1.75}
+.mpanel b{color:var(--brand-d)}
+
 /* ---------- 收尾 ---------- */
 .closing{margin:6px var(--pad) 0;padding:18px 16px;border-radius:18px;color:#fff;background:linear-gradient(150deg,#241a63 0%,#4b2ff0 100%)}
 .closing h3{margin:0;font-size:18px;line-height:1.4;letter-spacing:-.2px}
@@ -184,7 +216,7 @@ a{color:inherit}
 
 @media (max-width:359px){
   .hero h1{font-size:23px}
-  .step{padding:14px 12px}
+  .step{padding:0}
   .plogo{width:40px;height:40px}
 }
 
@@ -193,6 +225,9 @@ a{color:inherit}
   .app-bar,.seg,.fabs,.sheet,.mask,.lightbox,.skip,.read-bar{display:none!important}
   .step,.plats,.closing{box-shadow:none;break-inside:avoid}
   .step{margin:0 0 10px;border:1px solid #ddd}
+  .step-body{grid-template-rows:1fr!important}
+  .mtabs{display:none}
+  .mpanel{display:block!important}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:10px;color:#666}
 }
 @media (prefers-reduced-motion:reduce){
@@ -291,13 +326,18 @@ a{color:inherit}
       </div>
 
       <article class="step" id="step-1">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-1">
           <span class="num" aria-hidden="true">01</span>
-          <h3>挑选商品</h3>
-        </div>
+          <span class="h3">挑选商品</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-1"><div class="inner">
         <p class="lead">通过粘贴商品链接、商品关键词或者上传图片搜索，找到您想买的商品。</p>
-        <div class="method first">
-          <span class="tag">方式一</span>
+        <div class="mtabs" role="tablist" aria-label="操作方式">
+          <button type="button" class="on" role="tab" aria-selected="true" aria-controls="m-1A" id="t-1A">方式一</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="m-1B" id="t-1B">方式二</button>
+        </div>
+        <div class="mpanel on" id="m-1A" role="tabpanel" aria-labelledby="t-1A">
           <p>在<b>任意中国电商平台</b>找到您想购买的商品，复制并粘贴商品链接到 FalconGoo 的搜索框，选购商品。</p>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：在搜索框粘贴商品链接的截图">
@@ -306,8 +346,8 @@ a{color:inherit}
               <span class="ph-s">在搜索框粘贴商品链接</span>
             </div>
           </figure>
-        </div>        <div class="method">
-          <span class="tag">方式二</span>
+        </div>
+        <div class="mpanel" id="m-1B" role="tabpanel" aria-labelledby="t-1B">
           <p>在 FalconGoo 搜索框<b>输入商品名称</b>，从推荐的商品中挑选。</p>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：输入商品名称后的搜索结果截图">
@@ -316,17 +356,22 @@ a{color:inherit}
               <span class="ph-s">输入商品名称后的搜索结果</span>
             </div>
           </figure>
-        </div>
+        </div></div></div>
       </article>
 
       <article class="step" id="step-2">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-2">
           <span class="num" aria-hidden="true">02</span>
-          <h3>提交代购</h3>
-        </div>
+          <span class="h3">提交代购</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-2"><div class="inner">
         <p class="lead">选好规格后，您可以直接提交订单。如果系统未抓取到链接，您需手动填写订单信息进行下单。</p>
-        <div class="method first">
-          <span class="tag">方式一</span>
+        <div class="mtabs" role="tablist" aria-label="操作方式">
+          <button type="button" class="on" role="tab" aria-selected="true" aria-controls="m-2A" id="t-2A">方式一</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="m-2B" id="t-2B">方式二</button>
+        </div>
+        <div class="mpanel on" id="m-2A" role="tabpanel" aria-labelledby="t-2A">
           <p>选择商品颜色、尺寸、数量等，点击“<b>立即购买</b>”，前往收银台支付商品订单费用。</p>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：商品详情页选择颜色尺码数量的截图">
@@ -335,8 +380,8 @@ a{color:inherit}
               <span class="ph-s">商品详情页选择颜色、尺码、数量</span>
             </div>
           </figure>
-        </div>        <div class="method">
-          <span class="tag">方式二</span>
+        </div>
+        <div class="mpanel" id="m-2B" role="tabpanel" aria-labelledby="t-2B">
           <p>如系统无法识别到商品链接，将会出现“<b>填写代购订单页面</b>”；您手动填写商品订单信息后，点击“<b>立即代购</b>”，前往收银台支付商品订单费用。</p>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：填写代购单页面的截图">
@@ -345,14 +390,16 @@ a{color:inherit}
               <span class="ph-s">填写代购订单页面</span>
             </div>
           </figure>
-        </div>
+        </div></div></div>
       </article>
 
       <article class="step" id="step-3">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-3">
           <span class="num" aria-hidden="true">03</span>
-          <h3>支付商品费用</h3>
-        </div>
+          <span class="h3">支付商品费用</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-3"><div class="inner">
         <p class="lead">提交代购订单，选择支付方式，支付商品售价及中国大陆运费。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -368,14 +415,16 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">支付商品费用页面</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
       <article class="step" id="step-4">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-4">
           <span class="num" aria-hidden="true">04</span>
-          <h3>FalconGoo 代采购</h3>
-        </div>
+          <span class="h3">FalconGoo 代采购</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-4"><div class="inner">
         <p class="lead">FalconGoo 收到您的订单后，将为您代采购商品，并为您跟踪卖家发货。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -390,7 +439,7 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">代购订单状态与站内信</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
     </section>
@@ -404,10 +453,12 @@ a{color:inherit}
       </div>
 
       <article class="step" id="step-5">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-5">
           <span class="num" aria-hidden="true">05</span>
-          <h3>FalconGoo 验货入库</h3>
-        </div>
+          <span class="h3">FalconGoo 验货入库</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-5"><div class="inner">
         <p class="lead">卖家将商品寄送到 FalconGoo 仓库后，我们将为您签收、验货拍照、称重入库。入库后商品将会在“我的 FalconGoo”－“我的仓库”里显示。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -423,7 +474,7 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">我的仓库 · 已入库商品与验货照片</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
     </section>
@@ -437,10 +488,12 @@ a{color:inherit}
       </div>
 
       <article class="step ship" id="step-6">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-6">
           <span class="num" aria-hidden="true">06</span>
-          <h3>提交包裹</h3>
-        </div>
+          <span class="h3">提交包裹</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-6"><div class="inner">
         <p class="lead">在“我的仓库”中，选择商品点击提交包裹，填写海外收货人地址信息，从推荐的配送方式中进行选择。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -454,14 +507,16 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">选择商品、填写收货地址、选择配送方式</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
       <article class="step ship" id="step-7">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-7">
           <span class="num" aria-hidden="true">07</span>
-          <h3>支付预估国际运费及必要附加费</h3>
-        </div>
+          <span class="h3">支付预估国际运费及必要附加费</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-7"><div class="inner">
         <p class="lead">选择支付方式，支付预估国际运费及必要附加费。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -475,14 +530,16 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">预估国际运费与必要附加费明细</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
       <article class="step ship" id="step-8">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-8">
           <span class="num" aria-hidden="true">08</span>
-          <h3>FalconGoo 发货</h3>
-        </div>
+          <span class="h3">FalconGoo 发货</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-8"><div class="inner">
         <p class="lead">商品合并打包，加固包裹，称重发货。</p>
         <div class="tips">
           <div class="tips-h">TIPS</div>
@@ -496,14 +553,16 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">我的包裹 · 物流信息</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
       <article class="step ship" id="step-9">
-        <div class="step-h">
+        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-9">
           <span class="num" aria-hidden="true">09</span>
-          <h3>收货</h3>
-        </div>
+          <span class="h3">收货</span>
+          <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
+        </button>
+        <div class="step-body" id="sb-9"><div class="inner">
         <p class="lead">收到包裹后，在“我的 FalconGoo”－“我的包裹”里确认签收。</p>
           <figure class="shot">
             <div class="ph" role="img" aria-label="待补充：确认签收页面的截图">
@@ -511,7 +570,7 @@ a{color:inherit}
               <span class="ph-t">截图待补充</span>
               <span class="ph-s">我的包裹 · 确认签收</span>
             </div>
-          </figure>
+          </figure></div></div>
       </article>
 
     </section>
@@ -573,6 +632,50 @@ a{color:inherit}
   function $(s){ return document.querySelector(s); }
   function $all(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
 
+  /* ---------- 步骤折叠（手风琴） ---------- */
+  var stepEls = $all('.step');
+  function setStep(step, open){
+    if(!step) return;
+    step.classList.toggle('open', open);
+    var hd = step.querySelector('.step-h');
+    if(hd) hd.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function openOnly(step){
+    stepEls.forEach(function(s){ setStep(s, s === step); });
+  }
+  stepEls.forEach(function(step){
+    var hd = step.querySelector('.step-h');
+    if(!hd) return;
+    hd.addEventListener('click', function(){
+      var willOpen = !step.classList.contains('open');
+      if(willOpen){ openOnly(step); } else { setStep(step, false); }
+      if(willOpen){
+        setTimeout(function(){
+          if(step.getBoundingClientRect().top < 104){
+            step.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        }, 80);
+      }
+    });
+  });
+  if(stepEls[0]) setStep(stepEls[0], true);
+
+  /* ---------- 方式一 / 方式二 tab ---------- */
+  $all('.mtabs').forEach(function(bar){
+    var btns = bar.querySelectorAll('button');
+    Array.prototype.forEach.call(btns, function(btn){
+      btn.addEventListener('click', function(){
+        Array.prototype.forEach.call(btns, function(b){
+          var on = (b === btn);
+          b.classList.toggle('on', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+          var pane = document.getElementById(b.getAttribute('aria-controls'));
+          if(pane) pane.classList.toggle('on', on);
+        });
+      });
+    });
+  });
+
   /* ---------- 阅读进度 ---------- */
   var readBar = $('#readBar');
   var upBtn = $('#upBtn');
@@ -605,7 +708,7 @@ a{color:inherit}
           }
         }
       });
-    }, {rootMargin:'-104px 0px -68% 0px', threshold:0});
+    }, {rootMargin:'-104px 0px -55% 0px', threshold:0});
     secs.forEach(function(s){ if(s) io.observe(s); });
   }
 
@@ -647,7 +750,10 @@ a{color:inherit}
       if(!t) return;
       e.preventDefault();
       if(sheet && sheet.classList.contains('open')) closeSheet();
-      t.scrollIntoView({behavior:smooth, block:'start'});
+      var ts = t.classList.contains('step') ? t : (t.closest ? t.closest('.step') : null);
+      if(ts){ openOnly(ts); }
+      var go = function(){ t.scrollIntoView({behavior:smooth, block:'start'}); };
+      if(ts){ setTimeout(go, 90); } else { go(); }
       if(history.replaceState){ history.replaceState(null, '', '#' + id); }
     });
   });
