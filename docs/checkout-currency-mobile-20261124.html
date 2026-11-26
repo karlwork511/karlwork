@@ -625,25 +625,6 @@
     letter-spacing:-.4px;
   }
 
-  .m-fx-tag{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:22px;
-    height:18px;
-    margin:0 3px;
-    border-radius:4px;
-    background:#EBF1FF;
-    color:#2F6BFF;
-    vertical-align:middle;
-  }
-
-  .m-detail-row dd.is-fx{
-    font-size:13px;
-    font-weight:400;
-    color:var(--text-2);
-  }
-
   .m-sheet-note{
     margin:14px 20px 0;
     font-size:11.5px;
@@ -922,10 +903,6 @@
       <dt>付款方式</dt>
       <dd id="d-method"></dd>
     </div>
-    <div class="m-detail-row">
-      <dt>汇率</dt>
-      <dd id="d-fx" class="is-fx"></dd>
-    </div>
   </dl>
 
   <div class="m-detail-total">
@@ -1044,18 +1021,6 @@
     }
 
     byId('d-method').textContent = r.m.name;
-
-    var fxEl = byId('d-fx');
-    fxEl.textContent = 'CNY → ' + cur + ' ';
-    var tag = document.createElement('span');
-    tag.className = 'm-fx-tag';
-    tag.setAttribute('aria-hidden', 'true');
-    tag.innerHTML = '<svg viewBox="0 0 20 14" width="13" height="9" focusable="false">'
-      + '<path d="M1.6 5.2h12.6M10.8 1.6 15 5.2 10.8 8.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
-      + '<path d="M18.4 8.8H5.8M9.2 5.2 5 8.8l4.2 3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
-      + '</svg>';
-    fxEl.appendChild(tag);
-    fxEl.appendChild(document.createTextNode(' 1:' + (same ? '1' : String(r.fx))));
 
     byId('fee-tip').textContent = tipText(r.m);
 
