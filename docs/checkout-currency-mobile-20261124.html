@@ -9,6 +9,7 @@
     --brand:#6C5CE7;
     --brand-soft:#F2EFFF;
     --link:#2F6BFF;
+    --warn:#E8722A;
     --text-1:#171A2A;
     --text-2:#565C70;
     --text-3:#8A90A2;
@@ -36,7 +37,7 @@
     margin:0 auto;
     background:var(--page);
     min-height:100vh;
-    padding-bottom:132px;
+    padding-bottom:140px;
   }
 
   /* 顶部导航 */
@@ -90,31 +91,14 @@
     cursor:pointer;
   }
 
-  /* 金额与订单信息 */
-  .m-amount{
-    padding:22px 20px 16px;
-    text-align:center;
-  }
-
-  .m-total{
-    margin:0;
-    font-size:34px;
-    font-weight:700;
-    letter-spacing:-1px;
-    line-height:1.15;
-  }
-
-  .m-tip{
-    margin:8px 0 0;
-    font-size:13px;
-    color:var(--text-3);
-  }
-
+  /* 订单信息条 */
   .m-order{
-    margin:14px 0 0;
+    margin:0;
+    padding:13px 20px;
     font-size:11.5px;
     color:#A2A8B8;
     letter-spacing:-.1px;
+    text-align:center;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -125,15 +109,46 @@
     background:var(--bg);
   }
 
-  /* 支付方式 */
-  .m-group-title{
-    margin:0;
+  /* 区块标题 */
+  .m-block-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
     padding:14px 20px 8px;
+  }
+
+  .m-block-title{
+    margin:0;
     font-size:13px;
     font-weight:500;
     color:var(--text-3);
   }
 
+  .m-recharge{
+    height:26px;
+    padding:0 12px;
+    border:1px solid var(--brand);
+    border-radius:13px;
+    background:#fff;
+    color:var(--brand);
+    font-family:inherit;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    flex:none;
+  }
+
+  .m-recharge[hidden]{display:none}
+
+  .m-recharge:active{background:var(--brand-soft)}
+
+  .m-recharge:focus-visible{
+    outline:2px solid var(--brand);
+    outline-offset:2px;
+  }
+
+  /* 支付方式 */
   .m-list{
     background:#fff;
   }
@@ -182,14 +197,6 @@
     text-overflow:ellipsis;
   }
 
-  .m-hint{
-    font-size:12.5px;
-    font-weight:400;
-    color:var(--text-3);
-    flex:none;
-    margin-left:2px;
-  }
-
   .m-check{
     width:20px;
     height:20px;
@@ -221,6 +228,99 @@
   .m-input:focus-visible ~ .m-check{
     outline:2px solid var(--brand);
     outline-offset:2px;
+  }
+
+  /* 余额行 */
+  .m-bal{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+  }
+
+  .m-bal-name{
+    font-size:12.5px;
+    color:var(--text-3);
+    line-height:1.2;
+  }
+
+  .m-bal-line{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+
+  .m-bal-num{
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:-.2px;
+    line-height:1.25;
+    color:var(--text-1);
+  }
+
+  .m-bal-diff{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--warn);
+  }
+
+  .m-bal-diff[hidden]{display:none}
+
+  .m-row.is-disabled{
+    cursor:not-allowed;
+    background:#FAFAFC;
+  }
+
+  .m-row.is-disabled:active{background:#FAFAFC}
+
+  .m-row.is-disabled .m-icon{opacity:.45}
+
+  .m-row.is-disabled .m-bal-num{color:#B9BECD}
+
+  .m-row.is-disabled .m-bal-name{color:#B9BECD}
+
+  .m-row.is-disabled .m-check{
+    border-color:#E3E6EE;
+    background:#F7F8FB;
+  }
+
+  .m-row.is-disabled .m-input:checked ~ .m-check{
+    background:#E3E6EE;
+    border-color:#E3E6EE;
+  }
+
+  /* 演示切换 */
+  .m-demo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:18px 20px 10px;
+  }
+
+  .m-demo-label{
+    font-size:11px;
+    color:#C2C7D4;
+    letter-spacing:.4px;
+  }
+
+  .m-demo-btn{
+    height:24px;
+    padding:0 10px;
+    border:1px solid var(--line-2);
+    border-radius:12px;
+    background:#fff;
+    color:var(--text-3);
+    font-family:inherit;
+    font-size:11.5px;
+    cursor:pointer;
+  }
+
+  .m-demo-btn.is-on{
+    border-color:var(--brand);
+    color:var(--brand);
+    background:var(--brand-soft);
   }
 
   /* 图标（移动端小尺寸） */
@@ -568,6 +668,29 @@
 
   .m-sheet-done:active{background:#5B4CD6}
 
+  /* 轻提示 */
+  .m-toast{
+    position:fixed;
+    left:50%;
+    bottom:130px;
+    z-index:60;
+    transform:translate(-50%,8px);
+    padding:9px 16px;
+    border-radius:8px;
+    background:rgba(23,26,42,.88);
+    color:#fff;
+    font-size:13px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+
+  .m-toast.is-on{
+    opacity:1;
+    transform:translate(-50%,0);
+  }
+
   @media (prefers-reduced-motion:reduce){
     *{animation:none !important;transition:none !important}
   }
@@ -586,155 +709,175 @@
     <button type="button" class="m-cur">CN</button>
   </header>
 
-  <section class="m-amount">
-    <p class="m-total" id="order-total">¥11.43</p>
-    <p class="m-tip">您已成功提交订单，请尽快完成付款</p>
-    <p class="m-order">订单号 FFGICJ261163305 · 2026-11-26 16:54:26</p>
+  <p class="m-order">订单号 FFGICJ261163305 · 2026-11-26 16:54:26</p>
+
+  <div class="m-sep" aria-hidden="true"></div>
+
+  <section aria-labelledby="block-balance">
+    <div class="m-block-head">
+      <h2 class="m-block-title" id="block-balance">账户余额支付</h2>
+      <button type="button" class="m-recharge" id="recharge-btn" hidden>去充值</button>
+    </div>
+    <div class="m-list">
+      <label class="m-row" id="balance-row">
+        <input class="m-input" type="radio" name="paymethod" value="balance" id="pm-balance">
+        <span class="m-icon" aria-hidden="true">
+          <svg viewBox="0 0 26 18" width="24" height="17" aria-hidden="true">
+            <rect x="1" y="1" width="24" height="16" rx="3.5" fill="#1B1E27"></rect>
+            <rect x="4" y="12" width="7" height="2" rx="1" fill="#5A6076"></rect>
+            <text x="18" y="8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="4.5" font-style="italic" font-weight="700" fill="#fff">VISA</text>
+          </svg>
+        </span>
+        <span class="m-bal">
+          <span class="m-bal-name">账户余额</span>
+          <span class="m-bal-line">
+            <span class="m-bal-num" id="bal-num">¥37.87</span>
+            <span class="m-bal-diff" id="bal-diff" hidden></span>
+          </span>
+        </span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
+    </div>
   </section>
 
   <div class="m-sep" aria-hidden="true"></div>
 
-  <p class="m-group-title">请选择付款方式</p>
+  <section aria-labelledby="block-online">
+    <div class="m-block-head">
+      <h2 class="m-block-title" id="block-online">在线支付</h2>
+    </div>
+    <div class="m-list">
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="alipay">
+        <span class="m-icon" aria-hidden="true"><span class="ic-alipay">Alipay</span></span>
+        <span class="m-name">支付宝</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-  <div class="m-list">
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="balance">
-      <span class="m-icon" aria-hidden="true">
-        <svg viewBox="0 0 26 18" width="24" height="17" aria-hidden="true">
-          <rect x="1" y="1" width="24" height="16" rx="3.5" fill="#1B1E27"></rect>
-          <rect x="4" y="12" width="7" height="2" rx="1" fill="#5A6076"></rect>
-          <text x="18" y="8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="4.5" font-style="italic" font-weight="700" fill="#fff">VISA</text>
-        </svg>
-      </span>
-      <span class="m-name">余额支付（钱包）</span>
-      <span class="m-hint">可用余额 ¥37.87</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="unionpay">
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-up">
+            <svg viewBox="0 0 14 14" width="9" height="9" aria-hidden="true">
+              <rect x="0" y="2" width="3.2" height="10" fill="#E21836" transform="skewX(-10)"></rect>
+              <rect x="4.8" y="2" width="3.2" height="10" fill="#00447C" transform="skewX(-10)"></rect>
+              <rect x="9.6" y="2" width="3.2" height="10" fill="#007B84" transform="skewX(-10)"></rect>
+            </svg>
+            <span class="ic-up-txt">UnionPay</span>
+          </span>
+        </span>
+        <span class="m-name">银联</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="alipay">
-      <span class="m-icon" aria-hidden="true"><span class="ic-alipay">Alipay</span></span>
-      <span class="m-name">支付宝</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="yoomoney">
+        <span class="m-icon" aria-hidden="true"><span class="ic-yoomoney">yoomoney</span></span>
+        <span class="m-name">YooMoney</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="unionpay">
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-up">
-          <svg viewBox="0 0 14 14" width="9" height="9" aria-hidden="true">
-            <rect x="0" y="2" width="3.2" height="10" fill="#E21836" transform="skewX(-10)"></rect>
-            <rect x="4.8" y="2" width="3.2" height="10" fill="#00447C" transform="skewX(-10)"></rect>
-            <rect x="9.6" y="2" width="3.2" height="10" fill="#007B84" transform="skewX(-10)"></rect>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="sberpay">
+        <span class="m-icon" aria-hidden="true"><span class="ic-sber">Pay</span></span>
+        <span class="m-name">SberPay</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
+
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="tbank">
+        <span class="m-icon" aria-hidden="true"><span class="ic-tbank">T BANK</span></span>
+        <span class="m-name">T-Bank</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
+
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="card">
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-visa">VISA</span>
+          <svg class="ic-mc" viewBox="0 0 30 18" aria-hidden="true">
+            <circle cx="11" cy="9" r="8" fill="#EB001B"></circle>
+            <circle cx="19" cy="9" r="8" fill="#F79E1B" opacity=".82"></circle>
           </svg>
-          <span class="ic-up-txt">UnionPay</span>
+          <span class="ic-amex">AMEX</span>
         </span>
-      </span>
-      <span class="m-name">银联</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+        <span class="m-name">信用卡</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="yoomoney">
-      <span class="m-icon" aria-hidden="true"><span class="ic-yoomoney">yoomoney</span></span>
-      <span class="m-name">YooMoney</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
-
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="sberpay">
-      <span class="m-icon" aria-hidden="true"><span class="ic-sber">Pay</span></span>
-      <span class="m-name">SberPay</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
-
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="tbank">
-      <span class="m-icon" aria-hidden="true"><span class="ic-tbank">T BANK</span></span>
-      <span class="m-name">T-Bank</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
-
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="card">
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-visa">VISA</span>
-        <svg class="ic-mc" viewBox="0 0 30 18" aria-hidden="true">
-          <circle cx="11" cy="9" r="8" fill="#EB001B"></circle>
-          <circle cx="19" cy="9" r="8" fill="#F79E1B" opacity=".82"></circle>
-        </svg>
-        <span class="ic-amex">AMEX</span>
-      </span>
-      <span class="m-name">信用卡</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
-
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="applepay">
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-apple">
-          <svg viewBox="0 0 24 24" width="10" height="12" fill="#111" aria-hidden="true">
-            <path d="M16.37 1.43c0 1.14-.42 2.2-1.26 3.03-.9.9-1.94 1.4-3.05 1.32-.02-1.13.44-2.2 1.25-3.02.85-.87 1.95-1.4 3.06-1.33zM20.6 17.05c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.17 3.19-3.75 3.2-1.4.02-1.76-.9-3.66-.9-1.9 0-2.3.9-3.67.92-1.58.02-2.78-1.6-3.68-3.02C2.06 16.4 1.8 11.9 3.3 9.5c1.05-1.7 2.7-2.7 4.26-2.7 1.6 0 2.6.9 3.92.9 1.28 0 2.06-.9 3.9-.9 1.4 0 2.87.76 3.92 2.08-3.44 1.88-2.88 6.8 1.3 8.17z"></path>
-          </svg>
-          <span>Pay</span>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="applepay">
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-apple">
+            <svg viewBox="0 0 24 24" width="10" height="12" fill="#111" aria-hidden="true">
+              <path d="M16.37 1.43c0 1.14-.42 2.2-1.26 3.03-.9.9-1.94 1.4-3.05 1.32-.02-1.13.44-2.2 1.25-3.02.85-.87 1.95-1.4 3.06-1.33zM20.6 17.05c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.17 3.19-3.75 3.2-1.4.02-1.76-.9-3.66-.9-1.9 0-2.3.9-3.67.92-1.58.02-2.78-1.6-3.68-3.02C2.06 16.4 1.8 11.9 3.3 9.5c1.05-1.7 2.7-2.7 4.26-2.7 1.6 0 2.6.9 3.92.9 1.28 0 2.06-.9 3.9-.9 1.4 0 2.87.76 3.92 2.08-3.44 1.88-2.88 6.8 1.3 8.17z"></path>
+            </svg>
+            <span>Pay</span>
+          </span>
         </span>
-      </span>
-      <span class="m-name">Apple Pay</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+        <span class="m-name">Apple Pay</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="googlepay">
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-gpay">
-          <span class="ic-g">G</span>
-          <span class="ic-gpay-txt">Pay</span>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="googlepay">
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-gpay">
+            <span class="ic-g">G</span>
+            <span class="ic-gpay-txt">Pay</span>
+          </span>
         </span>
-      </span>
-      <span class="m-name">Google Pay</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+        <span class="m-name">Google Pay</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="paypal">
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-paypal">
-          <svg viewBox="0 0 12 14" width="8" height="10" aria-hidden="true">
-            <path d="M2 1h5.2c1.9 0 3 1.1 2.7 2.9-.35 2.1-1.9 3.3-4.1 3.3H4.4l-.6 3.3H1.3L2 1z" fill="#003087"></path>
-            <path d="M4.6 4.2h4.6c1.7 0 2.7 1 2.4 2.6-.3 1.9-1.7 3-3.7 3H6.2l-.5 2.8H3.1l1.5-8.4z" fill="#009CDE" opacity=".85"></path>
-          </svg>
-          <span class="ic-paypal-txt">PayPal</span>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="paypal">
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-paypal">
+            <svg viewBox="0 0 12 14" width="8" height="10" aria-hidden="true">
+              <path d="M2 1h5.2c1.9 0 3 1.1 2.7 2.9-.35 2.1-1.9 3.3-4.1 3.3H4.4l-.6 3.3H1.3L2 1z" fill="#003087"></path>
+              <path d="M4.6 4.2h4.6c1.7 0 2.7 1 2.4 2.6-.3 1.9-1.7 3-3.7 3H6.2l-.5 2.8H3.1l1.5-8.4z" fill="#009CDE" opacity=".85"></path>
+            </svg>
+            <span class="ic-paypal-txt">PayPal</span>
+          </span>
         </span>
-      </span>
-      <span class="m-name">PayPal</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+        <span class="m-name">PayPal</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="payid" checked>
-      <span class="m-icon" aria-hidden="true">
-        <span class="ic-payid">
-          <span class="ic-payid-txt">Pay</span>
-          <span class="ic-payid-id">ID</span>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="payid" id="pm-payid" checked>
+        <span class="m-icon" aria-hidden="true">
+          <span class="ic-payid">
+            <span class="ic-payid-txt">Pay</span>
+            <span class="ic-payid-id">ID</span>
+          </span>
         </span>
-      </span>
-      <span class="m-name">PayID</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+        <span class="m-name">PayID</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="trustly">
-      <span class="m-icon" aria-hidden="true"><span class="ic-trustly">Trustly</span></span>
-      <span class="m-name">Trustly</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="trustly">
+        <span class="m-icon" aria-hidden="true"><span class="ic-trustly">Trustly</span></span>
+        <span class="m-name">Trustly</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
 
-    <label class="m-row">
-      <input class="m-input" type="radio" name="paymethod" value="skrill">
-      <span class="m-icon" aria-hidden="true"><span class="ic-skrill">Skrill</span></span>
-      <span class="m-name">Skrill</span>
-      <span class="m-check" aria-hidden="true"></span>
-    </label>
+      <label class="m-row">
+        <input class="m-input" type="radio" name="paymethod" value="skrill">
+        <span class="m-icon" aria-hidden="true"><span class="ic-skrill">Skrill</span></span>
+        <span class="m-name">Skrill</span>
+        <span class="m-check" aria-hidden="true"></span>
+      </label>
+    </div>
+  </section>
+
+  <div class="m-demo">
+    <span class="m-demo-label">演示</span>
+    <button type="button" class="m-demo-btn is-on" id="demo-full">余额充足</button>
+    <button type="button" class="m-demo-btn" id="demo-low">余额不足</button>
   </div>
 </div>
 
@@ -795,10 +938,16 @@
   <button type="button" class="m-sheet-done" id="sheet-done">知道了</button>
 </dialog>
 
+<div class="m-toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
   var FX = { CNY: 1, USD: 0.149, RUB: 12.3762, AUD: 0.2257, EUR: 0.1363 };
   var SYMBOL = { CNY: '¥', USD: '$', RUB: '₽', AUD: 'A$', EUR: '€' };
   var ORDER_CNY = 11.43;
+
+  var BALANCE_FULL = 37.87;
+  var BALANCE_LOW = 8.55;
+  var balance = BALANCE_FULL;
 
   var METHODS = {
     balance:   { name: '余额支付（钱包）', currency: 'CNY', rate: 0,     fixed: null },
@@ -920,6 +1069,42 @@
     }
   }
 
+  /* 余额状态：是否够付本单（余额支付免手续费，按订单金额判断） */
+  function applyBalanceState() {
+    var enough = balance >= ORDER_CNY;
+    var row = byId('balance-row');
+    var input = byId('pm-balance');
+    var diffEl = byId('bal-diff');
+    var recharge = byId('recharge-btn');
+
+    byId('bal-num').textContent = cny(balance);
+
+    if (enough) {
+      row.classList.remove('is-disabled');
+      input.disabled = false;
+      diffEl.hidden = true;
+      diffEl.textContent = '';
+      recharge.hidden = true;
+    } else {
+      row.classList.add('is-disabled');
+      input.disabled = true;
+      diffEl.hidden = false;
+      diffEl.textContent = '还差 ' + cny(round2(ORDER_CNY - balance));
+      recharge.hidden = false;
+      if (current === 'balance') {
+        byId('pm-payid').checked = true;
+        render('payid');
+      }
+    }
+  }
+
+  function setBalance(next) {
+    balance = next;
+    byId('demo-full').classList.toggle('is-on', next === BALANCE_FULL);
+    byId('demo-low').classList.toggle('is-on', next === BALANCE_LOW);
+    applyBalanceState();
+  }
+
   var inputs = document.querySelectorAll('.m-input');
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].addEventListener('change', function () {
@@ -952,7 +1137,28 @@
     if (e.target === sheet) { closeSheet(); }
   });
 
+  /* 轻提示 */
+  var toastTimer;
+
+  function showToast(msg) {
+    var t = byId('toast');
+    t.textContent = msg;
+    t.classList.add('is-on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      t.classList.remove('is-on');
+    }, 1800);
+  }
+
+  byId('recharge-btn').addEventListener('click', function () {
+    showToast('跳转充值页');
+  });
+
+  byId('demo-full').addEventListener('click', function () { setBalance(BALANCE_FULL); });
+  byId('demo-low').addEventListener('click', function () { setBalance(BALANCE_LOW); });
+
   render('payid');
+  applyBalanceState();
 </script>
 
 </body>
