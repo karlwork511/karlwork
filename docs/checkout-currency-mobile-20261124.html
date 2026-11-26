@@ -290,39 +290,6 @@
     border-color:#E3E6EE;
   }
 
-  /* 演示切换 */
-  .m-demo{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    padding:18px 20px 10px;
-  }
-
-  .m-demo-label{
-    font-size:11px;
-    color:#C2C7D4;
-    letter-spacing:.4px;
-  }
-
-  .m-demo-btn{
-    height:24px;
-    padding:0 10px;
-    border:1px solid var(--line-2);
-    border-radius:12px;
-    background:#fff;
-    color:var(--text-3);
-    font-family:inherit;
-    font-size:11.5px;
-    cursor:pointer;
-  }
-
-  .m-demo-btn.is-on{
-    border-color:var(--brand);
-    color:var(--brand);
-    background:var(--brand-soft);
-  }
-
   /* 图标（移动端小尺寸） */
   .ic-visa{color:#1A1F71;font-size:7px;font-weight:800;font-style:italic;letter-spacing:-.3px}
   .ic-mc{width:13px;height:9px;flex:none}
@@ -855,11 +822,6 @@
     </div>
   </section>
 
-  <div class="m-demo">
-    <span class="m-demo-label">演示</span>
-    <button type="button" class="m-demo-btn is-on" id="demo-full">余额充足</button>
-    <button type="button" class="m-demo-btn" id="demo-low">余额不足</button>
-  </div>
 </div>
 
 <footer class="m-bar">
@@ -922,9 +884,8 @@
   var SYMBOL = { CNY: '¥', USD: '$', RUB: '₽', AUD: 'A$', EUR: '€' };
   var ORDER_CNY = 11.43;
 
-  var BALANCE_FULL = 37.87;
-  var BALANCE_LOW = 8.55;
-  var balance = BALANCE_FULL;
+  var BALANCE = 37.87;
+  var balance = BALANCE;
 
   var METHODS = {
     balance:   { name: '余额支付（钱包）', currency: 'CNY', rate: 0,     fixed: null },
@@ -1063,13 +1024,6 @@
     }
   }
 
-  function setBalance(next) {
-    balance = next;
-    byId('demo-full').classList.toggle('is-on', next === BALANCE_FULL);
-    byId('demo-low').classList.toggle('is-on', next === BALANCE_LOW);
-    applyBalanceState();
-  }
-
   var inputs = document.querySelectorAll('.m-input');
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].addEventListener('change', function () {
@@ -1118,9 +1072,6 @@
   byId('recharge-btn').addEventListener('click', function () {
     showToast('跳转充值页');
   });
-
-  byId('demo-full').addEventListener('click', function () { setBalance(BALANCE_FULL); });
-  byId('demo-low').addEventListener('click', function () { setBalance(BALANCE_LOW); });
 
   render('payid');
   applyBalanceState();
