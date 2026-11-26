@@ -379,6 +379,14 @@
     outline-offset:2px;
   }
 
+  .m-bar-cny{
+    margin-left:2px;
+    font-size:12px;
+    font-weight:400;
+    letter-spacing:0;
+    color:var(--text-3);
+  }
+
   .m-bar-fee{
     margin:2px 0 0;
     font-size:11.5px;
@@ -941,12 +949,31 @@
   function setMoney(el, cnyAmount, localAmount, currency, sameCurrency) {
     el.textContent = '';
     var main = document.createElement('span');
-    main.textContent = cny(cnyAmount);
+    main.textContent = sameCurrency
+      ? cny(cnyAmount)
+      : (SYMBOL[currency] + ' ' + fmt(localAmount));
     el.appendChild(main);
     if (!sameCurrency) {
       var sub = document.createElement('span');
       sub.className = 'm-sub';
-      sub.textContent = '（' + SYMBOL[currency] + ' ' + fmt(localAmount) + '）';
+      sub.textContent = '（' + cny(cnyAmount) + '）';
+      el.appendChild(sub);
+    }
+  }
+
+  /* 底部栏金额：跟随所选渠道的收款币种 */
+  function setBarMoney(r, same) {
+    var el = byId('bar-total');
+    el.textContent = '';
+    var main = document.createElement('span');
+    main.textContent = same
+      ? cny(r.totalCny)
+      : (SYMBOL[r.m.currency] + ' ' + fmt(r.totalLocal));
+    el.appendChild(main);
+    if (!same) {
+      var sub = document.createElement('span');
+      sub.className = 'm-bar-cny';
+      sub.textContent = '（' + cny(r.totalCny) + '）';
       el.appendChild(sub);
     }
   }
@@ -957,7 +984,7 @@
     var cur = r.m.currency;
     var same = cur === 'CNY';
 
-    byId('bar-total').textContent = cny(r.totalCny);
+    setBarMoney(r, same);
     byId('bar-fee').textContent = '包含支付手续费：' + (r.feeCny > 0 ? cny(r.feeCny) : '免手续费');
 
     setMoney(byId('d-payable'), ORDER_CNY, r.payableLocal, cur, same);
@@ -977,11 +1004,13 @@
     byId('fee-tip').textContent = tipText(r.m);
 
     var totalEl = byId('d-total');
-    totalEl.textContent = cny(r.totalCny);
+    totalEl.textContent = same
+      ? cny(r.totalCny)
+      : (SYMBOL[cur] + ' ' + fmt(r.totalLocal));
     if (!same) {
       var tsub = document.createElement('span');
       tsub.className = 'm-sub';
-      tsub.textContent = '（' + SYMBOL[cur] + ' ' + fmt(r.totalLocal) + '）';
+      tsub.textContent = '（' + cny(r.totalCny) + '）';
       totalEl.appendChild(tsub);
     }
   }
