@@ -574,12 +574,12 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    width:20px;
-    height:16px;
+    width:22px;
+    height:18px;
     margin:0 3px;
     border-radius:4px;
-    background:#F0EDFF;
-    color:#6B5CF0;
+    background:#EBF1FF;
+    color:#2F6BFF;
     vertical-align:middle;
   }
 
@@ -1046,9 +1046,9 @@
     var tag = document.createElement('span');
     tag.className = 'fx-tag';
     tag.setAttribute('aria-hidden', 'true');
-    tag.innerHTML = '<svg viewBox="0 0 16 12" width="13" height="10" focusable="false">'
-      + '<path d="M1.2 3.6h10.6M9.6 1.4l2.4 2.2-2.4 2.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>'
-      + '<path d="M14.8 8.4H4.2M6.4 6.2L4 8.4l2.4 2.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>'
+    tag.innerHTML = '<svg viewBox="0 0 20 14" width="14" height="10" focusable="false">'
+      + '<path d="M1.6 5.2h12.6M10.8 1.6 15 5.2 10.8 8.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
+      + '<path d="M18.4 8.8H5.8M9.2 5.2 5 8.8l4.2 3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
       + '</svg>';
     fxEl.appendChild(tag);
     fxEl.appendChild(document.createTextNode(' 1:' + (sameCurrency ? '1' : String(r.fx))));
