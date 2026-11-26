@@ -47,7 +47,7 @@ a{color:inherit}
 
 /* ---------- 分段 tab ---------- */
 .seg{
-  position:sticky;top:var(--bar);z-index:55;display:flex;gap:6px;padding:8px var(--pad);
+  position:sticky;top:0;z-index:55;display:flex;gap:6px;padding:8px var(--pad);
   overflow-x:auto;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--line);scrollbar-width:none;-ms-overflow-style:none;
 }
@@ -174,6 +174,12 @@ a{color:inherit}
 
 .plogo.more{background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand-line);box-shadow:none;font-size:13px;letter-spacing:.5px}
 
+/* ---------- 分段按钮：随滚动吸附顶部 ---------- */
+.seg{top:env(safe-area-inset-top);z-index:55;margin:4px 0 0;padding:9px var(--pad);border-top:1px solid var(--line)}
+.hero{padding-top:calc(16px + env(safe-area-inset-top))}
+.sec{scroll-margin-top:54px}
+.step{scroll-margin-top:54px}
+
 /* ---------- 步骤折叠（手风琴） ---------- */
 .step{padding:0;overflow:hidden}
 .step-h{
@@ -278,21 +284,7 @@ a{color:inherit}
 
 <div class="app">
 
-  <header class="app-bar">
-    <button class="ab-btn" type="button" id="backBtn" aria-label="返回上一页">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
-    </button>
-    <div class="ab-title">新手指引</div>
-    <span class="ab-sp" aria-hidden="true"></span>
-    <div class="read-bar" aria-hidden="true"><i id="readBar"></i></div>
-  </header>
 
-  <nav class="seg" id="seg" aria-label="页面分段">
-    <a href="#platforms" class="on">支持的平台</a>
-    <a href="#buy">Step 1 代购下单</a>
-    <a href="#inspect">Step 2 质检入库</a>
-    <a href="#ship">Step 3 提交包裹</a>
-  </nav>
 
   <main id="top">
 
@@ -350,6 +342,12 @@ a{color:inherit}
         </ul>
       </div>
     </section>
+
+  <nav class="seg" id="seg" aria-label="流程分段">
+    <a href="#buy" class="on">Step 1 代购下单</a>
+    <a href="#inspect">Step 2 质检入库</a>
+    <a href="#ship">Step 3 提交包裹</a>
+  </nav>
 
     <!-- ========== Step 1 ========== -->
     <section class="sec" id="buy" aria-labelledby="buyTitle">
@@ -682,7 +680,7 @@ a{color:inherit}
       setStep(step, willOpen);
       if(willOpen){
         setTimeout(function(){
-          if(step.getBoundingClientRect().top < 104){
+          if(step.getBoundingClientRect().top < 54){
             step.scrollIntoView({behavior:'smooth', block:'start'});
           }
         }, 80);
@@ -738,7 +736,7 @@ a{color:inherit}
           }
         }
       });
-    }, {rootMargin:'-104px 0px -55% 0px', threshold:0});
+    }, {rootMargin:'-54px 0px -58% 0px', threshold:0});
     secs.forEach(function(s){ if(s) io.observe(s); });
   }
 
