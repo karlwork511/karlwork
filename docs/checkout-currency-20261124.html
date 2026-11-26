@@ -570,25 +570,6 @@
     transform:translateY(0);
   }
 
-  .fx-tag{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:22px;
-    height:18px;
-    margin:0 3px;
-    border-radius:4px;
-    background:#EBF1FF;
-    color:#2F6BFF;
-    vertical-align:middle;
-  }
-
-  .sum-row dd.is-fx{
-    font-size:12.5px;
-    font-weight:500;
-    color:var(--text-2);
-  }
-
   .sum-total{
     margin-top:16px;
     padding-top:15px;
@@ -877,7 +858,6 @@
         <ul class="note-list">
           <li>应付金额以人民币为基准计算，切换支付方式后按该渠道收款币种自动换算，括号内为对应人民币金额。</li>
           <li>各渠道手续费费率不同，最终扣款以支付渠道结算为准，超出部分由平台承担。</li>
-          <li>汇率每日更新一次，进入收银台时锁定，支付超时后需重新发起支付。</li>
           <li>账户余额仅可用于支付本平台订单，不可提现、不可转让。</li>
           <li>支付过程中如遇到扣款失败、重复扣款等问题，请保留支付凭证并联系在线客服。</li>
         </ul>
@@ -911,10 +891,6 @@
           <dd id="sum-method"></dd>
         </div>
 
-        <div class="sum-row">
-          <dt>汇率</dt>
-          <dd id="sum-fx" class="is-fx"></dd>
-        </div>
       </dl>
 
       <div class="sum-total">
@@ -1040,18 +1016,6 @@
     }
 
     byId('sum-method').textContent = r.m.name;
-
-    var fxEl = byId('sum-fx');
-    fxEl.textContent = 'CNY → ' + cur + ' ';
-    var tag = document.createElement('span');
-    tag.className = 'fx-tag';
-    tag.setAttribute('aria-hidden', 'true');
-    tag.innerHTML = '<svg viewBox="0 0 20 14" width="14" height="10" focusable="false">'
-      + '<path d="M1.6 5.2h12.6M10.8 1.6 15 5.2 10.8 8.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
-      + '<path d="M18.4 8.8H5.8M9.2 5.2 5 8.8l4.2 3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter"></path>'
-      + '</svg>';
-    fxEl.appendChild(tag);
-    fxEl.appendChild(document.createTextNode(' 1:' + (sameCurrency ? '1' : String(r.fx))));
 
     byId('fee-tip').textContent = tipText(r.m);
 
