@@ -185,6 +185,13 @@ a{color:inherit}
 .hero-top h1{flex:1 1 auto;min-width:0;margin:0}
 .hero-top .kicker{flex:0 0 auto;white-space:nowrap}
 
+/* ---------- 顶部页眉 ---------- */
+.app-bar{height:calc(var(--bar) + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+.seg{top:calc(var(--bar) + env(safe-area-inset-top))}
+.hero{padding-top:18px}
+.sec{scroll-margin-top:100px}
+.step{scroll-margin-top:100px}
+
 /* ---------- 步骤折叠（手风琴） ---------- */
 .step{padding:0;overflow:hidden}
 .step-h{
@@ -288,6 +295,13 @@ a{color:inherit}
 <a class="skip" href="#platforms">跳到正文内容</a>
 
 <div class="app">
+  <header class="app-bar">
+    <button class="ab-btn" type="button" id="backBtn" aria-label="返回上一页">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+    </button>
+    <div class="ab-title">新手指引</div>
+    <span class="ab-sp" aria-hidden="true"></span>
+  </header>
 
 
 
@@ -687,7 +701,7 @@ a{color:inherit}
       setStep(step, willOpen);
       if(willOpen){
         setTimeout(function(){
-          if(step.getBoundingClientRect().top < 54){
+          if(step.getBoundingClientRect().top < 100){
             step.scrollIntoView({behavior:'smooth', block:'start'});
           }
         }, 80);
@@ -743,7 +757,7 @@ a{color:inherit}
           }
         }
       });
-    }, {rootMargin:'-54px 0px -58% 0px', threshold:0});
+    }, {rootMargin:'-100px 0px -52% 0px', threshold:0});
     secs.forEach(function(s){ if(s) io.observe(s); });
   }
 
