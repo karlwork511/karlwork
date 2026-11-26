@@ -74,7 +74,6 @@ a{color:inherit}
 
 /* ---------- 分组标题 ---------- */
 .sec{padding-top:4px;scroll-margin-top:104px}
-.plats-tip{margin:8px var(--pad) 0;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-align:center}
 .sec-head{padding:20px var(--pad) 12px}
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:11.5px;font-weight:600}
 .sec-head h2{margin:8px 0 0;font-size:19px;line-height:1.4;letter-spacing:-.2px}
@@ -158,7 +157,15 @@ a{color:inherit}
 .plogo.sm{font-size:10px}
 .plogo.xs{font-size:8.5px}
 .plogo svg{width:21px;height:21px}
-.plats-tip{margin:6px var(--pad) 0;font-size:11px}
+
+/* ---------- 保障条：图标左置紧凑版 ---------- */
+.assure{gap:8px;padding:0 var(--pad) 10px}
+.as{flex-direction:row;align-items:center;gap:9px;padding:10px 11px}
+.as .ico{width:26px;height:26px;border-radius:8px;flex:0 0 auto}
+.as .ico svg{width:15px;height:15px}
+.as div{min-width:0}
+.as b{font-size:12.5px;line-height:1.35}
+.as div span{margin-top:1px;font-size:11px;line-height:1.45}
 
 /* ---------- 步骤折叠（手风琴） ---------- */
 .step{padding:0;overflow:hidden}
@@ -335,7 +342,6 @@ a{color:inherit}
           <li class="plat"><span class="plogo" style="background:#fff;border:1.5px dashed #ccd1df;color:#aeb3c2;box-shadow:none">···</span><span>更多</span></li>
         </ul>
       </div>
-      <p class="plats-tip">左右滑动查看全部平台</p>
     </section>
 
     <!-- ========== Step 1 ========== -->
@@ -346,8 +352,8 @@ a{color:inherit}
         <p>选品、下单、付款，剩下的交给买手。</p>
       </div>
 
-      <article class="step" id="step-1">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-1">
+      <article class="step open" id="step-1">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-1">
           <span class="num" aria-hidden="true">01</span>
           <span class="h3">挑选商品</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -380,8 +386,8 @@ a{color:inherit}
         </div></div></div>
       </article>
 
-      <article class="step" id="step-2">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-2">
+      <article class="step open" id="step-2">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-2">
           <span class="num" aria-hidden="true">02</span>
           <span class="h3">提交代购</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -414,8 +420,8 @@ a{color:inherit}
         </div></div></div>
       </article>
 
-      <article class="step" id="step-3">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-3">
+      <article class="step open" id="step-3">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-3">
           <span class="num" aria-hidden="true">03</span>
           <span class="h3">支付商品费用</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -439,8 +445,8 @@ a{color:inherit}
           </figure></div></div>
       </article>
 
-      <article class="step" id="step-4">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-4">
+      <article class="step open" id="step-4">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-4">
           <span class="num" aria-hidden="true">04</span>
           <span class="h3">FalconGoo 代采购</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -473,8 +479,8 @@ a{color:inherit}
         <p>商品到仓后我们会验货并拍照给您看，确认无误再入库。</p>
       </div>
 
-      <article class="step" id="step-5">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-5">
+      <article class="step open" id="step-5">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-5">
           <span class="num" aria-hidden="true">05</span>
           <span class="h3">FalconGoo 验货入库</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -508,8 +514,8 @@ a{color:inherit}
         <p>仓库里的商品凑齐后，提交包裹、支付预估运费，剩下的交给我们打包发货。</p>
       </div>
 
-      <article class="step ship" id="step-6">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-6">
+      <article class="step ship open" id="step-6">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-6">
           <span class="num" aria-hidden="true">06</span>
           <span class="h3">提交包裹</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -531,8 +537,8 @@ a{color:inherit}
           </figure></div></div>
       </article>
 
-      <article class="step ship" id="step-7">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-7">
+      <article class="step ship open" id="step-7">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-7">
           <span class="num" aria-hidden="true">07</span>
           <span class="h3">支付预估国际运费及必要附加费</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -554,8 +560,8 @@ a{color:inherit}
           </figure></div></div>
       </article>
 
-      <article class="step ship" id="step-8">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-8">
+      <article class="step ship open" id="step-8">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-8">
           <span class="num" aria-hidden="true">08</span>
           <span class="h3">FalconGoo 发货</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -577,8 +583,8 @@ a{color:inherit}
           </figure></div></div>
       </article>
 
-      <article class="step ship" id="step-9">
-        <button class="step-h" type="button" aria-expanded="false" aria-controls="sb-9">
+      <article class="step ship open" id="step-9">
+        <button class="step-h" type="button" aria-expanded="true" aria-controls="sb-9">
           <span class="num" aria-hidden="true">09</span>
           <span class="h3">收货</span>
           <span class="tg"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path class="v" d="M12 5v14"/></svg></span>
@@ -661,15 +667,12 @@ a{color:inherit}
     var hd = step.querySelector('.step-h');
     if(hd) hd.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
-  function openOnly(step){
-    stepEls.forEach(function(s){ setStep(s, s === step); });
-  }
   stepEls.forEach(function(step){
     var hd = step.querySelector('.step-h');
     if(!hd) return;
     hd.addEventListener('click', function(){
       var willOpen = !step.classList.contains('open');
-      if(willOpen){ openOnly(step); } else { setStep(step, false); }
+      setStep(step, willOpen);
       if(willOpen){
         setTimeout(function(){
           if(step.getBoundingClientRect().top < 104){
@@ -679,7 +682,6 @@ a{color:inherit}
       }
     });
   });
-  if(stepEls[0]) setStep(stepEls[0], true);
 
   /* ---------- 方式一 / 方式二 tab ---------- */
   $all('.mtabs').forEach(function(bar){
@@ -772,7 +774,7 @@ a{color:inherit}
       e.preventDefault();
       if(sheet && sheet.classList.contains('open')) closeSheet();
       var ts = t.classList.contains('step') ? t : (t.closest ? t.closest('.step') : null);
-      if(ts){ openOnly(ts); }
+      if(ts){ setStep(ts, true); }
       var go = function(){ t.scrollIntoView({behavior:smooth, block:'start'}); };
       if(ts){ setTimeout(go, 90); } else { go(); }
       if(history.replaceState){ history.replaceState(null, '', '#' + id); }
