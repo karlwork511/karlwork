@@ -180,6 +180,11 @@ a{color:inherit}
 .sec{scroll-margin-top:54px}
 .step{scroll-margin-top:54px}
 
+/* ---------- 首屏标题行：标签移到右侧 ---------- */
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hero-top h1{flex:1 1 auto;min-width:0;margin:0}
+.hero-top .kicker{flex:0 0 auto;white-space:nowrap}
+
 /* ---------- 步骤折叠（手风琴） ---------- */
 .step{padding:0;overflow:hidden}
 .step-h{
@@ -289,8 +294,10 @@ a{color:inherit}
   <main id="top">
 
     <section class="hero">
-      <span class="kicker">FalconGoo 新手必读</span>
-      <h1>欢迎查阅<em>新手指引</em></h1>
+      <div class="hero-top">
+        <h1>欢迎查阅<em>新手指引</em></h1>
+        <span class="kicker">FalconGoo 新手必读</span>
+      </div>
     </section>
 
     <section class="assure" aria-label="服务保障">
