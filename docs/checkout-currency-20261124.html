@@ -9,6 +9,7 @@
     --brand:#6C5CE7;
     --brand-soft:#F2EFFF;
     --brand-line:#D9D2FB;
+    --link:#2F6BFF;
     --text-1:#171A2A;
     --text-2:#565C70;
     --text-3:#8A90A2;
@@ -103,22 +104,27 @@
     line-height:1.7;
   }
 
-  .section-label{
-    margin:0 0 10px;
-    font-size:12.5px;
-    font-weight:600;
-    color:var(--text-3);
-    letter-spacing:.3px;
+  .group{
+    margin-bottom:16px;
   }
 
-  .pay-list{
+  .group-title{
+    margin:0 0 9px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-3);
+    letter-spacing:.2px;
+  }
+
+  .group-card{
     background:#fff;
     border:1px solid var(--line);
     border-radius:var(--radius);
     padding:8px;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
+  }
+
+  .group-card--balance{
+    padding:16px;
   }
 
   .pay-row{
@@ -163,6 +169,64 @@
     outline-offset:2px;
   }
 
+  /* 账户余额支付 */
+  .balance-row{
+    background:#F8F9FC;
+    border:1px solid #EDEFF5;
+    border-radius:11px;
+    padding:14px 16px;
+    gap:14px;
+  }
+
+  .balance-row:hover{background:#F5F6FA}
+
+  .balance-row.is-active{
+    background:var(--brand-soft);
+    border-color:var(--brand-line);
+  }
+
+  .bal-logo{
+    width:44px;
+    height:30px;
+    flex:none;
+    border-radius:6px;
+    background:#fff;
+    border:1px solid #E9ECF2;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .bal-text{
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-1);
+    min-width:0;
+  }
+
+  .bal-approx{
+    font-size:12.5px;
+    font-weight:400;
+    color:var(--text-3);
+    margin-left:2px;
+  }
+
+  .recharge{
+    margin-left:auto;
+    border:0;
+    background:transparent;
+    padding:0;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:500;
+    color:var(--link);
+    cursor:pointer;
+    flex:none;
+  }
+
+  .recharge:hover{text-decoration:underline}
+
+  /* 在线支付图标 */
   .logo{
     width:78px;
     height:34px;
@@ -284,26 +348,7 @@
 
   .pay-row.is-active .pay-name{font-weight:600}
 
-  .pay-meta{
-    font-size:12px;
-    color:var(--text-3);
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-
-  .recharge{
-    border:0;
-    background:transparent;
-    padding:0;
-    font-family:inherit;
-    font-size:12px;
-    color:var(--brand);
-    cursor:pointer;
-  }
-
-  .recharge:hover{text-decoration:underline}
-
+  /* 付款详情 */
   .sum-col{
     position:sticky;
     top:20px;
@@ -554,6 +599,8 @@
     .lg-mc{width:16px;height:10px}
     .lg-amex{font-size:6px}
     .pay-head{font-size:20px}
+    .balance-row{padding:12px 13px;gap:11px}
+    .bal-text{font-size:13.5px}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -589,83 +636,89 @@
       收款币种由支付渠道决定，与用户端展示币种设置无关
     </p>
 
-    <p class="section-label">在线支付</p>
-
-    <div class="pay-list" id="pay-list">
-      <label class="pay-row is-active" for="pm-balance">
-        <input class="radio" type="radio" name="paymethod" id="pm-balance" value="balance" checked>
-        <span class="logo" aria-hidden="true">
-          <svg viewBox="0 0 26 18" width="26" height="18" aria-hidden="true">
-            <rect x="1" y="1" width="24" height="16" rx="3.5" fill="#1F2430"></rect>
-            <rect x="1" y="5.5" width="24" height="3" fill="#39405A"></rect>
-            <rect x="4" y="11.5" width="7" height="2" rx="1" fill="#8C93A8"></rect>
-          </svg>
-        </span>
-        <span class="pay-info">
-          <span class="pay-name">账户余额</span>
-          <span class="pay-meta">可用余额 CN ¥ 37.87 · <button type="button" class="recharge">立即充值</button></span>
-        </span>
-      </label>
-
-      <label class="pay-row" for="pm-alipay">
-        <input class="radio" type="radio" name="paymethod" id="pm-alipay" value="alipay">
-        <span class="logo" aria-hidden="true"><span class="lg-alipay">Alipay</span></span>
-        <span class="pay-info"><span class="pay-name">支付宝</span></span>
-      </label>
-
-      <label class="pay-row" for="pm-yoomoney">
-        <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
-        <span class="logo" aria-hidden="true"><span class="lg-yoomoney">yoomoney</span></span>
-        <span class="pay-info"><span class="pay-name">YooMoney</span></span>
-      </label>
-
-      <label class="pay-row" for="pm-card">
-        <input class="radio" type="radio" name="paymethod" id="pm-card" value="card">
-        <span class="logo" aria-hidden="true">
-          <span class="lg-visa">VISA</span>
-          <svg class="lg-mc" viewBox="0 0 30 18" aria-hidden="true">
-            <circle cx="11" cy="9" r="8" fill="#EB001B"></circle>
-            <circle cx="19" cy="9" r="8" fill="#F79E1B" opacity=".82"></circle>
-          </svg>
-          <span class="lg-amex">AMEX</span>
-        </span>
-        <span class="pay-info"><span class="pay-name">信用卡</span></span>
-      </label>
-
-      <label class="pay-row" for="pm-applepay">
-        <input class="radio" type="radio" name="paymethod" id="pm-applepay" value="applepay">
-        <span class="logo" aria-hidden="true">
-          <span class="lg-apple-pay">
-            <svg viewBox="0 0 24 24" width="12" height="14" fill="#111" aria-hidden="true">
-              <path d="M16.37 1.43c0 1.14-.42 2.2-1.26 3.03-.9.9-1.94 1.4-3.05 1.32-.02-1.13.44-2.2 1.25-3.02.85-.87 1.95-1.4 3.06-1.33zM20.6 17.05c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.17 3.19-3.75 3.2-1.4.02-1.76-.9-3.66-.9-1.9 0-2.3.9-3.67.92-1.58.02-2.78-1.6-3.68-3.02C2.06 16.4 1.8 11.9 3.3 9.5c1.05-1.7 2.7-2.7 4.26-2.7 1.6 0 2.6.9 3.92.9 1.28 0 2.06-.9 3.9-.9 1.4 0 2.87.76 3.92 2.08-3.44 1.88-2.88 6.8 1.3 8.17z"></path>
+    <div class="group">
+      <h2 class="group-title">账户余额支付</h2>
+      <div class="group-card group-card--balance">
+        <label class="pay-row balance-row is-active" for="pm-balance">
+          <input class="radio" type="radio" name="paymethod" id="pm-balance" value="balance" checked>
+          <span class="bal-logo" aria-hidden="true">
+            <svg viewBox="0 0 34 22" width="34" height="22" aria-hidden="true">
+              <rect x="1" y="1" width="32" height="20" rx="4" fill="#1B1E27"></rect>
+              <rect x="4" y="14.5" width="9" height="3" rx="1.5" fill="#5A6076"></rect>
+              <text x="24.5" y="9.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="6" font-style="italic" font-weight="700" fill="#FFFFFF">VISA</text>
             </svg>
-            <span>Pay</span>
           </span>
-        </span>
-        <span class="pay-info"><span class="pay-name">Apple Pay</span></span>
-      </label>
+          <span class="bal-text">账户余额 CNY 37.87 <span class="bal-approx">(≈ AUD 8.55)</span></span>
+          <button type="button" class="recharge">立即充值</button>
+        </label>
+      </div>
+    </div>
 
-      <label class="pay-row" for="pm-payid">
-        <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
-        <span class="logo" aria-hidden="true">
-          <span class="lg-payid">
-            <span class="lg-payid-txt">Pay</span>
-            <span class="lg-payid-id">ID</span>
-          </span>
-        </span>
-        <span class="pay-info"><span class="pay-name">PayID</span></span>
-      </label>
+    <div class="group">
+      <h2 class="group-title">在线支付</h2>
+      <div class="group-card">
+        <div class="pay-list" id="pay-list">
+          <label class="pay-row" for="pm-alipay">
+            <input class="radio" type="radio" name="paymethod" id="pm-alipay" value="alipay">
+            <span class="logo" aria-hidden="true"><span class="lg-alipay">Alipay</span></span>
+            <span class="pay-info"><span class="pay-name">支付宝</span></span>
+          </label>
 
-      <label class="pay-row" for="pm-googlepay">
-        <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
-        <span class="logo" aria-hidden="true">
-          <span class="lg-gpay">
-            <span class="lg-g">G</span>
-            <span class="lg-gpay-txt">Pay</span>
-          </span>
-        </span>
-        <span class="pay-info"><span class="pay-name">Google Pay</span></span>
-      </label>
+          <label class="pay-row" for="pm-yoomoney">
+            <input class="radio" type="radio" name="paymethod" id="pm-yoomoney" value="yoomoney">
+            <span class="logo" aria-hidden="true"><span class="lg-yoomoney">yoomoney</span></span>
+            <span class="pay-info"><span class="pay-name">YooMoney</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-card">
+            <input class="radio" type="radio" name="paymethod" id="pm-card" value="card">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-visa">VISA</span>
+              <svg class="lg-mc" viewBox="0 0 30 18" aria-hidden="true">
+                <circle cx="11" cy="9" r="8" fill="#EB001B"></circle>
+                <circle cx="19" cy="9" r="8" fill="#F79E1B" opacity=".82"></circle>
+              </svg>
+              <span class="lg-amex">AMEX</span>
+            </span>
+            <span class="pay-info"><span class="pay-name">信用卡</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-applepay">
+            <input class="radio" type="radio" name="paymethod" id="pm-applepay" value="applepay">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-apple-pay">
+                <svg viewBox="0 0 24 24" width="12" height="14" fill="#111" aria-hidden="true">
+                  <path d="M16.37 1.43c0 1.14-.42 2.2-1.26 3.03-.9.9-1.94 1.4-3.05 1.32-.02-1.13.44-2.2 1.25-3.02.85-.87 1.95-1.4 3.06-1.33zM20.6 17.05c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.17 3.19-3.75 3.2-1.4.02-1.76-.9-3.66-.9-1.9 0-2.3.9-3.67.92-1.58.02-2.78-1.6-3.68-3.02C2.06 16.4 1.8 11.9 3.3 9.5c1.05-1.7 2.7-2.7 4.26-2.7 1.6 0 2.6.9 3.92.9 1.28 0 2.06-.9 3.9-.9 1.4 0 2.87.76 3.92 2.08-3.44 1.88-2.88 6.8 1.3 8.17z"></path>
+                </svg>
+                <span>Pay</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">Apple Pay</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-payid">
+            <input class="radio" type="radio" name="paymethod" id="pm-payid" value="payid">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-payid">
+                <span class="lg-payid-txt">Pay</span>
+                <span class="lg-payid-id">ID</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">PayID</span></span>
+          </label>
+
+          <label class="pay-row" for="pm-googlepay">
+            <input class="radio" type="radio" name="paymethod" id="pm-googlepay" value="googlepay">
+            <span class="logo" aria-hidden="true">
+              <span class="lg-gpay">
+                <span class="lg-g">G</span>
+                <span class="lg-gpay-txt">Pay</span>
+              </span>
+            </span>
+            <span class="pay-info"><span class="pay-name">Google Pay</span></span>
+          </label>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -725,6 +778,10 @@
   var FX = { CNY: 1, USD: 0.149, RUB: 12.3762, AUD: 0.2257 };
   var SYMBOL = { CNY: 'CN ¥', USD: '$', RUB: '₽', AUD: 'A$' };
   var ORDER_CNY = 32.40;
+
+  /* 账户余额约合展示币种（对应截图中的 ≈ AUD 口径，可按需改成用户展示币种） */
+  var BALANCE_CNY = 37.87;
+  var BALANCE_DISPLAY_CUR = 'AUD';
 
   var METHODS = {
     balance:   { name: '账户余额',  currency: 'CNY', rate: 0,     fixed: null },
